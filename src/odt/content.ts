@@ -2,8 +2,14 @@ import { ODF_NS, ODF_VERSION } from "../core/namespaces.js";
 import { el, xmlDocument } from "../core/xml.js";
 import type { XmlElement } from "../core/xml.js";
 import type {
-  TextRun, TableData, CellOptions,
-  ListData, ListItemData, ParagraphOptions, TabStop, ImageData,
+  TextRun,
+  TableData,
+  CellOptions,
+  ListData,
+  ListItemData,
+  ParagraphOptions,
+  TabStop,
+  ImageData,
 } from "./types.js";
 import { normalizeFormatting, formattingKey, resolveColor } from "./formatting.js";
 import type { NormalizedFormatting } from "./formatting.js";
@@ -176,9 +182,7 @@ export function generateContent(
       .attr("style:name", "PageBreak")
       .attr("style:family", "paragraph")
       .attr("style:parent-style-name", "Standard");
-    pbStyle.appendChild(
-      el("style:paragraph-properties").attr("fo:break-before", "page"),
-    );
+    pbStyle.appendChild(el("style:paragraph-properties").attr("fo:break-before", "page"));
     autoStyles.appendChild(pbStyle);
   }
 
@@ -213,7 +217,14 @@ export function generateContent(
         if (element.table) {
           const tableName = `Table${tableCounter}`;
           textContainer.appendChild(
-            buildTableElement(tableName, element.table, textStyleMap, cellStyleMap, imageMap, imageCounter),
+            buildTableElement(
+              tableName,
+              element.table,
+              textStyleMap,
+              cellStyleMap,
+              imageMap,
+              imageCounter,
+            ),
           );
           // Count images in this table to advance the counter
           imageCounter += countImagesInTable(element.table);
@@ -233,9 +244,7 @@ export function generateContent(
         break;
       }
       case "page-break": {
-        textContainer.appendChild(
-          el("text:p").attr("text:style-name", "PageBreak"),
-        );
+        textContainer.appendChild(el("text:p").attr("text:style-name", "PageBreak"));
         break;
       }
       case "image": {
@@ -314,9 +323,7 @@ function buildTextStyleMap(
  * Build a map from cell style key → [style name, normalized cell style].
  * Scans all tables for unique cell formatting combinations.
  */
-function buildCellStyleMap(
-  elements: ContentElement[],
-): Map<string, [string, NormalizedCellStyle]> {
+function buildCellStyleMap(elements: ContentElement[]): Map<string, [string, NormalizedCellStyle]> {
   const map = new Map<string, [string, NormalizedCellStyle]>();
   let counter = 1;
 
@@ -344,17 +351,10 @@ function buildCellStyleMap(
 /**
  * Append table-level and column-level automatic styles.
  */
-function appendTableStyles(
-  autoStyles: XmlElement,
-  tableName: string,
-  table: TableData,
-): void {
+function appendTableStyles(autoStyles: XmlElement, tableName: string, table: TableData): void {
   // Table style
-  const tableStyle = el("style:style")
-    .attr("style:name", tableName)
-    .attr("style:family", "table");
-  const tableProps = el("style:table-properties")
-    .attr("table:align", "margins");
+  const tableStyle = el("style:style").attr("style:name", tableName).attr("style:family", "table");
+  const tableProps = el("style:table-properties").attr("table:align", "margins");
   tableStyle.appendChild(tableProps);
   autoStyles.appendChild(tableStyle);
 
@@ -366,8 +366,7 @@ function appendTableStyles(
       const colStyle = el("style:style")
         .attr("style:name", `${tableName}.${colLetter}`)
         .attr("style:family", "table-column");
-      const colProps = el("style:table-column-properties")
-        .attr("style:column-width", widths[i]);
+      const colProps = el("style:table-column-properties").attr("style:column-width", widths[i]);
       colStyle.appendChild(colProps);
       autoStyles.appendChild(colStyle);
     }
@@ -378,9 +377,7 @@ function appendTableStyles(
  * Build a cell automatic style element.
  */
 function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement {
-  const style = el("style:style")
-    .attr("style:name", styleName)
-    .attr("style:family", "table-cell");
+  const style = el("style:style").attr("style:name", styleName).attr("style:family", "table-cell");
 
   const props = el("style:table-cell-properties");
 
@@ -431,7 +428,10 @@ function buildTableElement(
     for (let i = 0; i < Math.max(widths.length, numCols); i++) {
       if (i < widths.length) {
         tableEl.appendChild(
-          el("table:table-column").attr("table:style-name", `${tableName}.${String.fromCharCode(65 + i)}`),
+          el("table:table-column").attr(
+            "table:style-name",
+            `${tableName}.${String.fromCharCode(65 + i)}`,
+          ),
         );
       } else {
         tableEl.appendChild(el("table:table-column"));
@@ -587,9 +587,7 @@ function appendRuns(
 
     // Page number field
     if (run.field === "page-number") {
-      const pageNum = el("text:page-number")
-        .attr("text:select-page", "current")
-        .text(run.text);
+      const pageNum = el("text:page-number").attr("text:select-page", "current").text(run.text);
 
       if (run.formatting) {
         const normalized = normalizeFormatting(run.formatting);
@@ -608,9 +606,7 @@ function appendRuns(
 
     // Bookmark
     if (run.bookmark) {
-      parent.appendChild(
-        el("text:bookmark").attr("text:name", run.bookmark),
-      );
+      parent.appendChild(el("text:bookmark").attr("text:name", run.bookmark));
       // If there's also text, render it after the bookmark
       if (run.text) {
         parent.text(run.text);
@@ -629,18 +625,14 @@ function appendRuns(
 
     // Hyperlink
     if (run.link) {
-      const linkEl = el("text:a")
-        .attr("xlink:type", "simple")
-        .attr("xlink:href", run.link);
+      const linkEl = el("text:a").attr("xlink:type", "simple").attr("xlink:href", run.link);
 
       if (run.formatting) {
         const normalized = normalizeFormatting(run.formatting);
         const key = formattingKey(normalized);
         if (key !== "") {
           const entry = styleMap.get(key)!;
-          linkEl.appendChild(
-            el("text:span").attr("text:style-name", entry[0]).text(run.text),
-          );
+          linkEl.appendChild(el("text:span").attr("text:style-name", entry[0]).text(run.text));
         } else {
           linkEl.text(run.text);
         }
@@ -664,9 +656,7 @@ function appendRuns(
       } else {
         const entry = styleMap.get(key)!;
         const styleName = entry[0];
-        parent.appendChild(
-          el("text:span").attr("text:style-name", styleName).text(run.text),
-        );
+        parent.appendChild(el("text:span").attr("text:style-name", styleName).text(run.text));
       }
     }
   }
@@ -678,9 +668,7 @@ function appendRuns(
  * Build an ODF automatic style element for text formatting.
  */
 function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElement {
-  const style = el("style:style")
-    .attr("style:name", styleName)
-    .attr("style:family", "text");
+  const style = el("style:style").attr("style:name", styleName).attr("style:family", "text");
 
   const props = el("style:text-properties");
 
@@ -728,17 +716,13 @@ function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElemen
  * Generate a key for a set of tab stops.
  */
 function tabStopsKey(tabStops: TabStop[]): string {
-  return tabStops
-    .map((ts) => `${ts.position}:${ts.type ?? "left"}`)
-    .join("|");
+  return tabStops.map((ts) => `${ts.position}:${ts.type ?? "left"}`).join("|");
 }
 
 /**
  * Build a map of unique paragraph styles needed for tab stops.
  */
-function buildParagraphStyleMap(
-  elements: ContentElement[],
-): Map<string, [string, TabStop[]]> {
+function buildParagraphStyleMap(elements: ContentElement[]): Map<string, [string, TabStop[]]> {
   const map = new Map<string, [string, TabStop[]]>();
   let counter = 1;
 
@@ -819,8 +803,10 @@ function buildListStyle(styleName: string, list: ListData): XmlElement {
         .attr("text:level", String(level))
         .attr("text:bullet-char", BULLET_CHARS[(level - 1) % BULLET_CHARS.length]);
 
-      const levelProps = el("style:list-level-properties")
-        .attr("text:list-level-position-and-space-mode", "label-alignment");
+      const levelProps = el("style:list-level-properties").attr(
+        "text:list-level-position-and-space-mode",
+        "label-alignment",
+      );
 
       levelProps.appendChild(
         el("style:list-level-label-alignment")
@@ -838,8 +824,10 @@ function buildListStyle(styleName: string, list: ListData): XmlElement {
         .attr("style:num-suffix", ".")
         .attr("style:num-format", "1");
 
-      const levelProps = el("style:list-level-properties")
-        .attr("text:list-level-position-and-space-mode", "label-alignment");
+      const levelProps = el("style:list-level-properties").attr(
+        "text:list-level-position-and-space-mode",
+        "label-alignment",
+      );
 
       levelProps.appendChild(
         el("style:list-level-label-alignment")
@@ -873,10 +861,7 @@ function buildListElement(
 
   const listEl = el("text:list").attr("text:style-name", styleName);
 
-  function appendItems(
-    parentEl: XmlElement,
-    items: ListItemData[],
-  ): void {
+  function appendItems(parentEl: XmlElement, items: ListItemData[]): void {
     for (const item of items) {
       const itemEl = el("text:list-item");
 

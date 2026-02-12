@@ -28,10 +28,7 @@ export interface PackageFile {
  * @param files - The XML and other files to include (excluding mimetype and manifest).
  * @returns A Uint8Array containing the complete ZIP package.
  */
-export async function assemblePackage(
-  mimeType: string,
-  files: PackageFile[],
-): Promise<Uint8Array> {
+export async function assemblePackage(mimeType: string, files: PackageFile[]): Promise<Uint8Array> {
   const zip = new JSZip();
 
   // 1. mimetype — must be first, uncompressed

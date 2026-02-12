@@ -1,10 +1,4 @@
-import type {
-  TextFormatting,
-  TextRun,
-  CellOptions,
-  TableCellData,
-  TableRowData,
-} from "./types.js";
+import type { TextFormatting, TextRun, CellOptions, TableCellData, TableRowData } from "./types.js";
 
 /**
  * Builder for cell content with formatted text runs.
@@ -83,10 +77,7 @@ export class RowBuilder {
    *   c.addText("Merged cell", { bold: true });
    * }, { colSpan: 2, backgroundColor: "#EEEEEE" });
    */
-  addCell(
-    content: string | ((builder: CellBuilder) => void),
-    options?: CellOptions,
-  ): this {
+  addCell(content: string | ((builder: CellBuilder) => void), options?: CellOptions): this {
     let runs: TextRun[];
 
     if (typeof content === "string") {

@@ -327,9 +327,7 @@ describe("OdtDocument", () => {
 
     it("should generate table:table-column elements", async () => {
       const doc = new OdtDocument();
-      doc.addTable([
-        ["A", "B", "C"],
-      ]);
+      doc.addTable([["A", "B", "C"]]);
       const content = await getContentXml(doc);
 
       expect(content).toContain("table:table-column");
@@ -338,10 +336,13 @@ describe("OdtDocument", () => {
 
     it("should support column widths", async () => {
       const doc = new OdtDocument();
-      doc.addTable([
-        ["Name", "Age"],
-        ["Alice", "30"],
-      ], { columnWidths: ["5cm", "3cm"] });
+      doc.addTable(
+        [
+          ["Name", "Age"],
+          ["Alice", "30"],
+        ],
+        { columnWidths: ["5cm", "3cm"] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain('style:column-width="5cm"');
@@ -350,9 +351,7 @@ describe("OdtDocument", () => {
 
     it("should support table-level border applied to all cells", async () => {
       const doc = new OdtDocument();
-      doc.addTable([
-        ["A", "B"],
-      ], { border: "0.5pt solid #000000" });
+      doc.addTable([["A", "B"]], { border: "0.5pt solid #000000" });
       const content = await getContentXml(doc);
 
       expect(content).toContain('fo:border-top="0.5pt solid #000000"');
@@ -532,11 +531,14 @@ describe("OdtDocument", () => {
     it("should produce valid .odt files with tables", async () => {
       const doc = new OdtDocument();
       doc.addHeading("Table Test", 1);
-      doc.addTable([
-        ["Name", "Age", "City"],
-        ["Alice", "30", "Portland"],
-        ["Bob", "25", "Seattle"],
-      ], { columnWidths: ["5cm", "2cm", "4cm"], border: "0.5pt solid #000000" });
+      doc.addTable(
+        [
+          ["Name", "Age", "City"],
+          ["Alice", "30", "Portland"],
+          ["Bob", "25", "Seattle"],
+        ],
+        { columnWidths: ["5cm", "2cm", "4cm"], border: "0.5pt solid #000000" },
+      );
 
       const bytes = await doc.save();
       const zip = await JSZip.loadAsync(bytes);
@@ -1016,11 +1018,14 @@ describe("OdtDocument", () => {
   describe("tab stops", () => {
     it("should insert tab elements", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("Label");
-        p.addTab();
-        p.addText("Value");
-      }, { tabStops: [{ position: "8cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("Label");
+          p.addTab();
+          p.addText("Value");
+        },
+        { tabStops: [{ position: "8cm" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain("text:tab");
@@ -1030,11 +1035,14 @@ describe("OdtDocument", () => {
 
     it("should generate paragraph style with tab stop positions", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("A");
-        p.addTab();
-        p.addText("B");
-      }, { tabStops: [{ position: "8cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("A");
+          p.addTab();
+          p.addText("B");
+        },
+        { tabStops: [{ position: "8cm" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain("style:tab-stops");
@@ -1044,11 +1052,14 @@ describe("OdtDocument", () => {
 
     it("should support right-aligned tab stops", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("Left");
-        p.addTab();
-        p.addText("Right");
-      }, { tabStops: [{ position: "16cm", type: "right" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("Left");
+          p.addTab();
+          p.addText("Right");
+        },
+        { tabStops: [{ position: "16cm", type: "right" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain('style:type="right"');
@@ -1056,11 +1067,14 @@ describe("OdtDocument", () => {
 
     it("should support center-aligned tab stops", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("Left");
-        p.addTab();
-        p.addText("Center");
-      }, { tabStops: [{ position: "8cm", type: "center" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("Left");
+          p.addTab();
+          p.addText("Center");
+        },
+        { tabStops: [{ position: "8cm", type: "center" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain('style:type="center"');
@@ -1068,13 +1082,16 @@ describe("OdtDocument", () => {
 
     it("should support multiple tab stops", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("Col1");
-        p.addTab();
-        p.addText("Col2");
-        p.addTab();
-        p.addText("Col3");
-      }, { tabStops: [{ position: "5cm" }, { position: "10cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("Col1");
+          p.addTab();
+          p.addText("Col2");
+          p.addTab();
+          p.addText("Col3");
+        },
+        { tabStops: [{ position: "5cm" }, { position: "10cm" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain('style:position="5cm"');
@@ -1083,16 +1100,22 @@ describe("OdtDocument", () => {
 
     it("should deduplicate paragraph styles with same tab stops", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("A");
-        p.addTab();
-        p.addText("B");
-      }, { tabStops: [{ position: "8cm" }] });
-      doc.addParagraph((p) => {
-        p.addText("C");
-        p.addTab();
-        p.addText("D");
-      }, { tabStops: [{ position: "8cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("A");
+          p.addTab();
+          p.addText("B");
+        },
+        { tabStops: [{ position: "8cm" }] },
+      );
+      doc.addParagraph(
+        (p) => {
+          p.addText("C");
+          p.addTab();
+          p.addText("D");
+        },
+        { tabStops: [{ position: "8cm" }] },
+      );
       const content = await getContentXml(doc);
 
       // Should only have one P1 style
@@ -1111,11 +1134,14 @@ describe("OdtDocument", () => {
 
     it("should use custom style for paragraphs with tab stops", async () => {
       const doc = new OdtDocument();
-      doc.addParagraph((p) => {
-        p.addText("A");
-        p.addTab();
-        p.addText("B");
-      }, { tabStops: [{ position: "8cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("A");
+          p.addTab();
+          p.addText("B");
+        },
+        { tabStops: [{ position: "8cm" }] },
+      );
       const content = await getContentXml(doc);
 
       expect(content).toContain('text:style-name="P1"');
@@ -1157,13 +1183,16 @@ describe("OdtDocument", () => {
 
       // Tab stops
       doc.addHeading("Tab Stops", 1);
-      doc.addParagraph((p) => {
-        p.addText("Name");
-        p.addTab();
-        p.addText("Value");
-        p.addTab();
-        p.addText("Unit");
-      }, { tabStops: [{ position: "5cm" }, { position: "10cm" }] });
+      doc.addParagraph(
+        (p) => {
+          p.addText("Name");
+          p.addTab();
+          p.addText("Value");
+          p.addTab();
+          p.addText("Unit");
+        },
+        { tabStops: [{ position: "5cm" }, { position: "10cm" }] },
+      );
 
       const bytes = await doc.save();
       const zip = await JSZip.loadAsync(bytes);
@@ -1199,14 +1228,12 @@ describe("OdtDocument", () => {
 
   /** A small fake PNG for testing (not a real image, but valid bytes for ZIP/manifest checks). */
   const TEST_PNG = new Uint8Array([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
   ]);
 
   /** A small fake JPEG for testing. */
   const TEST_JPEG = new Uint8Array([
-    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46,
-    0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
   ]);
 
   /** Helper: generate an .odt and return its manifest.xml as a string. */
@@ -1280,7 +1307,7 @@ describe("OdtDocument", () => {
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain('text:bookmark');
+      expect(content).toContain("text:bookmark");
       expect(content).toContain('text:name="chapter1"');
       expect(content).toContain("Chapter 1 content");
     });
@@ -1445,7 +1472,9 @@ describe("OdtDocument", () => {
       doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
 
       const content = await getContentXml(doc);
-      expect(content).toContain(`xmlns:draw="${"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"}"`);
+      expect(content).toContain(
+        `xmlns:draw="${"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"}"`,
+      );
       expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
     });
   });
@@ -1489,12 +1518,15 @@ describe("OdtDocument", () => {
       });
 
       // Table (existing feature — backwards compatibility)
-      doc.addTable([
-        ["Feature", "Status"],
-        ["Links", "Done"],
-        ["Bookmarks", "Done"],
-        ["Images", "Done"],
-      ], { border: "0.5pt solid #000000" });
+      doc.addTable(
+        [
+          ["Feature", "Status"],
+          ["Links", "Done"],
+          ["Bookmarks", "Done"],
+          ["Images", "Done"],
+        ],
+        { border: "0.5pt solid #000000" },
+      );
 
       // List (existing feature — backwards compatibility)
       doc.addList(["Images embedded", "Links working", "Bookmarks working"], { type: "numbered" });

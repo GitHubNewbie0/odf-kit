@@ -11,9 +11,16 @@ import { HeaderFooterBuilder } from "./header-footer-builder.js";
 import { TableBuilder } from "./table-builder.js";
 import { ListBuilder } from "./list-builder.js";
 import type {
-  TableOptions, TableData, TextRun, PageLayout,
-  ParagraphOptions, ListOptions, ListData, ListItemData,
-  ImageOptions, ImageData,
+  TableOptions,
+  TableData,
+  TextRun,
+  PageLayout,
+  ParagraphOptions,
+  ListOptions,
+  ListData,
+  ListItemData,
+  ImageOptions,
+  ImageData,
 } from "./types.js";
 
 /** MIME type for ODF text documents. */
@@ -262,10 +269,7 @@ export class OdtDocument {
    *   t.addRow((r) => { r.addCell("Alice"); r.addCell("30"); });
    * }, { columnWidths: ["5cm", "3cm"] });
    */
-  addTable(
-    content: string[][] | ((builder: TableBuilder) => void),
-    options?: TableOptions,
-  ): this {
+  addTable(content: string[][] | ((builder: TableBuilder) => void), options?: TableOptions): this {
     this.elements.push({
       type: "table",
       table: buildTableData(content, options),
@@ -307,10 +311,7 @@ export class OdtDocument {
    *   });
    * });
    */
-  addList(
-    content: string[] | ((builder: ListBuilder) => void),
-    options?: ListOptions,
-  ): this {
+  addList(content: string[] | ((builder: ListBuilder) => void), options?: ListOptions): this {
     this.elements.push({
       type: "list",
       list: buildListData(content, options),
@@ -602,13 +603,21 @@ function buildListData(
  */
 function mimeToExtension(mimeType: string): string {
   switch (mimeType) {
-    case "image/png": return ".png";
-    case "image/jpeg": return ".jpeg";
-    case "image/gif": return ".gif";
-    case "image/svg+xml": return ".svg";
-    case "image/webp": return ".webp";
-    case "image/bmp": return ".bmp";
-    case "image/tiff": return ".tiff";
-    default: return ".bin";
+    case "image/png":
+      return ".png";
+    case "image/jpeg":
+      return ".jpeg";
+    case "image/gif":
+      return ".gif";
+    case "image/svg+xml":
+      return ".svg";
+    case "image/webp":
+      return ".webp";
+    case "image/bmp":
+      return ".bmp";
+    case "image/tiff":
+      return ".tiff";
+    default:
+      return ".bin";
   }
 }
