@@ -23,7 +23,7 @@
     "lint": "eslint src tests",
     "format": "prettier --write src tests",
     "format:check": "prettier --check src tests",
-    "clean": "rm -rf dist",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
