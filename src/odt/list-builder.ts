@@ -1,4 +1,4 @@
-import type { TextFormatting, TextRun, ListItemData, ListData } from "./types.js";
+import type { TextRun, ListItemData } from "./types.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 
 /**

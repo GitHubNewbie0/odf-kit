@@ -2,7 +2,7 @@ import { ODF_NS, ODF_VERSION } from "../core/namespaces.js";
 import { el, xmlDocument } from "../core/xml.js";
 import type { XmlElement } from "../core/xml.js";
 import type {
-  TextRun, TableData, TableCellData, CellOptions,
+  TextRun, TableData, CellOptions,
   ListData, ListItemData, ParagraphOptions, TabStop, ImageData,
 } from "./types.js";
 import { normalizeFormatting, formattingKey, resolveColor } from "./formatting.js";
