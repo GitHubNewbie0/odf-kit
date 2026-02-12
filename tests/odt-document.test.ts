@@ -134,7 +134,6 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-
       // Should have an automatic style with bold
       expect(content).toContain('fo:font-weight="bold"');
       // Should have a text:span referencing the style
