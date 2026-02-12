@@ -132,7 +132,8 @@ describe("OdtDocument", () => {
       doc.addParagraph((p) => {
         p.addText("bold", { bold: true });
       });
-      await getContentXml(doc);
+      const content = await getContentXml(doc);
+
 
       // Should have an automatic style with bold
       expect(content).toContain('fo:font-weight="bold"');
