@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>odf-kit — Generate ODF Documents in TypeScript</title>
+  <meta name="description" content="Open-source TypeScript library for generating ODF text documents (.odt). Tables, formatting, images, lists, page layout. Single dependency. Apache 2.0 licensed.">
+  <meta name="keywords" content="ODF, OpenDocument, TypeScript, JavaScript, Node.js, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/">
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="odf-kit — Generate ODF Documents in TypeScript">
+  <meta property="og:description" content="Open-source TypeScript library for generating ODF text documents. Tables, formatting, images, lists, page layout. Single dependency.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/">
+  <meta property="og:site_name" content="odf-kit">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="odf-kit — Generate ODF Documents in TypeScript">
+  <meta name="twitter:description" content="Open-source TypeScript library for generating ODF text documents. Tables, formatting, images, lists, page layout.">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "odf-kit",
+    "description": "TypeScript library for generating ODF text documents (.odt files) with tables, formatting, images, lists, and page layout",
+    "codeRepository": "https://github.com/GitHubNewbie0/odf-kit",
+    "programmingLanguage": "TypeScript",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "runtimePlatform": "Node.js",
+    "targetProduct": {
+      "@type": "SoftwareApplication",
+      "name": "odf-kit",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform"
+    }
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #dbeafe;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: 5rem 0 3.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+    }
+
+    .hero-tagline {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: #ccc;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .install-cmd {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+    }
+
+    .install-cmd .prompt {
+      color: var(--code-comment);
+      user-select: none;
+    }
+
+    /* ─── FEATURES ─── */
+    .features {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: box-shadow 0.15s ease;
+    }
+
+    .feature-card:hover {
+      box-shadow: var(--shadow);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ─── CODE EXAMPLE ─── */
+    .code-section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 1.75rem;
+      overflow-x: auto;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .code-block::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f38ba8;
+      box-shadow: 16px 0 0 #f9e2af, 32px 0 0 #a6e3a1;
+    }
+
+    .code-block pre {
+      padding-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--code-text);
+    }
+
+    .kw { color: var(--code-keyword); }
+    .str { color: var(--code-string); }
+    .cmt { color: var(--code-comment); }
+    .typ { color: var(--code-type); }
+    .fn { color: var(--code-fn); }
+    .num { color: var(--code-num); }
+
+    /* ─── WHY ─── */
+    .why-section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .why-item h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .why-item p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats {
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 0.15rem;
+    }
+
+    /* ─── CTA ─── */
+    .cta {
+      padding: 4rem 0;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cta h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .cta p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 2.5rem 0;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .hero { padding: 3.5rem 0 2.5rem; }
+      .hero h1 { font-size: 2rem; }
+      .hero-tagline { font-size: 1.05rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .why-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+      .code-block pre { font-size: 0.75rem; }
+    }
+  </style>
+
+  <!-- 
+    ┌──────────────────────────────────────────────┐
+    │  GOATCOUNTER ANALYTICS                       │
+    │                                              │
+    │  1. Sign up free at https://goatcounter.com  │
+    │  2. Choose a code (e.g. "odf-kit")           │
+    │  3. Replace YOUR-CODE below with your code   │
+    │  4. View stats at YOUR-CODE.goatcounter.com  │
+    └──────────────────────────────────────────────┘
+  -->
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">v0.1.0 · Apache 2.0 · TypeScript</div>
+      <h1>Generate ODF documents<br>with <span>odf-kit</span></h1>
+      <p class="hero-tagline">
+        An open-source TypeScript library for creating .odt files programmatically.
+        Tables, formatting, images, lists, page layout — in a clean API with a single dependency.
+      </p>
+      <div class="hero-actions">
+        <a href="https://github.com/GitHubNewbie0/odf-kit" class="btn btn-primary" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z"/></svg>
+          npm
+        </a>
+      </div>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-label">Features</div>
+      <h2 class="section-title">Everything you need for .odt files</h2>
+      <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">✏️</div>
+          <h3>Text Formatting</h3>
+          <p>Bold, italic, underline, strikethrough, superscript, subscript. Custom fonts, sizes, colors, and highlights.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Tables</h3>
+          <p>Column widths, cell borders, backgrounds, merged cells (colspan &amp; rowspan). Formatted text inside cells.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📄</div>
+          <h3>Page Layout</h3>
+          <p>Page size, margins, orientation. Headers and footers with page numbers. Page breaks.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Lists</h3>
+          <p>Bullet and numbered lists with up to 6 levels of nesting. Formatted items via builder callback.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🖼️</div>
+          <h3>Images</h3>
+          <p>Embedded PNG, JPEG, GIF, SVG, WebP, BMP, TIFF. Standalone or inline. Sized and anchored.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔗</div>
+          <h3>Links &amp; Bookmarks</h3>
+          <p>External hyperlinks, internal bookmark links. Formatted link text. Named anchor points.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CODE EXAMPLE ═══ -->
+  <section class="code-section" id="example">
+    <div class="container">
+      <div class="section-label">Quick start</div>
+      <h2 class="section-title">Simple things stay simple</h2>
+      <p class="section-desc">Plain text is a one-liner. Formatted content uses a builder callback. TypeScript autocomplete guides you.</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Quarterly Report"</span> });
+doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Q4 Results"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Revenue exceeded expectations across all regions."</span>);
+
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Region"</span>,  <span class="str">"Revenue"</span>,   <span class="str">"Growth"</span>],
+  [<span class="str">"North"</span>,   <span class="str">"$2.1M"</span>,     <span class="str">"+12%"</span>],
+  [<span class="str">"South"</span>,   <span class="str">"$1.8M"</span>,     <span class="str">"+8%"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span class="kw">=></span> {
+  p.<span class="fn">addText</span>(<span class="str">"Status: "</span>);
+  p.<span class="fn">addText</span>(<span class="str">"Approved"</span>, { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">color</span>: <span class="str">"green"</span> });
+});
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="cmt">// → Uint8Array — valid .odt, opens in LibreOffice</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ WHY ODF-KIT ═══ -->
+  <section class="why-section" id="why">
+    <div class="container">
+      <div class="section-label">Why odf-kit</div>
+      <h2 class="section-title">Built to fill a real gap</h2>
+      <p class="section-desc">The JavaScript ecosystem had no maintained library for ODF document generation. odf-kit changes that.</p>
+      <div class="why-grid">
+        <div class="why-item">
+          <h3>TypeScript-first</h3>
+          <p>Full type definitions ship with the package. Your editor shows every method, every option, every valid value — as you type.</p>
+        </div>
+        <div class="why-item">
+          <h3>Single dependency</h3>
+          <p>Only jszip at runtime. No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
+        </div>
+        <div class="why-item">
+          <h3>ODF 1.2+ compliant</h3>
+          <p>Generates proper ZIP-packaged .odt files per ISO/IEC 26300. Validated against LibreOffice 24.2.</p>
+        </div>
+        <div class="why-item">
+          <h3>Open standards matter</h3>
+          <p>ODF is the ISO standard for documents. Used by governments, schools, and nonprofits worldwide who choose vendor independence.</p>
+        </div>
+        <div class="why-item">
+          <h3>Developer-friendly API</h3>
+          <p>Simple things are one-liners. Complex output uses builder callbacks. Both <code>bold: true</code> and <code>fontWeight: "bold"</code> work.</p>
+        </div>
+        <div class="why-item">
+          <h3>No prior art</h3>
+          <p>The only JS ODF library (simple-odf) was abandoned in 2021. It had no table support and only generated flat XML, not proper .odt files.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STATS ═══ -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div>
+          <div class="stat-value">102</div>
+          <div class="stat-label">Tests passing</div>
+        </div>
+        <div>
+          <div class="stat-value">1</div>
+          <div class="stat-label">Runtime dependency</div>
+        </div>
+        <div>
+          <div class="stat-value">5</div>
+          <div class="stat-label">Development phases</div>
+        </div>
+        <div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">External XML parsers</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta">
+    <div class="container">
+      <h2>Start generating ODF documents</h2>
+      <p>Install odf-kit and create your first .odt file in under a minute.</p>
+      <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <br>
+      <div class="hero-actions">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary" rel="noopener">Read the docs</a>
+        <a href="https://github.com/GitHubNewbie0/odf-kit" class="btn btn-secondary" rel="noopener">View source</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="container">
+      <p>
+        <strong>odf-kit</strong> · Apache 2.0 · 
+        <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · 
+        <a href="https://www.npmjs.com/package/odf-kit">npm</a> · 
+        <a href="https://github.com/GitHubNewbie0/odf-kit/blob/main/CHANGELOG.md">Changelog</a>
+      </p>
+      <p style="margin-top: 0.4rem;">Built for developers at nonprofits, governments, and community organizations.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
