@@ -1,104 +1,70 @@
-publiccodeYmlVersion: "0"
-
+publiccodeYmlVersion: 0.5.0
 name: odf-kit
-url: "https://github.com/GitHubNewbie0/odf-kit"
-landingURL: "https://githubnewbie0.github.io/odf-kit"
-softwareVersion: "0.1.0"
-releaseDate: "2026-02-11"
-
+url: https://github.com/GitHubNewbie0/odf-kit
+landingURL: https://githubnewbie0.github.io/odf-kit
+softwareVersion: 0.1.0
+releaseDate: 2026-02-11
 platforms:
   - web
-
 categories:
   - document-management
   - office
   - it-development
-
 developmentStatus: beta
-
-softwareType: "library"
-
+softwareType: library
 intendedAudience:
   scope:
-    - government
     - education
-    - science-and-technology
+    - government
     - local-authorities
-
+    - science-and-technology
 description:
   en:
-    shortDescription: >
-      TypeScript library for generating OpenDocument Format (.odt)
+    localisedName: odf-kit
+    shortDescription: TypeScript library for generating OpenDocument Format (.odt)
       files programmatically in Node.js.
-
-    longDescription: >
-      odf-kit is an open-source TypeScript library for generating
-      OpenDocument Format (ODF) documents programmatically. It produces
-      valid .odt files that open in LibreOffice, Apache OpenOffice, and
-      any ODF-compliant application.
+    longDescription: >-
+      odf-kit is an open-source TypeScript library for generating OpenDocument
+      Format (ODF) documents programmatically. It produces valid .odt files that
+      open in LibreOffice, Apache OpenOffice, and any ODF-compliant application.
 
 
       Designed for developers building tools for governments, nonprofits,
       schools, and organisations that use open document standards, odf-kit
-      provides a fluent, developer-friendly API for creating text documents
-      with rich formatting, tables, lists, images, hyperlinks, bookmarks,
-      headers and footers, and page layout control.
+      provides a fluent API for creating text documents with rich formatting,
+      tables, lists, images, hyperlinks, bookmarks, headers and footers, and
+      page layout control.
 
 
-      Unlike abandoned alternatives such as simple-odf, odf-kit generates
-      proper ZIP-packaged ODF files (not flat XML), supports tables with
-      cell merging and formatting, embeds images, and is actively
-      maintained. It has a single runtime dependency (JSZip) and targets
-      Node.js 22+.
+      Unlike abandoned alternatives such as simple-odf, odf-kit generates proper
+      ZIP-packaged ODF files (not flat XML), supports tables with cell merging
+      and formatting, embeds images, and is actively maintained. It has a single
+      runtime dependency (JSZip) and targets Node.js 22+.
 
 
-      odf-kit supports ODF 1.2+ (ISO/IEC 26300), the international
-      standard for open document formats mandated by the European Union,
-      Brazil, India, the United Kingdom, and many other jurisdictions
-      for government interoperability and vendor independence.
-
-    documentation: "https://github.com/GitHubNewbie0/odf-kit#readme"
-
+      odf-kit supports ODF 1.2+ (ISO/IEC 26300), the international standard for
+      open document formats used by governments worldwide for interoperability
+      and vendor independence.
+    documentation: https://github.com/GitHubNewbie0/odf-kit#readme
     features:
-      - Generate valid .odt files that open in LibreOffice and OpenOffice
-      - Rich text formatting (bold, italic, underline, strikethrough, color, fonts)
-      - Tables with column widths, cell borders, backgrounds, and merging
+      - Generate valid .odt files for LibreOffice and OpenOffice
+      - Rich text formatting with bold, italic, underline, color, and fonts
+      - Tables with column widths, borders, backgrounds, and cell merging
       - Bullet and numbered lists with nesting up to 6 levels
-      - Embedded images (PNG, JPEG, GIF, SVG, WebP, BMP, TIFF)
-      - Hyperlinks (external URLs and internal bookmarks)
+      - Embedded images (PNG, JPEG, GIF, SVG, WebP)
+      - Hyperlinks and internal bookmarks
       - Headers and footers with page numbers
-      - Page layout (size, margins, orientation, page breaks)
-      - Tab stops with left, center, and right alignment
-      - Superscript, subscript, and text highlighting
-      - Fluent API with method chaining
-      - Style deduplication for optimal file size
-      - Single runtime dependency (JSZip)
+      - Page layout with size, margins, orientation, and page breaks
       - ODF 1.2+ compliant (ISO/IEC 26300)
-
-    inputTypes:
-      - application/x.empty
-
-    outputTypes:
-      - application/vnd.oasis.opendocument.text
-
+      - Single runtime dependency
 legal:
   license: Apache-2.0
-
 maintenance:
-  type: "community"
-
+  type: community
   contacts:
     - name: Scott Wirth
       email: scott@wirthmgt.com
-
 localisation:
   localisationReady: false
   availableLanguages:
     - en
-
-dependsOn:
-  open:
-    - name: Node.js
-      versionMin: "22"
-    - name: JSZip
-      versionMin: "3.0"
