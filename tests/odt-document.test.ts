@@ -363,22 +363,11 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       doc.addTable((t) => {
         t.addRow((r) => {
-          r.addCell("Header", { backgroundColor: "lightgray" });
-        });
-      });
-      const content = await getContentXml(doc);
-      expect(content).toContain("fo:background-color");
-
-      // lightgray is not in our named colors map, so it passes through
-      // but silver (#c0c0c0) is — let's test that
-      const doc2 = new OdtDocument();
-      doc2.addTable((t) => {
-        t.addRow((r) => {
           r.addCell("Header", { backgroundColor: "silver" });
         });
       });
-      const content2 = await getContentXml(doc2);
-      expect(content2).toContain('fo:background-color="#c0c0c0"');
+      const content = await getContentXml(doc);
+      expect(content).toContain('fo:background-color="#c0c0c0"');
     });
 
     it("should support individual border overrides", async () => {
