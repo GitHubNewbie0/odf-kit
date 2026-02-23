@@ -366,7 +366,8 @@ describe("OdtDocument", () => {
           r.addCell("Header", { backgroundColor: "lightgray" });
         });
       });
-      const _content = await getContentXml(doc);
+      const content = await getContentXml(doc);
+      expect(content).toContain("fo:background-color");
 
       // lightgray is not in our named colors map, so it passes through
       // but silver (#c0c0c0) is — let's test that
