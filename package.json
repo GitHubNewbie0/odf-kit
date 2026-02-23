@@ -1,6 +1,6 @@
 {
   "name": "odf-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Create OpenDocument Format files (.odt, .ods, .odp, .odg) in TypeScript/JavaScript",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,11 +19,11 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests",
     "format": "prettier --write src tests",
     "format:check": "prettier --check src tests",
-    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
@@ -48,7 +48,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "jszip": "^3.10.1"
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

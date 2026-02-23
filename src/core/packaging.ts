@@ -1,4 +1,4 @@
-import JSZip from "jszip";
+import { zipSync, type Zippable } from "fflate";
 import { generateManifest } from "./manifest.js";
 import type { ManifestEntry } from "./manifest.js";
 
@@ -28,32 +28,40 @@ export interface PackageFile {
  * @param files - The XML and other files to include (excluding mimetype and manifest).
  * @returns A Uint8Array containing the complete ZIP package.
  */
-export async function assemblePackage(mimeType: string, files: PackageFile[]): Promise<Uint8Array> {
-  const zip = new JSZip();
+export async function assemblePackage(
+  mimeType: string,
+  files: PackageFile[],
+): Promise<Uint8Array> {
+  const encoder = new TextEncoder();
 
-  // 1. mimetype — must be first, uncompressed
-  zip.file("mimetype", mimeType, {
-    compression: "STORE",
-  });
+  // Build ZIP file map — object insertion order determines entry order in ZIP
+  const zipData: Zippable = {};
 
-  // 2. Add content files
+  // 1. mimetype — must be first, uncompressed (level 0 = STORED)
+  zipData["mimetype"] = [encoder.encode(mimeType), { level: 0 as const }];
+
+  // 2. Add content files (DEFLATED)
   for (const file of files) {
-    zip.file(file.path, file.content, {
-      compression: "DEFLATE",
-    });
+    const data =
+      typeof file.content === "string"
+        ? encoder.encode(file.content)
+        : file.content;
+    zipData[file.path] = [data, { level: 6 as const }];
   }
 
-  // 3. Generate and add manifest
+  // 3. Generate and add manifest (DEFLATED)
   const manifestEntries: ManifestEntry[] = files.map((f) => ({
     fullPath: f.path,
-    mediaType: f.mediaType ?? (f.path.endsWith(".xml") ? "text/xml" : "application/octet-stream"),
+    mediaType:
+      f.mediaType ??
+      (f.path.endsWith(".xml") ? "text/xml" : "application/octet-stream"),
   }));
 
   const manifestXml = generateManifest(mimeType, manifestEntries);
-  zip.file("META-INF/manifest.xml", manifestXml, {
-    compression: "DEFLATE",
-  });
+  zipData["META-INF/manifest.xml"] = [
+    encoder.encode(manifestXml),
+    { level: 6 as const },
+  ];
 
-  // Generate the ZIP as a Uint8Array
-  return zip.generateAsync({ type: "uint8array" });
+  return zipSync(zipData);
 }

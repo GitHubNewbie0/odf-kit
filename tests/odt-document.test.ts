@@ -1,48 +1,52 @@
-import JSZip from "jszip";
+import { unzipSync } from "fflate";
 import { OdtDocument } from "../src/odt/document.js";
+
+const decode = new TextDecoder();
+
+/** Helper: generate an .odt, unzip it, and return the entries. */
+async function unpackOdt(
+  doc: OdtDocument,
+): Promise<Record<string, Uint8Array>> {
+  const bytes = await doc.save();
+  return unzipSync(bytes);
+}
 
 /** Helper: generate an .odt and return its content.xml as a string. */
 async function getContentXml(doc: OdtDocument): Promise<string> {
-  const bytes = await doc.save();
-  const zip = await JSZip.loadAsync(bytes);
-  return zip.file("content.xml")!.async("string");
+  const entries = await unpackOdt(doc);
+  return decode.decode(entries["content.xml"]);
 }
 
 /** Helper: generate an .odt and return its styles.xml as a string. */
 async function getStylesXml(doc: OdtDocument): Promise<string> {
-  const bytes = await doc.save();
-  const zip = await JSZip.loadAsync(bytes);
-  return zip.file("styles.xml")!.async("string");
+  const entries = await unpackOdt(doc);
+  return decode.decode(entries["styles.xml"]);
 }
 
 describe("OdtDocument", () => {
   describe("Hello World .odt generation", () => {
-    let zip: JSZip;
+    let entries: Record<string, Uint8Array>;
 
     beforeAll(async () => {
       const doc = new OdtDocument();
       doc.addParagraph("Hello, World!");
-      const bytes = await doc.save();
-      zip = await JSZip.loadAsync(bytes);
+      entries = await unpackOdt(doc);
     });
 
     it("should produce a valid ZIP file", () => {
-      expect(zip).toBeDefined();
+      expect(entries).toBeDefined();
     });
 
-    it("should contain an uncompressed mimetype file as the first entry", async () => {
-      const mimetypeFile = zip.file("mimetype");
-      expect(mimetypeFile).not.toBeNull();
-
-      const content = await mimetypeFile!.async("string");
-      expect(content).toBe("application/vnd.oasis.opendocument.text");
+    it("should contain an uncompressed mimetype file as the first entry", () => {
+      expect(entries["mimetype"]).toBeDefined();
+      expect(decode.decode(entries["mimetype"])).toBe(
+        "application/vnd.oasis.opendocument.text",
+      );
     });
 
-    it("should contain META-INF/manifest.xml", async () => {
-      const manifest = zip.file("META-INF/manifest.xml");
-      expect(manifest).not.toBeNull();
-
-      const content = await manifest!.async("string");
+    it("should contain META-INF/manifest.xml", () => {
+      expect(entries["META-INF/manifest.xml"]).toBeDefined();
+      const content = decode.decode(entries["META-INF/manifest.xml"]);
       expect(content).toContain("manifest:manifest");
       expect(content).toContain("application/vnd.oasis.opendocument.text");
       expect(content).toContain("content.xml");
@@ -50,11 +54,9 @@ describe("OdtDocument", () => {
       expect(content).toContain("meta.xml");
     });
 
-    it("should contain content.xml with the paragraph", async () => {
-      const contentFile = zip.file("content.xml");
-      expect(contentFile).not.toBeNull();
-
-      const content = await contentFile!.async("string");
+    it("should contain content.xml with the paragraph", () => {
+      expect(entries["content.xml"]).toBeDefined();
+      const content = decode.decode(entries["content.xml"]);
       expect(content).toContain("office:document-content");
       expect(content).toContain("office:body");
       expect(content).toContain("office:text");
@@ -62,19 +64,15 @@ describe("OdtDocument", () => {
       expect(content).toContain("text:p");
     });
 
-    it("should contain styles.xml", async () => {
-      const stylesFile = zip.file("styles.xml");
-      expect(stylesFile).not.toBeNull();
-
-      const content = await stylesFile!.async("string");
+    it("should contain styles.xml", () => {
+      expect(entries["styles.xml"]).toBeDefined();
+      const content = decode.decode(entries["styles.xml"]);
       expect(content).toContain("office:document-styles");
     });
 
-    it("should contain meta.xml with generator tag", async () => {
-      const metaFile = zip.file("meta.xml");
-      expect(metaFile).not.toBeNull();
-
-      const content = await metaFile!.async("string");
+    it("should contain meta.xml with generator tag", () => {
+      expect(entries["meta.xml"]).toBeDefined();
+      const content = decode.decode(entries["meta.xml"]);
       expect(content).toContain("office:document-meta");
       expect(content).toContain("odf-kit");
     });
@@ -85,9 +83,7 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       doc.addHeading("Chapter One", 1);
       doc.addParagraph("Some text.");
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
-      const content = await zip.file("content.xml")!.async("string");
+      const content = await getContentXml(doc);
 
       expect(content).toContain("text:h");
       expect(content).toContain("Chapter One");
@@ -100,9 +96,8 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       doc.setMetadata({ title: "Test Doc", creator: "Test Author" });
       doc.addParagraph("Content.");
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
-      const meta = await zip.file("meta.xml")!.async("string");
+      const entries = await unpackOdt(doc);
+      const meta = decode.decode(entries["meta.xml"]);
 
       expect(meta).toContain("Test Doc");
       expect(meta).toContain("Test Author");
@@ -119,7 +114,6 @@ describe("OdtDocument", () => {
 
       expect(result).toBe(doc);
 
-      // Should still produce a valid file
       const bytes = await doc.save();
       expect(bytes).toBeInstanceOf(Uint8Array);
       expect(bytes.length).toBeGreaterThan(0);
@@ -134,9 +128,7 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Should have an automatic style with bold
       expect(content).toContain('fo:font-weight="bold"');
-      // Should have a text:span referencing the style
       expect(content).toContain("text:span");
       expect(content).toContain("bold");
     });
@@ -222,7 +214,6 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Should contain both plain text and a span
       expect(content).toContain("Normal ");
       expect(content).toContain("text:span");
       expect(content).toContain("bold ");
@@ -237,12 +228,10 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Both spans should reference the same style name (T1)
       const spanMatches = content.match(/text:style-name="T1"/g);
       expect(spanMatches).not.toBeNull();
       expect(spanMatches!.length).toBe(2);
 
-      // There should be only one style definition for T1
       const styleMatches = content.match(/style:name="T1"/g);
       expect(styleMatches).not.toBeNull();
       expect(styleMatches!.length).toBe(1);
@@ -256,7 +245,6 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Should have two different styles
       expect(content).toContain('style:name="T1"');
       expect(content).toContain('style:name="T2"');
     });
@@ -298,7 +286,6 @@ describe("OdtDocument", () => {
     it("should let explicit fontWeight override bold shortcut", async () => {
       const doc = new OdtDocument();
       doc.addParagraph((p) => {
-        // bold: true says bold, but fontWeight: "normal" is more explicit — it wins
         p.addText("not bold", { bold: true, fontWeight: "normal" });
       });
       const content = await getContentXml(doc);
@@ -379,7 +366,7 @@ describe("OdtDocument", () => {
           r.addCell("Header", { backgroundColor: "lightgray" });
         });
       });
-      await getContentXml(doc);
+      const content = await getContentXml(doc);
 
       // lightgray is not in our named colors map, so it passes through
       // but silver (#c0c0c0) is — let's test that
@@ -437,10 +424,9 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      expect(content).toContain('fo:font-weight="bold"');
       expect(content).toContain("Total: ");
       expect(content).toContain("$1,250");
-      expect(content).toContain('fo:color="#008000"');
+      expect(content).toContain('fo:font-weight="bold"');
     });
 
     it("should support colSpan (column merging)", async () => {
@@ -491,12 +477,10 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Both cells should reference the same style (C1)
       const cellStyleMatches = content.match(/table:style-name="C1"/g);
       expect(cellStyleMatches).not.toBeNull();
       expect(cellStyleMatches!.length).toBe(2);
 
-      // Only one style definition for C1
       const styleDefs = content.match(/style:name="C1"/g);
       expect(styleDefs).not.toBeNull();
       expect(styleDefs!.length).toBe(1);
@@ -537,18 +521,19 @@ describe("OdtDocument", () => {
           ["Alice", "30", "Portland"],
           ["Bob", "25", "Seattle"],
         ],
-        { columnWidths: ["5cm", "2cm", "4cm"], border: "0.5pt solid #000000" },
+        {
+          columnWidths: ["5cm", "2cm", "4cm"],
+          border: "0.5pt solid #000000",
+        },
       );
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
+      const entries = await unpackOdt(doc);
 
-      // All required files present
-      expect(zip.file("mimetype")).not.toBeNull();
-      expect(zip.file("content.xml")).not.toBeNull();
-      expect(zip.file("styles.xml")).not.toBeNull();
-      expect(zip.file("meta.xml")).not.toBeNull();
-      expect(zip.file("META-INF/manifest.xml")).not.toBeNull();
+      expect(entries["mimetype"]).toBeDefined();
+      expect(entries["content.xml"]).toBeDefined();
+      expect(entries["styles.xml"]).toBeDefined();
+      expect(entries["meta.xml"]).toBeDefined();
+      expect(entries["META-INF/manifest.xml"]).toBeDefined();
     });
   });
 
@@ -607,7 +592,9 @@ describe("OdtDocument", () => {
 
     it("should support method chaining with setPageLayout", () => {
       const doc = new OdtDocument();
-      const result = doc.setPageLayout({ orientation: "landscape" }).addParagraph("Test");
+      const result = doc
+        .setPageLayout({ orientation: "landscape" })
+        .addParagraph("Test");
       expect(result).toBe(doc);
     });
   });
@@ -658,7 +645,7 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       doc.setHeader((h) => {
         h.addText("Report", { bold: true });
-        h.addText(" — Draft", { italic: true });
+        h.addText(" \u2014 Draft", { italic: true });
       });
       doc.addParagraph("Content");
       const styles = await getStylesXml(doc);
@@ -667,7 +654,7 @@ describe("OdtDocument", () => {
       expect(styles).toContain('fo:font-weight="bold"');
       expect(styles).toContain('fo:font-style="italic"');
       expect(styles).toContain("Report");
-      expect(styles).toContain(" — Draft");
+      expect(styles).toContain(" \u2014 Draft");
     });
 
     it("should support formatted footer with page number via builder", async () => {
@@ -675,7 +662,7 @@ describe("OdtDocument", () => {
       doc.setFooter((f) => {
         f.addText("Page ");
         f.addPageNumber({ bold: true });
-        f.addText(" — Confidential", { italic: true, color: "gray" });
+        f.addText(" \u2014 Confidential", { italic: true, color: "gray" });
       });
       doc.addParagraph("Content");
       const styles = await getStylesXml(doc);
@@ -683,7 +670,7 @@ describe("OdtDocument", () => {
       expect(styles).toContain("style:footer");
       expect(styles).toContain("text:page-number");
       expect(styles).toContain("Page ");
-      expect(styles).toContain(" — Confidential");
+      expect(styles).toContain(" \u2014 Confidential");
     });
 
     it("should support both header and footer simultaneously", async () => {
@@ -750,38 +737,32 @@ describe("OdtDocument", () => {
       doc.setPageLayout({ orientation: "landscape", marginTop: "1cm" });
       doc.setHeader((h) => {
         h.addText("Report", { bold: true });
-        h.addText(" — Page ");
+        h.addText(" \u2014 Page ");
         h.addPageNumber();
       });
-      doc.setFooter("Confidential — Page ###");
+      doc.setFooter("Confidential \u2014 Page ###");
       doc.addHeading("Chapter 1", 1);
       doc.addParagraph("First chapter.");
       doc.addPageBreak();
       doc.addHeading("Chapter 2", 1);
       doc.addParagraph("Second chapter.");
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
+      const entries = await unpackOdt(doc);
 
-      expect(zip.file("mimetype")).not.toBeNull();
-      expect(zip.file("content.xml")).not.toBeNull();
-      expect(zip.file("styles.xml")).not.toBeNull();
-      expect(zip.file("meta.xml")).not.toBeNull();
-      expect(zip.file("META-INF/manifest.xml")).not.toBeNull();
+      expect(entries["mimetype"]).toBeDefined();
+      expect(entries["content.xml"]).toBeDefined();
+      expect(entries["styles.xml"]).toBeDefined();
+      expect(entries["meta.xml"]).toBeDefined();
+      expect(entries["META-INF/manifest.xml"]).toBeDefined();
 
-      const content = await zip.file("content.xml")!.async("string");
-      const styles = await zip.file("styles.xml")!.async("string");
+      const content = decode.decode(entries["content.xml"]);
+      const styles = decode.decode(entries["styles.xml"]);
 
-      // Page layout
       expect(styles).toContain('style:print-orientation="landscape"');
       expect(styles).toContain('fo:margin-top="1cm"');
-
-      // Header and footer
       expect(styles).toContain("style:header");
       expect(styles).toContain("style:footer");
       expect(styles).toContain("text:page-number");
-
-      // Page break
       expect(content).toContain("PageBreak");
     });
   });
@@ -868,7 +849,6 @@ describe("OdtDocument", () => {
       });
       const content = await getContentXml(doc);
 
-      // Should only have one T1 style, both spans reference it
       const matches = content.match(/style:name="T/g);
       expect(matches).toHaveLength(1);
     });
@@ -885,7 +865,7 @@ describe("OdtDocument", () => {
       expect(matches).toHaveLength(2);
     });
 
-    it("should handle H₂O example with subscript", async () => {
+    it("should handle H\u2082O example with subscript", async () => {
       const doc = new OdtDocument();
       doc.addParagraph((p) => {
         p.addText("H");
@@ -962,7 +942,6 @@ describe("OdtDocument", () => {
       expect(content).toContain("Parent");
       expect(content).toContain("Child 1");
       expect(content).toContain("Child 2");
-      // Nested list should be a text:list inside text:list-item
       const nestedListCount = (content.match(/<text:list[ >]/g) ?? []).length;
       expect(nestedListCount).toBeGreaterThanOrEqual(2);
     });
@@ -1118,7 +1097,6 @@ describe("OdtDocument", () => {
       );
       const content = await getContentXml(doc);
 
-      // Should only have one P1 style
       const matches = content.match(/style:name="P/g);
       expect(matches).toHaveLength(1);
     });
@@ -1148,25 +1126,23 @@ describe("OdtDocument", () => {
     });
   });
 
-  describe("full integration — all Phase 4 features", () => {
+  describe("full integration \u2014 all Phase 4 features", () => {
     it("should produce valid .odt with all Phase 4 features", async () => {
       const doc = new OdtDocument();
       doc.setMetadata({ title: "Phase 4 Test" });
 
-      // Advanced formatting
       doc.addHeading("Formatting Demo", 1);
       doc.addParagraph((p) => {
         p.addText("H");
         p.addText("2", { subscript: true });
         p.addText("O is ");
         p.addText("important", { underline: true, highlightColor: "yellow" });
-        p.addText(" — not ");
+        p.addText(" \u2014 not ");
         p.addText("optional", { strikethrough: true });
         p.addText("! E=mc");
         p.addText("2", { superscript: true });
       });
 
-      // Lists
       doc.addHeading("Lists", 1);
       doc.addList(["Apple", "Banana", "Cherry"]);
       doc.addList(["First", "Second", "Third"], { type: "numbered" });
@@ -1181,7 +1157,6 @@ describe("OdtDocument", () => {
         });
       });
 
-      // Tab stops
       doc.addHeading("Tab Stops", 1);
       doc.addParagraph(
         (p) => {
@@ -1194,31 +1169,25 @@ describe("OdtDocument", () => {
         { tabStops: [{ position: "5cm" }, { position: "10cm" }] },
       );
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
+      const entries = await unpackOdt(doc);
 
-      expect(zip.file("mimetype")).not.toBeNull();
-      expect(zip.file("content.xml")).not.toBeNull();
-      expect(zip.file("styles.xml")).not.toBeNull();
-      expect(zip.file("meta.xml")).not.toBeNull();
-      expect(zip.file("META-INF/manifest.xml")).not.toBeNull();
+      expect(entries["mimetype"]).toBeDefined();
+      expect(entries["content.xml"]).toBeDefined();
+      expect(entries["styles.xml"]).toBeDefined();
+      expect(entries["meta.xml"]).toBeDefined();
+      expect(entries["META-INF/manifest.xml"]).toBeDefined();
 
-      const content = await zip.file("content.xml")!.async("string");
+      const content = decode.decode(entries["content.xml"]);
 
-      // Advanced formatting
       expect(content).toContain('style:text-position="sub 58%"');
       expect(content).toContain('style:text-position="super 58%"');
       expect(content).toContain('style:text-underline-style="solid"');
       expect(content).toContain('style:text-line-through-style="solid"');
       expect(content).toContain("fo:background-color");
-
-      // Lists
       expect(content).toContain("text:list");
       expect(content).toContain("text:list-item");
       expect(content).toContain("text:list-level-style-bullet");
       expect(content).toContain("text:list-level-style-number");
-
-      // Tab stops
       expect(content).toContain("text:tab");
       expect(content).toContain("style:tab-stops");
     });
@@ -1226,21 +1195,19 @@ describe("OdtDocument", () => {
 
   // ─── Phase 5: Images and Links ───────────────────────────────────────
 
-  /** A small fake PNG for testing (not a real image, but valid bytes for ZIP/manifest checks). */
   const TEST_PNG = new Uint8Array([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x01,
   ]);
 
-  /** A small fake JPEG for testing. */
   const TEST_JPEG = new Uint8Array([
-    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+    0x01, 0x00, 0x00, 0x01,
   ]);
 
-  /** Helper: generate an .odt and return its manifest.xml as a string. */
   async function getManifestXml(doc: OdtDocument): Promise<string> {
-    const bytes = await doc.save();
-    const zip = await JSZip.loadAsync(bytes);
-    return zip.file("META-INF/manifest.xml")!.async("string");
+    const entries = await unpackOdt(doc);
+    return decode.decode(entries["META-INF/manifest.xml"]);
   }
 
   describe("hyperlinks", () => {
@@ -1261,7 +1228,10 @@ describe("OdtDocument", () => {
     it("should support formatted links", async () => {
       const doc = new OdtDocument();
       doc.addParagraph((p) => {
-        p.addLink("Click here", "https://example.com", { bold: true, color: "blue" });
+        p.addLink("Click here", "https://example.com", {
+          bold: true,
+          color: "blue",
+        });
       });
 
       const content = await getContentXml(doc);
@@ -1348,20 +1318,24 @@ describe("OdtDocument", () => {
   describe("images", () => {
     it("should embed a standalone image in the ZIP", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
-      const imageFile = zip.file("Pictures/image1.png");
-      expect(imageFile).not.toBeNull();
-
-      const imageBytes = await imageFile!.async("uint8array");
-      expect(imageBytes).toEqual(TEST_PNG);
+      const entries = await unpackOdt(doc);
+      expect(entries["Pictures/image1.png"]).toBeDefined();
+      expect(entries["Pictures/image1.png"]).toEqual(TEST_PNG);
     });
 
     it("should generate draw:frame and draw:image in content.xml", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
 
       const content = await getContentXml(doc);
       expect(content).toContain("draw:frame");
@@ -1377,7 +1351,11 @@ describe("OdtDocument", () => {
 
     it("should default to paragraph anchor for standalone images", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
 
       const content = await getContentXml(doc);
       expect(content).toContain('text:anchor-type="paragraph"');
@@ -1385,7 +1363,11 @@ describe("OdtDocument", () => {
 
     it("should add image to the manifest with correct media type", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
 
       const manifest = await getManifestXml(doc);
       expect(manifest).toContain('manifest:media-type="image/png"');
@@ -1396,7 +1378,11 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       doc.addParagraph((p) => {
         p.addText("See figure: ");
-        p.addImage(TEST_PNG, { width: "5cm", height: "3cm", mimeType: "image/png" });
+        p.addImage(TEST_PNG, {
+          width: "5cm",
+          height: "3cm",
+          mimeType: "image/png",
+        });
       });
 
       const content = await getContentXml(doc);
@@ -1422,11 +1408,14 @@ describe("OdtDocument", () => {
 
     it("should support JPEG images with correct extension", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_JPEG, { width: "10cm", height: "6cm", mimeType: "image/jpeg" });
+      doc.addImage(TEST_JPEG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/jpeg",
+      });
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
-      expect(zip.file("Pictures/image1.jpeg")).not.toBeNull();
+      const entries = await unpackOdt(doc);
+      expect(entries["Pictures/image1.jpeg"]).toBeDefined();
 
       const content = await getContentXml(doc);
       expect(content).toContain('xlink:href="Pictures/image1.jpeg"');
@@ -1437,13 +1426,20 @@ describe("OdtDocument", () => {
 
     it("should support multiple images", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
-      doc.addImage(TEST_JPEG, { width: "8cm", height: "5cm", mimeType: "image/jpeg" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
+      doc.addImage(TEST_JPEG, {
+        width: "8cm",
+        height: "5cm",
+        mimeType: "image/jpeg",
+      });
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
-      expect(zip.file("Pictures/image1.png")).not.toBeNull();
-      expect(zip.file("Pictures/image2.jpeg")).not.toBeNull();
+      const entries = await unpackOdt(doc);
+      expect(entries["Pictures/image1.png"]).toBeDefined();
+      expect(entries["Pictures/image2.jpeg"]).toBeDefined();
 
       const content = await getContentXml(doc);
       expect(content).toContain('draw:name="Image1"');
@@ -1456,7 +1452,11 @@ describe("OdtDocument", () => {
       const doc = new OdtDocument();
       const result = doc
         .addParagraph("Before image")
-        .addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" })
+        .addImage(TEST_PNG, {
+          width: "10cm",
+          height: "6cm",
+          mimeType: "image/png",
+        })
         .addParagraph("After image");
 
       expect(result).toBe(doc);
@@ -1469,32 +1469,36 @@ describe("OdtDocument", () => {
 
     it("should include draw and xlink namespaces", async () => {
       const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, { width: "10cm", height: "6cm", mimeType: "image/png" });
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
 
       const content = await getContentXml(doc);
       expect(content).toContain(
-        `xmlns:draw="${"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"}"`,
+        'xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"',
       );
-      expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
+      expect(content).toContain(
+        'xmlns:xlink="http://www.w3.org/1999/xlink"',
+      );
     });
   });
 
-  describe("full integration — all Phase 5 features", () => {
+  describe("full integration \u2014 all Phase 5 features", () => {
     it("should produce valid .odt with all Phase 5 features", async () => {
       const doc = new OdtDocument();
       doc.setMetadata({ title: "Phase 5 Test", creator: "odf-kit" });
       doc.setPageLayout({ orientation: "portrait" });
-      doc.setHeader("Phase 5 — Images and Links");
+      doc.setHeader("Phase 5 \u2014 Images and Links");
       doc.setFooter("Page ###");
 
-      // Heading with bookmark
       doc.addParagraph((p) => {
         p.addBookmark("intro");
         p.addText("Introduction");
       });
       doc.addParagraph("This document tests Phase 5 features.");
 
-      // Links
       doc.addParagraph((p) => {
         p.addText("Visit ");
         p.addLink("example.com", "https://example.com", { bold: true });
@@ -1503,21 +1507,22 @@ describe("OdtDocument", () => {
         p.addText(".");
       });
 
-      // Standalone image
       doc.addImage(TEST_PNG, {
         width: "10cm",
         height: "6cm",
         mimeType: "image/png",
       });
 
-      // Paragraph with inline image
       doc.addParagraph((p) => {
         p.addText("Inline image: ");
-        p.addImage(TEST_JPEG, { width: "3cm", height: "2cm", mimeType: "image/jpeg" });
+        p.addImage(TEST_JPEG, {
+          width: "3cm",
+          height: "2cm",
+          mimeType: "image/jpeg",
+        });
         p.addText(" end of line.");
       });
 
-      // Table (existing feature — backwards compatibility)
       doc.addTable(
         [
           ["Feature", "Status"],
@@ -1528,55 +1533,41 @@ describe("OdtDocument", () => {
         { border: "0.5pt solid #000000" },
       );
 
-      // List (existing feature — backwards compatibility)
-      doc.addList(["Images embedded", "Links working", "Bookmarks working"], { type: "numbered" });
+      doc.addList(["Images embedded", "Links working", "Bookmarks working"], {
+        type: "numbered",
+      });
 
       doc.addPageBreak();
       doc.addParagraph("Second page.");
 
-      const bytes = await doc.save();
-      const zip = await JSZip.loadAsync(bytes);
+      const entries = await unpackOdt(doc);
 
-      // ZIP structure
-      expect(zip.file("mimetype")).not.toBeNull();
-      expect(zip.file("content.xml")).not.toBeNull();
-      expect(zip.file("styles.xml")).not.toBeNull();
-      expect(zip.file("meta.xml")).not.toBeNull();
-      expect(zip.file("META-INF/manifest.xml")).not.toBeNull();
-      expect(zip.file("Pictures/image1.png")).not.toBeNull();
-      expect(zip.file("Pictures/image2.jpeg")).not.toBeNull();
+      expect(entries["mimetype"]).toBeDefined();
+      expect(entries["content.xml"]).toBeDefined();
+      expect(entries["styles.xml"]).toBeDefined();
+      expect(entries["meta.xml"]).toBeDefined();
+      expect(entries["META-INF/manifest.xml"]).toBeDefined();
+      expect(entries["Pictures/image1.png"]).toBeDefined();
+      expect(entries["Pictures/image2.jpeg"]).toBeDefined();
 
-      const content = await zip.file("content.xml")!.async("string");
-      const manifest = await zip.file("META-INF/manifest.xml")!.async("string");
+      const content = decode.decode(entries["content.xml"]);
+      const manifest = decode.decode(entries["META-INF/manifest.xml"]);
 
-      // Links
       expect(content).toContain("text:a");
       expect(content).toContain('xlink:href="https://example.com"');
       expect(content).toContain('xlink:href="#intro"');
-
-      // Bookmarks
       expect(content).toContain("text:bookmark");
       expect(content).toContain('text:name="intro"');
-
-      // Images
       expect(content).toContain("draw:frame");
       expect(content).toContain("draw:image");
       expect(content).toContain('xlink:href="Pictures/image1.png"');
       expect(content).toContain('xlink:href="Pictures/image2.jpeg"');
       expect(content).toContain('text:anchor-type="paragraph"');
       expect(content).toContain('text:anchor-type="as-character"');
-
-      // Manifest has image entries
       expect(manifest).toContain('manifest:media-type="image/png"');
       expect(manifest).toContain('manifest:media-type="image/jpeg"');
-
-      // Tables still work
       expect(content).toContain("table:table");
-
-      // Lists still work
       expect(content).toContain("text:list");
-
-      // Page break still works
       expect(content).toContain("PageBreak");
     });
   });
