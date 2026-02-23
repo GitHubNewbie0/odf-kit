@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>odf-kit — Generate ODF Documents in TypeScript</title>
-  <meta name="description" content="Open-source TypeScript library for generating ODF text documents (.odt). Tables, formatting, images, lists, page layout. Single dependency. Apache 2.0 licensed.">
-  <meta name="keywords" content="ODF, OpenDocument, TypeScript, JavaScript, Node.js, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package">
+  <title>odf-kit — Generate ODF Documents in JavaScript and TypeScript | Create .odt Files in Node.js</title>
+  <meta name="description" content="Generate OpenDocument Format (.odt) files programmatically in JavaScript and TypeScript. Create reports, invoices, contracts, and letters with tables, formatting, images, and page layout. The modern simple-odf alternative for Node.js. Apache 2.0 open source.">
+  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, open standards">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/">
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="odf-kit — Generate ODF Documents in TypeScript">
-  <meta property="og:description" content="Open-source TypeScript library for generating ODF text documents. Tables, formatting, images, lists, page layout. Single dependency.">
+  <meta property="og:title" content="odf-kit — Generate ODF Documents in JavaScript and TypeScript">
+  <meta property="og:description" content="Create .odt files programmatically in Node.js. Reports, invoices, contracts with tables, formatting, images, page layout. The modern simple-odf replacement. Open source.">
   <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/">
   <meta property="og:site_name" content="odf-kit">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="odf-kit — Generate ODF Documents in TypeScript">
-  <meta name="twitter:description" content="Open-source TypeScript library for generating ODF text documents. Tables, formatting, images, lists, page layout.">
+  <meta name="twitter:title" content="odf-kit — Generate ODF Documents in JavaScript and TypeScript">
+  <meta name="twitter:description" content="Create .odt files in Node.js. Reports, invoices, contracts with tables, formatting, images, page layout. Open source simple-odf alternative.">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -28,17 +28,52 @@
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     "name": "odf-kit",
-    "description": "TypeScript library for generating ODF text documents (.odt files) with tables, formatting, images, lists, and page layout",
+    "description": "JavaScript and TypeScript library for generating OpenDocument Format text documents (.odt files) with tables, text formatting, images, lists, hyperlinks, and page layout. Used for automated report generation, invoice creation, contract templates, and document automation in Node.js.",
     "codeRepository": "https://github.com/GitHubNewbie0/odf-kit",
-    "programmingLanguage": "TypeScript",
+    "programmingLanguage": ["TypeScript", "JavaScript"],
     "license": "https://www.apache.org/licenses/LICENSE-2.0",
     "runtimePlatform": "Node.js",
+    "keywords": "ODF, OpenDocument Format, document generation, .odt, LibreOffice, report generation, invoice generation",
     "targetProduct": {
       "@type": "SoftwareApplication",
       "name": "odf-kit",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Cross-platform"
     }
+  }
+  </script>
+
+  <!-- FAQ Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I generate an ODF document in JavaScript or Node.js?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install odf-kit with npm install odf-kit, then use the OdtDocument class to create .odt files programmatically. odf-kit supports text formatting, tables, images, lists, hyperlinks, bookmarks, and page layout. Generated files open in LibreOffice, Google Docs, and any ODF-compliant application."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a maintained alternative to simple-odf?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit is a modern TypeScript library that replaces the abandoned simple-odf package. Unlike simple-odf, odf-kit generates proper ZIP-packaged .odt files (not flat XML), supports tables, images, lists, hyperlinks, page layout, and is actively maintained."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I create ODF documents for government or public sector use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit generates ODF 1.2+ compliant documents per ISO/IEC 26300, the international standard mandated by many governments, the EU, and public sector organizations. Documents open in LibreOffice and other open-source office suites."
+        }
+      }
+    ]
   }
   </script>
 
@@ -120,7 +155,7 @@
     }
 
     .hero h1 {
-      font-size: 3rem;
+      font-size: 2.8rem;
       font-weight: 700;
       letter-spacing: -0.03em;
       line-height: 1.1;
@@ -133,9 +168,9 @@
     }
 
     .hero-tagline {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       color: var(--text-secondary);
-      max-width: 580px;
+      max-width: 620px;
       margin: 0 auto 2rem;
       line-height: 1.6;
     }
@@ -204,12 +239,7 @@
       user-select: none;
     }
 
-    /* ─── FEATURES ─── */
-    .features {
-      padding: 4rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    /* ─── SECTIONS ─── */
     .section-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.75rem;
@@ -229,8 +259,63 @@
 
     .section-desc {
       color: var(--text-secondary);
-      max-width: 540px;
+      max-width: 600px;
       margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* ─── USE CASES ─── */
+    .usecases {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .usecase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: box-shadow 0.15s ease;
+    }
+
+    .usecase-card:hover {
+      box-shadow: var(--shadow);
+    }
+
+    .usecase-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .usecase-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .usecase-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ─── FEATURES ─── */
+    .features {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
     }
 
     .feature-grid {
@@ -334,6 +419,39 @@
       line-height: 1.6;
     }
 
+    /* ─── COMPARISON ─── */
+    .comparison {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .comparison-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+    }
+
+    .comparison-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .comparison-table tr td:first-child {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .check { color: #16a34a; }
+    .cross { color: #dc2626; }
+
     /* ─── STATS BAR ─── */
     .stats {
       padding: 3rem 0;
@@ -358,6 +476,38 @@
       font-size: 0.82rem;
       color: var(--text-secondary);
       margin-top: 0.15rem;
+    }
+
+    /* ─── FAQ ─── */
+    .faq {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item {
+      margin-bottom: 2rem;
+    }
+
+    .faq-item h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .faq-item p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    .faq-item p a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .faq-item p a:hover {
+      text-decoration: underline;
     }
 
     /* ─── CTA ─── */
@@ -405,22 +555,16 @@
       .hero h1 { font-size: 2rem; }
       .hero-tagline { font-size: 1.05rem; }
       .feature-grid { grid-template-columns: 1fr; }
+      .usecase-grid { grid-template-columns: 1fr; }
       .why-grid { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
       .code-block pre { font-size: 0.75rem; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.5rem; }
     }
   </style>
 
-  <!-- 
-    ┌──────────────────────────────────────────────┐
-    │  GOATCOUNTER ANALYTICS                       │
-    │                                              │
-    │  1. Sign up free at https://goatcounter.com  │
-    │  2. Choose a code (e.g. "odf-kit")           │
-    │  3. Replace YOUR-CODE below with your code   │
-    │  4. View stats at YOUR-CODE.goatcounter.com  │
-    └──────────────────────────────────────────────┘
-  -->
+  <!-- GoatCounter Analytics -->
   <script data-goatcounter="https://odf-kit.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -429,11 +573,11 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.1.0 · Apache 2.0 · TypeScript</div>
-      <h1>Generate ODF documents<br>with <span>odf-kit</span></h1>
+      <div class="hero-badge">v0.1.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <h1>Generate OpenDocument files<br>in Node.js with <span>odf-kit</span></h1>
       <p class="hero-tagline">
-        An open-source TypeScript library for creating .odt files programmatically.
-        Tables, formatting, images, lists, page layout — in a clean API with a single dependency.
+        Create .odt documents programmatically in JavaScript and TypeScript.
+        Generate reports, invoices, letters, and contracts with tables, formatting, images, and page layout — from your server or build pipeline.
       </p>
       <div class="hero-actions">
         <a href="https://github.com/GitHubNewbie0/odf-kit" class="btn btn-primary" rel="noopener">
@@ -449,12 +593,86 @@
     </div>
   </section>
 
+  <!-- ═══ USE CASES ═══ -->
+  <section class="usecases" id="use-cases">
+    <div class="container">
+      <div class="section-label">Use cases</div>
+      <h2 class="section-title">Who generates ODF documents from code?</h2>
+      <p class="section-desc">Any Node.js application that needs to create formatted documents as files — not PDFs, not proprietary formats — but the open standard that LibreOffice, governments, and schools actually use.</p>
+      <div class="usecase-grid">
+        <div class="usecase-card">
+          <div class="usecase-tag">Government &amp; Public Sector</div>
+          <h3>Compliance document generation</h3>
+          <p>Many governments mandate OpenDocument Format (ODF) per ISO/IEC 26300. Generate permits, notices, tax documents, and citizen correspondence in the required open standard format.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">SaaS &amp; Web Apps</div>
+          <h3>Report and invoice export</h3>
+          <p>Add "Export as .odt" to your web application. Generate invoices, financial reports, project summaries, and data exports as formatted OpenDocument files your users can edit in LibreOffice or Word.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Nonprofits &amp; Education</div>
+          <h3>Automated letters and templates</h3>
+          <p>Generate grant reports, case documents, donor letters, transcripts, and certificates. Organizations using LibreOffice get native .odt files instead of .docx they have to convert.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Legal &amp; HR</div>
+          <h3>Contract and document assembly</h3>
+          <p>Assemble contracts, offer letters, NDAs, and compliance documents from templates and data. Produce vendor-independent files in the ISO document standard.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">DevOps &amp; CI/CD</div>
+          <h3>Build pipeline document generation</h3>
+          <p>Generate changelogs, release notes, test reports, and documentation as .odt files in your build pipeline. No desktop software required — odf-kit runs anywhere Node.js runs.</p>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Civic Tech</div>
+          <h3>Community organization tools</h3>
+          <p>Build tools for food banks, legal aid, refugee services, and community groups. Generate case files, intake forms, and service records in a format that works with free office software.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CODE EXAMPLE ═══ -->
+  <section class="code-section" id="example">
+    <div class="container">
+      <div class="section-label">Quick start</div>
+      <h2 class="section-title">Create an .odt file in JavaScript — simple things stay simple</h2>
+      <p class="section-desc">Plain text is a one-liner. Formatted content uses a builder callback. Works in JavaScript or TypeScript — autocomplete guides you through the API.</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Quarterly Report"</span> });
+doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Q4 Results"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Revenue exceeded expectations across all regions."</span>);
+
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Region"</span>,  <span class="str">"Revenue"</span>,   <span class="str">"Growth"</span>],
+  [<span class="str">"North"</span>,   <span class="str">"$2.1M"</span>,     <span class="str">"+12%"</span>],
+  [<span class="str">"South"</span>,   <span class="str">"$1.8M"</span>,     <span class="str">"+8%"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span class="kw">=></span> {
+  p.<span class="fn">addText</span>(<span class="str">"Status: "</span>);
+  p.<span class="fn">addText</span>(<span class="str">"Approved"</span>, { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">color</span>: <span class="str">"green"</span> });
+});
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="cmt">// → Uint8Array — valid .odt, opens in LibreOffice</span></pre>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ FEATURES ═══ -->
   <section class="features" id="features">
     <div class="container">
       <div class="section-label">Features</div>
-      <h2 class="section-title">Everything you need for .odt files</h2>
-      <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2.</p>
+      <h2 class="section-title">Everything you need to generate .odt files</h2>
+      <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2. Works in any JavaScript or TypeScript project on Node.js.</p>
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">✏️</div>
@@ -483,42 +701,9 @@
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔗</div>
-          <h3>Links &amp; Bookmarks</h3>
+          <h3>Hyperlinks &amp; Bookmarks</h3>
           <p>External hyperlinks, internal bookmark links. Formatted link text. Named anchor points.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══ CODE EXAMPLE ═══ -->
-  <section class="code-section" id="example">
-    <div class="container">
-      <div class="section-label">Quick start</div>
-      <h2 class="section-title">Simple things stay simple</h2>
-      <p class="section-desc">Plain text is a one-liner. Formatted content uses a builder callback. TypeScript autocomplete guides you.</p>
-      <div class="code-block">
-        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
-
-<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
-doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Quarterly Report"</span> });
-doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
-
-doc.<span class="fn">addHeading</span>(<span class="str">"Q4 Results"</span>, <span class="num">1</span>);
-doc.<span class="fn">addParagraph</span>(<span class="str">"Revenue exceeded expectations across all regions."</span>);
-
-doc.<span class="fn">addTable</span>([
-  [<span class="str">"Region"</span>,  <span class="str">"Revenue"</span>,   <span class="str">"Growth"</span>],
-  [<span class="str">"North"</span>,   <span class="str">"$2.1M"</span>,     <span class="str">"+12%"</span>],
-  [<span class="str">"South"</span>,   <span class="str">"$1.8M"</span>,     <span class="str">"+8%"</span>],
-], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
-
-doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span class="kw">=></span> {
-  p.<span class="fn">addText</span>(<span class="str">"Status: "</span>);
-  p.<span class="fn">addText</span>(<span class="str">"Approved"</span>, { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">color</span>: <span class="str">"green"</span> });
-});
-
-<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
-<span class="cmt">// → Uint8Array — valid .odt, opens in LibreOffice</span></pre>
       </div>
     </div>
   </section>
@@ -527,34 +712,94 @@ doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span clas
   <section class="why-section" id="why">
     <div class="container">
       <div class="section-label">Why odf-kit</div>
-      <h2 class="section-title">Built to fill a real gap</h2>
-      <p class="section-desc">The JavaScript ecosystem had no maintained library for ODF document generation. odf-kit changes that.</p>
+      <h2 class="section-title">The JavaScript ODF library that was missing</h2>
+      <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>TypeScript-first</h3>
-          <p>Full type definitions ship with the package. Your editor shows every method, every option, every valid value — as you type.</p>
+          <h3>JavaScript and TypeScript</h3>
+          <p>Works in any Node.js project. Full TypeScript type definitions ship with the package — your editor shows every method, option, and valid value as you type.</p>
         </div>
         <div class="why-item">
           <h3>Single dependency</h3>
-          <p>Only jszip at runtime. No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
+          <p>Only jszip at runtime. No XML parsers, no heavy frameworks. Lightweight and audit-friendly for enterprise and government projects.</p>
         </div>
         <div class="why-item">
-          <h3>ODF 1.2+ compliant</h3>
-          <p>Generates proper ZIP-packaged .odt files per ISO/IEC 26300. Validated against LibreOffice 24.2.</p>
+          <h3>ODF 1.2+ and ISO/IEC 26300</h3>
+          <p>Generates proper ZIP-packaged .odt files per the ODF international standard. Opens in LibreOffice, Google Docs, and any compliant application.</p>
         </div>
         <div class="why-item">
-          <h3>Open standards matter</h3>
-          <p>ODF is the ISO standard for documents. Used by governments, schools, and nonprofits worldwide who choose vendor independence.</p>
+          <h3>Open standards, open source</h3>
+          <p>ODF is the ISO standard used by the EU, governments, schools, and nonprofits worldwide. odf-kit is Apache 2.0 — use it anywhere, commercial or not.</p>
         </div>
         <div class="why-item">
           <h3>Developer-friendly API</h3>
-          <p>Simple things are one-liners. Complex output uses builder callbacks. Both <code>bold: true</code> and <code>fontWeight: "bold"</code> work.</p>
+          <p>Simple things are one-liners. Complex output uses builder callbacks. Both <code>bold: true</code> and <code>fontWeight: "bold"</code> work. Flexible and forgiving.</p>
         </div>
         <div class="why-item">
-          <h3>No prior art</h3>
-          <p>The only JS ODF library (simple-odf) was abandoned in 2021. It had no table support and only generated flat XML, not proper .odt files.</p>
+          <h3>Replaces simple-odf</h3>
+          <p>The only prior JS library (simple-odf) was abandoned in 2021. It had no table support and only generated flat XML. odf-kit produces proper .odt files with full formatting.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══ COMPARISON ═══ -->
+  <section class="comparison" id="comparison">
+    <div class="container">
+      <div class="section-label">Comparison</div>
+      <h2 class="section-title">odf-kit vs. simple-odf</h2>
+      <p class="section-desc">If you've been searching for a simple-odf alternative or replacement, here's what odf-kit does differently.</p>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>odf-kit</th>
+            <th>simple-odf</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Maintained</td>
+            <td><span class="check">✓</span> Active (2026)</td>
+            <td><span class="cross">✗</span> Abandoned (2021)</td>
+          </tr>
+          <tr>
+            <td>Output format</td>
+            <td><span class="check">✓</span> Proper .odt ZIP packages</td>
+            <td><span class="cross">✗</span> Flat XML only (.fodt)</td>
+          </tr>
+          <tr>
+            <td>Tables</td>
+            <td><span class="check">✓</span> Full support with merging</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
+            <td>Images</td>
+            <td><span class="check">✓</span> Embedded in ZIP</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
+            <td>Lists</td>
+            <td><span class="check">✓</span> Bullet &amp; numbered, nested</td>
+            <td>Partial</td>
+          </tr>
+          <tr>
+            <td>Page layout</td>
+            <td><span class="check">✓</span> Margins, headers, footers</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
+            <td>Hyperlinks &amp; bookmarks</td>
+            <td><span class="check">✓</span> External and internal</td>
+            <td>Partial</td>
+          </tr>
+          <tr>
+            <td>TypeScript</td>
+            <td><span class="check">✓</span> Written in TypeScript</td>
+            <td><span class="check">✓</span> Written in TypeScript</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -582,11 +827,39 @@ doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span clas
     </div>
   </section>
 
+  <!-- ═══ FAQ ═══ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Common questions</h2>
+      <div class="faq-item">
+        <h3>How do I generate an ODF document in JavaScript or Node.js?</h3>
+        <p>Install odf-kit with <code>npm install odf-kit</code>, import the <code>OdtDocument</code> class, add your content with methods like <code>addParagraph</code>, <code>addTable</code>, and <code>addImage</code>, then call <code>save()</code> to get a <code>Uint8Array</code> of a valid .odt file. Write it to disk with <code>fs.writeFile</code> or send it as an HTTP response. See the <a href="https://github.com/GitHubNewbie0/odf-kit#readme">full documentation</a>.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is odf-kit a replacement for simple-odf?</h3>
+        <p>Yes. simple-odf was abandoned in 2021 and only produced flat XML files (.fodt), not proper .odt ZIP packages. It had no support for tables, images, page layout, or bookmarks. odf-kit is a modern, actively maintained alternative that generates compliant .odt files with comprehensive formatting support.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does odf-kit work for government ODF compliance requirements?</h3>
+        <p>odf-kit generates ODF 1.2+ documents per ISO/IEC 26300, the international standard mandated by the European Union, many national governments, and public sector organizations. The output opens in LibreOffice and any ODF-compliant application.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I use odf-kit to create LibreOffice documents from my web application?</h3>
+        <p>Yes. odf-kit runs on any Node.js server. Your backend can generate .odt files on the fly and serve them as downloads. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What's the difference between .odt and .docx?</h3>
+        <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. .docx is Microsoft's Office Open XML format. ODF is required by many governments and organizations that need vendor independence. odf-kit generates .odt files; if you need .docx, look at the <a href="https://www.npmjs.com/package/docx">docx</a> package.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ CTA ═══ -->
   <section class="cta">
     <div class="container">
-      <h2>Start generating ODF documents</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute.</p>
+      <h2>Start generating ODF documents in Node.js</h2>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works with JavaScript and TypeScript.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
@@ -605,7 +878,7 @@ doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span clas
         <a href="https://www.npmjs.com/package/odf-kit">npm</a> · 
         <a href="https://github.com/GitHubNewbie0/odf-kit/blob/main/CHANGELOG.md">Changelog</a>
       </p>
-      <p style="margin-top: 0.4rem;">Built for developers at nonprofits, governments, and community organizations.</p>
+      <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
     </div>
   </footer>
 
