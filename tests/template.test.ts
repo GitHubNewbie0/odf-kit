@@ -23,7 +23,7 @@ describe("pipeline — heal then replace", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(pipeline(xml, { name: "Alice" })).toBe(
-      '<text:p><text:span text:style-name="T1">Alice</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">Alice</text:span></text:p>',
     );
   });
 
@@ -41,12 +41,12 @@ describe("pipeline — heal then replace", () => {
       "</text:p>";
     expect(pipeline(xml, { name: "Alice", orderNumber: 1042 })).toBe(
       '<text:p text:style-name="Standard">' +
-      "Dear " +
-      '<text:span text:style-name="T1">Alice</text:span>' +
-      ", your order #" +
-      '<text:span text:style-name="T3">1042</text:span>' +
-      " is ready." +
-      "</text:p>"
+        "Dear " +
+        '<text:span text:style-name="T1">Alice</text:span>' +
+        ", your order #" +
+        '<text:span text:style-name="T3">1042</text:span>' +
+        " is ready." +
+        "</text:p>",
     );
   });
 
@@ -60,15 +60,17 @@ describe("pipeline — heal then replace", () => {
       "</text:p>" +
       '<text:p><text:span text:style-name="T1">{/</text:span>' +
       '<text:span text:style-name="T1">items}</text:span></text:p>';
-    expect(pipeline(xml, {
-      items: [{ product: "Widget" }, { product: "Gadget" }],
-    })).toBe(
+    expect(
+      pipeline(xml, {
+        items: [{ product: "Widget" }, { product: "Gadget" }],
+      }),
+    ).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T2">Widget</text:span>' +
-      "</text:p>" +
-      "<text:p>" +
-      '<text:span text:style-name="T2">Gadget</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T2">Widget</text:span>' +
+        "</text:p>" +
+        "<text:p>" +
+        '<text:span text:style-name="T2">Gadget</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -81,7 +83,7 @@ describe("pipeline — heal then replace", () => {
       '<text:span text:style-name="T1">{/</text:span>' +
       '<text:span text:style-name="T1">showNote}</text:span>';
     expect(pipeline(xml, { showNote: true, message: "Important" })).toBe(
-      "<text:p>Always visible</text:p><text:p>Note: Important</text:p>"
+      "<text:p>Always visible</text:p><text:p>Note: Important</text:p>",
     );
   });
 
@@ -93,9 +95,7 @@ describe("pipeline — heal then replace", () => {
       "<text:p>Hidden note</text:p>" +
       '<text:span text:style-name="T1">{/</text:span>' +
       '<text:span text:style-name="T1">showNote}</text:span>';
-    expect(pipeline(xml, { showNote: false })).toBe(
-      "<text:p>Always visible</text:p>"
-    );
+    expect(pipeline(xml, { showNote: false })).toBe("<text:p>Always visible</text:p>");
   });
 
   test("XML escaping works through pipeline", () => {
@@ -105,7 +105,7 @@ describe("pipeline — heal then replace", () => {
       '<text:span text:style-name="T1">company}</text:span>' +
       "</text:p>";
     expect(pipeline(xml, { company: "Smith & Jones <LLC>" })).toBe(
-      '<text:p><text:span text:style-name="T1">Smith &amp; Jones &lt;LLC&gt;</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">Smith &amp; Jones &lt;LLC&gt;</text:span></text:p>',
     );
   });
 
@@ -116,7 +116,7 @@ describe("pipeline — heal then replace", () => {
       '<text:span text:style-name="T2">.name}</text:span>' +
       "</text:p>";
     expect(pipeline(xml, { user: { name: "Alice" } })).toBe(
-      '<text:p><text:span text:style-name="T1">Alice</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">Alice</text:span></text:p>',
     );
   });
 });
@@ -164,42 +164,44 @@ describe("pipeline — realistic document", () => {
       '<text:p text:style-name="Standard">Notes: {notes}</text:p>' +
       "{/showNotes}";
 
-    expect(pipeline(xml, {
-      date: "2026-02-23",
-      customer: "Acme Corp",
-      items: [
-        { product: "Widget", qty: 5 },
-        { product: "Gadget", qty: 3 },
-      ],
-      total: 1700,
-      showNotes: true,
-      notes: "Net 30",
-    })).toBe(
+    expect(
+      pipeline(xml, {
+        date: "2026-02-23",
+        customer: "Acme Corp",
+        items: [
+          { product: "Widget", qty: 5 },
+          { product: "Gadget", qty: 3 },
+        ],
+        total: 1700,
+        showNotes: true,
+        notes: "Net 30",
+      }),
+    ).toBe(
       '<text:p text:style-name="Standard">' +
-      "Invoice Date: " +
-      '<text:span text:style-name="T1">2026-02-23</text:span>' +
-      "</text:p>" +
-      '<text:p text:style-name="Standard">Customer: Acme Corp</text:p>' +
-      "<table:table>" +
-      "<table:table-row>" +
-      "<table:table-cell><text:p>Item</text:p></table:table-cell>" +
-      "<table:table-cell><text:p>Qty</text:p></table:table-cell>" +
-      "</table:table-row>" +
-      "<table:table-row>" +
-      "<table:table-cell><text:p>Widget</text:p></table:table-cell>" +
-      "<table:table-cell><text:p>" +
-      '<text:span text:style-name="T3">5</text:span>' +
-      "</text:p></table:table-cell>" +
-      "</table:table-row>" +
-      "<table:table-row>" +
-      "<table:table-cell><text:p>Gadget</text:p></table:table-cell>" +
-      "<table:table-cell><text:p>" +
-      '<text:span text:style-name="T3">3</text:span>' +
-      "</text:p></table:table-cell>" +
-      "</table:table-row>" +
-      "</table:table>" +
-      '<text:p text:style-name="Standard">Total: $1700</text:p>' +
-      '<text:p text:style-name="Standard">Notes: Net 30</text:p>'
+        "Invoice Date: " +
+        '<text:span text:style-name="T1">2026-02-23</text:span>' +
+        "</text:p>" +
+        '<text:p text:style-name="Standard">Customer: Acme Corp</text:p>' +
+        "<table:table>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Item</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>Qty</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Widget</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>" +
+        '<text:span text:style-name="T3">5</text:span>' +
+        "</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Gadget</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>" +
+        '<text:span text:style-name="T3">3</text:span>' +
+        "</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "</table:table>" +
+        '<text:p text:style-name="Standard">Total: $1700</text:p>' +
+        '<text:p text:style-name="Standard">Notes: Net 30</text:p>',
     );
   });
 
@@ -230,34 +232,34 @@ describe("pipeline — realistic document", () => {
       "{/departments}" +
       "<text:p>Regards, {sender}</text:p>";
 
-    expect(pipeline(xml, {
-      recipientName: "Alice",
-      sender: "The Team",
-      departments: [
-        {
-          dept: "Engineering",
-          members: [
-            { memberName: "Bob", isLead: true },
-            { memberName: "Carol", isLead: false },
-          ],
-        },
-        {
-          dept: "Design",
-          members: [
-            { memberName: "Dave", isLead: false },
-          ],
-        },
-      ],
-    })).toBe(
+    expect(
+      pipeline(xml, {
+        recipientName: "Alice",
+        sender: "The Team",
+        departments: [
+          {
+            dept: "Engineering",
+            members: [
+              { memberName: "Bob", isLead: true },
+              { memberName: "Carol", isLead: false },
+            ],
+          },
+          {
+            dept: "Design",
+            members: [{ memberName: "Dave", isLead: false }],
+          },
+        ],
+      }),
+    ).toBe(
       "<text:p>Dear " +
-      '<text:span text:style-name="T1">Alice</text:span>' +
-      ",</text:p>" +
-      "<text:p>Department: Engineering</text:p>" +
-      "<text:p>  - Bob (Lead)</text:p>" +
-      "<text:p>  - Carol</text:p>" +
-      "<text:p>Department: Design</text:p>" +
-      "<text:p>  - Dave</text:p>" +
-      "<text:p>Regards, The Team</text:p>"
+        '<text:span text:style-name="T1">Alice</text:span>' +
+        ",</text:p>" +
+        "<text:p>Department: Engineering</text:p>" +
+        "<text:p>  - Bob (Lead)</text:p>" +
+        "<text:p>  - Carol</text:p>" +
+        "<text:p>Department: Design</text:p>" +
+        "<text:p>  - Dave</text:p>" +
+        "<text:p>Regards, The Team</text:p>",
     );
   });
 });
@@ -285,12 +287,12 @@ describe("fillTemplate — integration", () => {
 
     const contentXml = fflate.strToU8(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
-      '<office:body><office:text>' +
-      '<text:p text:style-name="Standard">Hello {name}!</text:p>' +
-      "</office:text></office:body>" +
-      "</office:document-content>"
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
+        "<office:body><office:text>" +
+        '<text:p text:style-name="Standard">Hello {name}!</text:p>' +
+        "</office:text></office:body>" +
+        "</office:document-content>",
     );
 
     const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
@@ -313,14 +315,14 @@ describe("fillTemplate — integration", () => {
 
     const contentXml = fflate.strToU8(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
-      '<office:body><office:text>' +
-      "<text:p>Invoice for {customer}</text:p>" +
-      "{#items}<text:p>{product}: {qty}</text:p>{/items}" +
-      "{#showTotal}<text:p>Total: {total}</text:p>{/showTotal}" +
-      "</office:text></office:body>" +
-      "</office:document-content>"
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
+        "<office:body><office:text>" +
+        "<text:p>Invoice for {customer}</text:p>" +
+        "{#items}<text:p>{product}: {qty}</text:p>{/items}" +
+        "{#showTotal}<text:p>Total: {total}</text:p>{/showTotal}" +
+        "</office:text></office:body>" +
+        "</office:document-content>",
     );
 
     const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
@@ -356,26 +358,26 @@ describe("fillTemplate — integration", () => {
 
     const contentXml = fflate.strToU8(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
-      '<office:body><office:text>' +
-      "<text:p>Body content</text:p>" +
-      "</office:text></office:body>" +
-      "</office:document-content>"
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
+        "<office:body><office:text>" +
+        "<text:p>Body content</text:p>" +
+        "</office:text></office:body>" +
+        "</office:document-content>",
     );
 
     const stylesXml = fflate.strToU8(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" ' +
-      'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0">' +
-      "<office:master-styles>" +
-      '<style:master-page style:name="Standard">' +
-      "<style:header><text:p>{companyName} — Confidential</text:p></style:header>" +
-      "<style:footer><text:p>Page {pageLabel}</text:p></style:footer>" +
-      "</style:master-page>" +
-      "</office:master-styles>" +
-      "</office:document-styles>"
+        '<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" ' +
+        'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0">' +
+        "<office:master-styles>" +
+        '<style:master-page style:name="Standard">' +
+        "<style:header><text:p>{companyName} — Confidential</text:p></style:header>" +
+        "<style:footer><text:p>Page {pageLabel}</text:p></style:footer>" +
+        "</style:master-page>" +
+        "</office:master-styles>" +
+        "</office:document-styles>",
     );
 
     const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
@@ -405,17 +407,17 @@ describe("fillTemplate — integration", () => {
 
     const contentXml = fflate.strToU8(
       '<?xml version="1.0" encoding="UTF-8"?>' +
-      '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
-      '<office:body><office:text>' +
-      "<text:p>{name}</text:p>" +
-      "</office:text></office:body>" +
-      "</office:document-content>"
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
+        "<office:body><office:text>" +
+        "<text:p>{name}</text:p>" +
+        "</office:text></office:body>" +
+        "</office:document-content>",
     );
 
     const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
     const manifest = fflate.strToU8(
-      '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0"/>'
+      '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0"/>',
     );
     const fakeImage = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
 

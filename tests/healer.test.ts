@@ -19,9 +19,7 @@ describe("tokenize", () => {
   });
 
   test("handles text-only input", () => {
-    expect(tokenize("Hello world")).toEqual([
-      { type: "text", content: "Hello world" },
-    ]);
+    expect(tokenize("Hello world")).toEqual([{ type: "text", content: "Hello world" }]);
   });
 
   test("handles tags-only input", () => {
@@ -94,7 +92,7 @@ describe("healPlaceholders — two-span fragmentation", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
@@ -105,7 +103,7 @@ describe("healPlaceholders — two-span fragmentation", () => {
       '<text:span text:style-name="T2">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
@@ -116,7 +114,7 @@ describe("healPlaceholders — two-span fragmentation", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">Hello {name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">Hello {name}</text:span></text:p>',
     );
   });
 
@@ -128,9 +126,9 @@ describe("healPlaceholders — two-span fragmentation", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{name}</text:span>' +
-      '<text:span text:style-name="T1"> world</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{name}</text:span>' +
+        '<text:span text:style-name="T1"> world</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -142,9 +140,9 @@ describe("healPlaceholders — two-span fragmentation", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">Hello {name}</text:span>' +
-      '<text:span text:style-name="T2"> World</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">Hello {name}</text:span>' +
+        '<text:span text:style-name="T2"> World</text:span>' +
+        "</text:p>",
     );
   });
 });
@@ -162,7 +160,7 @@ describe("healPlaceholders — multi-span fragmentation", () => {
       '<text:span text:style-name="T1">me}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
@@ -177,7 +175,7 @@ describe("healPlaceholders — multi-span fragmentation", () => {
       '<text:span text:style-name="T1">}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
@@ -189,7 +187,7 @@ describe("healPlaceholders — multi-span fragmentation", () => {
       '<text:span text:style-name="T3">me}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 });
@@ -201,31 +199,21 @@ describe("healPlaceholders — multi-span fragmentation", () => {
 describe("healPlaceholders — bare text and span mixing", () => {
   test("heals placeholder starting in bare text, ending in span", () => {
     const xml =
-      "<text:p>" +
-      "{" +
-      '<text:span text:style-name="T1">name}</text:span>' +
-      "</text:p>";
+      "<text:p>" + "{" + '<text:span text:style-name="T1">name}</text:span>' + "</text:p>";
     expect(healPlaceholders(xml)).toBe("<text:p>{name}</text:p>");
   });
 
   test("heals placeholder starting in span, ending in bare text", () => {
     const xml =
-      "<text:p>" +
-      '<text:span text:style-name="T1">{</text:span>' +
-      "name}" +
-      "</text:p>";
+      "<text:p>" + '<text:span text:style-name="T1">{</text:span>' + "name}" + "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
   test("heals placeholder from bare text through span to bare text", () => {
     const xml =
-      "<text:p>" +
-      "{" +
-      '<text:span text:style-name="T1">na</text:span>' +
-      "me}" +
-      "</text:p>";
+      "<text:p>" + "{" + '<text:span text:style-name="T1">na</text:span>' + "me}" + "</text:p>";
     expect(healPlaceholders(xml)).toBe("<text:p>{name}</text:p>");
   });
 
@@ -256,10 +244,10 @@ describe("healPlaceholders — multiple placeholders", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{firstName}</text:span>' +
-      " " +
-      '<text:span text:style-name="T1">{lastName}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{firstName}</text:span>' +
+        " " +
+        '<text:span text:style-name="T1">{lastName}</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -273,10 +261,10 @@ describe("healPlaceholders — multiple placeholders", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{intact}</text:span>' +
-      " and " +
-      '<text:span text:style-name="T1">{fragmented}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{intact}</text:span>' +
+        " and " +
+        '<text:span text:style-name="T1">{fragmented}</text:span>' +
+        "</text:p>",
     );
   });
 });
@@ -293,7 +281,7 @@ describe("healPlaceholders — loop and conditional tags", () => {
       '<text:span text:style-name="T1">items}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{#items}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{#items}</text:span></text:p>',
     );
   });
 
@@ -304,7 +292,7 @@ describe("healPlaceholders — loop and conditional tags", () => {
       '<text:span text:style-name="T1">items}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{/items}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{/items}</text:span></text:p>',
     );
   });
 
@@ -321,7 +309,7 @@ describe("healPlaceholders — loop and conditional tags", () => {
       '<text:span text:style-name="T1">}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{#items}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{#items}</text:span></text:p>',
     );
   });
 });
@@ -338,7 +326,7 @@ describe("healPlaceholders — dot notation", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{user.name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{user.name}</text:span></text:p>',
     );
   });
 
@@ -350,7 +338,7 @@ describe("healPlaceholders — dot notation", () => {
       '<text:span text:style-name="T3">city}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{company.address.city}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{company.address.city}</text:span></text:p>',
     );
   });
 });
@@ -382,7 +370,7 @@ describe("healPlaceholders — edge cases", () => {
       '<text:span text:style-name="T1">x}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{x}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{x}</text:span></text:p>',
     );
   });
 
@@ -394,7 +382,7 @@ describe("healPlaceholders — edge cases", () => {
       '<text:span text:style-name="T1">}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{x}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{x}</text:span></text:p>',
     );
   });
 
@@ -405,7 +393,7 @@ describe("healPlaceholders — edge cases", () => {
       '<text:span text:style-name="T1">private}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{_private}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{_private}</text:span></text:p>',
     );
   });
 
@@ -416,7 +404,7 @@ describe("healPlaceholders — edge cases", () => {
       '<text:span text:style-name="T1">2}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{item2}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{item2}</text:span></text:p>',
     );
   });
 
@@ -446,10 +434,10 @@ describe("healPlaceholders — realistic ODF patterns", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       '<text:p text:style-name="Standard">' +
-      "Dear " +
-      '<text:span text:style-name="T1">{recipientName}</text:span>' +
-      "," +
-      "</text:p>"
+        "Dear " +
+        '<text:span text:style-name="T1">{recipientName}</text:span>' +
+        "," +
+        "</text:p>",
     );
   });
 
@@ -472,16 +460,16 @@ describe("healPlaceholders — realistic ODF patterns", () => {
 
     expect(healPlaceholders(xml)).toBe(
       '<text:p text:style-name="Standard">' +
-      '<text:span text:style-name="T1">{date}</text:span>' +
-      "</text:p>" +
-      '<text:p text:style-name="Standard">' +
-      "Dear {name}," +
-      "</text:p>" +
-      '<text:p text:style-name="Standard">' +
-      "Your order " +
-      '<text:span text:style-name="T2">{orderNumber}</text:span>' +
-      " has shipped." +
-      "</text:p>"
+        '<text:span text:style-name="T1">{date}</text:span>' +
+        "</text:p>" +
+        '<text:p text:style-name="Standard">' +
+        "Dear {name}," +
+        "</text:p>" +
+        '<text:p text:style-name="Standard">' +
+        "Your order " +
+        '<text:span text:style-name="T2">{orderNumber}</text:span>' +
+        " has shipped." +
+        "</text:p>",
     );
   });
 
@@ -502,15 +490,15 @@ describe("healPlaceholders — realistic ODF patterns", () => {
 
     expect(healPlaceholders(xml)).toBe(
       "<table:table-row><table:table-cell><text:p>" +
-      '<text:span text:style-name="T1">{#rows}</text:span>' +
-      "</text:p></table:table-cell></table:table-row>" +
-      "<table:table-row><table:table-cell><text:p>" +
-      '<text:span text:style-name="T1">{product}</text:span>' +
-      "</text:p></table:table-cell>" +
-      "<table:table-cell><text:p>{qty}</text:p></table:table-cell></table:table-row>" +
-      "<table:table-row><table:table-cell>" +
-      "<text:p>{/rows}</text:p>" +
-      "</table:table-cell></table:table-row>"
+        '<text:span text:style-name="T1">{#rows}</text:span>' +
+        "</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>" +
+        '<text:span text:style-name="T1">{product}</text:span>' +
+        "</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>{qty}</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell>" +
+        "<text:p>{/rows}</text:p>" +
+        "</table:table-cell></table:table-row>",
     );
   });
 });
@@ -529,9 +517,9 @@ describe("healPlaceholders — shared segment stress tests", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{first}</text:span>' +
-      '<text:span text:style-name="T2">{last}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{first}</text:span>' +
+        '<text:span text:style-name="T2">{last}</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -544,9 +532,9 @@ describe("healPlaceholders — shared segment stress tests", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{first}</text:span>' +
-      '<text:span text:style-name="T2"> and {last}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{first}</text:span>' +
+        '<text:span text:style-name="T2"> and {last}</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -564,12 +552,12 @@ describe("healPlaceholders — shared segment stress tests", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{a}</text:span>' +
-      " " +
-      '<text:span text:style-name="T1">{b}</text:span>' +
-      " " +
-      '<text:span text:style-name="T1">{c}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{a}</text:span>' +
+        " " +
+        '<text:span text:style-name="T1">{b}</text:span>' +
+        " " +
+        '<text:span text:style-name="T1">{c}</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -583,10 +571,10 @@ describe("healPlaceholders — shared segment stress tests", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{a}</text:span>' +
-      '<text:span text:style-name="T2">{b}</text:span>' +
-      '<text:span text:style-name="T3">{c}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{a}</text:span>' +
+        '<text:span text:style-name="T2">{b}</text:span>' +
+        '<text:span text:style-name="T3">{c}</text:span>' +
+        "</text:p>",
     );
   });
 });
@@ -603,7 +591,7 @@ describe("healPlaceholders — XML entities", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">Smith &amp; Co: {name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">Smith &amp; Co: {name}</text:span></text:p>',
     );
   });
 
@@ -617,10 +605,10 @@ describe("healPlaceholders — XML entities", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      "Value &lt; " +
-      '<text:span text:style-name="T1">{max}</text:span>' +
-      " &gt; min" +
-      "</text:p>"
+        "Value &lt; " +
+        '<text:span text:style-name="T1">{max}</text:span>' +
+        " &gt; min" +
+        "</text:p>",
     );
   });
 });
@@ -638,7 +626,7 @@ describe("healPlaceholders — ODF inline elements", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 
@@ -653,10 +641,10 @@ describe("healPlaceholders — ODF inline elements", () => {
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
       "<text:p>" +
-      '<text:span text:style-name="T1">{first}</text:span>' +
-      "<text:line-break/>" +
-      '<text:span text:style-name="T1">{second}</text:span>' +
-      "</text:p>"
+        '<text:span text:style-name="T1">{first}</text:span>' +
+        "<text:line-break/>" +
+        '<text:span text:style-name="T1">{second}</text:span>' +
+        "</text:p>",
     );
   });
 
@@ -668,7 +656,7 @@ describe("healPlaceholders — ODF inline elements", () => {
       '<text:span text:style-name="T1">name}</text:span>' +
       "</text:p>";
     expect(healPlaceholders(xml)).toBe(
-      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>'
+      '<text:p><text:span text:style-name="T1">{name}</text:span></text:p>',
     );
   });
 });

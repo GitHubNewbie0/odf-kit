@@ -36,10 +36,7 @@ import { replaceAll, type TemplateData } from "./replacer.js";
  * writeFileSync("invoice-filled.odt", result);
  * ```
  */
-export function fillTemplate(
-  templateBytes: Uint8Array,
-  data: TemplateData
-): Uint8Array {
+export function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array {
   // Unzip the ODF package
   const files = unzipSync(templateBytes);
 

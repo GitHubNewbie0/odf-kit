@@ -4,9 +4,7 @@ import { OdtDocument } from "../src/odt/document.js";
 const decode = new TextDecoder();
 
 /** Helper: generate an .odt, unzip it, and return the entries. */
-async function unpackOdt(
-  doc: OdtDocument,
-): Promise<Record<string, Uint8Array>> {
+async function unpackOdt(doc: OdtDocument): Promise<Record<string, Uint8Array>> {
   const bytes = await doc.save();
   return unzipSync(bytes);
 }
@@ -39,9 +37,7 @@ describe("OdtDocument", () => {
 
     it("should contain an uncompressed mimetype file as the first entry", () => {
       expect(entries["mimetype"]).toBeDefined();
-      expect(decode.decode(entries["mimetype"])).toBe(
-        "application/vnd.oasis.opendocument.text",
-      );
+      expect(decode.decode(entries["mimetype"])).toBe("application/vnd.oasis.opendocument.text");
     });
 
     it("should contain META-INF/manifest.xml", () => {
@@ -582,9 +578,7 @@ describe("OdtDocument", () => {
 
     it("should support method chaining with setPageLayout", () => {
       const doc = new OdtDocument();
-      const result = doc
-        .setPageLayout({ orientation: "landscape" })
-        .addParagraph("Test");
+      const result = doc.setPageLayout({ orientation: "landscape" }).addParagraph("Test");
       expect(result).toBe(doc);
     });
   });
@@ -1186,13 +1180,11 @@ describe("OdtDocument", () => {
   // ─── Phase 5: Images and Links ───────────────────────────────────────
 
   const TEST_PNG = new Uint8Array([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x01,
-    0x00, 0x00, 0x00, 0x01,
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
   ]);
 
   const TEST_JPEG = new Uint8Array([
-    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
-    0x01, 0x00, 0x00, 0x01,
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
   ]);
 
   async function getManifestXml(doc: OdtDocument): Promise<string> {
@@ -1466,12 +1458,8 @@ describe("OdtDocument", () => {
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain(
-        'xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"',
-      );
-      expect(content).toContain(
-        'xmlns:xlink="http://www.w3.org/1999/xlink"',
-      );
+      expect(content).toContain('xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"');
+      expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
     });
   });
 

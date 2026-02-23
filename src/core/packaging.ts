@@ -28,10 +28,7 @@ export interface PackageFile {
  * @param files - The XML and other files to include (excluding mimetype and manifest).
  * @returns A Uint8Array containing the complete ZIP package.
  */
-export async function assemblePackage(
-  mimeType: string,
-  files: PackageFile[],
-): Promise<Uint8Array> {
+export async function assemblePackage(mimeType: string, files: PackageFile[]): Promise<Uint8Array> {
   const encoder = new TextEncoder();
 
   // Build ZIP file map — object insertion order determines entry order in ZIP
@@ -42,26 +39,18 @@ export async function assemblePackage(
 
   // 2. Add content files (DEFLATED)
   for (const file of files) {
-    const data =
-      typeof file.content === "string"
-        ? encoder.encode(file.content)
-        : file.content;
+    const data = typeof file.content === "string" ? encoder.encode(file.content) : file.content;
     zipData[file.path] = [data, { level: 6 as const }];
   }
 
   // 3. Generate and add manifest (DEFLATED)
   const manifestEntries: ManifestEntry[] = files.map((f) => ({
     fullPath: f.path,
-    mediaType:
-      f.mediaType ??
-      (f.path.endsWith(".xml") ? "text/xml" : "application/octet-stream"),
+    mediaType: f.mediaType ?? (f.path.endsWith(".xml") ? "text/xml" : "application/octet-stream"),
   }));
 
   const manifestXml = generateManifest(mimeType, manifestEntries);
-  zipData["META-INF/manifest.xml"] = [
-    encoder.encode(manifestXml),
-    { level: 6 as const },
-  ];
+  zipData["META-INF/manifest.xml"] = [encoder.encode(manifestXml), { level: 6 as const }];
 
   return zipSync(zipData);
 }

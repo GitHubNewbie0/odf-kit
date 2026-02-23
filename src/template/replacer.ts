@@ -105,11 +105,7 @@ function findMatchingClose(xml: string, tag: string, searchFrom: number): number
  *
  * Applied uniformly to every section open and close marker.
  */
-function expandBoundary(
-  xml: string,
-  start: number,
-  end: number
-): { start: number; end: number } {
+function expandBoundary(xml: string, start: number, end: number): { start: number; end: number } {
   let s = start;
   let e = end;
 
