@@ -20,3 +20,5 @@ export type {
   ImageData,
 } from "./odt/index.js";
 export type { MetadataOptions } from "./core/index.js";
+export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
+export type { TemplateData } from "./template/index.js";

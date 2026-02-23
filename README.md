@@ -1,10 +1,12 @@
 # odf-kit
 
-Create OpenDocument Format files (.odt) in TypeScript/JavaScript. No templates, no LibreOffice dependency — just a clean API that produces spec-compliant ODF files.
+Create and fill OpenDocument Format files (.odt) in TypeScript/JavaScript. Build documents from scratch with a clean API, or fill existing templates with data. No LibreOffice dependency — just spec-compliant ODF files.
+
+**Two ways to generate documents:**
 
 ```typescript
+// 1. Build from scratch
 import { OdtDocument } from "odf-kit";
-import { writeFile } from "fs/promises";
 
 const doc = new OdtDocument();
 doc.addHeading("Quarterly Report", 1);
@@ -17,10 +19,28 @@ doc.addTable([
 ], { border: "0.5pt solid #000000" });
 
 const bytes = await doc.save();
-await writeFile("report.odt", bytes);
 ```
 
-The generated `.odt` file opens in LibreOffice, Apache OpenOffice, OnlyOffice, Collabora, Google Docs, Microsoft Office, and any ODF-compliant application.
+```typescript
+// 2. Fill an existing template
+import { fillTemplate } from "odf-kit";
+import { readFileSync, writeFileSync } from "fs";
+
+const template = readFileSync("invoice-template.odt");
+const result = fillTemplate(template, {
+  customer: "Acme Corp",
+  date: "2026-02-23",
+  items: [
+    { product: "Widget", qty: 5, price: "$125" },
+    { product: "Gadget", qty: 3, price: "$120" },
+  ],
+  showNotes: true,
+  notes: "Net 30",
+});
+writeFileSync("invoice.odt", result);
+```
+
+Generated `.odt` files open in LibreOffice, Apache OpenOffice, OnlyOffice, Collabora, Google Docs, Microsoft Office, and any ODF-compliant application.
 
 ## Why odf-kit?
 
@@ -38,6 +58,7 @@ Requires Node.js 22 or later. ESM only.
 
 ## Features
 
+- **Template engine** — fill existing `.odt` templates with `{placeholders}`, loops, conditionals, and nested data
 - **Text** — paragraphs, headings (levels 1–6), bold, italic, underline, strikethrough, superscript, subscript, font size, font family, text color, highlight color
 - **Tables** — column widths, cell borders (per-table, per-cell, per-side), background colors, cell merging (colspan/rowspan), rich text in cells
 - **Page layout** — page size, margins, orientation, headers, footers, page numbers, page breaks
@@ -47,7 +68,110 @@ Requires Node.js 22 or later. ESM only.
 - **Bookmarks** — named anchor points for internal navigation
 - **Tab stops** — left, center, right alignment with configurable positions
 
-## Quick Start
+## Template Engine
+
+Create a `.odt` template in LibreOffice (or any ODF editor) with `{placeholders}` in the text, then fill it with data:
+
+```typescript
+import { fillTemplate } from "odf-kit";
+import { readFileSync, writeFileSync } from "fs";
+
+const template = readFileSync("template.odt");
+const result = fillTemplate(template, {
+  name: "Alice",
+  company: { name: "Acme Corp", address: "123 Main St" },
+});
+writeFileSync("output.odt", result);
+```
+
+### Simple replacement
+
+Use `{tag}` for simple value substitution. Values are automatically XML-escaped.
+
+```
+Dear {name},
+
+Your order #{orderNumber} has been shipped to {address}.
+```
+
+### Dot notation
+
+Access nested objects with `{object.property}`:
+
+```
+Company: {company.name}
+City: {company.address.city}
+```
+
+### Loops
+
+Use `{#tag}...{/tag}` with an array to repeat content:
+
+```
+{#items}
+Product: {product} — Qty: {qty} — Price: {price}
+{/items}
+```
+
+```typescript
+fillTemplate(template, {
+  items: [
+    { product: "Widget", qty: 5, price: "$125" },
+    { product: "Gadget", qty: 3, price: "$120" },
+  ],
+});
+```
+
+Loop items inherit parent data, so you can reference top-level values inside a loop. Item properties override parent properties of the same name.
+
+### Conditionals
+
+Use `{#tag}...{/tag}` with a truthy or falsy value to include or remove content:
+
+```
+{#showDiscount}
+You qualify for a {percent}% discount!
+{/showDiscount}
+```
+
+```typescript
+fillTemplate(template, {
+  showDiscount: true,
+  percent: 10,
+});
+```
+
+Falsy values (`false`, `null`, `undefined`, `0`, `""`, `[]`) remove the section. Truthy values include it.
+
+### Nesting
+
+Loops and conditionals nest freely:
+
+```typescript
+fillTemplate(template, {
+  departments: [
+    {
+      name: "Engineering",
+      members: [
+        { name: "Alice", isLead: true },
+        { name: "Bob", isLead: false },
+      ],
+    },
+    {
+      name: "Design",
+      members: [{ name: "Carol", isLead: false }],
+    },
+  ],
+});
+```
+
+### How it works
+
+LibreOffice often fragments user-typed text like `{name}` across multiple XML elements due to editing history or spell check. odf-kit's template engine handles this automatically with a two-pass pipeline: first it reassembles fragmented placeholders, then it replaces them with your data. Headers and footers in `styles.xml` are processed alongside the document body.
+
+Template syntax follows [Mustache](https://mustache.github.io/) conventions, proven in document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's engine is a clean-room implementation purpose-built for ODF.
+
+## Quick Start — Programmatic Creation
 
 ### Simple document
 
@@ -252,6 +376,28 @@ const bytes = await new OdtDocument()
 | `addPageBreak()` | Insert a page break |
 | `save()` | Generate .odt file as `Promise<Uint8Array>` |
 
+### fillTemplate
+
+```typescript
+function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `templateBytes` | `Uint8Array` | Raw bytes of a `.odt` template file |
+| `data` | `TemplateData` | Key-value data for placeholder replacement |
+| **Returns** | `Uint8Array` | A new `.odt` file with all placeholders replaced |
+
+`TemplateData` is `Record<string, unknown>` — any JSON-serializable object.
+
+**Template syntax:**
+
+| Syntax | Description |
+|--------|-------------|
+| `{tag}` | Replace with value from data |
+| `{object.property}` | Dot notation for nested objects |
+| `{#tag}...{/tag}` | Loop (array) or conditional (truthy/falsy) |
+
 ### TextFormatting
 
 Accepted by `addText()`, `addLink()`, and `addCell()`:
@@ -328,7 +474,13 @@ Extends `TextFormatting` with:
 
 ## Status
 
-**v0.1.0** — ODT module is complete and tested (102 tests). Generates valid `.odt` files that open correctly in LibreOffice 24.2. ODS (spreadsheets), ODP (presentations), and ODG (drawings) are planned for future releases.
+**v0.3.0** — Template engine with loops, conditionals, dot notation, and automatic placeholder healing. 222 tests passing.
+
+**v0.2.0** — Migrated to fflate (zero transitive dependencies).
+
+**v0.1.0** — Complete ODT programmatic creation: text, tables, page layout, lists, images, links, bookmarks. 102 tests.
+
+ODS (spreadsheets), ODP (presentations), and ODG (drawings) are planned for future releases.
 
 ## Specification Compliance
 
@@ -345,6 +497,10 @@ npm install
 npm run build
 npm test
 ```
+
+## Acknowledgments
+
+Template syntax follows [Mustache](https://mustache.github.io/) conventions, adapted for document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's template engine is a clean-room implementation purpose-built for ODF — no code from either project was used. We credit both projects for establishing the patterns that make document templates intuitive.
 
 ## License
 

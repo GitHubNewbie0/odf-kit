@@ -5,6 +5,35 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-02-23
+
+Template engine.
+
+### Added
+
+- **Template engine** — Fill existing `.odt` templates with data using `fillTemplate()`. Load a `.odt` file created in LibreOffice, replace `{placeholders}` with values from a JSON/object data source, and get a new `.odt` file back.
+- **Simple replacement** — `{tag}` placeholders replaced with values, with automatic XML escaping of `& < > " '`
+- **Loops** — `{#items}...{/items}` repeats content for each item in an array. Items inherit parent data; item properties override.
+- **Conditionals** — `{#showSection}...{/showSection}` includes or removes content based on truthy/falsy values.
+- **Dot notation** — `{user.address.city}` resolves nested object paths.
+- **Placeholder healer** — Automatically reassembles placeholders that LibreOffice fragments across multiple `<text:span>` elements. Handles 2-span, multi-span, every-character, shared-segment, and bare-text fragmentation patterns. Removes editing artifacts (`<text:s/>`, `<text:bookmark/>`) trapped inside fragments.
+- **Boundary expansion** — Section markers (`{#tag}`, `{/tag}`) expand outward through wrapping XML elements to prevent orphaned empty tags after removal.
+- **Header/footer templates** — Placeholders in `styles.xml` (headers and footers) are processed alongside `content.xml`.
+- **120 new tests** — healer (51), replacer (56), template pipeline and integration (13). Total: 222 tests.
+
+### Credits
+
+Template syntax follows [Mustache](https://mustache.github.io/) conventions (`{tag}`, `{#section}{/section}`), proven in document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's template engine is a clean-room implementation purpose-built for ODF — no code from either project was used.
+
+## [0.2.0] - 2026-02-21
+
+Zero-dependency migration.
+
+### Changed
+
+- **Replaced jszip with fflate** — Zero transitive runtime dependencies. Faster compression/decompression, smaller bundle (~8kB). MIT license.
+- All 102 existing tests re-validated with fflate. Generated files verified in LibreOffice.
+
 ## [0.1.0] - 2026-02-11
 
 Initial release. Complete ODT (text document) support.
@@ -27,4 +56,6 @@ Initial release. Complete ODT (text document) support.
 - **TypeScript** — Full type definitions with JSDoc comments. ESM-only, Node.js 22+.
 - **Testing** — 102 tests covering all features. Validated against LibreOffice 24.2.
 
+[0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
+[0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.1.0
