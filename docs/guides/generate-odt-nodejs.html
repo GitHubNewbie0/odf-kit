@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Generate .odt Files in Node.js — odf-kit Guide</title>
+  <meta name="description" content="Step-by-step tutorial: generate OpenDocument (.odt) files in Node.js with JavaScript or TypeScript. Create reports, invoices, and letters with tables, formatting, images, and page layout using odf-kit.">
+  <meta name="keywords" content="generate odt file nodejs, create odt javascript, odt node.js, OpenDocument JavaScript, LibreOffice document generation, create odt programmatically, odt npm package, node.js document generation">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-nodejs.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How to Generate .odt Files in Node.js">
+  <meta property="og:description" content="Step-by-step tutorial: generate OpenDocument (.odt) files in Node.js with odf-kit. Tables, formatting, images, page layout.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-nodejs.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Generate .odt Files in Node.js",
+    "description": "Generate OpenDocument Format (.odt) files programmatically in Node.js using the odf-kit library.",
+    "step": [
+      { "@type": "HowToStep", "name": "Install odf-kit", "text": "Run npm install odf-kit in your Node.js project." },
+      { "@type": "HowToStep", "name": "Create a document", "text": "Import OdtDocument and create a new instance." },
+      { "@type": "HowToStep", "name": "Add content", "text": "Add paragraphs, headings, tables, images, and lists." },
+      { "@type": "HowToStep", "name": "Save the file", "text": "Call save() to get a Uint8Array and write it to disk." }
+    ],
+    "tool": { "@type": "SoftwareApplication", "name": "odf-kit", "url": "https://www.npmjs.com/package/odf-kit" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* NAV */
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+
+    /* HERO */
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+
+    /* CONTENT */
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+
+    /* CODE BLOCKS */
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+
+    /* INSTALL */
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+
+    /* CTA */
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+    /* FOOTER */
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>Generate .odt in Node.js</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · TypeScript + JavaScript</div>
+      <h1>How to generate .odt files in Node.js</h1>
+      <p>A step-by-step tutorial for creating OpenDocument text files programmatically in JavaScript or TypeScript using odf-kit. No LibreOffice or desktop software required.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>What you'll build</h2>
+      <p>By the end of this guide, you'll have a Node.js script that generates a formatted .odt document with headings, paragraphs, a table, and styled text. The output opens in LibreOffice, Google Docs, Microsoft Word, and any application that supports OpenDocument Format.</p>
+
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Node.js 22 or later (<a href="https://nodejs.org">nodejs.org</a>)</li>
+        <li>A Node.js project with <code>package.json</code> (run <code>npm init -y</code> if you don't have one)</li>
+        <li>ESM enabled: add <code>"type": "module"</code> to your package.json</li>
+      </ul>
+
+      <h2>Step 1 — Install odf-kit</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+      <p>odf-kit has a single runtime dependency (<a href="https://github.com/101arrowz/fflate">fflate</a> for ZIP packaging) with zero transitive dependencies. Nothing else to install.</p>
+
+      <h2>Step 2 — Create your first document</h2>
+      <p>Create a file called <code>generate.js</code> and add the following:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+
+doc.<span class="fn">addHeading</span>(<span class="str">"My First ODF Document"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"This file was generated by Node.js."</span>);
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+writeFileSync(<span class="str">"output.odt"</span>, bytes);
+console.<span class="fn">log</span>(<span class="str">"Created output.odt"</span>);</pre>
+      </div>
+      <p>Run it with <code>node generate.js</code>. Open <code>output.odt</code> in LibreOffice Writer — you'll see a heading and a paragraph. That's the minimal case: three lines to create a valid .odt file.</p>
+
+      <h2>Step 3 — Add a table</h2>
+      <p>Tables accept a simple array of arrays. The first row typically contains headers:</p>
+      <div class="code-block">
+        <pre>doc.<span class="fn">addTable</span>([
+  [<span class="str">"Product"</span>,  <span class="str">"Quantity"</span>,  <span class="str">"Price"</span>],
+  [<span class="str">"Widget"</span>,   <span class="str">"50"</span>,        <span class="str">"$4.99"</span>],
+  [<span class="str">"Gadget"</span>,   <span class="str">"25"</span>,        <span class="str">"$9.99"</span>],
+  [<span class="str">"Gizmo"</span>,    <span class="str">"100"</span>,       <span class="str">"$2.49"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });</pre>
+      </div>
+      <p>For more control, use a builder callback to set column widths, cell backgrounds, and merged cells. See the <a href="https://github.com/GitHubNewbie0/odf-kit#tables">full table documentation</a>.</p>
+
+      <h2>Step 4 — Format text</h2>
+      <p>Plain strings create plain paragraphs. For formatting, use a builder callback:</p>
+      <div class="code-block">
+        <pre>doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span class="kw">=></span> {
+  p.<span class="fn">addText</span>(<span class="str">"Total revenue: "</span>);
+  p.<span class="fn">addText</span>(<span class="str">"$1.2M"</span>, {
+    <span class="typ">bold</span>: <span class="num">true</span>,
+    <span class="typ">fontSize</span>: <span class="num">14</span>,
+    <span class="typ">color</span>: <span class="str">"#16a34a"</span>
+  });
+});</pre>
+      </div>
+      <p>Available formatting options include bold, italic, underline, strikethrough, superscript, subscript, font family, font size, text color, and highlight color. Both shorthand (<code>bold: true</code>) and explicit (<code>fontWeight: "bold"</code>) forms work.</p>
+
+      <h2>Step 5 — Add page layout, headers, and footers</h2>
+      <div class="code-block">
+        <pre>doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Quarterly Report"</span> });
+doc.<span class="fn">setPageLayout</span>({ <span class="typ">orientation</span>: <span class="str">"landscape"</span> });
+doc.<span class="fn">setHeader</span>(<span class="str">"Acme Corp — Confidential"</span>);
+doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
+<span class="cmt">// ### is replaced with the actual page number</span></pre>
+      </div>
+
+      <h2>Step 6 — Add images</h2>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> logo = readFileSync(<span class="str">"logo.png"</span>);
+doc.<span class="fn">addImage</span>(logo, <span class="str">"image/png"</span>, {
+  <span class="typ">width</span>: <span class="str">"5cm"</span>,
+  <span class="typ">height</span>: <span class="str">"2cm"</span>,
+});</pre>
+      </div>
+      <p>Supported formats: PNG, JPEG, GIF, SVG, WebP, BMP, and TIFF. Images are embedded in the .odt ZIP file — no external references.</p>
+
+      <h2>Complete example</h2>
+      <p>Here's a full script that combines everything above into a formatted report:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Q4 Report"</span> });
+doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Q4 2025 Results"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Revenue exceeded expectations across all regions."</span>);
+
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Region"</span>,  <span class="str">"Revenue"</span>,  <span class="str">"Growth"</span>],
+  [<span class="str">"North"</span>,   <span class="str">"$2.1M"</span>,    <span class="str">"+12%"</span>],
+  [<span class="str">"South"</span>,   <span class="str">"$1.8M"</span>,    <span class="str">"+8%"</span>],
+  [<span class="str">"East"</span>,    <span class="str">"$1.5M"</span>,    <span class="str">"+15%"</span>],
+  [<span class="str">"West"</span>,    <span class="str">"$2.3M"</span>,    <span class="str">"+10%"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Summary"</span>, <span class="num">2</span>);
+doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span class="kw">=></span> {
+  p.<span class="fn">addText</span>(<span class="str">"Status: "</span>);
+  p.<span class="fn">addText</span>(<span class="str">"Approved"</span>, { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">color</span>: <span class="str">"green"</span> });
+});
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+writeFileSync(<span class="str">"report.odt"</span>, bytes);
+console.<span class="fn">log</span>(<span class="str">"Created report.odt"</span>);</pre>
+      </div>
+
+      <h2>What about templates?</h2>
+      <p>If you already have a .odt file created in LibreOffice and want to fill it with data, odf-kit has a template engine too. See the <a href="fill-odt-template-javascript.html">Fill .odt Templates with JavaScript</a> guide.</p>
+
+      <h2>Why .odt instead of .docx?</h2>
+      <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. It's the default format for LibreOffice, and it's required by many governments, the European Union, and public sector organizations. If your users work with LibreOffice, or your project needs to comply with open format mandates, .odt is the right choice. If you need .docx, the <a href="https://www.npmjs.com/package/docx">docx</a> package is a good option.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to generate .odt files?</h2>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
