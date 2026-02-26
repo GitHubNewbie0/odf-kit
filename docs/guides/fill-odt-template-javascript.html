@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fill .odt Templates with JavaScript — odf-kit Guide</title>
+  <meta name="description" content="Fill existing LibreOffice .odt templates with data using JavaScript. Replace placeholders, loop over arrays, add conditionals. Mail merge for .odt files in Node.js with odf-kit. Works like docxtemplater but for ODF.">
+  <meta name="keywords" content="fill odt template javascript, odt template engine, odt mail merge nodejs, LibreOffice template fill, odt placeholder replacement, docxtemplater odt, odt Mustache template, fill OpenDocument template, odt template loop conditional, generate odt from template">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Fill .odt Templates with JavaScript — Mail Merge for LibreOffice">
+  <meta property="og:description" content="Fill existing .odt templates with data using JavaScript. Placeholders, loops, conditionals. Like docxtemplater but for ODF.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Fill .odt Templates with JavaScript",
+    "description": "Fill existing LibreOffice .odt templates with data using odf-kit's template engine in Node.js.",
+    "step": [
+      { "@type": "HowToStep", "name": "Create a template in LibreOffice", "text": "Type {placeholders} in your .odt document where you want data inserted." },
+      { "@type": "HowToStep", "name": "Install odf-kit", "text": "Run npm install odf-kit." },
+      { "@type": "HowToStep", "name": "Load and fill the template", "text": "Use fillTemplate() to replace placeholders with your data." },
+      { "@type": "HowToStep", "name": "Save the result", "text": "Write the returned Uint8Array to a new .odt file." }
+    ],
+    "tool": { "@type": "SoftwareApplication", "name": "odf-kit", "url": "https://www.npmjs.com/package/odf-kit" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .syntax-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .syntax-table th { text-align: left; padding: 0.65rem 1rem; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .syntax-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .syntax-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .syntax-table { font-size: 0.8rem; }
+      .syntax-table th, .syntax-table td { padding: 0.4rem 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>Fill .odt Templates</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · Template Engine</div>
+      <h1>Fill .odt templates with JavaScript</h1>
+      <p>Create a document template in LibreOffice with {placeholders}, then fill it with data from your application. Loops, conditionals, nested objects — like mail merge, but from code.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>How it works</h2>
+      <p>You design your document in LibreOffice Writer, typing <code>{placeholders}</code> where you want data inserted. odf-kit's <code>fillTemplate()</code> function reads the .odt file, replaces all placeholders with your data, and returns a new .odt file. The formatting, fonts, images, and layout from your template are preserved — only the placeholder text changes.</p>
+
+      <p>The syntax follows conventions established by <a href="https://mustache.github.io/">Mustache</a> and <a href="https://docxtemplater.com/">docxtemplater</a>, so it'll feel familiar if you've used either. odf-kit's template engine is a clean-room implementation purpose-built for OpenDocument Format.</p>
+
+      <h2>Template syntax</h2>
+      <table class="syntax-table">
+        <thead>
+          <tr><th>Syntax</th><th>Description</th><th>Example data</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>{tag}</td><td>Simple replacement</td><td><code>{ name: "Alice" }</code></td></tr>
+          <tr><td>{object.property}</td><td>Dot notation</td><td><code>{ user: { name: "Alice" } }</code></td></tr>
+          <tr><td>{#items}...{/items}</td><td>Loop (array)</td><td><code>{ items: [{}, {}] }</code></td></tr>
+          <tr><td>{#flag}...{/flag}</td><td>Conditional (truthy/falsy)</td><td><code>{ flag: true }</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Step 1 — Create a template in LibreOffice</h2>
+      <p>Open LibreOffice Writer and create a document. Type <code>{placeholders}</code> directly in the text wherever you want data inserted. For example, an invoice template might look like:</p>
+      <div class="callout">
+        <p><strong>Invoice #{invoiceNumber}</strong></p>
+        <p>Date: {date}</p>
+        <p>Bill to: {customer}</p>
+        <p>{company.address}</p>
+      </div>
+      <p>Save it as <code>invoice-template.odt</code>. You can format the template however you want — fonts, colors, tables, images, headers, footers. Everything is preserved when the template is filled.</p>
+
+      <h2>Step 2 — Install odf-kit and fill the template</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> template = readFileSync(<span class="str">"invoice-template.odt"</span>);
+
+<span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
+  <span class="typ">invoiceNumber</span>: <span class="str">"2026-042"</span>,
+  <span class="typ">date</span>: <span class="str">"February 23, 2026"</span>,
+  <span class="typ">customer</span>: <span class="str">"Acme Corp"</span>,
+  <span class="typ">company</span>: {
+    <span class="typ">name</span>: <span class="str">"Acme Corp"</span>,
+    <span class="typ">address</span>: <span class="str">"123 Main St, Springfield"</span>,
+  },
+});
+
+writeFileSync(<span class="str">"invoice-001.odt"</span>, result);</pre>
+      </div>
+      <p>That's it. Every <code>{placeholder}</code> in the template is replaced with the corresponding value from your data object. Values are automatically XML-escaped — no risk of breaking the document with special characters like <code>&lt;</code> or <code>&amp;</code>.</p>
+
+      <h2>Loops — repeating content</h2>
+      <p>Use <code>{#arrayName}...{/arrayName}</code> to repeat content for each item in an array. Inside the loop, use <code>{property}</code> to access each item's fields.</p>
+      <p>In your template, you might have a table where one row contains loop markers:</p>
+      <div class="callout">
+        <p>{#items}</p>
+        <p>{product} — Qty: {qty} — {price}</p>
+        <p>{/items}</p>
+      </div>
+      <div class="code-block">
+        <pre><span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
+  <span class="typ">items</span>: [
+    { <span class="typ">product</span>: <span class="str">"Widget"</span>, <span class="typ">qty</span>: <span class="num">5</span>, <span class="typ">price</span>: <span class="str">"$125"</span> },
+    { <span class="typ">product</span>: <span class="str">"Gadget"</span>, <span class="typ">qty</span>: <span class="num">3</span>, <span class="typ">price</span>: <span class="str">"$120"</span> },
+    { <span class="typ">product</span>: <span class="str">"Gizmo"</span>,  <span class="typ">qty</span>: <span class="num">10</span>, <span class="typ">price</span>: <span class="str">"$99"</span> },
+  ],
+});</pre>
+      </div>
+      <p>The content between <code>{#items}</code> and <code>{/items}</code> is repeated once for each object in the array. Inside the loop, fields from the current item (<code>{product}</code>, <code>{qty}</code>, <code>{price}</code>) are resolved first, then fields from the parent data object are checked — so you can reference top-level data inside loops.</p>
+
+      <h2>Conditionals — optional sections</h2>
+      <p>The same syntax works for conditionals. If the value is a boolean, a non-empty string, or any truthy value (but not an array), the content is included or removed:</p>
+      <div class="code-block">
+        <pre><span class="cmt">// Template: {#showNotes}Notes: {notes}{/showNotes}</span>
+
+<span class="fn">fillTemplate</span>(template, {
+  <span class="typ">showNotes</span>: <span class="num">true</span>,
+  <span class="typ">notes</span>: <span class="str">"Net 30 payment terms"</span>,
+});
+<span class="cmt">// → "Notes: Net 30 payment terms"</span>
+
+<span class="fn">fillTemplate</span>(template, {
+  <span class="typ">showNotes</span>: <span class="num">false</span>,
+});
+<span class="cmt">// → "" (section removed entirely)</span></pre>
+      </div>
+
+      <h2>How odf-kit handles LibreOffice's XML fragmentation</h2>
+      <p>When you type <code>{customer}</code> in LibreOffice, it often saves the XML as something like <code>&lt;text:span&gt;{cust&lt;/text:span&gt;&lt;text:span&gt;omer}&lt;/text:span&gt;</code> — the placeholder is split across multiple XML elements due to editing history, spell checking, or formatting changes. Other template engines break on this.</p>
+      <p>odf-kit includes a dedicated <strong>placeholder healer</strong> that automatically detects and reassembles fragmented placeholders before doing any replacements. It also cleans up editing artifacts like <code>&lt;text:s/&gt;</code> and <code>&lt;text:bookmark/&gt;</code> elements that LibreOffice inserts inside placeholders. You don't need to do anything — it just works.</p>
+
+      <h2>Headers and footers</h2>
+      <p>Placeholders in document headers and footers are processed alongside the body. If your template has <code>{company.name}</code> in the header, it gets replaced with the same data.</p>
+
+      <h2>What about building documents from scratch?</h2>
+      <p>If you don't have an existing template and want to create .odt files programmatically with code, odf-kit does that too. See the <a href="generate-odt-nodejs.html">Generate .odt Files in Node.js</a> guide.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Start filling .odt templates</h2>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
