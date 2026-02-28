@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>odf-kit — Generate and Fill ODF Documents in JavaScript and TypeScript | Create .odt Files in Node.js</title>
+  <title>odf-kit — OpenDocument Format (.odt) Library for Node.js</title>
   <meta name="description" content="Generate and fill OpenDocument Format (.odt) files in JavaScript and TypeScript. Build documents from scratch or fill existing templates with data — loops, conditionals, dot notation. Create reports, invoices, contracts, and letters with tables, formatting, images, and page layout. The modern simple-odf alternative for Node.js. Apache 2.0 open source.">
   <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement">
   <meta name="author" content="GitHubNewbie0">
@@ -937,15 +937,15 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       <h2 class="section-title">Common questions</h2>
       <div class="faq-item">
         <h3>How do I generate an ODF document in JavaScript or Node.js?</h3>
-        <p>Install odf-kit with <code>npm install odf-kit</code>, then use the <code>OdtDocument</code> class to build documents from scratch, or use <code>fillTemplate()</code> to fill existing .odt templates with data. Call <code>save()</code> or write the result to disk with <code>fs.writeFile</code>. See the <a href="https://github.com/GitHubNewbie0/odf-kit#readme">full documentation</a>.</p>
+        <p>Install odf-kit with <code>npm install odf-kit</code>, then use the <code>OdtDocument</code> class to build documents from scratch, or use <code>fillTemplate()</code> to fill existing .odt templates with data. Call <code>save()</code> or write the result to disk with <code>fs.writeFile</code>. See the <a href="guides/generate-odt-nodejs.html">step-by-step guide</a>.</p>
       </div>
       <div class="faq-item">
         <h3>Can I fill an existing .odt template with data?</h3>
-        <p>Yes. Create a template in LibreOffice with {placeholders} in the text, then use <code>fillTemplate(templateBytes, data)</code>. It supports simple replacement, loops for repeating content ({#items}...{/items}), conditionals for optional sections, and dot notation for nested objects ({company.name}). The engine automatically handles LibreOffice's XML fragmentation of placeholder text.</p>
+        <p>Yes. Create a template in LibreOffice with {placeholders} in the text, then use <code>fillTemplate(templateBytes, data)</code>. It supports simple replacement, loops for repeating content ({#items}...{/items}), conditionals for optional sections, and dot notation for nested objects ({company.name}). The engine automatically handles LibreOffice's XML fragmentation of placeholder text. See the <a href="guides/fill-odt-template-javascript.html">template guide</a> for a full walkthrough.</p>
       </div>
       <div class="faq-item">
         <h3>Is odf-kit a replacement for simple-odf?</h3>
-        <p>Yes. simple-odf was abandoned in 2021 and only produced flat XML files (.fodt), not proper .odt ZIP packages. It had no support for tables, images, page layout, templates, or bookmarks. odf-kit is a modern, actively maintained alternative that generates compliant .odt files with comprehensive formatting support.</p>
+        <p>Yes. simple-odf was abandoned in 2021 and only produced flat XML files (.fodt), not proper .odt ZIP packages. It had no support for tables, images, page layout, templates, or bookmarks. odf-kit is a modern, actively maintained alternative that generates compliant .odt files with comprehensive formatting support. See the <a href="guides/simple-odf-alternative.html">migration guide</a> for a side-by-side comparison.</p>
       </div>
       <div class="faq-item">
         <h3>Does odf-kit work for government ODF compliance requirements?</h3>
@@ -959,10 +959,17 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <h3>What's the difference between .odt and .docx?</h3>
         <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. .docx is Microsoft's Office Open XML format. ODF is required by many governments and organizations that need vendor independence. odf-kit generates .odt files; if you need .docx, look at the <a href="https://www.npmjs.com/package/docx">docx</a> package.</p>
       </div>
+      <div class="faq-item">
+        <h3>Where can I find step-by-step tutorials?</h3>
+        <p>We have detailed guides for common tasks:</p>
+        <ul style="margin-top: 0.5rem; padding-left: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8;">
+          <li><a href="guides/generate-odt-nodejs.html">Generate .odt files in Node.js</a> — programmatic document creation</li>
+          <li><a href="guides/fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — template engine walkthrough</li>
+          <li><a href="guides/simple-odf-alternative.html">Migrating from simple-odf</a> — comparison and migration guide</li>
+        </ul>
+      </div>
     </div>
   </section>
-
-  <!-- ═══ CTA ═══ -->
   <section class="cta">
     <div class="container">
       <h2>Start generating ODF documents in Node.js</h2>
@@ -983,7 +990,10 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <strong>odf-kit</strong> · Apache 2.0 · 
         <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · 
         <a href="https://www.npmjs.com/package/odf-kit">npm</a> · 
-        <a href="https://github.com/GitHubNewbie0/odf-kit/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/GitHubNewbie0/odf-kit/blob/main/CHANGELOG.md">Changelog</a> · 
+        <a href="guides/generate-odt-nodejs.html">Generate Guide</a> · 
+        <a href="guides/fill-odt-template-javascript.html">Template Guide</a> · 
+        <a href="guides/simple-odf-alternative.html">Migration Guide</a>
       </p>
       <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
     </div>
