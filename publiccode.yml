@@ -2,8 +2,8 @@ publiccodeYmlVersion: 0.5.0
 name: odf-kit
 url: https://github.com/GitHubNewbie0/odf-kit
 landingURL: https://githubnewbie0.github.io/odf-kit
-softwareVersion: 0.3.0
-releaseDate: 2026-02-23
+softwareVersion: 0.4.0
+releaseDate: 2026-03-01
 platforms:
   - web
 categories:
@@ -22,7 +22,7 @@ description:
   en:
     localisedName: odf-kit
     shortDescription: TypeScript library for generating and filling OpenDocument
-      Format (.odt) files in Node.js.
+      Format (.odt) files in Node.js and browsers.
     longDescription: >-
       odf-kit is an open-source TypeScript library for generating and filling
       OpenDocument Format (ODF) documents programmatically. Build documents from
@@ -44,7 +44,9 @@ description:
       Unlike abandoned alternatives such as simple-odf, odf-kit generates proper
       ZIP-packaged ODF files (not flat XML), supports tables with cell merging
       and formatting, embeds images, and is actively maintained. It has zero
-      transitive runtime dependencies (fflate only) and targets Node.js 22+.
+      transitive runtime dependencies (fflate only) and works in Node.js 18+
+      and modern browsers — documents can be generated entirely client-side
+      with no server required.
 
       odf-kit supports ODF 1.2+ (ISO/IEC 26300), the international standard for
       open document formats used by governments worldwide for interoperability
@@ -66,6 +68,7 @@ description:
       - Page layout with size, margins, orientation, and page breaks
       - ODF 1.2+ compliant (ISO/IEC 26300)
       - Zero transitive runtime dependencies
+      - Works in Node.js and browsers (client-side generation, no server required)
 legal:
   license: Apache-2.0
 maintenance:
