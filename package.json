@@ -1,7 +1,7 @@
 {
   "name": "odf-kit",
-  "version": "0.3.0",
-  "description": "Create OpenDocument Format files (.odt, .ods, .odp, .odg) in TypeScript/JavaScript",
+  "version": "0.4.0",
+  "description": "Create OpenDocument Format files (.odt, .ods, .odp, .odg) in TypeScript/JavaScript. Works in Node.js and browsers.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -36,16 +36,14 @@
     "libreoffice",
     "document",
     "spreadsheet",
-    "presentation"
+    "presentation",
+    "browser"
   ],
   "author": "GitHubNewbie0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GitHubNewbie0/odf-kit.git"
-  },
-  "engines": {
-    "node": ">=22.0.0"
+    "url": "git+https://github.com/GitHubNewbie0/odf-kit.git"
   },
   "dependencies": {
     "fflate": "^0.8.2"

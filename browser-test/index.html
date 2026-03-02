@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>odf-kit Browser Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 60px auto; }
+    button { font-size: 18px; padding: 12px 24px; cursor: pointer; }
+    #status { margin-top: 20px; padding: 12px; border-radius: 4px; display: none; }
+    .success { background: #d4edda; color: #155724; display: block !important; }
+    .error { background: #f8d7da; color: #721c24; display: block !important; }
+  </style>
+</head>
+<body>
+  <h1>odf-kit Browser Test</h1>
+  <p>Click the button to generate an .odt file entirely in the browser.</p>
+  <button id="generate">Generate ODT</button>
+  <div id="status"></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

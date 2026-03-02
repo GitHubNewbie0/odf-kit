@@ -1,6 +1,6 @@
 # odf-kit
 
-Create and fill OpenDocument Format files (.odt) in TypeScript/JavaScript. Build documents from scratch with a clean API, or fill existing templates with data. No LibreOffice dependency — just spec-compliant ODF files.
+Create and fill OpenDocument Format files (.odt) in TypeScript/JavaScript. Build documents from scratch with a clean API, or fill existing templates with data. Works in Node.js and browsers. No LibreOffice dependency — just spec-compliant ODF files.
 
 **Two ways to generate documents:**
 
@@ -54,7 +54,70 @@ odf-kit fills that gap with a single runtime dependency, full TypeScript types, 
 npm install odf-kit
 ```
 
-Requires Node.js 22 or later. ESM only.
+Works in Node.js 18+ and modern browsers. ESM only.
+
+**Browser** — use any bundler (Vite, webpack, esbuild, Rollup):
+
+```bash
+npm install odf-kit
+```
+
+```javascript
+import { OdtDocument } from "odf-kit";
+```
+
+Your bundler resolves everything automatically — no extra configuration needed.
+
+## Browser Usage
+
+odf-kit generates documents entirely client-side. No server required — user data never leaves the browser.
+
+```javascript
+import { OdtDocument } from "odf-kit";
+
+const doc = new OdtDocument();
+doc.addHeading("Generated in the Browser", 1);
+doc.addParagraph("This document was created without any server.");
+
+const bytes = await doc.save();
+
+// Trigger download
+const blob = new Blob([bytes], {
+  type: "application/vnd.oasis.opendocument.text",
+});
+const url = URL.createObjectURL(blob);
+const a = document.createElement("a");
+a.href = url;
+a.download = "document.odt";
+a.click();
+URL.revokeObjectURL(url);
+```
+
+Template filling works the same way — pass template bytes from a `<input type="file">` or `fetch()`:
+
+```javascript
+import { fillTemplate } from "odf-kit";
+
+// From a file input
+const file = document.getElementById("template-input").files[0];
+const templateBytes = new Uint8Array(await file.arrayBuffer());
+
+const result = fillTemplate(templateBytes, {
+  name: "Alice",
+  company: "Acme Corp",
+});
+
+// Download the filled document
+const blob = new Blob([result], {
+  type: "application/vnd.oasis.opendocument.text",
+});
+const url = URL.createObjectURL(blob);
+const a = document.createElement("a");
+a.href = url;
+a.download = "filled.odt";
+a.click();
+URL.revokeObjectURL(url);
+```
 
 ## Features
 
@@ -307,6 +370,13 @@ doc.addParagraph((p) => {
 });
 ```
 
+In a browser, get image bytes from `fetch()` or a file input instead of `readFile()`:
+
+```javascript
+const response = await fetch("logo.png");
+const logo = new Uint8Array(await response.arrayBuffer());
+```
+
 ### Links and bookmarks
 
 ```typescript
@@ -471,6 +541,16 @@ Extends `TextFormatting` with:
   marginRight?: string,
 }
 ```
+
+## Platform Support
+
+odf-kit works anywhere that supports ES2022 and ESM:
+
+- **Node.js** 18 and later
+- **Browsers** — Chrome, Firefox, Safari, Edge (all modern versions)
+- **Deno**, **Bun**, **Cloudflare Workers**
+
+The library uses only standard JavaScript APIs (`TextEncoder`, `Uint8Array`) plus [fflate](https://github.com/101arrowz/fflate) for ZIP packaging. The TypeScript build enforces this — Node-specific APIs cannot exist in the library source code, guaranteeing cross-platform compatibility.
 
 ## Status
 
