@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>odf-kit — OpenDocument Format (.odt) Library for Node.js</title>
-  <meta name="description" content="Generate and fill OpenDocument Format (.odt) files in JavaScript and TypeScript. Build documents from scratch or fill existing templates with data — loops, conditionals, dot notation. Create reports, invoices, contracts, and letters with tables, formatting, images, and page layout. The modern simple-odf alternative for Node.js. Apache 2.0 open source.">
-  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement">
+  <title>odf-kit — OpenDocument Format (.odt) Library for Node.js and Browsers</title>
+  <meta name="description" content="Generate and fill OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch or fill existing templates with data — loops, conditionals, dot notation. Create reports, invoices, contracts, and letters with tables, formatting, images, and page layout. Client-side document generation with no server required. The modern simple-odf alternative. Apache 2.0 open source.">
+  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, client-side, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/">
@@ -20,7 +20,7 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="odf-kit — Generate and Fill ODF Documents in JavaScript and TypeScript">
-  <meta name="twitter:description" content="Create .odt files or fill templates with data in Node.js. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Open source simple-odf alternative.">
+  <meta name="twitter:description" content="Create .odt files or fill templates with data in Node.js and browsers. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Open source simple-odf alternative.">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -28,11 +28,11 @@
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     "name": "odf-kit",
-    "description": "JavaScript and TypeScript library for generating and filling OpenDocument Format text documents (.odt files). Build documents from scratch with tables, text formatting, images, lists, hyperlinks, and page layout — or fill existing .odt templates with data using placeholders, loops, and conditionals. Used for automated report generation, invoice creation, contract templates, and document automation in Node.js.",
+    "description": "JavaScript and TypeScript library for generating and filling OpenDocument Format text documents (.odt files). Works in Node.js and browsers. Build documents from scratch with tables, text formatting, images, lists, hyperlinks, and page layout — or fill existing .odt templates with data using placeholders, loops, and conditionals. Client-side document generation with no server required. Used for automated report generation, invoice creation, contract templates, and document automation.",
     "codeRepository": "https://github.com/GitHubNewbie0/odf-kit",
     "programmingLanguage": ["TypeScript", "JavaScript"],
     "license": "https://www.apache.org/licenses/LICENSE-2.0",
-    "runtimePlatform": "Node.js",
+    "runtimePlatform": ["Node.js", "Web Browser"],
     "keywords": "ODF, OpenDocument Format, document generation, .odt, LibreOffice, report generation, invoice generation, template engine, document template",
     "targetProduct": {
       "@type": "SoftwareApplication",
@@ -54,7 +54,7 @@
         "name": "How do I generate an ODF document in JavaScript or Node.js?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Install odf-kit with npm install odf-kit, then use the OdtDocument class to create .odt files programmatically, or use fillTemplate() to fill existing .odt templates with data. odf-kit supports text formatting, tables, images, lists, hyperlinks, bookmarks, page layout, and template filling with loops and conditionals. Generated files open in LibreOffice, Google Docs, and any ODF-compliant application."
+          "text": "Install odf-kit with npm install odf-kit, then use the OdtDocument class to create .odt files programmatically, or use fillTemplate() to fill existing .odt templates with data. odf-kit works in Node.js and browsers — generate documents server-side or entirely client-side with no server required. It supports text formatting, tables, images, lists, hyperlinks, bookmarks, page layout, and template filling with loops and conditionals. Generated files open in LibreOffice, Google Docs, and any ODF-compliant application."
         }
       },
       {
@@ -627,11 +627,11 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.3.0 · Apache 2.0 · TypeScript + JavaScript</div>
-      <h1>Generate and fill OpenDocument<br>files in Node.js with <span>odf-kit</span></h1>
+      <div class="hero-badge">v0.4.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <h1>Generate and fill OpenDocument<br>files with <span>odf-kit</span></h1>
       <p class="hero-tagline">
         Create .odt documents from scratch or fill existing templates with data.
-        Build reports, invoices, letters, and contracts with tables, formatting, images, loops, and conditionals — from your server or build pipeline.
+        Build reports, invoices, letters, and contracts with tables, formatting, images, loops, and conditionals — in Node.js or directly in the browser.
       </p>
       <div class="hero-actions">
         <a href="https://github.com/GitHubNewbie0/odf-kit" class="btn btn-primary" rel="noopener">
@@ -652,7 +652,7 @@
     <div class="container">
       <div class="section-label">Use cases</div>
       <h2 class="section-title">Who generates ODF documents from code?</h2>
-      <p class="section-desc">Any Node.js application that needs to create formatted documents as files — not PDFs, not proprietary formats — but the open standard that LibreOffice, governments, and schools actually use.</p>
+      <p class="section-desc">Any application — server-side or in the browser — that needs to create formatted documents as files. Not PDFs, not proprietary formats — the open standard that LibreOffice, governments, and schools actually use.</p>
       <div class="usecase-grid">
         <div class="usecase-card">
           <div class="usecase-tag">Government &amp; Public Sector</div>
@@ -662,7 +662,7 @@
         <div class="usecase-card">
           <div class="usecase-tag">SaaS &amp; Web Apps</div>
           <h3>Report and invoice export</h3>
-          <p>Add "Export as .odt" to your web application. Generate invoices, financial reports, project summaries, and data exports as formatted OpenDocument files your users can edit in LibreOffice or Word.</p>
+          <p>Add "Export as .odt" to your web application. Generate invoices and reports server-side, or directly in the browser — user data never leaves the page. Files open in LibreOffice or Word.</p>
         </div>
         <div class="usecase-card">
           <div class="usecase-tag">Nonprofits &amp; Education</div>
@@ -677,7 +677,7 @@
         <div class="usecase-card">
           <div class="usecase-tag">DevOps &amp; CI/CD</div>
           <h3>Build pipeline document generation</h3>
-          <p>Generate changelogs, release notes, test reports, and documentation as .odt files in your build pipeline. No desktop software required — odf-kit runs anywhere Node.js runs.</p>
+          <p>Generate changelogs, release notes, test reports, and documentation as .odt files in your build pipeline. No desktop software required — odf-kit runs in Node.js, browsers, Deno, and Bun.</p>
         </div>
         <div class="usecase-card">
           <div class="usecase-tag">Civic Tech</div>
@@ -760,7 +760,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
     <div class="container">
       <div class="section-label">Features</div>
       <h2 class="section-title">Everything you need to generate .odt files</h2>
-      <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2. Works in any JavaScript or TypeScript project on Node.js.</p>
+      <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2. Works in Node.js and modern browsers.</p>
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">📋</div>
@@ -802,6 +802,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
           <h3>Zero Transitive Dependencies</h3>
           <p>Single runtime dependency (fflate). No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
         </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Node.js &amp; Browser</h3>
+          <p>Same API everywhere. Generate documents server-side in Node.js or client-side in the browser. Also works in Deno, Bun, and Cloudflare Workers.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -814,8 +819,8 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>Two modes, one library</h3>
-          <p>Build documents from scratch with a programmatic API, or fill existing .odt templates with data. Use whichever approach fits your workflow — or combine both.</p>
+          <h3>Two modes, one library, every platform</h3>
+          <p>Build documents from scratch with a programmatic API, or fill existing .odt templates with data. Same API in Node.js and browsers — generate server-side or client-side with no server required.</p>
         </div>
         <div class="why-item">
           <h3>Zero transitive dependencies</h3>
@@ -901,6 +906,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
             <td><span class="check">✓</span> Written in TypeScript</td>
             <td><span class="check">✓</span> Written in TypeScript</td>
           </tr>
+          <tr>
+            <td>Browser support</td>
+            <td><span class="check">✓</span> Node.js and browsers</td>
+            <td><span class="cross">✗</span> Node.js only</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -937,7 +947,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       <h2 class="section-title">Common questions</h2>
       <div class="faq-item">
         <h3>How do I generate an ODF document in JavaScript or Node.js?</h3>
-        <p>Install odf-kit with <code>npm install odf-kit</code>, then use the <code>OdtDocument</code> class to build documents from scratch, or use <code>fillTemplate()</code> to fill existing .odt templates with data. Call <code>save()</code> or write the result to disk with <code>fs.writeFile</code>. See the <a href="guides/generate-odt-nodejs.html">step-by-step guide</a>.</p>
+        <p>Install odf-kit with <code>npm install odf-kit</code>, then use the <code>OdtDocument</code> class to build documents from scratch, or use <code>fillTemplate()</code> to fill existing .odt templates with data. Works in Node.js and browsers. Call <code>save()</code> to get a <code>Uint8Array</code>, then write it to disk or trigger a browser download. See the <a href="guides/generate-odt-nodejs.html">step-by-step guide</a>.</p>
       </div>
       <div class="faq-item">
         <h3>Can I fill an existing .odt template with data?</h3>
@@ -953,7 +963,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       </div>
       <div class="faq-item">
         <h3>Can I use odf-kit to create LibreOffice documents from my web application?</h3>
-        <p>Yes. odf-kit runs on any Node.js server. Your backend can generate .odt files on the fly and serve them as downloads. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF.</p>
+        <p>Yes. odf-kit works both server-side in Node.js and client-side in the browser. You can generate .odt files on your backend and serve them as downloads, or generate them entirely in the browser — user data never leaves the page. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF.</p>
       </div>
       <div class="faq-item">
         <h3>What's the difference between .odt and .docx?</h3>
@@ -972,8 +982,8 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
   </section>
   <section class="cta">
     <div class="container">
-      <h2>Start generating ODF documents in Node.js</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute. Build from scratch or fill templates with data.</p>
+      <h2>Start generating ODF documents</h2>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch or fill templates with data.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
