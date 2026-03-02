@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How to Generate .odt Files in Node.js — odf-kit Guide</title>
-  <meta name="description" content="Step-by-step tutorial: generate OpenDocument (.odt) files in Node.js with JavaScript or TypeScript. Create reports, invoices, and letters with tables, formatting, images, and page layout using odf-kit.">
+  <meta name="description" content="Step-by-step tutorial: generate OpenDocument (.odt) files in Node.js or the browser with JavaScript or TypeScript. Create reports, invoices, and letters with tables, formatting, images, and page layout using odf-kit.">
   <meta name="keywords" content="generate odt file nodejs, create odt javascript, odt node.js, OpenDocument JavaScript, LibreOffice document generation, create odt programmatically, odt npm package, node.js document generation">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
@@ -24,7 +24,7 @@
     "@context": "https://schema.org",
     "@type": "HowTo",
     "name": "How to Generate .odt Files in Node.js",
-    "description": "Generate OpenDocument Format (.odt) files programmatically in Node.js using the odf-kit library.",
+    "description": "Generate OpenDocument Format (.odt) files programmatically in Node.js or the browser using the odf-kit library.",
     "step": [
       { "@type": "HowToStep", "name": "Install odf-kit", "text": "Run npm install odf-kit in your Node.js project." },
       { "@type": "HowToStep", "name": "Create a document", "text": "Import OdtDocument and create a new instance." },
@@ -138,7 +138,7 @@
     <div class="container">
       <div class="hero-badge">Guide · TypeScript + JavaScript</div>
       <h1>How to generate .odt files in Node.js</h1>
-      <p>A step-by-step tutorial for creating OpenDocument text files programmatically in JavaScript or TypeScript using odf-kit. No LibreOffice or desktop software required.</p>
+      <p>A step-by-step tutorial for creating OpenDocument text files programmatically in JavaScript or TypeScript using odf-kit. Works in Node.js and browsers. No LibreOffice or desktop software required.</p>
     </div>
   </section>
 
@@ -146,11 +146,11 @@
     <div class="container">
 
       <h2>What you'll build</h2>
-      <p>By the end of this guide, you'll have a Node.js script that generates a formatted .odt document with headings, paragraphs, a table, and styled text. The output opens in LibreOffice, Google Docs, Microsoft Word, and any application that supports OpenDocument Format.</p>
+      <p>By the end of this guide, you'll have a Node.js script that generates a formatted .odt document with headings, paragraphs, a table, and styled text. The same code works in browsers too — see the <a href="#browser-usage">browser usage</a> section below. The output opens in LibreOffice, Google Docs, Microsoft Word, and any application that supports OpenDocument Format.</p>
 
       <h2>Prerequisites</h2>
       <ul>
-        <li>Node.js 22 or later (<a href="https://nodejs.org">nodejs.org</a>)</li>
+        <li>Node.js 18 or later (<a href="https://nodejs.org">nodejs.org</a>)</li>
         <li>A Node.js project with <code>package.json</code> (run <code>npm init -y</code> if you don't have one)</li>
         <li>ESM enabled: add <code>"type": "module"</code> to your package.json</li>
       </ul>
@@ -257,6 +257,30 @@ console.<span class="fn">log</span>(<span class="str">"Created report.odt"</span
 
       <h2>What about templates?</h2>
       <p>If you already have a .odt file created in LibreOffice and want to fill it with data, odf-kit has a template engine too. See the <a href="fill-odt-template-javascript.html">Fill .odt Templates with JavaScript</a> guide.</p>
+
+      <h2 id="browser-usage">Browser usage</h2>
+      <p>The same API works in the browser — no server required. Use any bundler (Vite, webpack, esbuild) and import as normal. The only difference is how you save the file:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">addHeading</span>(<span class="str">"Generated in the Browser"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"No server involved."</span>);
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+
+<span class="cmt">// Trigger download</span>
+<span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+  <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+});
+<span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+<span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+a.href = url;
+a.download = <span class="str">"document.odt"</span>;
+a.<span class="fn">click</span>();
+URL.<span class="fn">revokeObjectURL</span>(url);</pre>
+      </div>
+      <p>This is useful for privacy-sensitive applications, offline tools, and anywhere you want to generate documents without sending data to a server. odf-kit works in Chrome, Firefox, Safari, and Edge.</p>
 
       <h2>Why .odt instead of .docx?</h2>
       <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. It's the default format for LibreOffice, and it's required by many governments, the European Union, and public sector organizations. If your users work with LibreOffice, or your project needs to comply with open format mandates, .odt is the right choice. If you need .docx, the <a href="https://www.npmjs.com/package/docx">docx</a> package is a good option.</p>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>simple-odf Alternative — Migrate to odf-kit for ODF Document Generation in Node.js</title>
-  <meta name="description" content="Looking for a simple-odf replacement? odf-kit is a maintained TypeScript library for generating .odt files in Node.js. Tables, images, page layout, template engine — everything simple-odf was missing. Drop-in migration guide.">
+  <title>simple-odf Alternative — Migrate to odf-kit for ODF Document Generation</title>
+  <meta name="description" content="Looking for a simple-odf replacement? odf-kit is a maintained TypeScript library for generating .odt files in Node.js and browsers. Tables, images, page layout, template engine — everything simple-odf was missing. Drop-in migration guide.">
   <meta name="keywords" content="simple-odf alternative, simple-odf replacement, simple-odf abandoned, simple-odf migration, odt generation javascript, odf-kit vs simple-odf, create odt nodejs, OpenDocument JavaScript library, LibreOffice document generation">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
@@ -12,7 +12,7 @@
 
   <meta property="og:type" content="article">
   <meta property="og:title" content="simple-odf Alternative — Migrate to odf-kit">
-  <meta property="og:description" content="Looking for a simple-odf replacement? odf-kit is a maintained TypeScript library for generating .odt files in Node.js with tables, images, and a template engine.">
+  <meta property="og:description" content="Looking for a simple-odf replacement? odf-kit is a maintained TypeScript library for generating .odt files in Node.js and browsers with tables, images, and a template engine.">
   <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +118,7 @@
     <div class="container">
       <div class="hero-badge">Migration Guide</div>
       <h1>simple-odf alternative: migrate to odf-kit</h1>
-      <p>simple-odf was abandoned in 2021. odf-kit is a maintained TypeScript library that generates proper .odt files with tables, images, page layout, and a template engine. Here's how to migrate.</p>
+      <p>simple-odf was abandoned in 2021. odf-kit is a maintained TypeScript library that generates proper .odt files with tables, images, page layout, and a template engine. Works in Node.js and browsers. Here's how to migrate.</p>
     </div>
   </section>
 
@@ -144,6 +144,7 @@
           <tr><td>Lists</td><td><span class="check">✓</span> Bullet &amp; numbered, nested</td><td>Partial</td></tr>
           <tr><td>Hyperlinks</td><td><span class="check">✓</span> External + internal bookmarks</td><td>Partial</td></tr>
           <tr><td>TypeScript</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Browser support</td><td><span class="check">✓</span> Node.js + browsers</td><td><span class="cross">✗</span> Node.js only</td></tr>
           <tr><td>Dependencies</td><td>1 (fflate, 0 transitive)</td><td>0</td></tr>
           <tr><td>Tests</td><td>222</td><td>~50</td></tr>
         </tbody>
@@ -196,6 +197,7 @@ writeFileSync(<span class="str">"doc.odt"</span>, bytes);</pre>
         <li><strong>Page layout</strong> — page size, margins, orientation, headers with page numbers, footers</li>
         <li><strong>Template engine</strong> — design documents in LibreOffice, fill them with data from code. Placeholders, loops, conditionals, dot notation. See the <a href="fill-odt-template-javascript.html">template guide</a>.</li>
         <li><strong>Bookmarks and internal links</strong> — named anchor points and cross-references within the document</li>
+        <li><strong>Browser support</strong> — same API works client-side in the browser. Generate documents without a server — user data never leaves the page.</li>
       </ul>
 
       <h2>Installation</h2>
@@ -207,7 +209,7 @@ npm uninstall simple-odf
 <span class="cmt"># Install odf-kit</span>
 npm install odf-kit</pre>
       </div>
-      <p>Make sure your package.json has <code>"type": "module"</code> (odf-kit is ESM-only) and you're running Node.js 22 or later.</p>
+      <p>Make sure your package.json has <code>"type": "module"</code> (odf-kit is ESM-only) and you're running Node.js 18 or later.</p>
 
       <h2>Need help migrating?</h2>
       <p>If you run into issues, <a href="https://github.com/GitHubNewbie0/odf-kit/issues">open an issue on GitHub</a>. We're happy to help with specific migration questions.</p>

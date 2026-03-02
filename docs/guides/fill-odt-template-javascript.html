@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fill .odt Templates with JavaScript — odf-kit Guide</title>
-  <meta name="description" content="Fill existing LibreOffice .odt templates with data using JavaScript. Replace placeholders, loop over arrays, add conditionals. Mail merge for .odt files in Node.js with odf-kit. Works like docxtemplater but for ODF.">
+  <meta name="description" content="Fill existing LibreOffice .odt templates with data using JavaScript. Replace placeholders, loop over arrays, add conditionals. Mail merge for .odt files in Node.js and browsers with odf-kit. Works like docxtemplater but for ODF.">
   <meta name="keywords" content="fill odt template javascript, odt template engine, odt mail merge nodejs, LibreOffice template fill, odt placeholder replacement, docxtemplater odt, odt Mustache template, fill OpenDocument template, odt template loop conditional, generate odt from template">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
@@ -24,7 +24,7 @@
     "@context": "https://schema.org",
     "@type": "HowTo",
     "name": "Fill .odt Templates with JavaScript",
-    "description": "Fill existing LibreOffice .odt templates with data using odf-kit's template engine in Node.js.",
+    "description": "Fill existing LibreOffice .odt templates with data using odf-kit's template engine in Node.js or the browser.",
     "step": [
       { "@type": "HowToStep", "name": "Create a template in LibreOffice", "text": "Type {placeholders} in your .odt document where you want data inserted." },
       { "@type": "HowToStep", "name": "Install odf-kit", "text": "Run npm install odf-kit." },
@@ -188,6 +188,8 @@
 writeFileSync(<span class="str">"invoice-001.odt"</span>, result);</pre>
       </div>
       <p>That's it. Every <code>{placeholder}</code> in the template is replaced with the corresponding value from your data object. Values are automatically XML-escaped — no risk of breaking the document with special characters like <code>&lt;</code> or <code>&amp;</code>.</p>
+
+      <p><strong>Browser usage:</strong> The same <code>fillTemplate()</code> function works client-side. Get template bytes from a <code>&lt;input type="file"&gt;</code> or <code>fetch()</code>, and trigger a download with <code>Blob</code> + <code>URL.createObjectURL()</code>. No server required — user data never leaves the browser.</p>
 
       <h2>Loops — repeating content</h2>
       <p>Use <code>{#arrayName}...{/arrayName}</code> to repeat content for each item in an array. Inside the loop, use <code>{property}</code> to access each item's fields.</p>
