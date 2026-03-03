@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://githubnewbie0.github.io/odf-kit/sitemap.xml
