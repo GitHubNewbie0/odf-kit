@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free docxtemplater Alternative for ODF / .odt Templates — odf-kit</title>
+  <meta name="description" content="Looking for a free alternative to docxtemplater for ODF / .odt template filling? odf-kit is a free, open-source JavaScript library for filling .odt templates with JSON data. Loops, conditionals, and dot notation — no paid modules required. Works in Node.js and browsers.">
+  <meta name="keywords" content="docxtemplater alternative, docxtemplater odt, free odt template engine, odt template JavaScript, fill odt template, docxtemplater free alternative, odf template engine, odt mail merge JavaScript, docxtemplater odf module, open source document template, odt placeholder replacement, odt template filling free">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Free docxtemplater Alternative for ODF / .odt Templates">
+  <meta property="og:description" content="Fill .odt templates with JSON data using a free, open-source JavaScript library. Loops, conditionals, dot notation — no paid modules.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Free docxtemplater Alternative for ODF / .odt Templates",
+    "description": "Compare docxtemplater and odf-kit for ODF template filling. odf-kit is a free, open-source alternative with loops, conditionals, and browser support.",
+    "author": { "@type": "Person", "name": "GitHubNewbie0" },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": "odf-kit",
+      "url": "https://www.npmjs.com/package/odf-kit",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .compare-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.92rem; }
+    .compare-table th { text-align: left; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); font-weight: 600; color: var(--text); }
+    .compare-table td { padding: 0.75rem 1rem; border: 1px solid var(--border); color: var(--text-secondary); }
+    .compare-table tr:nth-child(even) td { background: var(--surface); }
+    .checkmark { color: #16a34a; font-weight: 600; }
+    .xmark { color: #dc2626; font-weight: 600; }
+    .paid { color: #d97706; font-weight: 500; }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .compare-table { font-size: 0.82rem; }
+      .compare-table th, .compare-table td { padding: 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>docxtemplater ODF Alternative</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Comparison · Template Engine · Free &amp; Open Source</div>
+      <h1>Free docxtemplater alternative for ODF&nbsp;/&nbsp;.odt templates</h1>
+      <p>docxtemplater is a popular JavaScript library for filling document templates — but its ODF support requires a paid module. odf-kit offers a free, open-source template engine for .odt files with loops, conditionals, dot notation, and browser support. No license fees, no per-document charges.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>The problem with docxtemplater for ODF</h2>
+      <p>docxtemplater is well-established for .docx template filling. It has a large user base, good documentation, and a mature API. If you need to fill Word document templates, it's a solid choice.</p>
+      <p>However, if you need to fill .odt templates — the OpenDocument Format used by LibreOffice and required by many governments — docxtemplater's ODF support is a paid add-on module. The open-source core only handles .docx, .pptx, and .xlsx. To use .odt templates, you need a commercial license.</p>
+      <p>For developers building tools for non-profits, governments, community organizations, or open source projects, a paid per-developer license may not be practical — especially when the entire point of using ODF is to avoid vendor lock-in and proprietary dependencies.</p>
+
+      <h2>Feature comparison</h2>
+      <table class="compare-table">
+        <tr>
+          <th>Feature</th>
+          <th>odf-kit</th>
+          <th>docxtemplater</th>
+        </tr>
+        <tr>
+          <td>.odt template filling</td>
+          <td><span class="checkmark">✓ Free</span></td>
+          <td><span class="paid">Paid module</span></td>
+        </tr>
+        <tr>
+          <td>Placeholder replacement</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Loops ({#items}...{/items})</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Conditionals ({#flag}...{/flag})</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Dot notation ({company.name})</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Create documents from scratch</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="xmark">✗</span></td>
+        </tr>
+        <tr>
+          <td>Browser support</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Node.js support</td>
+          <td><span class="checkmark">✓</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>Placeholder healing (fragmented XML)</td>
+          <td><span class="checkmark">✓ Automatic</span></td>
+          <td><span class="checkmark">✓</span></td>
+        </tr>
+        <tr>
+          <td>.docx support</td>
+          <td><span class="xmark">✗</span></td>
+          <td><span class="checkmark">✓ Free</span></td>
+        </tr>
+        <tr>
+          <td>Runtime dependencies</td>
+          <td>Zero</td>
+          <td>Multiple (pizzip, etc.)</td>
+        </tr>
+        <tr>
+          <td>License</td>
+          <td>Apache 2.0</td>
+          <td>MIT (core) + commercial (modules)</td>
+        </tr>
+        <tr>
+          <td>Image insertion in templates</td>
+          <td><span class="xmark">✗</span></td>
+          <td><span class="paid">Paid module</span></td>
+        </tr>
+      </table>
+
+      <div class="callout">
+        <p><strong>To be clear:</strong> docxtemplater is a good library. If you need .docx templates, it's a strong option. This comparison is specifically about .odt template filling, where odf-kit provides a free alternative to docxtemplater's paid ODF module. odf-kit does not handle .docx files.</p>
+      </div>
+
+      <h2>Template syntax comparison</h2>
+      <p>Both libraries use curly-brace placeholder syntax. If you're already familiar with docxtemplater's syntax, odf-kit's will feel familiar:</p>
+
+      <table class="compare-table">
+        <tr>
+          <th>Feature</th>
+          <th>odf-kit</th>
+          <th>docxtemplater</th>
+        </tr>
+        <tr>
+          <td>Simple replacement</td>
+          <td><code>{name}</code></td>
+          <td><code>{name}</code></td>
+        </tr>
+        <tr>
+          <td>Nested property</td>
+          <td><code>{company.address.city}</code></td>
+          <td><code>{company.address.city}</code></td>
+        </tr>
+        <tr>
+          <td>Loop</td>
+          <td><code>{#items}...{/items}</code></td>
+          <td><code>{#items}...{/items}</code></td>
+        </tr>
+        <tr>
+          <td>Conditional</td>
+          <td><code>{#showNotes}...{/showNotes}</code></td>
+          <td><code>{#showNotes}...{/showNotes}</code></td>
+        </tr>
+      </table>
+
+      <p>The syntax is intentionally similar. If you have existing .odt templates designed for docxtemplater's ODF module, they will likely work with odf-kit with little or no modification.</p>
+
+      <h2>Quick start with odf-kit</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+      <p><strong>Step 1:</strong> Create a template in LibreOffice. Type <code>{customer}</code>, <code>{date}</code>, and <code>{#items}...{/items}</code> directly in the document text.</p>
+
+      <p><strong>Step 2:</strong> Fill the template with data:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { <span class="fn">readFileSync</span>, <span class="fn">writeFileSync</span> } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> template = <span class="fn">readFileSync</span>(<span class="str">"invoice-template.odt"</span>);
+
+<span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
+  <span class="typ">customer</span>: <span class="str">"Acme Corp"</span>,
+  <span class="typ">date</span>: <span class="str">"2026-03-01"</span>,
+  <span class="typ">items</span>: [
+    { <span class="typ">product</span>: <span class="str">"Widget"</span>, <span class="typ">qty</span>: <span class="num">5</span>, <span class="typ">price</span>: <span class="str">"$125"</span> },
+    { <span class="typ">product</span>: <span class="str">"Gadget"</span>, <span class="typ">qty</span>: <span class="num">3</span>, <span class="typ">price</span>: <span class="str">"$120"</span> },
+  ],
+  <span class="typ">showDiscount</span>: <span class="kw">true</span>,
+  <span class="typ">discount</span>: <span class="str">"10%"</span>,
+});
+
+<span class="fn">writeFileSync</span>(<span class="str">"invoice.odt"</span>, result);</pre>
+      </div>
+
+      <p>That's it. No configuration, no license keys, no paid modules. The <code>fillTemplate()</code> function reads the .odt file, replaces all placeholders, expands loops, evaluates conditionals, and returns a new .odt file as a <code>Uint8Array</code>.</p>
+
+      <h2>Placeholder healing</h2>
+      <p>When you type <code>{placeholder}</code> in LibreOffice, the application sometimes splits the text across multiple XML elements — for example due to spell-check annotations, formatting boundaries, or editing history. This means the raw XML might contain <code>&lt;span&gt;{&lt;/span&gt;&lt;span&gt;placeholder&lt;/span&gt;&lt;span&gt;}&lt;/span&gt;</code> instead of a single <code>{placeholder}</code> text node.</p>
+      <p>odf-kit automatically detects and reassembles these fragmented placeholders before doing replacements. You don't need to manually edit the XML or use any special LibreOffice settings when creating templates.</p>
+
+      <h2>Browser support</h2>
+      <p>odf-kit works entirely in the browser — no server needed. Users can upload a template via a file input, fill it with data from a form, and download the result. The template and data never leave the browser, which is ideal for privacy-sensitive applications.</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> input = document.<span class="fn">querySelector</span>(<span class="str">"#template-file"</span>);
+
+input.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, <span class="kw">async</span> (e) <span class="kw">=></span> {
+  <span class="kw">const</span> file = e.target.files[<span class="num">0</span>];
+  <span class="kw">const</span> buffer = <span class="kw">new</span> <span class="typ">Uint8Array</span>(
+    <span class="kw">await</span> file.<span class="fn">arrayBuffer</span>()
+  );
+
+  <span class="kw">const</span> result = <span class="fn">fillTemplate</span>(buffer, {
+    <span class="typ">name</span>: <span class="str">"Alice"</span>,
+    <span class="typ">company</span>: <span class="str">"Acme Corp"</span>,
+  });
+
+  <span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([result], {
+    <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+  });
+  <span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+  <span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+  a.href = url;
+  a.download = <span class="str">"filled.odt"</span>;
+  a.<span class="fn">click</span>();
+  URL.<span class="fn">revokeObjectURL</span>(url);
+});</pre>
+      </div>
+
+      <h2>What about creating documents from scratch?</h2>
+      <p>Unlike docxtemplater, odf-kit can also create .odt documents from scratch — no template file needed. This is useful for generating reports, invoices, letters, or any structured document programmatically:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">addHeading</span>(<span class="str">"Invoice #1042"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Date: March 1, 2026"</span>);
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Item"</span>,    <span class="str">"Qty"</span>, <span class="str">"Price"</span>],
+  [<span class="str">"Widget"</span>, <span class="str">"5"</span>,   <span class="str">"$125"</span>],
+  [<span class="str">"Gadget"</span>, <span class="str">"3"</span>,   <span class="str">"$120"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();</pre>
+      </div>
+
+      <p>See the <a href="generate-odt-nodejs.html">full Node.js guide</a> or the <a href="generate-odt-browser.html">browser guide</a> for complete examples with formatting, images, page layout, headers, and footers.</p>
+
+      <h2>When to use docxtemplater instead</h2>
+      <p>If your primary format is .docx and you only occasionally need .odt, docxtemplater's ecosystem is broader and more mature for Word documents. If you need advanced features like image insertion inside templates, chart generation, or HTML-to-document conversion, docxtemplater's paid modules cover those use cases. odf-kit is focused specifically on ODF — it does that format well and for free, but it doesn't handle .docx at all.</p>
+
+      <h2>Summary</h2>
+      <p>If you need to fill .odt templates with data in JavaScript or TypeScript, odf-kit gives you loops, conditionals, dot notation, placeholder healing, and browser support — all free and open source under Apache 2.0. If you also need to create .odt documents from scratch, odf-kit handles that too. No paid modules, no license keys, zero dependencies.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Fill .odt templates for free</h2>
+      <p>Loops, conditionals, dot notation. Works in Node.js and browsers. Apache 2.0.</p>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

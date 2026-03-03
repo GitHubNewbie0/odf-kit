@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate ODF Documents in the Browser with JavaScript — No Server Required</title>
+  <meta name="description" content="Generate OpenDocument (.odt) files entirely in the browser with JavaScript. No server, no LibreOffice, no backend — user data never leaves the page. Client-side ODF document generation with odf-kit. Privacy-first document creation for web applications.">
+  <meta name="keywords" content="generate odt browser, create odt client-side, odt javascript browser, OpenDocument browser, client-side document generation, odf-kit browser, generate odt no server, privacy document generation, odt web application, browser document export, odt download javascript, create LibreOffice document browser, odf javascript client-side, offline document generation">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Generate ODF Documents in the Browser — No Server Required">
+  <meta property="og:description" content="Create .odt files entirely in the browser with JavaScript. No server, no LibreOffice — user data stays on the page. Privacy-first ODF generation.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Generate ODF Documents in the Browser with JavaScript",
+    "description": "Create OpenDocument Format (.odt) files entirely in the browser using JavaScript and odf-kit. No server or backend required.",
+    "step": [
+      { "@type": "HowToStep", "name": "Set up your project with a bundler", "text": "Use Vite, webpack, esbuild, or any bundler that supports npm packages." },
+      { "@type": "HowToStep", "name": "Install odf-kit", "text": "Run npm install odf-kit in your project." },
+      { "@type": "HowToStep", "name": "Import and create a document", "text": "Import OdtDocument from odf-kit and build your document with headings, text, tables, and images." },
+      { "@type": "HowToStep", "name": "Trigger a download", "text": "Convert the Uint8Array to a Blob and use URL.createObjectURL to trigger a file download." }
+    ],
+    "tool": { "@type": "SoftwareApplication", "name": "odf-kit", "url": "https://www.npmjs.com/package/odf-kit" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>Generate .odt in the Browser</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · Browser · No Server Required</div>
+      <h1>Generate ODF documents in the browser with JavaScript</h1>
+      <p>Create .odt files entirely on the client side. No server, no LibreOffice installation, no backend processing. User data never leaves the browser — ideal for privacy-sensitive applications, offline tools, and lightweight document export.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>Why generate documents in the browser?</h2>
+      <p>Traditional document generation requires a server: your web application collects data, sends it to a backend, the backend generates a file, and sends it back for download. This works, but it adds complexity, latency, server cost, and — critically — it means user data must travel over the network.</p>
+      <p>Client-side generation eliminates all of that. The document is created right in the user's browser tab using JavaScript. The file never touches a server. This matters for:</p>
+      <ul>
+        <li><strong>Privacy and data sovereignty</strong> — sensitive data like medical records, legal documents, financial reports, or personal information stays on the user's device</li>
+        <li><strong>Offline-capable applications</strong> — PWAs and offline tools can generate documents without any network connection</li>
+        <li><strong>Reduced infrastructure</strong> — no server-side document generation pipeline to build, scale, or maintain</li>
+        <li><strong>Government and compliance</strong> — many public sector applications must minimize data transmission and generate documents in the open ISO standard format (ODF / ISO/IEC 26300)</li>
+      </ul>
+
+      <h2>What you'll build</h2>
+      <p>By the end of this guide, you'll have a web page with a button that generates a formatted .odt document and downloads it — entirely in the browser. The document will include headings, formatted text, a table, and a list. It opens in LibreOffice, Google Docs, Microsoft Word, and any ODF-compliant application.</p>
+
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>A JavaScript project with a bundler (Vite, webpack, esbuild, Rollup, Parcel — anything that supports <code>npm install</code>)</li>
+        <li>Basic familiarity with ES modules (<code>import</code> / <code>export</code>)</li>
+      </ul>
+      <p>If you don't have a project yet, the fastest way to start is with Vite:</p>
+      <div class="code-block">
+        <pre><span class="cmt"># Create a new Vite project</span>
+npm create vite@latest my-odt-app -- --template vanilla
+<span class="kw">cd</span> my-odt-app
+npm install</pre>
+      </div>
+
+      <h2>Step 1 — Install odf-kit</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+      <p>odf-kit has zero transitive runtime dependencies. It adds minimal weight to your bundle — no XML parsers, no heavy frameworks.</p>
+
+      <h2>Step 2 — Generate a document and trigger a download</h2>
+      <p>Here's the complete pattern for creating an .odt file in the browser and downloading it:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">async function</span> <span class="fn">generateDocument</span>() {
+  <span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+
+  doc.<span class="fn">addHeading</span>(<span class="str">"Quarterly Report"</span>, <span class="num">1</span>);
+  doc.<span class="fn">addParagraph</span>(<span class="str">"Generated entirely in the browser."</span>);
+
+  doc.<span class="fn">addTable</span>([
+    [<span class="str">"Region"</span>,  <span class="str">"Revenue"</span>,  <span class="str">"Growth"</span>],
+    [<span class="str">"North"</span>,   <span class="str">"$2.1M"</span>,    <span class="str">"+12%"</span>],
+    [<span class="str">"South"</span>,   <span class="str">"$1.8M"</span>,    <span class="str">"+8%"</span>],
+  ], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+  <span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+
+  <span class="cmt">// Create a download link</span>
+  <span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+    <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+  });
+  <span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+  <span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+  a.href = url;
+  a.download = <span class="str">"report.odt"</span>;
+  a.<span class="fn">click</span>();
+  URL.<span class="fn">revokeObjectURL</span>(url);
+}
+
+<span class="cmt">// Wire it to a button</span>
+document.<span class="fn">querySelector</span>(<span class="str">"#generate-btn"</span>)
+  .<span class="fn">addEventListener</span>(<span class="str">"click"</span>, generateDocument);</pre>
+      </div>
+      <p>That's it. When the user clicks the button, a valid .odt file is generated in memory, converted to a Blob, and downloaded. No network requests. No server. The data exists only in the browser tab.</p>
+
+      <h2>Step 3 — Fill a template from a file input</h2>
+      <p>If you have an existing .odt template created in LibreOffice, you can let the user upload it and fill it with data — entirely client-side:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> input = document.<span class="fn">querySelector</span>(<span class="str">"#template-file"</span>);
+
+input.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, <span class="kw">async</span> (e) <span class="kw">=></span> {
+  <span class="kw">const</span> file = e.target.files[<span class="num">0</span>];
+  <span class="kw">const</span> buffer = <span class="kw">new</span> <span class="typ">Uint8Array</span>(
+    <span class="kw">await</span> file.<span class="fn">arrayBuffer</span>()
+  );
+
+  <span class="kw">const</span> result = <span class="fn">fillTemplate</span>(buffer, {
+    <span class="typ">customer</span>: <span class="str">"Acme Corp"</span>,
+    <span class="typ">date</span>: <span class="kw">new</span> <span class="typ">Date</span>().<span class="fn">toLocaleDateString</span>(),
+    <span class="typ">items</span>: [
+      { <span class="typ">product</span>: <span class="str">"Widget"</span>, <span class="typ">qty</span>: <span class="num">5</span>, <span class="typ">price</span>: <span class="str">"$125"</span> },
+      { <span class="typ">product</span>: <span class="str">"Gadget"</span>, <span class="typ">qty</span>: <span class="num">3</span>, <span class="typ">price</span>: <span class="str">"$120"</span> },
+    ],
+  });
+
+  <span class="cmt">// Download the filled document</span>
+  <span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([result], {
+    <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+  });
+  <span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+  <span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+  a.href = url;
+  a.download = <span class="str">"invoice.odt"</span>;
+  a.<span class="fn">click</span>();
+  URL.<span class="fn">revokeObjectURL</span>(url);
+});</pre>
+      </div>
+      <p>The template file is read locally with the File API. It never leaves the browser. The <code>fillTemplate()</code> function replaces all <code>{placeholders}</code> with your data, including loops (<code>{#items}...{/items}</code>) and conditionals. The filled document downloads immediately.</p>
+
+      <h2>Step 4 — Add images from fetch or file input</h2>
+      <p>In the browser, you load images with <code>fetch()</code> instead of <code>fs.readFile()</code>:</p>
+      <div class="code-block">
+        <pre><span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"logo.png"</span>);
+<span class="kw">const</span> logoBytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(
+  <span class="kw">await</span> response.<span class="fn">arrayBuffer</span>()
+);
+
+doc.<span class="fn">addImage</span>(logoBytes, <span class="str">"image/png"</span>, {
+  <span class="typ">width</span>: <span class="str">"5cm"</span>,
+  <span class="typ">height</span>: <span class="str">"2cm"</span>,
+});</pre>
+      </div>
+      <p>You can also get image bytes from a <code>&lt;canvas&gt;</code> element, a user-uploaded file, or any other source that produces a <code>Uint8Array</code> or <code>ArrayBuffer</code>.</p>
+
+      <h2>How it works under the hood</h2>
+      <p>An .odt file is a ZIP archive containing XML files and embedded resources. odf-kit builds the XML in memory, compresses it with <a href="https://github.com/101arrowz/fflate">fflate</a> (a fast, pure-JavaScript ZIP library), and returns the result as a <code>Uint8Array</code>. There are no Node.js-specific APIs anywhere in the library — the TypeScript build enforces this at compile time. The same code runs in Node.js, browsers, Deno, Bun, and Cloudflare Workers.</p>
+      <p>The <code>Blob</code> + <code>URL.createObjectURL()</code> pattern is the standard way to trigger file downloads in the browser without a server. The browser creates a temporary URL pointing to the in-memory data, the <code>&lt;a&gt;</code> element triggers the download dialog, and <code>revokeObjectURL()</code> frees the memory.</p>
+
+      <h2>Browser compatibility</h2>
+      <p>odf-kit works in all modern browsers: Chrome, Firefox, Safari, and Edge. It uses only standard web APIs — <code>TextEncoder</code>, <code>Uint8Array</code>, <code>Blob</code>, <code>URL.createObjectURL()</code> — that are available in all browsers shipped since 2018. No polyfills needed.</p>
+
+      <h2>Complete example — "Export as .odt" button</h2>
+      <p>Here's a realistic example: a web application that lets users generate a formatted report and download it as an .odt file:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">async function</span> <span class="fn">exportReport</span>(data) {
+  <span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+
+  doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: data.title });
+  doc.<span class="fn">setFooter</span>(<span class="str">"Page ###"</span>);
+
+  doc.<span class="fn">addHeading</span>(data.title, <span class="num">1</span>);
+  doc.<span class="fn">addParagraph</span>(<span class="str">`Generated on ${<span class="kw">new</span> <span class="typ">Date</span>().<span class="fn">toLocaleDateString</span>()}`</span>);
+
+  doc.<span class="fn">addHeading</span>(<span class="str">"Summary"</span>, <span class="num">2</span>);
+  doc.<span class="fn">addParagraph</span>(data.summary);
+
+  doc.<span class="fn">addHeading</span>(<span class="str">"Data"</span>, <span class="num">2</span>);
+  doc.<span class="fn">addTable</span>(
+    [data.columns, ...data.rows],
+    { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> }
+  );
+
+  doc.<span class="fn">addHeading</span>(<span class="str">"Notes"</span>, <span class="num">2</span>);
+  doc.<span class="fn">addList</span>(data.notes);
+
+  <span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+
+  <span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+    <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+  });
+  <span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+  <span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+  a.href = url;
+  a.download = <span class="str">`${data.title}.odt`</span>;
+  a.<span class="fn">click</span>();
+  URL.<span class="fn">revokeObjectURL</span>(url);
+}
+
+<span class="cmt">// Use it with your application data</span>
+<span class="fn">exportReport</span>({
+  <span class="typ">title</span>: <span class="str">"Q4 Sales Report"</span>,
+  <span class="typ">summary</span>: <span class="str">"Revenue exceeded targets in all regions."</span>,
+  <span class="typ">columns</span>: [<span class="str">"Region"</span>, <span class="str">"Revenue"</span>, <span class="str">"Growth"</span>],
+  <span class="typ">rows</span>: [
+    [<span class="str">"North"</span>, <span class="str">"$2.1M"</span>, <span class="str">"+12%"</span>],
+    [<span class="str">"South"</span>, <span class="str">"$1.8M"</span>, <span class="str">"+8%"</span>],
+    [<span class="str">"East"</span>,  <span class="str">"$1.5M"</span>, <span class="str">"+15%"</span>],
+  ],
+  <span class="typ">notes</span>: [
+    <span class="str">"All figures are unaudited"</span>,
+    <span class="str">"Growth is year-over-year"</span>,
+  ],
+});</pre>
+      </div>
+
+      <h2>When to use browser generation vs. server generation</h2>
+      <p>Client-side generation is ideal when you want to keep data private, reduce server load, or build offline-capable tools. Server-side generation (Node.js) is better when you need to batch-generate hundreds of documents, integrate with databases, or run in a CI/CD pipeline. odf-kit uses the same API in both environments — the only difference is how you read input files and write output files.</p>
+
+      <h2>What about .odt instead of .docx?</h2>
+      <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. It's the default format for LibreOffice, and it's required by many governments including the European Union, Germany, France, Italy, the Netherlands, the United Kingdom, Brazil, and India. If your users work with LibreOffice, or your application serves public sector organizations, .odt is the right choice. The files also open in Google Docs and Microsoft Word.</p>
+
+      <h2>Also works server-side</h2>
+      <p>The same API works in Node.js 18+, Deno, Bun, and Cloudflare Workers. See the <a href="generate-odt-nodejs.html">Generate .odt Files in Node.js</a> guide for server-side examples, or the <a href="fill-odt-template-javascript.html">Fill .odt Templates with JavaScript</a> guide for the template engine.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Start generating .odt files in the browser</h2>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

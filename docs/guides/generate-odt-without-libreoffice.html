@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate .odt Files Without LibreOffice — Lightweight JavaScript Alternative</title>
+  <meta name="description" content="Generate .odt files without installing LibreOffice on your server. odf-kit is a lightweight JavaScript library that creates OpenDocument files from code — no headless LibreOffice, no 500 MB dependency, no process management. Works in Node.js, browsers, Deno, and serverless environments.">
+  <meta name="keywords" content="generate odt without libreoffice, create odt no libreoffice, odt generation javascript, libreoffice headless alternative, odt without libreoffice server, lightweight odt generation, odt serverless, odt cloudflare workers, odt lambda, create odt programmatically, generate opendocument without libreoffice, odt docker lightweight, libreoffice headless convert odt, odt node.js no libreoffice">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Generate .odt Files Without LibreOffice">
+  <meta property="og:description" content="Create .odt documents from JavaScript — no LibreOffice installation, no headless mode, no 500 MB dependency. Lightweight and serverless-compatible.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Generate .odt Files Without LibreOffice",
+    "description": "Create OpenDocument Format files from JavaScript without installing LibreOffice. A lightweight alternative to headless LibreOffice for document generation.",
+    "author": { "@type": "Person", "name": "GitHubNewbie0" },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": "odf-kit",
+      "url": "https://www.npmjs.com/package/odf-kit",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .compare-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.92rem; }
+    .compare-table th { text-align: left; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); font-weight: 600; color: var(--text); }
+    .compare-table td { padding: 0.75rem 1rem; border: 1px solid var(--border); color: var(--text-secondary); }
+    .compare-table tr:nth-child(even) td { background: var(--surface); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .compare-table { font-size: 0.82rem; }
+      .compare-table th, .compare-table td { padding: 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>Generate .odt Without LibreOffice</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · Lightweight · No LibreOffice Required</div>
+      <h1>Generate .odt files without LibreOffice</h1>
+      <p>You don't need a 500 MB LibreOffice installation to create .odt documents. odf-kit is a lightweight JavaScript library that generates OpenDocument files directly from code — in Node.js, browsers, Deno, Bun, or any serverless environment.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>The headless LibreOffice approach — and its problems</h2>
+      <p>The most common advice for generating .odt files on a server is to install LibreOffice and run it in headless mode:</p>
+      <div class="code-block">
+        <pre><span class="cmt"># The traditional approach</span>
+libreoffice --headless --convert-to odt input.html</pre>
+      </div>
+      <p>This works for converting between formats, but it comes with serious operational overhead:</p>
+      <ul>
+        <li><strong>Massive dependency</strong> — LibreOffice is 500+ MB installed. Your Docker image goes from lean to enormous. Build times increase, deployment is slower, and storage costs rise.</li>
+        <li><strong>Process management</strong> — LibreOffice runs as a separate process. You need to handle startup time, memory limits, timeouts, zombie processes, and concurrent execution. Each conversion spawns a new process or locks a shared instance.</li>
+        <li><strong>Scaling difficulties</strong> — Under load, LibreOffice headless becomes a bottleneck. It's CPU-intensive, single-threaded per conversion, and difficult to scale horizontally without significant infrastructure.</li>
+        <li><strong>No serverless support</strong> — LibreOffice doesn't run in AWS Lambda, Cloudflare Workers, Vercel Edge Functions, or any serverless/edge environment. The binary is too large and the execution model is incompatible.</li>
+        <li><strong>No browser support</strong> — LibreOffice is a native application. It can't run in a web browser. If you want client-side document generation, it's not an option.</li>
+        <li><strong>Security surface</strong> — Running a full office suite on your server expands your attack surface. LibreOffice has had CVEs, and keeping it patched adds maintenance burden.</li>
+      </ul>
+
+      <h2>The lightweight alternative</h2>
+      <p>If your goal is to <em>create</em> .odt documents — reports, invoices, letters, permits, form fills — you don't need LibreOffice at all. odf-kit generates valid .odt files directly from JavaScript or TypeScript:</p>
+
+      <table class="compare-table">
+        <tr>
+          <th></th>
+          <th>LibreOffice headless</th>
+          <th>odf-kit</th>
+        </tr>
+        <tr>
+          <td>Install size</td>
+          <td>500+ MB</td>
+          <td>~50 KB (npm package)</td>
+        </tr>
+        <tr>
+          <td>Runtime dependencies</td>
+          <td>System packages, fonts, Java (optional)</td>
+          <td>Zero</td>
+        </tr>
+        <tr>
+          <td>Startup time</td>
+          <td>Seconds</td>
+          <td>Instant (library import)</td>
+        </tr>
+        <tr>
+          <td>Concurrent generation</td>
+          <td>Limited by process/memory</td>
+          <td>Limited only by Node.js event loop</td>
+        </tr>
+        <tr>
+          <td>Serverless / edge</td>
+          <td>Not possible</td>
+          <td>Works anywhere JavaScript runs</td>
+        </tr>
+        <tr>
+          <td>Browser</td>
+          <td>Not possible</td>
+          <td>Full support</td>
+        </tr>
+        <tr>
+          <td>Docker image impact</td>
+          <td>+500 MB base, slower builds</td>
+          <td>No impact</td>
+        </tr>
+        <tr>
+          <td>Format conversion (e.g., .odt → PDF)</td>
+          <td>Yes</td>
+          <td>No — generation only</td>
+        </tr>
+        <tr>
+          <td>Edit existing complex documents</td>
+          <td>Yes</td>
+          <td>Template filling only</td>
+        </tr>
+      </table>
+
+      <div class="callout">
+        <p><strong>When you still need LibreOffice:</strong> If you need to convert .odt to PDF, render complex existing documents, or perform format conversion between office formats, LibreOffice headless is still the right tool. odf-kit is for creating new documents and filling templates — the tasks where LibreOffice is overkill.</p>
+      </div>
+
+      <h2>Quick start</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { <span class="fn">writeFileSync</span> } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+
+doc.<span class="fn">setMetadata</span>({ <span class="typ">title</span>: <span class="str">"Monthly Report"</span> });
+doc.<span class="fn">setHeader</span>(<span class="str">"Confidential — Page ###"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Monthly Report"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"All systems operational."</span>);
+
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"System"</span>,  <span class="str">"Status"</span>,  <span class="str">"Uptime"</span>],
+  [<span class="str">"API"</span>,     <span class="str">"OK"</span>,      <span class="str">"99.95%"</span>],
+  [<span class="str">"Database"</span>,<span class="str">"OK"</span>,      <span class="str">"99.99%"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+doc.<span class="fn">addList</span>([
+  <span class="str">"No incidents this month"</span>,
+  <span class="str">"Scheduled maintenance completed"</span>,
+], { <span class="typ">type</span>: <span class="str">"numbered"</span> });
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="fn">writeFileSync</span>(<span class="str">"report.odt"</span>, bytes);</pre>
+      </div>
+
+      <p>No LibreOffice process. No binary dependency. The file is generated in-process, in milliseconds, and the output opens correctly in LibreOffice, Google Docs, and Microsoft Word.</p>
+
+      <h2>Fill templates without LibreOffice</h2>
+      <p>If you have an existing .odt template designed in LibreOffice, you can fill it with data programmatically — without needing LibreOffice installed on the server that runs the code:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { <span class="fn">readFileSync</span>, <span class="fn">writeFileSync</span> } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> template = <span class="fn">readFileSync</span>(<span class="str">"template.odt"</span>);
+<span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
+  <span class="typ">name</span>: <span class="str">"Alice"</span>,
+  <span class="typ">company</span>: <span class="str">"Acme Corp"</span>,
+  <span class="typ">items</span>: [
+    { <span class="typ">product</span>: <span class="str">"Widget"</span>, <span class="typ">qty</span>: <span class="num">5</span> },
+    { <span class="typ">product</span>: <span class="str">"Gadget"</span>, <span class="typ">qty</span>: <span class="num">3</span> },
+  ],
+});
+<span class="fn">writeFileSync</span>(<span class="str">"output.odt"</span>, result);</pre>
+      </div>
+
+      <p>The template uses <code>{placeholder}</code> syntax with support for loops (<code>{#items}...{/items}</code>), conditionals, and dot notation for nested data. odf-kit automatically heals fragmented placeholders that LibreOffice splits across XML elements during editing.</p>
+
+      <h2>Serverless and edge deployment</h2>
+      <p>Because odf-kit is a pure JavaScript library with zero native dependencies, it runs in environments where LibreOffice simply cannot:</p>
+      <ul>
+        <li><strong>AWS Lambda</strong> — import and call, no layers or custom runtimes needed</li>
+        <li><strong>Cloudflare Workers</strong> — runs at the edge, no origin server</li>
+        <li><strong>Vercel / Netlify Functions</strong> — works in any Node.js serverless function</li>
+        <li><strong>Deno Deploy</strong> — ESM import works out of the box</li>
+        <li><strong>Docker</strong> — your image stays lean; no <code>apt-get install libreoffice</code></li>
+      </ul>
+      <p>For browser usage — where LibreOffice is impossible — see the <a href="generate-odt-browser.html">browser generation guide</a>.</p>
+
+      <h2>Lean Docker example</h2>
+      <p>Here's how small your Dockerfile stays:</p>
+      <div class="code-block">
+        <pre><span class="kw">FROM</span> node:<span class="num">18</span>-alpine
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci --production
+<span class="kw">COPY</span> . .
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"generate.mjs"</span>]</pre>
+      </div>
+      <p>Compare this to a Dockerfile that installs LibreOffice — which requires a Debian or Ubuntu base image, <code>apt-get install libreoffice</code>, font packages, and typically pushes your image past 1 GB. With odf-kit, your Alpine-based image stays under 100 MB.</p>
+
+      <h2>What odf-kit supports</h2>
+      <p>odf-kit generates valid ODF 1.2+ .odt files with: headings (levels 1–6), paragraphs with full text formatting (bold, italic, underline, strikethrough, superscript, subscript, font size, font family, color, highlight), tables with borders, column widths, cell formatting, row/column spans, numbered and bulleted lists with nesting, images (PNG, JPEG), hyperlinks and internal bookmarks, headers and footers with automatic page numbers, page layout (orientation, margins, paper size), tab stops, page breaks, document metadata, and method chaining.</p>
+      <p>The template engine supports placeholder replacement, loops over arrays, conditionals on truthy/falsy values, dot notation for nested objects, and automatic placeholder healing.</p>
+
+      <h2>Related guides</h2>
+      <p>For detailed tutorials, see the <a href="generate-odt-nodejs.html">Node.js generation guide</a>, the <a href="generate-odt-browser.html">browser generation guide</a>, and the <a href="fill-odt-template-javascript.html">template filling guide</a>. For a comparison with the abandoned simple-odf library, see the <a href="simple-odf-alternative.html">simple-odf alternative</a> page. For government compliance use cases, see the <a href="odf-government-compliance.html">ODF government compliance guide</a>.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Drop the 500 MB dependency</h2>
+      <p>Generate .odt files from JavaScript. Zero dependencies. Runs anywhere.</p>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

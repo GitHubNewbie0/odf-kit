@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ODF Document Generation for Government Compliance (ISO 26300) — odf-kit Guide</title>
+  <meta name="description" content="Generate ODF-compliant documents programmatically for government and public sector applications. Meet ISO/IEC 26300 requirements mandated by the EU, NATO, Germany, France, Italy, the Netherlands, the UK, Brazil, and India. JavaScript and TypeScript library for open standard document generation.">
+  <meta name="keywords" content="ODF government compliance, ISO 26300 document generation, open document format government, ODF mandate EU, generate odt government, public sector document generation, ODF compliance JavaScript, open standard documents, government document format, ODF ISO standard, NATO ODF, EU ODF requirement, LibreOffice government, open document format compliance, digital sovereignty documents">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ODF Document Generation for Government Compliance (ISO 26300)">
+  <meta property="og:description" content="Generate ODF-compliant documents for public sector applications. Meet ISO/IEC 26300 mandates with JavaScript.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "ODF Document Generation for Government Compliance (ISO 26300)",
+    "description": "How to generate ODF-compliant documents programmatically for government and public sector applications using JavaScript and TypeScript.",
+    "author": { "@type": "Person", "name": "GitHubNewbie0" },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": "odf-kit",
+      "url": "https://www.npmjs.com/package/odf-kit",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content h3 { font-size: 1.1rem; font-weight: 700; margin: 1.75rem 0 0.5rem; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .mandate-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.92rem; }
+    .mandate-table th { text-align: left; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); font-weight: 600; color: var(--text); }
+    .mandate-table td { padding: 0.75rem 1rem; border: 1px solid var(--border); color: var(--text-secondary); }
+    .mandate-table tr:nth-child(even) td { background: var(--surface); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .mandate-table { font-size: 0.82rem; }
+      .mandate-table th, .mandate-table td { padding: 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>ODF Government Compliance</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · Compliance · ISO/IEC 26300</div>
+      <h1>ODF document generation for government compliance</h1>
+      <p>Dozens of countries mandate the OpenDocument Format for public sector documents. If you're building software for government, non-profits, or any organization subject to open format requirements, here's how to generate compliant .odt files programmatically with JavaScript or TypeScript.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>What is ODF and why do governments require it?</h2>
+      <p>The OpenDocument Format (ODF) is an international standard for office documents, published as ISO/IEC 26300. Unlike proprietary formats such as .docx (OOXML), ODF is vendor-independent — it doesn't depend on any single company's software. Any application can implement it fully from the published specification.</p>
+      <p>This matters for governments because of digital sovereignty: the principle that public institutions should not be locked into a single vendor's ecosystem for critical infrastructure like document management. When a government stores its records in a proprietary format, it depends on that vendor's continued support, pricing decisions, and backwards compatibility. ODF eliminates that dependency.</p>
+      <p>ODF is the default format for LibreOffice, Apache OpenOffice, Collabora Online, and OnlyOffice. It is also supported by Google Docs and Microsoft Word (though Microsoft's implementation has historically been incomplete).</p>
+
+      <h2>Where ODF is mandated</h2>
+      <p>The following is a summary of known ODF mandates and formal recommendations for government use. This is based on research compiled by The Document Foundation and other public sources.</p>
+
+      <h3>Supranational</h3>
+      <table class="mandate-table">
+        <tr><th>Organization</th><th>Status</th></tr>
+        <tr><td>NATO</td><td>Required for document exchange across all 28 member countries</td></tr>
+        <tr><td>United Nations</td><td>Favors open formats for reports, policy drafts, and inter-agency collaboration</td></tr>
+        <tr><td>European Commission</td><td>Promotes ODF through its open source software strategy; used internally by the European Parliament, the Commission, and the EUIPO</td></tr>
+      </table>
+
+      <h3>Europe</h3>
+      <table class="mandate-table">
+        <tr><th>Country</th><th>Status</th></tr>
+        <tr><td>Germany</td><td>ODF to be the standard for public administration by 2027. Ministry of Foreign Affairs and several federal courts already use ODF exclusively.</td></tr>
+        <tr><td>France</td><td>ODF recommended as preferred format under the Référentiel Général d'Interopérabilité (RGI)</td></tr>
+        <tr><td>Italy</td><td>Digital Administration Code permits only ODF; OOXML does not meet the code's open standard criteria</td></tr>
+        <tr><td>Netherlands</td><td>ODF mandated for all public sector data exchange; compliance actively monitored</td></tr>
+        <tr><td>United Kingdom</td><td>ODF adopted in 2014 as the sole standard for sharing and collaborating on editable documents across the public sector</td></tr>
+        <tr><td>Belgium</td><td>All federal departments required to accept and read ODF since 2007</td></tr>
+        <tr><td>Denmark</td><td>ODF mandated for state authorities for document exchange and archiving since 2011</td></tr>
+        <tr><td>Spain (Andalusia, Extremadura)</td><td>ODF required for government-to-government and government-to-citizen communication</td></tr>
+        <tr><td>Slovakia</td><td>All public authorities must be able to read and use ODF</td></tr>
+        <tr><td>Switzerland</td><td>ODF recommended for document exchange with citizens and other agencies</td></tr>
+        <tr><td>Finland</td><td>Ministry of Justice and other ministries have adopted ODF as the main document format</td></tr>
+      </table>
+
+      <h3>Americas, Asia, and Africa</h3>
+      <table class="mandate-table">
+        <tr><th>Country</th><th>Status</th></tr>
+        <tr><td>Brazil</td><td>Proprietary formats prohibited in federal administration since 2010; ODF is the standard</td></tr>
+        <tr><td>India</td><td>ODF is the preferred format under the policy on open standards for e-governance</td></tr>
+        <tr><td>Taiwan</td><td>ODF tools deployed in all schools; local governments use LibreOffice</td></tr>
+        <tr><td>South Africa</td><td>ODF listed as an accepted format under the MIOS policy</td></tr>
+        <tr><td>Uruguay</td><td>ODF required for editable public documents</td></tr>
+        <tr><td>Venezuela</td><td>ODF 1.0 required for all federal government editable documents</td></tr>
+        <tr><td>Argentina (Misiones)</td><td>ODF mandatory within government organizations</td></tr>
+      </table>
+
+      <h2>The developer's problem</h2>
+      <p>The mandate is clear — use ODF. But if you're building a web application, a reporting system, or an automation pipeline that needs to generate documents, you need a library that produces valid .odt files. Until recently, the JavaScript and TypeScript ecosystem had no actively maintained option. The most commonly referenced library, simple-odf, was abandoned in 2023 and never produced proper ZIP-packaged .odt files that could open in LibreOffice.</p>
+      <p>odf-kit fills that gap. It generates valid ODF 1.2+ compliant .odt files from JavaScript or TypeScript, works in Node.js and browsers, has zero runtime dependencies, and is actively maintained under the Apache 2.0 license.</p>
+
+      <h2>Quick start — generating a compliant document</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { <span class="fn">writeFileSync</span> } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+
+doc.<span class="fn">setMetadata</span>({
+  <span class="typ">title</span>: <span class="str">"Annual Budget Proposal"</span>,
+  <span class="typ">creator</span>: <span class="str">"Department of Finance"</span>,
+  <span class="typ">description</span>: <span class="str">"FY 2027 proposed budget allocation"</span>,
+});
+
+doc.<span class="fn">setPageLayout</span>({ <span class="typ">orientation</span>: <span class="str">"portrait"</span> });
+doc.<span class="fn">setHeader</span>(<span class="str">"CONFIDENTIAL — Page ###"</span>);
+doc.<span class="fn">setFooter</span>(<span class="str">"Department of Finance — FY 2027"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Annual Budget Proposal"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Fiscal Year 2027 — Prepared for City Council"</span>);
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Allocation by Department"</span>, <span class="num">2</span>);
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Department"</span>,    <span class="str">"Requested"</span>, <span class="str">"Approved"</span>],
+  [<span class="str">"Public Works"</span>,  <span class="str">"$4.2M"</span>,    <span class="str">"$3.8M"</span>],
+  [<span class="str">"Education"</span>,     <span class="str">"$8.1M"</span>,    <span class="str">"$7.9M"</span>],
+  [<span class="str">"Public Safety"</span>, <span class="str">"$6.5M"</span>,    <span class="str">"$6.5M"</span>],
+  [<span class="str">"Parks"</span>,         <span class="str">"$1.1M"</span>,    <span class="str">"$0.9M"</span>],
+], { <span class="typ">border</span>: <span class="str">"0.5pt solid #000"</span> });
+
+doc.<span class="fn">addHeading</span>(<span class="str">"Notes"</span>, <span class="num">2</span>);
+doc.<span class="fn">addList</span>([
+  <span class="str">"All figures are preliminary and subject to council vote"</span>,
+  <span class="str">"Education allocation includes $500K for technology upgrades"</span>,
+  <span class="str">"Public Safety allocation unchanged from FY 2026"</span>,
+], { <span class="typ">type</span>: <span class="str">"numbered"</span> });
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="fn">writeFileSync</span>(<span class="str">"budget-proposal.odt"</span>, bytes);</pre>
+      </div>
+
+      <p>The output file opens correctly in LibreOffice, Google Docs, and Microsoft Word. It contains proper ODF XML structure with styles, metadata, and formatting — not a renamed HTML file or a flat XML dump.</p>
+
+      <h2>Template-based generation for standardized forms</h2>
+      <p>Many government workflows use standardized document templates — resolutions, permits, notices, reports with a fixed layout. odf-kit's template engine lets you create these templates in LibreOffice (where non-technical staff can design them) and fill them with data from your application:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { <span class="fn">readFileSync</span>, <span class="fn">writeFileSync</span> } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> template = <span class="fn">readFileSync</span>(<span class="str">"resolution-template.odt"</span>);
+
+<span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
+  <span class="typ">resolution_number</span>: <span class="str">"2027-042"</span>,
+  <span class="typ">date</span>: <span class="str">"March 15, 2027"</span>,
+  <span class="typ">title</span>: <span class="str">"Approval of FY 2027 Budget"</span>,
+  <span class="typ">council_members</span>: [
+    { <span class="typ">name</span>: <span class="str">"Maria Santos"</span>, <span class="typ">vote</span>: <span class="str">"Yes"</span> },
+    { <span class="typ">name</span>: <span class="str">"James Chen"</span>,   <span class="typ">vote</span>: <span class="str">"Yes"</span> },
+    { <span class="typ">name</span>: <span class="str">"Anya Patel"</span>,   <span class="typ">vote</span>: <span class="str">"No"</span> },
+  ],
+  <span class="typ">showAppendix</span>: <span class="kw">true</span>,
+  <span class="typ">appendix</span>: <span class="str">"See attached financial summary."</span>,
+});
+
+<span class="fn">writeFileSync</span>(<span class="str">"resolution-2027-042.odt"</span>, result);</pre>
+      </div>
+
+      <p>The template uses <code>{placeholder}</code> syntax: <code>{resolution_number}</code>, <code>{date}</code>, and so on. Loops use <code>{#council_members}...{/council_members}</code> to repeat a section for each array item. Conditionals use the same syntax with a boolean: <code>{#showAppendix}...{/showAppendix}</code> includes the section only when the value is truthy.</p>
+
+      <h2>Browser-based generation for citizen-facing applications</h2>
+      <p>odf-kit also works entirely in the browser — no server required. This is particularly relevant for government applications where data privacy is critical. A citizen filling out a form on a government website can generate their document locally, without their data ever being transmitted to a server:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">async function</span> <span class="fn">generatePermit</span>(formData) {
+  <span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+  doc.<span class="fn">addHeading</span>(<span class="str">"Building Permit Application"</span>, <span class="num">1</span>);
+  doc.<span class="fn">addParagraph</span>(<span class="str">`Applicant: ${formData.name}`</span>);
+  doc.<span class="fn">addParagraph</span>(<span class="str">`Property: ${formData.address}`</span>);
+  doc.<span class="fn">addParagraph</span>(<span class="str">`Date: ${<span class="kw">new</span> <span class="typ">Date</span>().<span class="fn">toLocaleDateString</span>()}`</span>);
+
+  <span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+
+  <span class="cmt">// Download — data never leaves the browser</span>
+  <span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+    <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>,
+  });
+  <span class="kw">const</span> url = URL.<span class="fn">createObjectURL</span>(blob);
+  <span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+  a.href = url;
+  a.download = <span class="str">"permit-application.odt"</span>;
+  a.<span class="fn">click</span>();
+  URL.<span class="fn">revokeObjectURL</span>(url);
+}</pre>
+      </div>
+
+      <p>See the full <a href="generate-odt-browser.html">browser generation guide</a> for more details on client-side usage.</p>
+
+      <h2>Why not just use LibreOffice on the server?</h2>
+      <p>Many developers generate ODF documents by running LibreOffice in headless mode on a server (<code>libreoffice --headless --convert-to odt</code>). This works but comes with significant trade-offs: LibreOffice is a 500+ MB dependency that requires a full installation, process management, and careful resource allocation. It's slow to start, hard to scale, and unavailable in serverless or edge environments. It also cannot run in the browser.</p>
+      <p>odf-kit is a lightweight alternative: a 50 KB npm package with zero dependencies that generates .odt files directly from JavaScript. It runs anywhere JavaScript runs — Node.js, browsers, Deno, Bun, Cloudflare Workers. For document creation and template filling, it's a simpler and more scalable approach. If you need full document conversion (e.g., .odt to PDF), LibreOffice is still the right tool for that specific task.</p>
+
+      <h2>What odf-kit generates</h2>
+      <p>odf-kit produces standard ODF 1.2+ .odt files — proper ZIP archives containing <code>content.xml</code>, <code>styles.xml</code>, <code>meta.xml</code>, <code>manifest.xml</code>, and the <code>mimetype</code> entry. The output passes validation and opens correctly in all ODF-compliant applications. The library supports headings, paragraphs, formatted text (bold, italic, underline, color, font), tables with borders and cell formatting, numbered and bulleted lists, images, hyperlinks, bookmarks, headers and footers with page numbers, page layout and margins, and document metadata.</p>
+
+      <h2>License and availability</h2>
+      <p>odf-kit is free and open source under the Apache 2.0 license. There are no usage fees, no per-document charges, and no premium tiers. It's published on npm and the source code is available on GitHub. It's registered in the Developers Italia catalog for Italian public administration and listed on The Document Foundation's community resources.</p>
+
+      <h2>Learn more</h2>
+      <p>For step-by-step tutorials, see the <a href="generate-odt-nodejs.html">Node.js generation guide</a>, the <a href="generate-odt-browser.html">browser generation guide</a>, and the <a href="fill-odt-template-javascript.html">template filling guide</a>. For a comparison with the abandoned simple-odf library, see the <a href="simple-odf-alternative.html">simple-odf alternative</a> page.</p>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Generate ODF-compliant documents from JavaScript</h2>
+      <p>Works in Node.js and browsers. Zero dependencies. Apache 2.0.</p>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
