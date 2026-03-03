@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-03-03</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-nodejs.html</loc>
@@ -15,5 +15,21 @@
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html</loc>
     <lastmod>2026-02-23</lastmod>
+  </url>
+  <url>
+    <loc>https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html</loc>
+    <lastmod>2026-03-03</lastmod>
+  </url>
+  <url>
+    <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html</loc>
+    <lastmod>2026-03-03</lastmod>
+  </url>
+  <url>
+    <loc>https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html</loc>
+    <lastmod>2026-03-03</lastmod>
+  </url>
+  <url>
+    <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html</loc>
+    <lastmod>2026-03-03</lastmod>
   </url>
 </urlset>

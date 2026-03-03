@@ -959,11 +959,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       </div>
       <div class="faq-item">
         <h3>Does odf-kit work for government ODF compliance requirements?</h3>
-        <p>odf-kit generates ODF 1.2+ documents per ISO/IEC 26300, the international standard mandated by the European Union, many national governments, and public sector organizations. The output opens in LibreOffice and any ODF-compliant application.</p>
+        <p>odf-kit generates ODF 1.2+ documents per ISO/IEC 26300, the international standard mandated by the European Union, many national governments, and public sector organizations. The output opens in LibreOffice and any ODF-compliant application. See the <a href="guides/odf-government-compliance.html">government compliance guide</a> for a full list of mandates and implementation details.</p>
       </div>
       <div class="faq-item">
         <h3>Can I use odf-kit to create LibreOffice documents from my web application?</h3>
-        <p>Yes. odf-kit works both server-side in Node.js and client-side in the browser. You can generate .odt files on your backend and serve them as downloads, or generate them entirely in the browser — user data never leaves the page. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF.</p>
+        <p>Yes. odf-kit works both server-side in Node.js and client-side in the browser. You can generate .odt files on your backend and serve them as downloads, or generate them entirely in the browser — user data never leaves the page. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF. See the <a href="guides/generate-odt-browser.html">browser generation guide</a> for a complete walkthrough.</p>
       </div>
       <div class="faq-item">
         <h3>What's the difference between .odt and .docx?</h3>
@@ -974,7 +974,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <p>We have detailed guides for common tasks:</p>
         <ul style="margin-top: 0.5rem; padding-left: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8;">
           <li><a href="guides/generate-odt-nodejs.html">Generate .odt files in Node.js</a> — programmatic document creation</li>
+          <li><a href="guides/generate-odt-browser.html">Generate .odt files in the browser</a> — client-side generation, no server needed</li>
           <li><a href="guides/fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — template engine walkthrough</li>
+          <li><a href="guides/odf-government-compliance.html">ODF for government compliance</a> — ISO 26300 mandates and implementation</li>
+          <li><a href="guides/generate-odt-without-libreoffice.html">Generate .odt without LibreOffice</a> — lightweight alternative to headless LibreOffice</li>
+          <li><a href="guides/docxtemplater-odf-alternative.html">Free docxtemplater alternative for ODF</a> — comparison for .odt template filling</li>
           <li><a href="guides/simple-odf-alternative.html">Migrating from simple-odf</a> — comparison and migration guide</li>
         </ul>
       </div>
@@ -1002,7 +1006,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <a href="https://www.npmjs.com/package/odf-kit">npm</a> · 
         <a href="https://github.com/GitHubNewbie0/odf-kit/blob/main/CHANGELOG.md">Changelog</a> · 
         <a href="guides/generate-odt-nodejs.html">Generate Guide</a> · 
+        <a href="guides/generate-odt-browser.html">Browser Guide</a> · 
         <a href="guides/fill-odt-template-javascript.html">Template Guide</a> · 
+        <a href="guides/odf-government-compliance.html">Government Guide</a> · 
+        <a href="guides/generate-odt-without-libreoffice.html">No-LibreOffice Guide</a> · 
+        <a href="guides/docxtemplater-odf-alternative.html">docxtemplater Alternative</a> · 
         <a href="guides/simple-odf-alternative.html">Migration Guide</a>
       </p>
       <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
