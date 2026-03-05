@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working with ODT Files in JavaScript — Parse, Convert, and Generate .odt Documents</title>
+  <meta name="description" content="The complete guide to ODT files in JavaScript and Node.js. Parse and extract text from .odt files, convert ODT to HTML or PDF, and generate new .odt documents programmatically. Covers officeparser, textract, odt2html, LibreOffice headless, and odf-kit.">
+  <meta name="keywords" content="odt javascript, odt node.js, npm odt, odt parser npm, odt to html, odt to pdf nodejs, parse odt file javascript, read odt file node, odt-to-html, npm odt-to-html package, npm install odt-to-html, odt-parser npm, odt text extraction, convert odt javascript, generate odt javascript, create odt node, flat xml odf text document, open document format javascript, odf javascript library, libreoffice node.js, officeparser odt, textract odt">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Working with ODT Files in JavaScript — Parse, Convert, and Generate">
+  <meta property="og:description" content="The complete guide to handling .odt files in JavaScript. Parse text, convert to HTML/PDF, and generate new documents programmatically.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Working with ODT Files in JavaScript — Parse, Convert, and Generate .odt Documents",
+    "description": "Comprehensive guide to the JavaScript ODT ecosystem. Covers parsing, converting, and generating OpenDocument Format text files in Node.js and the browser.",
+    "author": { "@type": "Person", "name": "GitHubNewbie0" },
+    "datePublished": "2026-03-04",
+    "publisher": { "@type": "Organization", "name": "odf-kit" },
+    "about": [
+      { "@type": "SoftwareApplication", "name": "odf-kit", "url": "https://www.npmjs.com/package/odf-kit" },
+      { "@type": "SoftwareApplication", "name": "officeparser", "url": "https://www.npmjs.com/package/officeparser" },
+      { "@type": "SoftwareApplication", "name": "textract", "url": "https://www.npmjs.com/package/textract" }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .callout p { margin-bottom: 0; }
+    .callout strong { color: var(--text); }
+    .pkg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .pkg-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .pkg-card h4 a { color: var(--accent); text-decoration: none; }
+    .pkg-card h4 a:hover { text-decoration: underline; }
+    .pkg-card .pkg-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .pkg-card p { font-size: 0.92rem; margin-bottom: 0; }
+    .pkg-status { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 500; }
+    .status-active { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .status-stale { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
+    .status-abandoned { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .comparison-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.88rem; }
+    .comparison-table th, .comparison-table td { padding: 0.6rem 0.8rem; border: 1px solid var(--border); text-align: left; }
+    .comparison-table th { background: #f5f5f3; font-weight: 600; font-size: 0.82rem; }
+    .comparison-table td { color: var(--text-secondary); }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .comparison-table { font-size: 0.78rem; }
+      .comparison-table th, .comparison-table td { padding: 0.4rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>ODT JavaScript Ecosystem</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Guide · Ecosystem · Parse · Convert · Generate</div>
+      <h1>Working with ODT files in JavaScript</h1>
+      <p>The complete guide to the .odt ecosystem in JavaScript and Node.js. Whether you need to parse text from existing documents, convert ODT to HTML or PDF, or generate new .odt files from scratch — here's what's available and what actually works.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>What are .odt files?</h2>
+      <p>Files with the <code>.odt</code> extension are OpenDocument Format text documents — an ISO international standard (ISO/IEC 26300) used by LibreOffice, Apache OpenOffice, Google Docs, and many government organizations worldwide. Under the hood, an .odt file is a ZIP archive containing XML files (<code>content.xml</code>, <code>styles.xml</code>, <code>meta.xml</code>) plus any embedded images. This is sometimes called a "packaged" ODF file, as opposed to a "flat" XML ODF file (<code>.fodt</code>) which stores everything in a single XML document.</p>
+
+      <p>If you're seeing references to "flat XML ODF text document" — that's the unpackaged variant. Most real-world .odt files are ZIP-packaged, and that's what the tools below handle.</p>
+
+      <h2>Three things you can do with ODT in JavaScript</h2>
+      <p>JavaScript developers working with .odt files generally need one of three things: parsing and extracting text from existing documents, converting them to other formats like HTML or PDF, or generating new .odt files programmatically. The ecosystem has different tools for each task, with varying levels of maturity and maintenance.</p>
+
+      <h2>1. Parse and extract text from .odt files</h2>
+      <p>If you need to read an existing .odt file and extract its text content — for indexing, search, text analysis, or display — these are your options:</p>
+
+      <div class="pkg-card">
+        <h4><a href="https://www.npmjs.com/package/officeparser">officeparser</a> <span class="pkg-status status-active">Active</span></h4>
+        <div class="pkg-meta">npm install officeparser · 575k+ downloads · MIT · Supports .odt, .docx, .pptx, .xlsx, .pdf</div>
+        <p>The most actively maintained option for extracting text from .odt files. Returns a structured AST with metadata, formatting, and attachment support. Works in Node.js and browsers. Handles the ZIP extraction and XML parsing internally.</p>
+      </div>
+
+      <div class="code-block"><pre>
+<span class="kw">import</span> { <span class="typ">parseOffice</span> } <span class="kw">from</span> <span class="str">"officeparser"</span>;
+
+<span class="kw">const</span> ast = <span class="kw">await</span> <span class="fn">parseOffice</span>(<span class="str">"/path/to/document.odt"</span>);
+<span class="kw">const</span> text = ast.<span class="fn">toText</span>();
+console.<span class="fn">log</span>(text);         <span class="cmt">// plain text content</span>
+console.<span class="fn">log</span>(ast.metadata);  <span class="cmt">// author, title, dates</span></pre>
+      </div>
+
+      <div class="pkg-card">
+        <h4><a href="https://www.npmjs.com/package/textract">textract</a> <span class="pkg-status status-stale">Stale</span></h4>
+        <div class="pkg-meta">npm install textract · 84k+ downloads · MIT · Supports .odt, .docx, .pdf, .xlsx, and many more</div>
+        <p>A versatile text extraction library that supports a wide range of file types. Last published 6+ years ago but still functional. Some formats require system dependencies (like <code>pdftotext</code>). Good if you need to extract text from many different file types in a single pipeline.</p>
+      </div>
+
+      <div class="pkg-card">
+        <h4><a href="https://www.npmjs.com/package/odt2html">odt2html</a> <span class="pkg-status status-abandoned">Abandoned</span></h4>
+        <div class="pkg-meta">npm install odt2html · Apache-2.0 · Last published 2016</div>
+        <p>Converts ODT to HTML by parsing the ODF XML structure and mapping it to HTML elements. Not actively maintained but may work for simple documents. Uses a SAX parser for streaming conversion.</p>
+      </div>
+
+      <h2>2. Convert .odt to HTML or PDF</h2>
+      <p>Converting an .odt file to another format is a more complex task than text extraction. The document's formatting, styles, tables, and images all need to be translated. Here are the approaches:</p>
+
+      <h3>LibreOffice headless (most reliable)</h3>
+      <p>The most reliable way to convert .odt files to HTML or PDF is to use LibreOffice in headless mode. This is a command-line approach that doesn't require JavaScript at all, but it's commonly used in Node.js workflows via <code>child_process</code>:</p>
+
+      <div class="code-block"><pre>
+<span class="cmt">// Convert .odt to PDF using LibreOffice headless</span>
+<span class="kw">import</span> { <span class="typ">execSync</span> } <span class="kw">from</span> <span class="str">"child_process"</span>;
+
+<span class="fn">execSync</span>(<span class="str">`libreoffice --headless --convert-to pdf document.odt`</span>);
+<span class="cmt">// produces document.pdf in the same directory</span>
+
+<span class="cmt">// Convert to HTML</span>
+<span class="fn">execSync</span>(<span class="str">`libreoffice --headless --convert-to html document.odt`</span>);</pre>
+      </div>
+
+      <p>This produces high-fidelity output because LibreOffice understands the full ODF specification. The downside is that LibreOffice must be installed on the server, and headless mode can be slow and resource-heavy. For a pure JavaScript approach that generates .odt files without requiring LibreOffice at all, see the <a href="generate-odt-without-libreoffice.html">Generate .odt Without LibreOffice</a> guide.</p>
+
+      <h3>Pure JavaScript conversion (limited)</h3>
+      <p>There is no mature, actively maintained pure JavaScript library for full-fidelity ODT-to-HTML or ODT-to-PDF conversion. The packages that exist (<code>odt2html</code>, <code>odt.js</code>) handle basic text and simple formatting but struggle with tables, images, complex styles, and the many edge cases in the ODF specification. If you need accurate conversion, LibreOffice headless or a cloud conversion API is the practical choice.</p>
+
+      <h2>3. Generate new .odt files</h2>
+      <p>If you need to create .odt files programmatically — generating reports, invoices, contracts, letters, or any structured document from your application data — this is the area where the ecosystem was historically weakest.</p>
+
+      <div class="pkg-card">
+        <h4><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> <span class="pkg-status status-active">Active</span></h4>
+        <div class="pkg-meta">npm install odf-kit · Apache-2.0 · Zero dependencies · Node.js + Browser</div>
+        <p>The only actively maintained JavaScript library for generating ODF documents. Build .odt files from scratch with headings, paragraphs, tables, images, lists, hyperlinks, bookmarks, and page layout — or fill existing .odt templates with data using a Mustache-style template engine. Works in Node.js and browsers with the same API. Zero runtime dependencies.</p>
+      </div>
+
+      <div class="code-block"><pre>
+<span class="cmt">// Generate a new .odt document from scratch</span>
+<span class="kw">import</span> { <span class="typ">OdtDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdtDocument</span>();
+doc.<span class="fn">addHeading</span>(<span class="str">"Quarterly Report"</span>, <span class="num">1</span>);
+doc.<span class="fn">addParagraph</span>(<span class="str">"Generated automatically from application data."</span>);
+doc.<span class="fn">addTable</span>([
+  [<span class="str">"Region"</span>, <span class="str">"Revenue"</span>, <span class="str">"Growth"</span>],
+  [<span class="str">"North"</span>, <span class="str">"$1.2M"</span>, <span class="str">"+12%"</span>],
+  [<span class="str">"South"</span>, <span class="str">"$890K"</span>, <span class="str">"+8%"</span>],
+]);
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="cmt">// → valid .odt file, opens in LibreOffice, Google Docs, Word</span></pre>
+      </div>
+
+      <div class="code-block"><pre>
+<span class="cmt">// Fill an existing .odt template with data</span>
+<span class="kw">import</span> { <span class="typ">fillTemplate</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> result = <span class="fn">fillTemplate</span>(templateBytes, {
+  <span class="typ">name</span>: <span class="str">"Alice Johnson"</span>,
+  <span class="typ">date</span>: <span class="str">"2026-03-04"</span>,
+  <span class="typ">items</span>: [
+    { <span class="typ">description</span>: <span class="str">"Consulting"</span>, <span class="typ">amount</span>: <span class="str">"$5,000"</span> },
+    { <span class="typ">description</span>: <span class="str">"Development"</span>, <span class="typ">amount</span>: <span class="str">"$12,000"</span> },
+  ],
+});
+<span class="cmt">// → .odt with {name}, {date}, {#items}...{/items} replaced</span></pre>
+      </div>
+
+      <div class="pkg-card">
+        <h4><a href="https://www.npmjs.com/package/simple-odf">simple-odf</a> <span class="pkg-status status-abandoned">Abandoned</span></h4>
+        <div class="pkg-meta">npm install simple-odf · MIT · Last published 2021</div>
+        <p>The predecessor in this space. Only produced flat XML (.fodt) files, not proper ZIP-packaged .odt documents. No support for tables, images, page layout, or templates. Abandoned since 2021. See the <a href="simple-odf-alternative.html">simple-odf migration guide</a> for a comparison with odf-kit.</p>
+      </div>
+
+      <h2>Quick comparison</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Best option</th>
+            <th>Pure JS?</th>
+            <th>Browser?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Extract text from .odt</td>
+            <td><code>officeparser</code></td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Convert .odt → HTML</td>
+            <td>LibreOffice headless</td>
+            <td>No</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Convert .odt → PDF</td>
+            <td>LibreOffice headless</td>
+            <td>No</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Generate new .odt</td>
+            <td><code>odf-kit</code></td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Fill .odt templates</td>
+            <td><code>odf-kit</code></td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>The gap in the ecosystem</h2>
+      <p>The .docx ecosystem in JavaScript is mature — libraries like <a href="https://www.npmjs.com/package/docx">docx</a> for generation and <a href="https://www.npmjs.com/package/mammoth">mammoth</a> for conversion are well-established and widely used. The .odt ecosystem has historically lagged behind, with most tools either abandoned, limited to text extraction, or dependent on LibreOffice as a backend.</p>
+
+      <p>This is significant because .odt is the ISO standard format, required by the European Union, NATO, and 20+ national governments for official documents. Many organizations, schools, and non-profits default to LibreOffice and ODF. If you're building tools for these users, you need .odt support — and until recently, the JavaScript options were limited.</p>
+
+      <p><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> was built specifically to fill the generation and template-filling gap. It's the only actively maintained library for creating .odt files in JavaScript, and it works both server-side and in the browser with zero dependencies.</p>
+
+      <h2>Common workflows</h2>
+
+      <h3>Generate .odt from a web application</h3>
+      <p>Use <code>odf-kit</code> in the browser to generate .odt files entirely client-side. User data never leaves the page. See the <a href="generate-odt-browser.html">browser generation guide</a> for a complete walkthrough.</p>
+
+      <h3>Fill templates in a CI/CD pipeline</h3>
+      <p>Create a template in LibreOffice with <code>{placeholder}</code> fields, then use <code>odf-kit</code>'s <code>fillTemplate()</code> in Node.js to produce personalized documents at build time. See the <a href="fill-odt-template-javascript.html">template guide</a>.</p>
+
+      <h3>Parse uploaded .odt files and index their content</h3>
+      <p>Use <code>officeparser</code> to extract text from .odt files uploaded by users. The extracted text can be stored in a database for full-text search, content analysis, or document management.</p>
+
+      <h3>Generate .odt for government compliance</h3>
+      <p>Many public sector organizations require ODF format for document submissions and archives. Use <code>odf-kit</code> to generate compliant documents without requiring LibreOffice on your servers. See the <a href="odf-government-compliance.html">government compliance guide</a>.</p>
+
+      <h2>More guides</h2>
+      <ul>
+        <li><a href="generate-odt-nodejs.html">Generate .odt files in Node.js</a> — step-by-step document creation</li>
+        <li><a href="generate-odt-browser.html">Generate .odt files in the browser</a> — client-side generation, no server needed</li>
+        <li><a href="fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — template engine walkthrough</li>
+        <li><a href="odf-government-compliance.html">ODF for government compliance</a> — ISO 26300 mandates and implementation</li>
+        <li><a href="generate-odt-without-libreoffice.html">Generate .odt without LibreOffice</a> — lightweight alternative</li>
+        <li><a href="docxtemplater-odf-alternative.html">Free docxtemplater alternative for ODF</a> — comparison for .odt templates</li>
+        <li><a href="simple-odf-alternative.html">Migrating from simple-odf</a> — comparison and migration guide</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Need to generate .odt files?</h2>
+      <p>odf-kit is the actively maintained library for creating OpenDocument Format files in JavaScript.</p>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
