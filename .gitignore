@@ -5,3 +5,6 @@ dist/
 *.swp
 *.swo
 coverage/
+
+validator-fixture.odt
+.~lock.*
