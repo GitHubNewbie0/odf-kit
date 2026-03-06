@@ -223,6 +223,7 @@ export class OdtDocument {
    * @param content - A string for plain text, or a callback receiving a
    *   {@link ParagraphBuilder} for formatted text with multiple runs.
    * @param level - Heading level, 1–6. Defaults to 1.
+   * @param options - Optional paragraph options (alignment, spacing, indentation).
    * @returns This document, for chaining.
    *
    * @example
@@ -233,12 +234,21 @@ export class OdtDocument {
    *   h.addText("Chapter ");
    *   h.addText("One", { italic: true });
    * }, 1);
+   *
+   * @example
+   * // Centered heading with spacing
+   * doc.addHeading("Introduction", 2, { align: "center", spaceBefore: "0.5cm" });
    */
-  addHeading(content: string | ((builder: ParagraphBuilder) => void), level: number = 1): this {
+  addHeading(
+    content: string | ((builder: ParagraphBuilder) => void),
+    level: number = 1,
+    options?: ParagraphOptions,
+  ): this {
     this.elements.push({
       type: "heading",
       level,
       runs: buildRuns(content),
+      paragraphOptions: options,
     });
     return this;
   }

@@ -391,4 +391,18 @@ describe("renderHtml — output wrapper", () => {
   test("returns empty fragment for empty body", () => {
     expect(renderHtml([], { fragment: true })).toBe("");
   });
+
+  test("full document includes charset meta tag in head", () => {
+    const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
+    const html = renderHtml(body);
+    expect(html).toContain("<head>");
+    expect(html).toContain('<meta charset="utf-8">');
+    expect(html).toContain("</head>");
+  });
+
+  test("head appears before body in full document", () => {
+    const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
+    const html = renderHtml(body);
+    expect(html.indexOf("<head>")).toBeLessThan(html.indexOf("<body>"));
+  });
 });

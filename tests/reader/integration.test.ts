@@ -367,3 +367,51 @@ describe("readOdt — round-trip hyperlinks", () => {
     expect(linkSpan?.text).toBe("our site");
   });
 });
+
+// ============================================================
+// Round-trip — mergeStyle tri-state (bold override cancellation)
+// ============================================================
+
+describe("readOdt — mergeStyle tri-state formatting", () => {
+  test("span with explicit normal weight inside bold paragraph is not bold", async () => {
+    // Create a paragraph where one run is bold via formatting and another
+    // explicitly resets to normal. The normal span must not inherit bold.
+    const doc = new OdtDocument();
+    doc.addParagraph((p) => {
+      p.addText("bold", { bold: true });
+      p.addText("normal");
+    });
+    const bytes = await doc.save();
+    const parsed = readOdt(bytes);
+
+    const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
+    const first = paragraphs[0];
+    const boldSpan = first.spans.find((s) => s.text === "bold");
+    const normalSpan = first.spans.find((s) => s.text === "normal");
+    expect(boldSpan?.bold).toBe(true);
+    expect(normalSpan?.bold).toBeUndefined();
+  });
+
+  test("bold and italic spans are independently set and cleared", async () => {
+    const doc = new OdtDocument();
+    doc.addParagraph((p) => {
+      p.addText("both", { bold: true, italic: true });
+      p.addText("bold only", { bold: true });
+      p.addText("plain");
+    });
+    const bytes = await doc.save();
+    const parsed = readOdt(bytes);
+
+    const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
+    const first = paragraphs[0];
+    const both = first.spans.find((s) => s.text === "both");
+    const boldOnly = first.spans.find((s) => s.text === "bold only");
+    const plain = first.spans.find((s) => s.text === "plain");
+    expect(both?.bold).toBe(true);
+    expect(both?.italic).toBe(true);
+    expect(boldOnly?.bold).toBe(true);
+    expect(boldOnly?.italic).toBeUndefined();
+    expect(plain?.bold).toBeUndefined();
+    expect(plain?.italic).toBeUndefined();
+  });
+});

@@ -162,16 +162,19 @@ function expandBoundary(xml: string, start: number, end: number): { start: numbe
  * orphaned tags when {#tag} or {/tag} sits inside a span or paragraph.
  *
  * After each section is processed, rescans from the beginning since
- * the string has changed.
+ * the string has changed. The loop is guaranteed to terminate: each
+ * iteration removes exactly one {#tag}...{/tag} pair from the string,
+ * so after N sections there are no more open markers.
+ *
+ * Unmatched {/tag} markers (no preceding {#tag}) are left as literal
+ * text — they pass through replaceSimple unchanged since SIMPLE_RE does
+ * not match the {/...} syntax.
  */
 function replaceSections(xml: string, data: TemplateData): string {
   let result = xml;
-  let safety = 0;
+  let match: RegExpExecArray | null;
 
-  while (safety++ < 1000) {
-    const match = SECTION_OPEN_RE.exec(result);
-    if (!match) break;
-
+  while ((match = SECTION_OPEN_RE.exec(result)) !== null) {
     const tag = match[1];
     const openTag = `{#${tag}}`;
     const closeTag = `{/${tag}}`;

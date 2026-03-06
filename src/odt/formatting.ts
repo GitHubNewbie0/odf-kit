@@ -47,7 +47,11 @@ const CSS_NAMED_COLORS: Record<string, string> = {
  * All values are resolved to their ODF-compatible form.
  */
 export interface NormalizedFormatting {
-  fontWeight?: "normal" | "bold";
+  /**
+   * Font weight as a string ready for `fo:font-weight`.
+   * Named values (`"normal"`, `"bold"`) or numeric weights (`"300"`, `"600"`).
+   */
+  fontWeight?: "normal" | "bold" | string;
   fontStyle?: "normal" | "italic";
   fontSize?: string;
   fontFamily?: string;
@@ -57,6 +61,8 @@ export interface NormalizedFormatting {
   superscript?: boolean;
   subscript?: boolean;
   highlightColor?: string;
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+  smallCaps?: boolean;
 }
 
 /**
@@ -66,14 +72,17 @@ export interface NormalizedFormatting {
  * - `italic: true` becomes `fontStyle: "italic"`
  * - `fontSize: 12` becomes `"12pt"`
  * - Named colors like `"red"` become `"#ff0000"`
+ * - Numeric `fontWeight` values (100–900) become strings (e.g. `300` → `"300"`)
  * - Explicit properties (`fontWeight`, `fontStyle`) override boolean shortcuts
  */
 export function normalizeFormatting(fmt: TextFormatting): NormalizedFormatting {
   const result: NormalizedFormatting = {};
 
-  // Font weight: explicit property wins over boolean shortcut
+  // Font weight: explicit property wins over boolean shortcut.
+  // Numeric values are converted to strings for ODF attribute emission.
   if (fmt.fontWeight !== undefined) {
-    result.fontWeight = fmt.fontWeight;
+    result.fontWeight =
+      typeof fmt.fontWeight === "number" ? String(fmt.fontWeight) : fmt.fontWeight;
   } else if (fmt.bold !== undefined) {
     result.fontWeight = fmt.bold ? "bold" : "normal";
   }
@@ -124,6 +133,16 @@ export function normalizeFormatting(fmt: TextFormatting): NormalizedFormatting {
     result.highlightColor = CSS_NAMED_COLORS[lower] ?? fmt.highlightColor;
   }
 
+  // Text transform: pass through
+  if (fmt.textTransform !== undefined) {
+    result.textTransform = fmt.textTransform;
+  }
+
+  // Small caps
+  if (fmt.smallCaps) {
+    result.smallCaps = true;
+  }
+
   return result;
 }
 
@@ -144,6 +163,8 @@ export function formattingKey(fmt: NormalizedFormatting): string {
   if (fmt.superscript) parts.push("sup:1");
   if (fmt.subscript) parts.push("sub:1");
   if (fmt.highlightColor) parts.push(`hc:${fmt.highlightColor}`);
+  if (fmt.textTransform) parts.push(`tt:${fmt.textTransform}`);
+  if (fmt.smallCaps) parts.push("sc:1");
   return parts.join("|");
 }
 

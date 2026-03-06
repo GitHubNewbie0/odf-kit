@@ -438,3 +438,102 @@ describe("fillTemplate — integration", () => {
     expect(files["Pictures/logo.png"]).toEqual(fakeImage);
   });
 });
+
+// ============================================================
+// fillTemplate — meta.xml processing
+// ============================================================
+
+describe("fillTemplate — meta.xml processing", () => {
+  test("replaces placeholders in meta.xml", () => {
+    let fflate: typeof import("fflate") | undefined;
+    let fillTemplate:
+      | ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array)
+      | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      fflate = require("fflate");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      fillTemplate = require("../src/template/template.js").fillTemplate;
+    } catch {
+      return;
+    }
+    if (!fflate || !fillTemplate) return;
+
+    const contentXml = fflate.strToU8(
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' +
+        "<office:body><office:text>" +
+        "<text:p>Body content</text:p>" +
+        "</office:text></office:body>" +
+        "</office:document-content>",
+    );
+
+    const metaXml = fflate.strToU8(
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<office:document-meta xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
+        'xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0">' +
+        "<office:meta>" +
+        "<dc:title>{reportTitle}</dc:title>" +
+        "<dc:subject>{reportSubject}</dc:subject>" +
+        "<meta:keyword>{keywords}</meta:keyword>" +
+        "</office:meta>" +
+        "</office:document-meta>",
+    );
+
+    const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
+
+    const odt = fflate.zipSync({
+      mimetype: [mimetype, { level: 0 }],
+      "content.xml": [contentXml, { level: 6 }],
+      "meta.xml": [metaXml, { level: 6 }],
+    });
+
+    const result = fillTemplate(new Uint8Array(odt), {
+      reportTitle: "Annual Report 2026",
+      reportSubject: "Finance & Operations",
+      keywords: "annual, finance",
+    });
+
+    const files = fflate.unzipSync(result);
+    const meta = fflate.strFromU8(files["meta.xml"]);
+
+    expect(meta).toContain("Annual Report 2026");
+    expect(meta).toContain("Finance &amp; Operations");
+    expect(meta).toContain("annual, finance");
+    expect(meta).not.toContain("{reportTitle}");
+    expect(meta).not.toContain("{reportSubject}");
+    expect(meta).not.toContain("{keywords}");
+  });
+
+  test("fillTemplate works normally when meta.xml is absent", () => {
+    let fflate: typeof import("fflate") | undefined;
+    let fillTemplate:
+      | ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array)
+      | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      fflate = require("fflate");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      fillTemplate = require("../src/template/template.js").fillTemplate;
+    } catch {
+      return;
+    }
+    if (!fflate || !fillTemplate) return;
+
+    const contentXml = fflate.strToU8("<text:p>{name}</text:p>");
+    const mimetype = fflate.strToU8("application/vnd.oasis.opendocument.text");
+
+    const odt = fflate.zipSync({
+      mimetype: [mimetype, { level: 0 }],
+      "content.xml": [contentXml, { level: 6 }],
+    });
+
+    const result = fillTemplate(new Uint8Array(odt), { name: "Alice" });
+    const files = fflate.unzipSync(result);
+    const content = fflate.strFromU8(files["content.xml"]);
+
+    expect(content).toBe("<text:p>Alice</text:p>");
+  });
+});

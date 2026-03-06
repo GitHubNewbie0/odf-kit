@@ -4,6 +4,7 @@ import type { XmlElement } from "../core/xml.js";
 import type {
   TextRun,
   TableData,
+  TableRowOptions,
   CellOptions,
   ListData,
   ListItemData,
@@ -34,13 +35,37 @@ export interface ContentElement {
    */
   list?: ListData;
   /**
-   * Paragraph options (tab stops). Used by "paragraph".
+   * Paragraph options (alignment, spacing, indentation, tab stops).
+   * Used by "paragraph" and "heading".
    */
   paragraphOptions?: ParagraphOptions;
   /**
    * Image data. Used by "image" (standalone image).
    */
   image?: ImageData;
+}
+
+// ─── Row Style ────────────────────────────────────────────────────────
+
+/** Normalized row properties ready for ODF style generation. */
+interface NormalizedRowStyle {
+  backgroundColor?: string;
+}
+
+/** Generate a stable key for a NormalizedRowStyle for deduplication. */
+function rowStyleKey(rs: NormalizedRowStyle): string {
+  const parts: string[] = [];
+  if (rs.backgroundColor) parts.push(`bg:${rs.backgroundColor}`);
+  return parts.join("|");
+}
+
+/** Normalize row options into resolved row style properties. */
+function normalizeRowStyle(options: TableRowOptions | undefined): NormalizedRowStyle {
+  const result: NormalizedRowStyle = {};
+  if (options?.backgroundColor) {
+    result.backgroundColor = resolveColor(options.backgroundColor);
+  }
+  return result;
 }
 
 // ─── Cell Style ───────────────────────────────────────────────────────
@@ -52,6 +77,8 @@ interface NormalizedCellStyle {
   borderBottom?: string;
   borderLeft?: string;
   borderRight?: string;
+  verticalAlign?: "top" | "middle" | "bottom";
+  padding?: string;
 }
 
 /** Generate a stable key for a NormalizedCellStyle for deduplication. */
@@ -62,6 +89,8 @@ function cellStyleKey(cs: NormalizedCellStyle): string {
   if (cs.borderBottom) parts.push(`bb:${cs.borderBottom}`);
   if (cs.borderLeft) parts.push(`bl:${cs.borderLeft}`);
   if (cs.borderRight) parts.push(`br:${cs.borderRight}`);
+  if (cs.verticalAlign) parts.push(`va:${cs.verticalAlign}`);
+  if (cs.padding) parts.push(`p:${cs.padding}`);
   return parts.join("|");
 }
 
@@ -92,6 +121,16 @@ function normalizeCellStyle(
     result.backgroundColor = resolveColor(options.backgroundColor);
   }
 
+  // Vertical alignment
+  if (options?.verticalAlign) {
+    result.verticalAlign = options.verticalAlign;
+  }
+
+  // Padding
+  if (options?.padding) {
+    result.padding = options.padding;
+  }
+
   // Clean up undefined borders
   if (!result.borderTop) delete result.borderTop;
   if (!result.borderBottom) delete result.borderBottom;
@@ -120,7 +159,10 @@ export function generateContent(
   // Collect all unique cell style combinations
   const cellStyleMap = buildCellStyleMap(elements);
 
-  // Collect paragraph styles (for tab stops)
+  // Collect all unique row style combinations
+  const rowStyleMap = buildRowStyleMap(elements);
+
+  // Collect paragraph styles (alignment, spacing, indentation, tab stops)
   const paraStyleMap = buildParagraphStyleMap(elements);
 
   // Image counter for draw:name attributes
@@ -137,6 +179,26 @@ export function generateContent(
     .attr("xmlns:svg", ODF_NS.svg)
     .attr("office:version", ODF_VERSION);
 
+  // Font face declarations — required for every font name referenced via
+  // style:font-name in any automatic style in this file.
+  // Must appear before office:automatic-styles in document order.
+  const fontFamilies = collectFontFamilies(textStyleMap);
+  if (fontFamilies.size > 0) {
+    const fontFaceDecls = el("office:font-face-decls");
+    for (const fontFamily of fontFamilies) {
+      // Wrap multi-word family names in quotes for svg:font-family
+      const svgFontFamily = fontFamily.includes(" ") ? `'${fontFamily}'` : fontFamily;
+      fontFaceDecls.appendChild(
+        el("style:font-face")
+          .attr("style:name", fontFamily)
+          .attr("svg:font-family", svgFontFamily)
+          .attr("style:font-family-generic", "swiss")
+          .attr("style:font-pitch", "variable"),
+      );
+    }
+    root.appendChild(fontFaceDecls);
+  }
+
   // Automatic styles
   const autoStyles = el("office:automatic-styles");
 
@@ -145,12 +207,12 @@ export function generateContent(
     autoStyles.appendChild(buildTextStyle(styleName, fmt));
   }
 
-  // Paragraph styles with tab stops (P1, P2, ...)
-  for (const [styleName, tabStops] of paraStyleMap.values()) {
-    autoStyles.appendChild(buildParagraphStyle(styleName, tabStops));
+  // Paragraph styles (P1, P2, ...)
+  for (const [styleName, opts, parentStyle] of paraStyleMap.values()) {
+    autoStyles.appendChild(buildParagraphStyle(styleName, opts, parentStyle));
   }
 
-  // Table and column styles
+  // Table, column, and row styles
   let tableCounter = 1;
   for (const element of elements) {
     if (element.type === "table" && element.table) {
@@ -163,6 +225,11 @@ export function generateContent(
   // Cell styles (C1, C2, ...)
   for (const [styleName, cs] of cellStyleMap.values()) {
     autoStyles.appendChild(buildCellStyle(styleName, cs));
+  }
+
+  // Row styles (R1, R2, ...)
+  for (const [styleName, rs] of rowStyleMap.values()) {
+    autoStyles.appendChild(buildRowStyle(styleName, rs));
   }
 
   // List styles (L1, L2, ...)
@@ -198,7 +265,7 @@ export function generateContent(
   for (const element of elements) {
     switch (element.type) {
       case "paragraph": {
-        const styleName = resolveParagraphStyleName(element, paraStyleMap);
+        const styleName = resolveParagraphStyleName(element, "Standard", paraStyleMap);
         const p = el("text:p").attr("text:style-name", styleName);
         imageCounter = appendRuns(p, element.runs ?? [], textStyleMap, imageMap, imageCounter);
         textContainer.appendChild(p);
@@ -206,8 +273,12 @@ export function generateContent(
       }
       case "heading": {
         const level = element.level ?? 1;
+        const defaultStyleName = `Heading_20_${level}`;
+        // If paragraph options are present, use a custom style that inherits
+        // from the heading level style — otherwise use the named style directly.
+        const styleName = resolveParagraphStyleName(element, defaultStyleName, paraStyleMap);
         const h = el("text:h")
-          .attr("text:style-name", `Heading_20_${level}`)
+          .attr("text:style-name", styleName)
           .attr("text:outline-level", String(level));
         imageCounter = appendRuns(h, element.runs ?? [], textStyleMap, imageMap, imageCounter);
         textContainer.appendChild(h);
@@ -222,6 +293,7 @@ export function generateContent(
               element.table,
               textStyleMap,
               cellStyleMap,
+              rowStyleMap,
               imageMap,
               imageCounter,
             ),
@@ -317,6 +389,47 @@ function buildTextStyleMap(
   return map;
 }
 
+/**
+ * Collect all unique font family names referenced in a text style map.
+ * Used to emit font-face declarations in content.xml.
+ */
+function collectFontFamilies(
+  textStyleMap: Map<string, [string, NormalizedFormatting]>,
+): Set<string> {
+  const families = new Set<string>();
+  for (const [, fmt] of textStyleMap.values()) {
+    if (fmt.fontFamily) families.add(fmt.fontFamily);
+  }
+  return families;
+}
+
+// ─── Row Style Map ────────────────────────────────────────────────────
+
+/**
+ * Build a map from row style key → [style name, normalized row style].
+ * Scans all table rows for unique row formatting combinations.
+ */
+function buildRowStyleMap(elements: ContentElement[]): Map<string, [string, NormalizedRowStyle]> {
+  const map = new Map<string, [string, NormalizedRowStyle]>();
+  let counter = 1;
+
+  for (const element of elements) {
+    if (element.type !== "table" || !element.table) continue;
+
+    for (const row of element.table.rows) {
+      const normalized = normalizeRowStyle(row.options);
+      const key = rowStyleKey(normalized);
+      if (key === "") continue;
+      if (!map.has(key)) {
+        map.set(key, [`R${counter}`, normalized]);
+        counter++;
+      }
+    }
+  }
+
+  return map;
+}
+
 // ─── Cell Style Map ───────────────────────────────────────────────────
 
 /**
@@ -374,6 +487,22 @@ function appendTableStyles(autoStyles: XmlElement, tableName: string, table: Tab
 }
 
 /**
+ * Build a row automatic style element.
+ */
+function buildRowStyle(styleName: string, rs: NormalizedRowStyle): XmlElement {
+  const style = el("style:style").attr("style:name", styleName).attr("style:family", "table-row");
+
+  const props = el("style:table-row-properties");
+
+  if (rs.backgroundColor) {
+    props.attr("fo:background-color", rs.backgroundColor);
+  }
+
+  style.appendChild(props);
+  return style;
+}
+
+/**
  * Build a cell automatic style element.
  */
 function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement {
@@ -396,6 +525,12 @@ function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement 
   if (cs.borderRight) {
     props.attr("fo:border-right", cs.borderRight);
   }
+  if (cs.verticalAlign) {
+    props.attr("style:vertical-align", cs.verticalAlign);
+  }
+  if (cs.padding) {
+    props.attr("fo:padding", cs.padding);
+  }
 
   style.appendChild(props);
   return style;
@@ -411,6 +546,7 @@ function buildTableElement(
   table: TableData,
   textStyleMap: Map<string, [string, NormalizedFormatting]>,
   cellStyleMap: Map<string, [string, NormalizedCellStyle]>,
+  rowStyleMap: Map<string, [string, NormalizedRowStyle]>,
   imageMap?: Map<ImageData, string>,
   imageCounterStart?: number,
 ): XmlElement {
@@ -452,6 +588,14 @@ function buildTableElement(
     const row = table.rows[rowIdx];
     const rowEl = el("table:table-row");
 
+    // Apply row style when one exists for this row's options
+    const normalizedRow = normalizeRowStyle(row.options);
+    const rsKey = rowStyleKey(normalizedRow);
+    if (rsKey !== "") {
+      const entry = rowStyleMap.get(rsKey);
+      if (entry) rowEl.attr("table:style-name", entry[0]);
+    }
+
     let logicalCol = 0;
 
     for (const cell of row.cells) {
@@ -470,8 +614,9 @@ function buildTableElement(
         continue;
       }
 
-      // Real cell
-      const cellEl = el("table:table-cell").attr("office:value-type", "string");
+      // Real cell — omit office:value-type for text cells (spec violation to set
+      // it without the corresponding office:string-value attribute)
+      const cellEl = el("table:table-cell");
 
       // Cell style
       const normalizedCell = normalizeCellStyle(cell.options, tableBorder);
@@ -666,6 +811,9 @@ function appendRuns(
 
 /**
  * Build an ODF automatic style element for text formatting.
+ * All four text properties (font-weight, font-style, font-size, font-name/family)
+ * are tripled: Western + Asian + Complex. This ensures CJK and RTL text in the
+ * same run is formatted correctly rather than falling back to parent style values.
  */
 function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElement {
   const style = el("style:style").attr("style:name", styleName).attr("style:family", "text");
@@ -674,16 +822,24 @@ function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElemen
 
   if (fmt.fontWeight) {
     props.attr("fo:font-weight", fmt.fontWeight);
+    props.attr("style:font-weight-asian", fmt.fontWeight);
+    props.attr("style:font-weight-complex", fmt.fontWeight);
   }
   if (fmt.fontStyle) {
     props.attr("fo:font-style", fmt.fontStyle);
+    props.attr("style:font-style-asian", fmt.fontStyle);
+    props.attr("style:font-style-complex", fmt.fontStyle);
   }
   if (fmt.fontSize) {
     props.attr("fo:font-size", fmt.fontSize);
+    props.attr("style:font-size-asian", fmt.fontSize);
+    props.attr("style:font-size-complex", fmt.fontSize);
   }
   if (fmt.fontFamily) {
     props.attr("style:font-name", fmt.fontFamily);
     props.attr("fo:font-family", fmt.fontFamily);
+    props.attr("style:font-name-asian", fmt.fontFamily);
+    props.attr("style:font-name-complex", fmt.fontFamily);
   }
   if (fmt.color) {
     props.attr("fo:color", fmt.color);
@@ -705,12 +861,66 @@ function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElemen
   if (fmt.highlightColor) {
     props.attr("fo:background-color", fmt.highlightColor);
   }
+  if (fmt.textTransform) {
+    props.attr("fo:text-transform", fmt.textTransform);
+  }
+  if (fmt.smallCaps) {
+    props.attr("fo:font-variant", "small-caps");
+  }
 
   style.appendChild(props);
   return style;
 }
 
-// ─── Paragraph Styles (tab stops) ─────────────────────────────────────
+// ─── Paragraph Styles ─────────────────────────────────────────────────
+
+/**
+ * Normalize a lineHeight value to an ODF fo:line-height string.
+ * Numbers ≥ 1 are treated as multipliers (1.5 → "150%").
+ * Strings with units are passed through as-is ("18pt" → "18pt").
+ */
+function normalizeLineHeight(lineHeight: number | string): string {
+  if (typeof lineHeight === "number") {
+    return `${Math.round(lineHeight * 100)}%`;
+  }
+  return lineHeight;
+}
+
+/**
+ * Returns true when the ParagraphOptions object contains at least one
+ * property that requires a custom automatic paragraph style.
+ */
+function hasParagraphOptions(opts: ParagraphOptions | undefined): boolean {
+  if (!opts) return false;
+  return !!(
+    opts.align ||
+    opts.spaceBefore ||
+    opts.spaceAfter ||
+    opts.lineHeight !== undefined ||
+    opts.indentLeft ||
+    opts.indentFirst ||
+    (opts.tabStops && opts.tabStops.length > 0)
+  );
+}
+
+/**
+ * Generate a stable key for a ParagraphOptions object.
+ * Two identical option combinations produce the same key,
+ * enabling style deduplication.
+ */
+function paragraphOptionsKey(opts: ParagraphOptions): string {
+  const parts: string[] = [];
+  if (opts.align) parts.push(`a:${opts.align}`);
+  if (opts.spaceBefore) parts.push(`sb:${opts.spaceBefore}`);
+  if (opts.spaceAfter) parts.push(`sa:${opts.spaceAfter}`);
+  if (opts.lineHeight !== undefined) parts.push(`lh:${opts.lineHeight}`);
+  if (opts.indentLeft) parts.push(`il:${opts.indentLeft}`);
+  if (opts.indentFirst) parts.push(`if:${opts.indentFirst}`);
+  if (opts.tabStops && opts.tabStops.length > 0) {
+    parts.push(`ts:${tabStopsKey(opts.tabStops)}`);
+  }
+  return parts.join("|");
+}
 
 /**
  * Generate a key for a set of tab stops.
@@ -720,19 +930,37 @@ function tabStopsKey(tabStops: TabStop[]): string {
 }
 
 /**
- * Build a map of unique paragraph styles needed for tab stops.
+ * Build a map of unique paragraph styles needed for all paragraph options.
+ *
+ * The map key is `${parentStyle}|${optionsKey}` so that two elements with
+ * identical options but different parents (e.g. a paragraph vs. a heading)
+ * get distinct automatic styles with the correct inheritance chain.
+ *
+ * Map value: [styleName, ParagraphOptions, parentStyleName]
  */
-function buildParagraphStyleMap(elements: ContentElement[]): Map<string, [string, TabStop[]]> {
-  const map = new Map<string, [string, TabStop[]]>();
+function buildParagraphStyleMap(
+  elements: ContentElement[],
+): Map<string, [string, ParagraphOptions, string]> {
+  const map = new Map<string, [string, ParagraphOptions, string]>();
   let counter = 1;
 
+  function register(opts: ParagraphOptions, parentStyle: string): void {
+    const optsKey = paragraphOptionsKey(opts);
+    const mapKey = `${parentStyle}|${optsKey}`;
+    if (!map.has(mapKey)) {
+      map.set(mapKey, [`P${counter}`, opts, parentStyle]);
+      counter++;
+    }
+  }
+
   for (const element of elements) {
-    if (element.paragraphOptions?.tabStops && element.paragraphOptions.tabStops.length > 0) {
-      const key = tabStopsKey(element.paragraphOptions.tabStops);
-      if (!map.has(key)) {
-        map.set(key, [`P${counter}`, element.paragraphOptions.tabStops]);
-        counter++;
-      }
+    if (!hasParagraphOptions(element.paragraphOptions)) continue;
+
+    if (element.type === "paragraph") {
+      register(element.paragraphOptions!, "Standard");
+    } else if (element.type === "heading") {
+      const level = element.level ?? 1;
+      register(element.paragraphOptions!, `Heading_20_${level}`);
     }
   }
 
@@ -740,43 +968,92 @@ function buildParagraphStyleMap(elements: ContentElement[]): Map<string, [string
 }
 
 /**
- * Build a paragraph style with tab stops.
+ * Build a paragraph automatic style element.
+ *
+ * @param styleName - The generated style name (e.g. "P1").
+ * @param opts - The paragraph options to encode.
+ * @param parentStyle - The named style this inherits from ("Standard" for
+ *   paragraphs, "Heading_20_N" for headings with options).
  */
-function buildParagraphStyle(styleName: string, tabStops: TabStop[]): XmlElement {
+function buildParagraphStyle(
+  styleName: string,
+  opts: ParagraphOptions,
+  parentStyle: string,
+): XmlElement {
   const style = el("style:style")
     .attr("style:name", styleName)
     .attr("style:family", "paragraph")
-    .attr("style:parent-style-name", "Standard");
+    .attr("style:parent-style-name", parentStyle);
 
   const paraProps = el("style:paragraph-properties");
+  let hasParaProps = false;
 
-  const tabStopsEl = el("style:tab-stops");
-
-  for (const ts of tabStops) {
-    const tabStop = el("style:tab-stop")
-      .attr("style:position", ts.position)
-      .attr("style:type", ts.type ?? "left");
-    tabStopsEl.appendChild(tabStop);
+  if (opts.align) {
+    paraProps.attr("fo:text-align", opts.align);
+    hasParaProps = true;
+  }
+  if (opts.spaceBefore) {
+    paraProps.attr("fo:margin-top", opts.spaceBefore);
+    hasParaProps = true;
+  }
+  if (opts.spaceAfter) {
+    paraProps.attr("fo:margin-bottom", opts.spaceAfter);
+    hasParaProps = true;
+  }
+  if (opts.lineHeight !== undefined) {
+    paraProps.attr("fo:line-height", normalizeLineHeight(opts.lineHeight));
+    hasParaProps = true;
+  }
+  if (opts.indentLeft) {
+    paraProps.attr("fo:margin-left", opts.indentLeft);
+    hasParaProps = true;
+  }
+  if (opts.indentFirst) {
+    paraProps.attr("fo:text-indent", opts.indentFirst);
+    hasParaProps = true;
+  }
+  if (opts.tabStops && opts.tabStops.length > 0) {
+    const tabStopsEl = el("style:tab-stops");
+    for (const ts of opts.tabStops) {
+      tabStopsEl.appendChild(
+        el("style:tab-stop")
+          .attr("style:position", ts.position)
+          .attr("style:type", ts.type ?? "left"),
+      );
+    }
+    paraProps.appendChild(tabStopsEl);
+    hasParaProps = true;
   }
 
-  paraProps.appendChild(tabStopsEl);
-  style.appendChild(paraProps);
+  if (hasParaProps) {
+    style.appendChild(paraProps);
+  }
+
   return style;
 }
 
 /**
- * Returns a custom style name (P1, P2) if tab stops are present, otherwise "Standard".
+ * Returns the paragraph style name to use for a given element.
+ *
+ * If the element has no meaningful paragraph options, returns the
+ * provided default style name unchanged. Otherwise looks up the
+ * pre-built automatic style from the map.
+ *
+ * @param element - The content element being rendered.
+ * @param defaultStyleName - The fallback named style ("Standard" for paragraphs,
+ *   "Heading_20_N" for headings).
+ * @param paraStyleMap - The pre-built paragraph style map.
  */
 function resolveParagraphStyleName(
   element: ContentElement,
-  paraStyleMap: Map<string, [string, TabStop[]]>,
+  defaultStyleName: string,
+  paraStyleMap: Map<string, [string, ParagraphOptions, string]>,
 ): string {
-  if (element.paragraphOptions?.tabStops && element.paragraphOptions.tabStops.length > 0) {
-    const key = tabStopsKey(element.paragraphOptions.tabStops);
-    const entry = paraStyleMap.get(key);
-    return entry ? entry[0] : "Standard";
-  }
-  return "Standard";
+  if (!hasParagraphOptions(element.paragraphOptions)) return defaultStyleName;
+  const optsKey = paragraphOptionsKey(element.paragraphOptions!);
+  const mapKey = `${defaultStyleName}|${optsKey}`;
+  const entry = paraStyleMap.get(mapKey);
+  return entry ? entry[0] : defaultStyleName;
 }
 
 // ─── List Building ───────────────────────────────────────────────────
@@ -819,10 +1096,17 @@ function buildListStyle(styleName: string, list: ListData): XmlElement {
       bulletEl.appendChild(levelProps);
       listStyle.appendChild(bulletEl);
     } else {
+      const numFormat = list.options?.numFormat ?? "1";
+      const numSuffix = list.options?.numSuffix ?? ".";
+
       const numberEl = el("text:list-level-style-number")
         .attr("text:level", String(level))
-        .attr("style:num-suffix", ".")
-        .attr("style:num-format", "1");
+        .attr("style:num-format", numFormat)
+        .attr("style:num-suffix", numSuffix);
+
+      if (list.options?.numPrefix) {
+        numberEl.attr("style:num-prefix", list.options.numPrefix);
+      }
 
       const levelProps = el("style:list-level-properties").attr(
         "text:list-level-position-and-space-mode",
@@ -857,13 +1141,23 @@ function buildListElement(
 ): XmlElement {
   const isBullet = (list.options?.type ?? "bullet") === "bullet";
   const paraStyleName = isBullet ? "List_20_Bullet" : "List_20_Number";
+  const startValue = !isBullet ? list.options?.startValue : undefined;
   let imageCounter = imageCounterStart ?? 1;
+  let isFirstItem = true;
 
   const listEl = el("text:list").attr("text:style-name", styleName);
 
-  function appendItems(parentEl: XmlElement, items: ListItemData[]): void {
+  function appendItems(parentEl: XmlElement, items: ListItemData[], isRoot: boolean): void {
     for (const item of items) {
       const itemEl = el("text:list-item");
+
+      // text:start-value goes on the first item of the root list only
+      if (isRoot && isFirstItem && startValue !== undefined) {
+        itemEl.attr("text:start-value", String(startValue));
+        isFirstItem = false;
+      } else if (isRoot) {
+        isFirstItem = false;
+      }
 
       // Paragraph with the item text
       const p = el("text:p").attr("text:style-name", paraStyleName);
@@ -873,7 +1167,7 @@ function buildListElement(
       // Nested sub-list (goes inside the same list-item)
       if (item.nested) {
         const subList = el("text:list");
-        appendItems(subList, item.nested.items);
+        appendItems(subList, item.nested.items, false);
         itemEl.appendChild(subList);
       }
 
@@ -881,7 +1175,7 @@ function buildListElement(
     }
   }
 
-  appendItems(listEl, list.items);
+  appendItems(listEl, list.items, true);
   return listEl;
 }
 

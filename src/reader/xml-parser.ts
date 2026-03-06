@@ -41,12 +41,17 @@ export type XmlNode = XmlElementNode | XmlTextNode;
  * always receive plain character strings, never entity references.
  */
 function decodeEntities(raw: string): string {
-  return raw
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'");
+  return (
+    raw
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      // Numeric character references: decimal (&#160;) and hex (&#xA0;)
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+      .replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+  );
 }
 
 /**
@@ -60,10 +65,11 @@ function decodeEntities(raw: string): string {
  */
 function parseAttributes(raw: string): Record<string, string> {
   const attrs: Record<string, string> = {};
-  const re = /([a-zA-Z_:][a-zA-Z0-9_:.-]*)="([^"]*)"/g;
+  // Match both double-quoted (attr="val") and single-quoted (attr='val') values
+  const re = /([a-zA-Z_:][a-zA-Z0-9_:.-]*)=(?:"([^"]*)"|'([^']*)')/g;
   let m;
   while ((m = re.exec(raw)) !== null) {
-    attrs[m[1]] = decodeEntities(m[2]);
+    attrs[m[1]] = decodeEntities(m[2] ?? m[3]);
   }
   return attrs;
 }
@@ -121,12 +127,23 @@ export function parseXml(xml: string): XmlElementNode {
       continue;
     }
 
-    // All other tags: find the closing >
-    const end = src.indexOf(">", i);
-    if (end === -1) break; // malformed — stop
+    // All other tags: find the closing >, skipping over quoted attribute
+    // values so that a literal > inside "..." or '...' does not prematurely
+    // close the tag.
+    let j = i + 1;
+    while (j < src.length && src[j] !== ">") {
+      if (src[j] === '"' || src[j] === "'") {
+        const quote = src[j++];
+        while (j < src.length && src[j] !== quote) j++;
+        if (j < src.length) j++; // skip closing quote
+      } else {
+        j++;
+      }
+    }
+    if (j >= src.length) break; // malformed — stop
 
-    const inner = src.slice(i + 1, end);
-    i = end + 1;
+    const inner = src.slice(i + 1, j);
+    i = j + 1;
 
     // XML declaration or processing instruction: <?...?>
     if (inner.startsWith("?")) continue;

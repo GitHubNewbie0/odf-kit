@@ -63,7 +63,11 @@ function textContent(node: XmlElementNode): string {
 
 /**
  * Resolved character formatting for a named automatic style.
- * Properties are only present when the style explicitly sets them.
+ *
+ * Tri-state: true = explicitly on, false = explicitly off (overrides
+ * a parent that set it on), undefined = not set by this style.
+ * This allows a child style to cancel formatting inherited from a parent
+ * (e.g. fo:font-weight="normal" inside a bold paragraph style).
  */
 interface CharStyle {
   bold?: boolean;
@@ -77,19 +81,19 @@ interface CharStyle {
 /**
  * Merge a base character style with an override.
  *
- * The override wins for any property it explicitly sets (true).
- * Unset properties in the override fall back to the base.
- * Since odf-kit only ever sets properties to true (never explicitly
- * to false), this produces correct inheritance for all generated output.
+ * The override wins for any property it explicitly sets (true or false).
+ * Unset properties (undefined) in the override fall back to the base.
+ * This allows a child style to cancel formatting inherited from a parent
+ * (e.g. fo:font-weight="normal" cancels bold from a parent paragraph style).
  */
 function mergeStyle(base: CharStyle, override: CharStyle): CharStyle {
-  const result: CharStyle = {};
-  if (base.bold || override.bold) result.bold = true;
-  if (base.italic || override.italic) result.italic = true;
-  if (base.underline || override.underline) result.underline = true;
-  if (base.strikethrough || override.strikethrough) result.strikethrough = true;
-  if (base.superscript || override.superscript) result.superscript = true;
-  if (base.subscript || override.subscript) result.subscript = true;
+  const result: CharStyle = { ...base };
+  if (override.bold !== undefined) result.bold = override.bold;
+  if (override.italic !== undefined) result.italic = override.italic;
+  if (override.underline !== undefined) result.underline = override.underline;
+  if (override.strikethrough !== undefined) result.strikethrough = override.strikethrough;
+  if (override.superscript !== undefined) result.superscript = override.superscript;
+  if (override.subscript !== undefined) result.subscript = override.subscript;
   return result;
 }
 
@@ -143,19 +147,21 @@ function scanStylesElement(
       const style: CharStyle = {};
       const p = textPropsEl.attrs;
 
-      if (p["fo:font-weight"] === "bold") style.bold = true;
-      if (p["fo:font-style"] === "italic") style.italic = true;
+      // Tri-state: set true when on, false when explicitly off (so a child
+      // style can cancel formatting inherited from a parent).
+      if ("fo:font-weight" in p) style.bold = p["fo:font-weight"] === "bold";
+      if ("fo:font-style" in p) style.italic = p["fo:font-style"] === "italic";
 
       const underlineStyle = p["style:text-underline-style"];
-      if (underlineStyle !== undefined && underlineStyle !== "none") style.underline = true;
+      if (underlineStyle !== undefined) style.underline = underlineStyle !== "none";
 
       const strikeStyle = p["style:text-line-through-style"];
-      if (strikeStyle !== undefined && strikeStyle !== "none") style.strikethrough = true;
+      if (strikeStyle !== undefined) style.strikethrough = strikeStyle !== "none";
 
       const textPosition = p["style:text-position"];
       if (textPosition !== undefined) {
-        if (textPosition.startsWith("super")) style.superscript = true;
-        if (textPosition.startsWith("sub")) style.subscript = true;
+        style.superscript = textPosition.startsWith("super");
+        style.subscript = textPosition.startsWith("sub");
       }
 
       charStyles.set(name, style);
@@ -180,22 +186,36 @@ function scanStylesElement(
 }
 
 /**
- * Build style maps from both <office:automatic-styles> and <office:styles>
- * in a parsed content.xml tree.
+ * Build style maps from both content.xml and (optionally) styles.xml.
  *
- * List styles defined by odf-kit appear in <office:styles> (named styles),
- * while character formatting automatic styles appear in
- * <office:automatic-styles>. Scanning both ensures all styles are resolved.
+ * Scan order — later scans override earlier for the same style name:
+ * 1. styles.xml office:styles (named styles — lowest priority)
+ * 2. styles.xml office:automatic-styles (used in headers/footers)
+ * 3. content.xml office:styles (named styles defined inline)
+ * 4. content.xml office:automatic-styles (highest priority)
+ *
+ * In real-world ODT files named styles live in styles.xml. In
+ * odf-kit-generated files they appear in content.xml. Scanning both
+ * ensures all styles are resolved regardless of origin.
  */
-function buildStyleMaps(contentRoot: XmlElementNode): StyleMaps {
+function buildStyleMaps(contentRoot: XmlElementNode, stylesRoot?: XmlElementNode): StyleMaps {
   const charStyles = new Map<string, CharStyle>();
   const listOrdered = new Map<string, boolean>();
 
-  const autoStylesEl = findElement(contentRoot, "office:automatic-styles");
-  if (autoStylesEl) scanStylesElement(autoStylesEl, charStyles, listOrdered);
+  // styles.xml (lowest priority — overridden by content.xml)
+  if (stylesRoot) {
+    const namedEl = findElement(stylesRoot, "office:styles");
+    if (namedEl) scanStylesElement(namedEl, charStyles, listOrdered);
+    const autoEl = findElement(stylesRoot, "office:automatic-styles");
+    if (autoEl) scanStylesElement(autoEl, charStyles, listOrdered);
+  }
 
+  // content.xml (higher priority)
   const namedStylesEl = findElement(contentRoot, "office:styles");
   if (namedStylesEl) scanStylesElement(namedStylesEl, charStyles, listOrdered);
+
+  const autoStylesEl = findElement(contentRoot, "office:automatic-styles");
+  if (autoStylesEl) scanStylesElement(autoStylesEl, charStyles, listOrdered);
 
   return { charStyles, listOrdered };
 }
@@ -242,7 +262,9 @@ function parseSpans(
         break;
 
       case "text:s": {
-        // ODF space element — text:c gives the repeat count (default 1)
+        // ODF compressed-spaces element — represents one or more consecutive
+        // regular spaces that XML parsers would otherwise collapse.
+        // text:c gives the repeat count (default 1).
         const count = parseInt(child.attrs["text:c"] ?? "1", 10);
         spans.push(makeSpan(" ".repeat(count), baseStyle, href));
         break;
@@ -472,8 +494,11 @@ export function readOdt(bytes: Uint8Array): OdtDocumentModel {
   const metaXmlBytes = zip["meta.xml"];
   const metadata: OdtMetadata = metaXmlBytes ? parseMetaXml(strFromU8(metaXmlBytes)) : {};
 
+  const stylesXmlBytes = zip["styles.xml"];
+  const stylesRoot = stylesXmlBytes ? parseXml(strFromU8(stylesXmlBytes)) : undefined;
+
   const contentRoot = parseXml(contentXml);
-  const styles = buildStyleMaps(contentRoot);
+  const styles = buildStyleMaps(contentRoot, stylesRoot);
 
   const bodyEl = findElement(contentRoot, "office:body");
   const bodyTextEl = bodyEl ? findElement(bodyEl, "office:text") : undefined;

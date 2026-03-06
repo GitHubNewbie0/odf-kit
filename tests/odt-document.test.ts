@@ -1463,6 +1463,902 @@ describe("OdtDocument", () => {
     });
   });
 
+  // ─── Repair Plan: Generation Side Fixes ─────────────────────────────
+
+  describe("Asian/Complex script tripling", () => {
+    it("should emit Asian and Complex font-weight variants for bold text", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("bold", { bold: true });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-weight="bold"');
+      expect(content).toContain('style:font-weight-asian="bold"');
+      expect(content).toContain('style:font-weight-complex="bold"');
+    });
+
+    it("should emit Asian and Complex font-style variants for italic text", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("italic", { italic: true });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-style="italic"');
+      expect(content).toContain('style:font-style-asian="italic"');
+      expect(content).toContain('style:font-style-complex="italic"');
+    });
+
+    it("should emit Asian and Complex font-size variants", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("big", { fontSize: 18 });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-size="18pt"');
+      expect(content).toContain('style:font-size-asian="18pt"');
+      expect(content).toContain('style:font-size-complex="18pt"');
+    });
+
+    it("should emit Asian and Complex font-name variants for fontFamily", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("fancy", { fontFamily: "Arial" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:font-name="Arial"');
+      expect(content).toContain('style:font-name-asian="Arial"');
+      expect(content).toContain('style:font-name-complex="Arial"');
+    });
+
+    it("should triple all four properties together", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("all", { bold: true, italic: true, fontSize: 14, fontFamily: "Arial" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:font-weight-asian="bold"');
+      expect(content).toContain('style:font-weight-complex="bold"');
+      expect(content).toContain('style:font-style-asian="italic"');
+      expect(content).toContain('style:font-style-complex="italic"');
+      expect(content).toContain('style:font-size-asian="14pt"');
+      expect(content).toContain('style:font-size-complex="14pt"');
+      expect(content).toContain('style:font-name-asian="Arial"');
+      expect(content).toContain('style:font-name-complex="Arial"');
+    });
+  });
+
+  describe("font-face declarations", () => {
+    it("should emit office:font-face-decls when fontFamily is used", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("fancy", { fontFamily: "Arial" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain("office:font-face-decls");
+      expect(content).toContain('style:name="Arial"');
+      expect(content).toContain("style:font-face");
+    });
+
+    it("should quote multi-word font family names in svg:font-family", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("text", { fontFamily: "Times New Roman" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain("svg:font-family=\"'Times New Roman'\"");
+    });
+
+    it("should not emit office:font-face-decls when no fontFamily is used", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("plain", { bold: true });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).not.toContain("office:font-face-decls");
+    });
+
+    it("should deduplicate font-face entries for the same family", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("first", { fontFamily: "Arial" });
+        p.addText("second", { fontFamily: "Arial", bold: true });
+      });
+      const content = await getContentXml(doc);
+
+      const matches = content.match(/style:name="Arial"/g);
+      expect(matches).toHaveLength(1);
+    });
+
+    it("should emit separate font-face entries for different families", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("sans", { fontFamily: "Arial" });
+        p.addText("serif", { fontFamily: "Georgia" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:name="Arial"');
+      expect(content).toContain('style:name="Georgia"');
+    });
+
+    it("should place font-face-decls before automatic-styles in document order", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("text", { fontFamily: "Arial" });
+      });
+      const content = await getContentXml(doc);
+
+      const fontFacePos = content.indexOf("office:font-face-decls");
+      const autoStylesPos = content.indexOf("office:automatic-styles");
+      expect(fontFacePos).toBeLessThan(autoStylesPos);
+    });
+  });
+
+  describe("numeric font weight", () => {
+    it("should support fontWeight: 300 (light)", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("light", { fontWeight: 300 });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-weight="300"');
+      expect(content).toContain('style:font-weight-asian="300"');
+      expect(content).toContain('style:font-weight-complex="300"');
+    });
+
+    it("should support fontWeight: 600 (semi-bold)", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("semibold", { fontWeight: 600 });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-weight="600"');
+      expect(content).toContain('style:font-weight-asian="600"');
+      expect(content).toContain('style:font-weight-complex="600"');
+    });
+
+    it("should deduplicate numeric font weight styles correctly", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("first", { fontWeight: 300 });
+        p.addText("second", { fontWeight: 300 });
+      });
+      const content = await getContentXml(doc);
+
+      const styleDefs = content.match(/style:name="T1"/g);
+      expect(styleDefs).toHaveLength(1);
+      const styleRefs = content.match(/text:style-name="T1"/g);
+      expect(styleRefs).toHaveLength(2);
+    });
+  });
+
+  describe("text transform and small caps", () => {
+    it("should emit fo:text-transform for textTransform: uppercase", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("heading text", { textTransform: "uppercase" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-transform="uppercase"');
+    });
+
+    it("should emit fo:text-transform for textTransform: lowercase", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("LOUD TEXT", { textTransform: "lowercase" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-transform="lowercase"');
+    });
+
+    it("should emit fo:text-transform for textTransform: capitalize", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("title text", { textTransform: "capitalize" });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-transform="capitalize"');
+    });
+
+    it("should emit fo:font-variant for smallCaps: true", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("small caps", { smallCaps: true });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:font-variant="small-caps"');
+    });
+
+    it("should deduplicate textTransform styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addText("first", { textTransform: "uppercase" });
+        p.addText("second", { textTransform: "uppercase" });
+      });
+      const content = await getContentXml(doc);
+
+      const defs = content.match(/style:name="T1"/g);
+      expect(defs).toHaveLength(1);
+    });
+  });
+
+  describe("named styles in styles.xml", () => {
+    it("should define the Standard paragraph style", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:name="Standard"');
+      expect(styles).toContain('style:family="paragraph"');
+    });
+
+    it("should define all six Heading styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      for (let level = 1; level <= 6; level++) {
+        expect(styles).toContain(`style:name="Heading_20_${level}"`);
+      }
+    });
+
+    it("should define the Heading parent style", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:name="Heading"');
+    });
+
+    it("should define List_20_Bullet and List_20_Number styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:name="List_20_Bullet"');
+      expect(styles).toContain('style:name="List_20_Number"');
+    });
+
+    it("should define Header and Footer styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:name="Header"');
+      expect(styles).toContain('style:name="Footer"');
+    });
+
+    it("should apply Asian/Complex tripling to Heading font-weight", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:font-weight-asian="bold"');
+      expect(styles).toContain('style:font-weight-complex="bold"');
+    });
+
+    it("should apply Asian/Complex tripling to Heading font sizes", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:font-size-asian="28pt"');
+      expect(styles).toContain('style:font-size-complex="28pt"');
+    });
+
+    it("should set keep-with-next on the Heading parent style", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('fo:keep-with-next="always"');
+    });
+
+    it("should set style:default-outline-level on heading styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('style:default-outline-level="1"');
+      expect(styles).toContain('style:default-outline-level="2"');
+    });
+
+    it("should include Liberation Serif in styles.xml font-face-decls", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain("office:font-face-decls");
+      expect(styles).toContain('style:name="Liberation Serif"');
+    });
+  });
+
+  describe("paragraph alignment", () => {
+    it("should emit fo:text-align for align: center", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("centered", { align: "center" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-align="center"');
+    });
+
+    it("should emit fo:text-align for align: right", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("right", { align: "right" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-align="right"');
+    });
+
+    it("should emit fo:text-align for align: justify", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("justified text here", { align: "justify" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-align="justify"');
+    });
+
+    it("should use Standard style when no paragraph options are set", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("plain text");
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('text:style-name="Standard"');
+      expect(content).not.toContain('text:style-name="P1"');
+    });
+
+    it("should use a custom paragraph style when align is set", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("centered", { align: "center" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('text:style-name="P1"');
+    });
+
+    it("should deduplicate paragraph styles with the same alignment", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("first centered", { align: "center" });
+      doc.addParagraph("second centered", { align: "center" });
+      const content = await getContentXml(doc);
+
+      const defs = content.match(/style:name="P1"/g);
+      expect(defs).toHaveLength(1);
+      const refs = content.match(/text:style-name="P1"/g);
+      expect(refs).toHaveLength(2);
+    });
+
+    it("should create separate styles for different alignments", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("centered", { align: "center" });
+      doc.addParagraph("right", { align: "right" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:name="P1"');
+      expect(content).toContain('style:name="P2"');
+    });
+  });
+
+  describe("paragraph spacing", () => {
+    it("should emit fo:margin-top for spaceBefore", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("spaced", { spaceBefore: "0.4cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-top="0.4cm"');
+    });
+
+    it("should emit fo:margin-bottom for spaceAfter", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("spaced", { spaceAfter: "0.2cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-bottom="0.2cm"');
+    });
+
+    it("should support spaceBefore and spaceAfter together", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("spaced", { spaceBefore: "0.4cm", spaceAfter: "0.2cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-top="0.4cm"');
+      expect(content).toContain('fo:margin-bottom="0.2cm"');
+    });
+
+    it("should support spacing in pt units", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("spaced", { spaceBefore: "6pt" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-top="6pt"');
+    });
+  });
+
+  describe("line height", () => {
+    it("should convert lineHeight number 1.5 to 150%", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("text", { lineHeight: 1.5 });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:line-height="150%"');
+    });
+
+    it("should convert lineHeight number 2 to 200%", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("text", { lineHeight: 2 });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:line-height="200%"');
+    });
+
+    it("should pass through lineHeight string with units", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("text", { lineHeight: "18pt" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:line-height="18pt"');
+    });
+
+    it("should convert lineHeight 1 to 100%", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("text", { lineHeight: 1 });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:line-height="100%"');
+    });
+  });
+
+  describe("paragraph indentation", () => {
+    it("should emit fo:margin-left for indentLeft", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("indented", { indentLeft: "1cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-left="1cm"');
+    });
+
+    it("should emit fo:text-indent for indentFirst", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("indented first line", { indentFirst: "0.5cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-indent="0.5cm"');
+    });
+
+    it("should support hanging indent with negative indentFirst", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("hanging", { indentLeft: "1cm", indentFirst: "-1cm" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:margin-left="1cm"');
+      expect(content).toContain('fo:text-indent="-1cm"');
+    });
+  });
+
+  describe("heading with paragraph options", () => {
+    it("should apply align to a heading via custom paragraph style", async () => {
+      const doc = new OdtDocument();
+      doc.addHeading("Centered Heading", 1, { align: "center" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:text-align="center"');
+    });
+
+    it("should use a custom style that inherits from Heading_20_N", async () => {
+      const doc = new OdtDocument();
+      doc.addHeading("Heading with options", 2, { align: "center" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:parent-style-name="Heading_20_2"');
+    });
+
+    it("should use Heading_20_N directly when no options are provided", async () => {
+      const doc = new OdtDocument();
+      doc.addHeading("Plain heading", 1);
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('text:style-name="Heading_20_1"');
+    });
+
+    it("should give heading options and paragraph options different parent styles", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("centered para", { align: "center" });
+      doc.addHeading("centered heading", 1, { align: "center" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:parent-style-name="Standard"');
+      expect(content).toContain('style:parent-style-name="Heading_20_1"');
+    });
+
+    it("should support method chaining with three-argument addHeading", () => {
+      const doc = new OdtDocument();
+      const result = doc.addHeading("Title", 1, { align: "center" }).addParagraph("Body");
+      expect(result).toBe(doc);
+    });
+  });
+
+  describe("cell vertical alignment and padding", () => {
+    it("should emit style:vertical-align for verticalAlign: middle", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("centered", { verticalAlign: "middle" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:vertical-align="middle"');
+    });
+
+    it("should emit style:vertical-align for verticalAlign: top", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("top", { verticalAlign: "top" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:vertical-align="top"');
+    });
+
+    it("should emit style:vertical-align for verticalAlign: bottom", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("bottom", { verticalAlign: "bottom" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:vertical-align="bottom"');
+    });
+
+    it("should emit fo:padding for padding", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("padded", { padding: "0.1cm" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:padding="0.1cm"');
+    });
+
+    it("should support padding in pt units", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("padded", { padding: "2pt" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:padding="2pt"');
+    });
+
+    it("should deduplicate cell styles with same verticalAlign and padding", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("A", { verticalAlign: "middle", padding: "0.1cm" });
+          r.addCell("B", { verticalAlign: "middle", padding: "0.1cm" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      const defs = content.match(/style:name="C1"/g);
+      expect(defs).toHaveLength(1);
+      const refs = content.match(/table:style-name="C1"/g);
+      expect(refs).toHaveLength(2);
+    });
+  });
+
+  describe("row background color", () => {
+    it("should emit fo:background-color on a row style", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow(
+          (r) => {
+            r.addCell("A");
+            r.addCell("B");
+          },
+          { backgroundColor: "#EEEEEE" },
+        );
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:family="table-row"');
+      expect(content).toContain('fo:background-color="#EEEEEE"');
+    });
+
+    it("should apply row style name to table:table-row element", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow(
+          (r) => {
+            r.addCell("Header");
+          },
+          { backgroundColor: "#DDDDDD" },
+        );
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('table:style-name="R1"');
+    });
+
+    it("should resolve named colors for row background (silver \u2192 #c0c0c0)", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow(
+          (r) => {
+            r.addCell("A");
+          },
+          { backgroundColor: "silver" },
+        );
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('fo:background-color="#c0c0c0"');
+    });
+
+    it("should not apply row style when no row options are set", async () => {
+      const doc = new OdtDocument();
+      doc.addTable([["A", "B"]]);
+      const content = await getContentXml(doc);
+
+      expect(content).not.toContain('style:family="table-row"');
+    });
+
+    it("should deduplicate identical row styles", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow(
+          (r) => {
+            r.addCell("A");
+          },
+          { backgroundColor: "#EEEEEE" },
+        );
+        t.addRow(
+          (r) => {
+            r.addCell("B");
+          },
+          { backgroundColor: "#EEEEEE" },
+        );
+      });
+      const content = await getContentXml(doc);
+
+      const defs = content.match(/style:name="R1"/g);
+      expect(defs).toHaveLength(1);
+      const refs = content.match(/table:style-name="R1"/g);
+      expect(refs).toHaveLength(2);
+    });
+  });
+
+  describe("table cell value-type", () => {
+    it("should not emit office:value-type on table cells", async () => {
+      const doc = new OdtDocument();
+      doc.addTable([
+        ["Name", "Age"],
+        ["Alice", "30"],
+      ]);
+      const content = await getContentXml(doc);
+
+      expect(content).not.toContain("office:value-type");
+    });
+
+    it("should not emit office:value-type on cells with options", async () => {
+      const doc = new OdtDocument();
+      doc.addTable((t) => {
+        t.addRow((r) => {
+          r.addCell("Header", { bold: true, backgroundColor: "#DDDDDD" });
+        });
+      });
+      const content = await getContentXml(doc);
+
+      expect(content).not.toContain("office:value-type");
+    });
+  });
+
+  describe("numbered list format types", () => {
+    it("should support numFormat: i (lowercase roman)", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["First", "Second"], { type: "numbered", numFormat: "i" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-format="i"');
+    });
+
+    it("should support numFormat: I (uppercase roman)", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["First", "Second"], { type: "numbered", numFormat: "I" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-format="I"');
+    });
+
+    it("should support numFormat: a (lowercase alpha)", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["First", "Second"], { type: "numbered", numFormat: "a" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-format="a"');
+    });
+
+    it("should support numFormat: A (uppercase alpha)", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["First", "Second"], { type: "numbered", numFormat: "A" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-format="A"');
+    });
+
+    it("should default to Arabic numerals when no numFormat is specified", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["Item"], { type: "numbered" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-format="1"');
+    });
+  });
+
+  describe("list numbering customization", () => {
+    it("should support numPrefix and numSuffix to produce (1), (2)", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["A", "B"], { type: "numbered", numPrefix: "(", numSuffix: ")" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-prefix="("');
+      expect(content).toContain('style:num-suffix=")"');
+    });
+
+    it("should support custom numSuffix alone", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["A", "B"], { type: "numbered", numSuffix: ")" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-suffix=")"');
+    });
+
+    it("should default numSuffix to period", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["A", "B"], { type: "numbered" });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('style:num-suffix="."');
+    });
+
+    it("should emit text:start-value on the first list item when startValue is set", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["Item 5", "Item 6"], { type: "numbered", startValue: 5 });
+      const content = await getContentXml(doc);
+
+      expect(content).toContain('text:start-value="5"');
+    });
+
+    it("should only emit text:start-value on the first item", async () => {
+      const doc = new OdtDocument();
+      doc.addList(["A", "B", "C"], { type: "numbered", startValue: 3 });
+      const content = await getContentXml(doc);
+
+      const matches = content.match(/text:start-value/g);
+      expect(matches).toHaveLength(1);
+    });
+
+    it("should not emit text:start-value for bullet lists", async () => {
+      const doc = new OdtDocument();
+      // startValue is ignored for bullet lists; cast needed since type system blocks it
+      doc.addList(["A", "B"], { type: "bullet" });
+      const content = await getContentXml(doc);
+
+      expect(content).not.toContain("text:start-value");
+    });
+  });
+
+  describe("full integration \u2014 all repair plan features", () => {
+    it("should produce a valid .odt combining all new generation features", async () => {
+      const doc = new OdtDocument();
+      doc.setMetadata({ title: "Repair Plan Integration Test" });
+
+      doc.addHeading("Centered Chapter", 1, { align: "center", spaceBefore: "0.5cm" });
+      doc.addParagraph("Justified body text with double spacing.", {
+        align: "justify",
+        lineHeight: 2,
+        indentLeft: "1cm",
+        indentFirst: "-1cm",
+      });
+      doc.addParagraph((p) => {
+        p.addText("Semi-bold", { fontWeight: 600 });
+        p.addText(" and ", { textTransform: "uppercase" });
+        p.addText("small caps text", { smallCaps: true });
+        p.addText(" in a custom font", { fontFamily: "Arial" });
+      });
+
+      doc.addTable(
+        (t) => {
+          t.addRow(
+            (r) => {
+              r.addCell("Header", {
+                bold: true,
+                backgroundColor: "#DDDDDD",
+                verticalAlign: "middle",
+                padding: "0.1cm",
+              });
+              r.addCell("Value", {
+                bold: true,
+                backgroundColor: "#DDDDDD",
+                verticalAlign: "middle",
+                padding: "0.1cm",
+              });
+            },
+            { backgroundColor: "#DDDDDD" },
+          );
+          t.addRow((r) => {
+            r.addCell("Data");
+            r.addCell("42");
+          });
+        },
+        { border: "0.5pt solid #000000" },
+      );
+
+      doc.addList(["Item A", "Item B"], {
+        type: "numbered",
+        numFormat: "i",
+        numPrefix: "(",
+        numSuffix: ")",
+        startValue: 3,
+      });
+
+      const entries = await unpackOdt(doc);
+      expect(entries["content.xml"]).toBeDefined();
+      expect(entries["styles.xml"]).toBeDefined();
+
+      const content = decode.decode(entries["content.xml"]);
+      const styles = decode.decode(entries["styles.xml"]);
+
+      // Asian/Complex tripling
+      expect(content).toContain('style:font-weight-asian="600"');
+      // Font face declarations
+      expect(content).toContain("office:font-face-decls");
+      expect(content).toContain('style:name="Arial"');
+      // Paragraph options
+      expect(content).toContain('fo:text-align="center"');
+      expect(content).toContain('fo:text-align="justify"');
+      expect(content).toContain('fo:line-height="200%"');
+      expect(content).toContain('fo:margin-left="1cm"');
+      // Heading inherits from Heading_20_1
+      expect(content).toContain('style:parent-style-name="Heading_20_1"');
+      // Cell features
+      expect(content).toContain('style:vertical-align="middle"');
+      expect(content).toContain('fo:padding="0.1cm"');
+      // Row style
+      expect(content).toContain('style:family="table-row"');
+      // No value-type spec violation
+      expect(content).not.toContain("office:value-type");
+      // List features
+      expect(content).toContain('style:num-format="i"');
+      expect(content).toContain('text:start-value="3"');
+      // Named styles in styles.xml
+      expect(styles).toContain('style:name="Standard"');
+      expect(styles).toContain('style:name="Heading_20_1"');
+      expect(styles).toContain('style:name="List_20_Bullet"');
+    });
+  });
+
   describe("full integration \u2014 all Phase 5 features", () => {
     it("should produce valid .odt with all Phase 5 features", async () => {
       const doc = new OdtDocument();

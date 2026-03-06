@@ -59,14 +59,25 @@ export function tokenize(xml: string): Segment[] {
 
   while (i < xml.length) {
     if (xml[i] === "<") {
-      const end = xml.indexOf(">", i);
-      if (end === -1) {
+      // Scan for tag end, skipping over quoted attribute values so that a
+      // literal > inside "..." or '...' does not prematurely close the tag.
+      let j = i + 1;
+      while (j < xml.length && xml[j] !== ">") {
+        if (xml[j] === '"' || xml[j] === "'") {
+          const quote = xml[j++];
+          while (j < xml.length && xml[j] !== quote) j++;
+          if (j < xml.length) j++; // skip closing quote
+        } else {
+          j++;
+        }
+      }
+      if (j >= xml.length) {
         // Malformed XML — treat remainder as text
         segments.push({ type: "text", content: xml.slice(i) });
         break;
       }
-      segments.push({ type: "tag", content: xml.slice(i, end + 1) });
-      i = end + 1;
+      segments.push({ type: "tag", content: xml.slice(i, j + 1) });
+      i = j + 1;
     } else {
       const end = xml.indexOf("<", i);
       if (end === -1) {
@@ -125,9 +136,18 @@ function findPlaceholders(ribbon: string): { start: number; end: number; text: s
 
 /**
  * Remove empty <text:span ...></text:span> pairs from an XML string.
+ *
+ * Loops until stable so that nested empty spans (a span whose only content
+ * was another empty span) are also removed.
  */
 function removeEmptySpans(xml: string): string {
-  return xml.replace(/<text:span[^>]*><\/text:span>/g, "");
+  let result = xml;
+  let prev: string;
+  do {
+    prev = result;
+    result = result.replace(/<text:span[^>]*><\/text:span>/g, "");
+  } while (result !== prev);
+  return result;
 }
 
 /**

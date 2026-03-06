@@ -660,3 +660,64 @@ describe("healPlaceholders — ODF inline elements", () => {
     );
   });
 });
+
+// ============================================================
+// tokenize — quoted attribute values containing >
+// ============================================================
+
+describe("tokenize — quoted attribute values containing >", () => {
+  test("handles > inside double-quoted attribute value", () => {
+    const xml = '<text:p fo:condition="value&gt;5">text</text:p>';
+    const segments = tokenize(xml);
+    expect(segments).toEqual([
+      { type: "tag", content: '<text:p fo:condition="value&gt;5">' },
+      { type: "text", content: "text" },
+      { type: "tag", content: "</text:p>" },
+    ]);
+  });
+
+  test("handles > inside single-quoted attribute value", () => {
+    const xml = "<text:p fo:condition='value>5'>text</text:p>";
+    const segments = tokenize(xml);
+    expect(segments).toEqual([
+      { type: "tag", content: "<text:p fo:condition='value>5'>" },
+      { type: "text", content: "text" },
+      { type: "tag", content: "</text:p>" },
+    ]);
+  });
+
+  test("placeholder healing still works when surrounding tags contain > in attributes", () => {
+    const xml =
+      '<text:p fo:condition="x>0">' +
+      '<text:span text:style-name="T1">{</text:span>' +
+      '<text:span text:style-name="T1">name}</text:span>' +
+      "</text:p>";
+    expect(healPlaceholders(xml)).toBe(
+      '<text:p fo:condition="x>0"><text:span text:style-name="T1">{name}</text:span></text:p>',
+    );
+  });
+});
+
+// ============================================================
+// removeEmptySpans — nested empty spans
+// ============================================================
+
+describe("healPlaceholders — nested empty spans", () => {
+  test("removes span whose only content was another empty span", () => {
+    // After healing, inner span becomes empty; outer span then also becomes empty.
+    // Both must be removed in a single healPlaceholders call.
+    const xml =
+      "<text:p>" +
+      '<text:span text:style-name="T1">' +
+      '<text:span text:style-name="T2">{</text:span>' +
+      '<text:span text:style-name="T2">name}</text:span>' +
+      "</text:span>" +
+      "</text:p>";
+    // After healing: inner T2 spans collapse to one span with {name}, outer T1 span becomes empty
+    // Both empty spans must be cleaned up
+    const result = healPlaceholders(xml);
+    expect(result).not.toContain('<text:span text:style-name="T1"></text:span>');
+    expect(result).not.toContain('<text:span text:style-name="T2"></text:span>');
+    expect(result).toContain("{name}");
+  });
+});

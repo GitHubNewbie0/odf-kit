@@ -18,13 +18,15 @@ import { replaceAll, type TemplateData } from "./replacer.js";
  * @param data — Key-value data for placeholder replacement
  * @returns Uint8Array — A new .odt file with placeholders replaced
  *
+ * @throws {Error} If `templateBytes` is not a valid ZIP file.
+ *
  * @example
  * ```typescript
  * import { fillTemplate } from "odf-kit";
  * import { readFileSync, writeFileSync } from "fs";
  *
  * const template = readFileSync("invoice-template.odt");
- * const result = await fillTemplate(template, {
+ * const result = fillTemplate(template, {
  *   customer: "Acme Corp",
  *   date: "2026-02-23",
  *   items: [
@@ -54,6 +56,14 @@ export function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uin
     const healed = healPlaceholders(xml);
     const filled = replaceAll(healed, data);
     files["styles.xml"] = strToU8(filled);
+  }
+
+  // Process meta.xml — document properties (title, subject, etc.) may contain placeholders
+  if (files["meta.xml"]) {
+    const xml = strFromU8(files["meta.xml"]);
+    const healed = healPlaceholders(xml);
+    const filled = replaceAll(healed, data);
+    files["meta.xml"] = strToU8(filled);
   }
 
   // Re-zip with ODF-required structure:

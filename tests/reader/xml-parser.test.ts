@@ -275,3 +275,74 @@ describe("parseXml — ODF realistic fragments", () => {
     expect(row.children).toHaveLength(2);
   });
 });
+
+// ============================================================
+// Attribute quoting styles
+// ============================================================
+
+describe("parseXml — single-quoted attributes", () => {
+  test("parses a single-quoted attribute value", () => {
+    const node = parseXml("<text:p text:style-name='P1'></text:p>");
+    expect(node.attrs["text:style-name"]).toBe("P1");
+  });
+
+  test("parses mixed double and single-quoted attributes on the same element", () => {
+    const node = parseXml("<tag a=\"double\" b='single'></tag>");
+    expect(node.attrs["a"]).toBe("double");
+    expect(node.attrs["b"]).toBe("single");
+  });
+
+  test("decodes entities in single-quoted attribute values", () => {
+    const node = parseXml("<tag attr='a &amp; b'></tag>");
+    expect(node.attrs["attr"]).toBe("a & b");
+  });
+});
+
+// ============================================================
+// Numeric character references
+// ============================================================
+
+describe("parseXml — numeric character references", () => {
+  test("decodes decimal numeric character reference in text content", () => {
+    const node = parseXml("<text:p>non&#160;breaking</text:p>");
+    const text = node.children[0];
+    if (text.type === "text") expect(text.text).toBe("non breaking");
+  });
+
+  test("decodes hex numeric character reference in text content", () => {
+    const node = parseXml("<text:p>en&#x2013;dash</text:p>");
+    const text = node.children[0];
+    if (text.type === "text") expect(text.text).toBe("en–dash");
+  });
+
+  test("decodes numeric character reference in attribute value", () => {
+    const node = parseXml('<tag attr="&#169; 2026"></tag>');
+    expect(node.attrs["attr"]).toBe("© 2026");
+  });
+
+  test("decodes multiple numeric references in one string", () => {
+    const node = parseXml("<p>&#60;&#62;</p>");
+    const text = node.children[0];
+    if (text.type === "text") expect(text.text).toBe("<>");
+  });
+});
+
+// ============================================================
+// Tag boundary with > in attribute value
+// ============================================================
+
+describe("parseXml — > in attribute values", () => {
+  test("handles > inside double-quoted attribute without splitting the tag", () => {
+    const node = parseXml('<text:p fo:condition="value&gt;5">text</text:p>');
+    expect(node.tag).toBe("text:p");
+    expect(node.attrs["fo:condition"]).toBe("value>5");
+    const text = node.children[0];
+    if (text.type === "text") expect(text.text).toBe("text");
+  });
+
+  test("handles > inside single-quoted attribute without splitting the tag", () => {
+    const node = parseXml("<text:p fo:condition='x>0'>text</text:p>");
+    expect(node.tag).toBe("text:p");
+    expect(node.attrs["fo:condition"]).toBe("x>0");
+  });
+});

@@ -1,4 +1,11 @@
-import type { TextFormatting, TextRun, CellOptions, TableCellData, TableRowData } from "./types.js";
+import type {
+  TextFormatting,
+  TextRun,
+  CellOptions,
+  TableCellData,
+  TableRowData,
+  TableRowOptions,
+} from "./types.js";
 
 /**
  * Builder for cell content with formatted text runs.
@@ -125,12 +132,23 @@ export class TableBuilder {
    * Add a row to this table.
    *
    * @param buildRow - Callback receiving a {@link RowBuilder}.
+   * @param options - Optional row-level options (e.g. background color).
    * @returns This builder, for chaining.
+   *
+   * @example
+   * // Plain row
+   * t.addRow((r) => { r.addCell("Alice"); r.addCell("30"); });
+   *
+   * @example
+   * // Header row with background color
+   * t.addRow((r) => {
+   *   r.addCell("Name"); r.addCell("Age");
+   * }, { backgroundColor: "#DDDDDD" });
    */
-  addRow(buildRow: (row: RowBuilder) => void): this {
+  addRow(buildRow: (row: RowBuilder) => void, options?: TableRowOptions): this {
     const builder = new RowBuilder();
     buildRow(builder);
-    this.rows.push({ cells: builder.cells });
+    this.rows.push({ cells: builder.cells, options });
     return this;
   }
 }

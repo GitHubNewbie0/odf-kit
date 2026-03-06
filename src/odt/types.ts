@@ -28,6 +28,16 @@
  * { strikethrough: true }
  * { superscript: true }
  * { subscript: true }
+ *
+ * @example
+ * // Text transform and small caps
+ * { textTransform: "uppercase" }
+ * { smallCaps: true }
+ *
+ * @example
+ * // Numeric font weight (light, semi-bold, etc.)
+ * { fontWeight: 300 }
+ * { fontWeight: 600 }
  */
 export interface TextFormatting {
   /** Shortcut for `fontWeight: "bold"`. */
@@ -36,8 +46,12 @@ export interface TextFormatting {
   /** Shortcut for `fontStyle: "italic"`. */
   italic?: boolean;
 
-  /** Font weight. Overrides `bold` if both are provided. */
-  fontWeight?: "normal" | "bold";
+  /**
+   * Font weight. Overrides `bold` if both are provided.
+   * Accepts named values (`"normal"`, `"bold"`) or numeric CSS weights
+   * (`100`–`900`, e.g. `300` for light, `600` for semi-bold).
+   */
+  fontWeight?: "normal" | "bold" | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 
   /** Font style. Overrides `italic` if both are provided. */
   fontStyle?: "normal" | "italic";
@@ -75,6 +89,20 @@ export interface TextFormatting {
    * Accepts hex (`"#FFFF00"`) or CSS named colors (`"yellow"`).
    */
   highlightColor?: string;
+
+  /**
+   * Transform the text case.
+   * - `"uppercase"` — ALL CAPS
+   * - `"lowercase"` — all lowercase
+   * - `"capitalize"` — First Letter Of Each Word
+   */
+  textTransform?: "uppercase" | "lowercase" | "capitalize";
+
+  /**
+   * Render text in small capitals. Common in legal documents, academic
+   * papers, and section headings.
+   */
+  smallCaps?: boolean;
 }
 
 /**
@@ -138,9 +166,60 @@ export interface TabStop {
  * Options for paragraph-level formatting.
  *
  * @example
+ * { align: "center" }
+ *
+ * @example
+ * { spaceBefore: "0.4cm", spaceAfter: "0.2cm" }
+ *
+ * @example
+ * { lineHeight: 1.5 }
+ * { lineHeight: "18pt" }
+ *
+ * @example
+ * // Hanging indent (first line protrudes left)
+ * { indentLeft: "1cm", indentFirst: "-1cm" }
+ *
+ * @example
  * { tabStops: [{ position: "8cm" }, { position: "14cm", type: "right" }] }
  */
 export interface ParagraphOptions {
+  /**
+   * Horizontal text alignment. Defaults to the parent style's alignment (left).
+   */
+  align?: "left" | "center" | "right" | "justify";
+
+  /**
+   * Space above the paragraph with units (e.g. `"0.4cm"`, `"6pt"`).
+   * Equivalent to `fo:margin-top` on the paragraph.
+   */
+  spaceBefore?: string;
+
+  /**
+   * Space below the paragraph with units (e.g. `"0.2cm"`, `"6pt"`).
+   * Equivalent to `fo:margin-bottom` on the paragraph.
+   */
+  spaceAfter?: string;
+
+  /**
+   * Line height. A number ≥ 1 is treated as a multiplier (e.g. `1.5` → 150%).
+   * A string with units sets an absolute line height (e.g. `"18pt"`).
+   */
+  lineHeight?: number | string;
+
+  /**
+   * Left indent for the entire paragraph with units (e.g. `"1cm"`).
+   * Equivalent to `fo:margin-left` on the paragraph.
+   */
+  indentLeft?: string;
+
+  /**
+   * First-line indent with units. Positive values indent the first line
+   * (e.g. `"0.5cm"`). Negative values create a hanging indent — combine
+   * with `indentLeft` to keep text aligned (e.g. `indentLeft: "1cm"`,
+   * `indentFirst: "-1cm"`).
+   */
+  indentFirst?: string;
+
   /**
    * Tab stops for this paragraph. Used with `addTab()` in the paragraph builder.
    */
@@ -207,13 +286,49 @@ export interface ImageData {
  * { type: "numbered" }
  *
  * @example
- * { type: "bullet" }
+ * // Roman numerals starting at 1
+ * { type: "numbered", numFormat: "i" }
+ *
+ * @example
+ * // Alphabetic list with parentheses: (a), (b), (c)
+ * { type: "numbered", numFormat: "a", numPrefix: "(", numSuffix: ")" }
+ *
+ * @example
+ * // Continue numbering from 5
+ * { type: "numbered", startValue: 5 }
  */
 export interface ListOptions {
   /**
    * List type. Defaults to `"bullet"`.
    */
   type?: "bullet" | "numbered";
+
+  /**
+   * Number format for numbered lists. Ignored for bullet lists.
+   * - `"1"` — Arabic numerals: 1, 2, 3 (default)
+   * - `"a"` — lowercase alpha: a, b, c
+   * - `"A"` — uppercase alpha: A, B, C
+   * - `"i"` — lowercase roman: i, ii, iii
+   * - `"I"` — uppercase roman: I, II, III
+   */
+  numFormat?: "1" | "a" | "A" | "i" | "I";
+
+  /**
+   * Text prepended to the number (e.g. `"("` produces `(1)`, `(2)`).
+   * Ignored for bullet lists. Defaults to `""`.
+   */
+  numPrefix?: string;
+
+  /**
+   * Text appended to the number (e.g. `")"` produces `1)`, `2)`).
+   * Ignored for bullet lists. Defaults to `"."`.
+   */
+  numSuffix?: string;
+
+  /**
+   * Number to start the list at. Ignored for bullet lists. Defaults to `1`.
+   */
+  startValue?: number;
 }
 
 /**
@@ -331,8 +446,12 @@ export interface TableOptions {
  * { colSpan: 2 }
  *
  * @example
- * // Cell with custom border
- * { border: "1pt solid #000000", backgroundColor: "lightgray" }
+ * // Cell with custom border and vertical alignment
+ * { border: "1pt solid #000000", verticalAlign: "middle" }
+ *
+ * @example
+ * // Cell padding
+ * { padding: "0.1cm" }
  */
 export interface CellOptions extends TextFormatting {
   /**
@@ -369,6 +488,20 @@ export interface CellOptions extends TextFormatting {
    * Cells covered by the span in subsequent rows should not be added — odf-kit generates them.
    */
   rowSpan?: number;
+
+  /**
+   * Vertical alignment of content within the cell.
+   * - `"top"` — align to top (default)
+   * - `"middle"` — center vertically
+   * - `"bottom"` — align to bottom
+   */
+  verticalAlign?: "top" | "middle" | "bottom";
+
+  /**
+   * Padding between the cell border and its content, applied to all four sides.
+   * Accepts values with units (e.g. `"0.1cm"`, `"2pt"`).
+   */
+  padding?: string;
 }
 
 /**
@@ -383,11 +516,33 @@ export interface TableCellData {
 }
 
 /**
+ * Options for row-level settings.
+ *
+ * @example
+ * // Zebra striping
+ * { backgroundColor: "#EEEEEE" }
+ *
+ * @example
+ * // Header row highlight
+ * { backgroundColor: "#DDDDDD" }
+ */
+export interface TableRowOptions {
+  /**
+   * Row background color. Accepts hex (`"#EEEEEE"`) or CSS named colors (`"lightgray"`).
+   * Applied to the entire row via `fo:background-color` on `style:table-row-properties`.
+   */
+  backgroundColor?: string;
+}
+
+/**
  * Internal representation of a table row's data.
  */
 export interface TableRowData {
   /** Cells in this row. */
   cells: TableCellData[];
+
+  /** Row-level options (background color, etc.). */
+  options?: TableRowOptions;
 }
 
 /**

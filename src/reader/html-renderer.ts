@@ -123,5 +123,5 @@ function renderNode(node: BodyNode): string {
 export function renderHtml(body: BodyNode[], options?: HtmlOptions): string {
   const inner = body.map(renderNode).join("\n");
   if (options?.fragment === true) return inner;
-  return `<!DOCTYPE html>\n<html>\n<body>\n${inner}\n</body>\n</html>`;
+  return `<!DOCTYPE html>\n<html>\n<head><meta charset="utf-8"></head>\n<body>\n${inner}\n</body>\n</html>`;
 }

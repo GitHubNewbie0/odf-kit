@@ -486,6 +486,13 @@ describe("replaceAll — edge cases", () => {
     expect(replaceAll(xml, { broken: true })).toBe("<text:p>{#broken}content</text:p>");
   });
 
+  test("dangling close tag (no matching open tag) passes through as literal text", () => {
+    // {/tag} with no preceding {#tag} is not matched by SIMPLE_RE ({/...} syntax)
+    // and not matched by SECTION_OPEN_RE, so it survives unchanged as literal text
+    const xml = "<text:p>{/orphan}content</text:p>";
+    expect(replaceAll(xml, {})).toBe("<text:p>{/orphan}content</text:p>");
+  });
+
   test("adjacent sections", () => {
     expect(replaceAll("{#a}A{/a}{#b}B{/b}", { a: true, b: true })).toBe("AB");
   });
