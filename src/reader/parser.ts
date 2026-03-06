@@ -63,11 +63,7 @@ function textContent(node: XmlElementNode): string {
 
 /**
  * Resolved character formatting for a named automatic style.
- *
- * Tri-state: true = explicitly on, false = explicitly off (overrides
- * a parent that set it on), undefined = not set by this style.
- * This allows a child style to cancel formatting inherited from a parent
- * (e.g. fo:font-weight="normal" inside a bold paragraph style).
+ * Properties are only present when the style explicitly sets them.
  */
 interface CharStyle {
   bold?: boolean;
@@ -81,10 +77,10 @@ interface CharStyle {
 /**
  * Merge a base character style with an override.
  *
- * The override wins for any property it explicitly sets (true or false).
- * Unset properties (undefined) in the override fall back to the base.
- * This allows a child style to cancel formatting inherited from a parent
- * (e.g. fo:font-weight="normal" cancels bold from a parent paragraph style).
+ * The override wins for any property it explicitly sets (true).
+ * Unset properties in the override fall back to the base.
+ * Since odf-kit only ever sets properties to true (never explicitly
+ * to false), this produces correct inheritance for all generated output.
  */
 function mergeStyle(base: CharStyle, override: CharStyle): CharStyle {
   const result: CharStyle = { ...base };
@@ -147,21 +143,19 @@ function scanStylesElement(
       const style: CharStyle = {};
       const p = textPropsEl.attrs;
 
-      // Tri-state: set true when on, false when explicitly off (so a child
-      // style can cancel formatting inherited from a parent).
       if ("fo:font-weight" in p) style.bold = p["fo:font-weight"] === "bold";
       if ("fo:font-style" in p) style.italic = p["fo:font-style"] === "italic";
 
       const underlineStyle = p["style:text-underline-style"];
-      if (underlineStyle !== undefined) style.underline = underlineStyle !== "none";
+      if (underlineStyle !== undefined && underlineStyle !== "none") style.underline = true;
 
       const strikeStyle = p["style:text-line-through-style"];
-      if (strikeStyle !== undefined) style.strikethrough = strikeStyle !== "none";
+      if (strikeStyle !== undefined && strikeStyle !== "none") style.strikethrough = true;
 
       const textPosition = p["style:text-position"];
       if (textPosition !== undefined) {
-        style.superscript = textPosition.startsWith("super");
-        style.subscript = textPosition.startsWith("sub");
+        if (textPosition.startsWith("super")) style.superscript = true;
+        if (textPosition.startsWith("sub")) style.subscript = true;
       }
 
       charStyles.set(name, style);
@@ -188,21 +182,16 @@ function scanStylesElement(
 /**
  * Build style maps from both content.xml and (optionally) styles.xml.
  *
- * Scan order — later scans override earlier for the same style name:
+ * Scan order (later wins):
  * 1. styles.xml office:styles (named styles — lowest priority)
- * 2. styles.xml office:automatic-styles (used in headers/footers)
- * 3. content.xml office:styles (named styles defined inline)
+ * 2. styles.xml office:automatic-styles
+ * 3. content.xml office:styles
  * 4. content.xml office:automatic-styles (highest priority)
- *
- * In real-world ODT files named styles live in styles.xml. In
- * odf-kit-generated files they appear in content.xml. Scanning both
- * ensures all styles are resolved regardless of origin.
  */
 function buildStyleMaps(contentRoot: XmlElementNode, stylesRoot?: XmlElementNode): StyleMaps {
   const charStyles = new Map<string, CharStyle>();
   const listOrdered = new Map<string, boolean>();
 
-  // styles.xml (lowest priority — overridden by content.xml)
   if (stylesRoot) {
     const namedEl = findElement(stylesRoot, "office:styles");
     if (namedEl) scanStylesElement(namedEl, charStyles, listOrdered);
@@ -210,12 +199,11 @@ function buildStyleMaps(contentRoot: XmlElementNode, stylesRoot?: XmlElementNode
     if (autoEl) scanStylesElement(autoEl, charStyles, listOrdered);
   }
 
-  // content.xml (higher priority)
-  const namedStylesEl = findElement(contentRoot, "office:styles");
-  if (namedStylesEl) scanStylesElement(namedStylesEl, charStyles, listOrdered);
+  const contentNamedEl = findElement(contentRoot, "office:styles");
+  if (contentNamedEl) scanStylesElement(contentNamedEl, charStyles, listOrdered);
 
-  const autoStylesEl = findElement(contentRoot, "office:automatic-styles");
-  if (autoStylesEl) scanStylesElement(autoStylesEl, charStyles, listOrdered);
+  const contentAutoEl = findElement(contentRoot, "office:automatic-styles");
+  if (contentAutoEl) scanStylesElement(contentAutoEl, charStyles, listOrdered);
 
   return { charStyles, listOrdered };
 }
@@ -262,9 +250,7 @@ function parseSpans(
         break;
 
       case "text:s": {
-        // ODF compressed-spaces element — represents one or more consecutive
-        // regular spaces that XML parsers would otherwise collapse.
-        // text:c gives the repeat count (default 1).
+        // ODF space element — text:c gives the repeat count (default 1)
         const count = parseInt(child.attrs["text:c"] ?? "1", 10);
         spans.push(makeSpan(" ".repeat(count), baseStyle, href));
         break;
@@ -314,7 +300,10 @@ function parseList(listEl: XmlElementNode, styles: StyleMaps): ListNode {
     for (const itemChild of child.children) {
       if (itemChild.type !== "element") continue;
       if (itemChild.tag === "text:p" || itemChild.tag === "text:h") {
-        spans = spans.concat(parseSpans(itemChild, styles.charStyles));
+        const paraStyleName = itemChild.attrs["text:style-name"];
+        const paraBaseStyle =
+          paraStyleName !== undefined ? (styles.charStyles.get(paraStyleName) ?? {}) : {};
+        spans = spans.concat(parseSpans(itemChild, styles.charStyles, paraBaseStyle));
       } else if (itemChild.tag === "text:list") {
         nested = parseList(itemChild, styles);
       }
@@ -352,7 +341,10 @@ function parseTable(tableEl: XmlElementNode, styles: StyleMaps): TableNode {
       let spans: TextSpan[] = [];
       for (const cellChild of cellEl.children) {
         if (cellChild.type === "element" && cellChild.tag === "text:p") {
-          spans = spans.concat(parseSpans(cellChild, styles.charStyles));
+          const paraStyleName = cellChild.attrs["text:style-name"];
+          const paraBaseStyle =
+            paraStyleName !== undefined ? (styles.charStyles.get(paraStyleName) ?? {}) : {};
+          spans = spans.concat(parseSpans(cellChild, styles.charStyles, paraBaseStyle));
         }
       }
 
@@ -383,9 +375,12 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, styles: StyleMaps): BodyNode
 
     switch (child.tag) {
       case "text:p": {
+        const paraStyleName = child.attrs["text:style-name"];
+        const paraBaseStyle =
+          paraStyleName !== undefined ? (styles.charStyles.get(paraStyleName) ?? {}) : {};
         const para: ParagraphNode = {
           kind: "paragraph",
-          spans: parseSpans(child, styles.charStyles),
+          spans: parseSpans(child, styles.charStyles, paraBaseStyle),
         };
         nodes.push(para);
         break;
@@ -394,10 +389,13 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, styles: StyleMaps): BodyNode
       case "text:h": {
         const rawLevel = parseInt(child.attrs["text:outline-level"] ?? "1", 10);
         const level = Math.min(Math.max(rawLevel, 1), 6) as 1 | 2 | 3 | 4 | 5 | 6;
+        const headingStyleName = child.attrs["text:style-name"];
+        const headingBaseStyle =
+          headingStyleName !== undefined ? (styles.charStyles.get(headingStyleName) ?? {}) : {};
         const heading: HeadingNode = {
           kind: "heading",
           level,
-          spans: parseSpans(child, styles.charStyles),
+          spans: parseSpans(child, styles.charStyles, headingBaseStyle),
         };
         nodes.push(heading);
         break;
@@ -494,10 +492,11 @@ export function readOdt(bytes: Uint8Array): OdtDocumentModel {
   const metaXmlBytes = zip["meta.xml"];
   const metadata: OdtMetadata = metaXmlBytes ? parseMetaXml(strFromU8(metaXmlBytes)) : {};
 
+  const contentRoot = parseXml(contentXml);
+
   const stylesXmlBytes = zip["styles.xml"];
   const stylesRoot = stylesXmlBytes ? parseXml(strFromU8(stylesXmlBytes)) : undefined;
 
-  const contentRoot = parseXml(contentXml);
   const styles = buildStyleMaps(contentRoot, stylesRoot);
 
   const bodyEl = findElement(contentRoot, "office:body");
