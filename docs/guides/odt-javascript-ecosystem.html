@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Working with ODT Files in JavaScript — Parse, Convert, and Generate .odt Documents</title>
-  <meta name="description" content="The complete guide to ODT files in JavaScript and Node.js. Parse and extract text from .odt files, convert ODT to HTML or PDF, and generate new .odt documents programmatically. Covers officeparser, textract, odt2html, LibreOffice headless, and odf-kit.">
+  <meta name="description" content="The complete guide to ODT files in JavaScript and Node.js. Parse and extract text from .odt files, convert ODT to HTML in pure JavaScript with odf-kit, and generate new .odt documents programmatically. Covers odf-kit, officeparser, textract, odt2html, and LibreOffice headless.">
   <meta name="keywords" content="odt javascript, odt node.js, npm odt, odt parser npm, odt to html, odt to pdf nodejs, parse odt file javascript, read odt file node, odt-to-html, npm odt-to-html package, npm install odt-to-html, odt-parser npm, odt text extraction, convert odt javascript, generate odt javascript, create odt node, flat xml odf text document, open document format javascript, odf javascript library, libreoffice node.js, officeparser odt, textract odt">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
@@ -186,7 +186,7 @@ console.<span class="fn">log</span>(ast.metadata);  <span class="cmt">// author,
       <div class="pkg-card">
         <h4><a href="https://www.npmjs.com/package/odt2html">odt2html</a> <span class="pkg-status status-abandoned">Abandoned</span></h4>
         <div class="pkg-meta">npm install odt2html · Apache-2.0 · Last published 2016</div>
-        <p>Converts ODT to HTML by parsing the ODF XML structure and mapping it to HTML elements. Not actively maintained but may work for simple documents. Uses a SAX parser for streaming conversion.</p>
+        <p>Converts ODT to HTML by parsing the ODF XML structure and mapping it to HTML elements. Not actively maintained and may fail on modern documents. For an actively maintained pure JavaScript alternative, see <a href="https://www.npmjs.com/package/odf-kit">odf-kit</a>'s <code>odtToHtml()</code> function below.</p>
       </div>
 
       <h2>2. Convert .odt to HTML or PDF</h2>
@@ -208,8 +208,26 @@ console.<span class="fn">log</span>(ast.metadata);  <span class="cmt">// author,
 
       <p>This produces high-fidelity output because LibreOffice understands the full ODF specification. The downside is that LibreOffice must be installed on the server, and headless mode can be slow and resource-heavy. For a pure JavaScript approach that generates .odt files without requiring LibreOffice at all, see the <a href="generate-odt-without-libreoffice.html">Generate .odt Without LibreOffice</a> guide.</p>
 
-      <h3>Pure JavaScript conversion (limited)</h3>
-      <p>There is no mature, actively maintained pure JavaScript library for full-fidelity ODT-to-HTML or ODT-to-PDF conversion. The packages that exist (<code>odt2html</code>, <code>odt.js</code>) handle basic text and simple formatting but struggle with tables, images, complex styles, and the many edge cases in the ODF specification. If you need accurate conversion, LibreOffice headless or a cloud conversion API is the practical choice.</p>
+      <h3>Pure JavaScript ODT to HTML — odf-kit</h3>
+      <p><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> v0.5.0 adds a built-in ODT reader and HTML converter — the first actively maintained pure JavaScript library for ODT-to-HTML conversion. It handles paragraphs, headings, tables, lists, bold, italic, underline, strikethrough, superscript, subscript, and hyperlinks. Zero dependencies, works in Node.js and browsers.</p>
+
+      <div class="code-block"><pre>
+<span class="kw">import</span> { <span class="typ">odtToHtml</span>, <span class="typ">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { <span class="typ">readFileSync</span> } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+
+<span class="cmt">// Convert to HTML in one step</span>
+<span class="kw">const</span> html = <span class="fn">odtToHtml</span>(bytes, { fragment: <span class="kw">true</span> });
+
+<span class="cmt">// Or parse to a structured model first</span>
+<span class="kw">const</span> doc = <span class="fn">readOdt</span>(bytes);
+console.<span class="fn">log</span>(doc.metadata.title);   <span class="cmt">// document title from meta.xml</span>
+console.<span class="fn">log</span>(doc.body.length);       <span class="cmt">// number of paragraphs, headings, tables...</span>
+<span class="kw">const</span> html = doc.<span class="fn">toHtml</span>();          <span class="cmt">// full HTML document</span></pre>
+      </div>
+
+      <p>For full-fidelity conversion including fonts, colors, page layout, and embedded images, LibreOffice headless remains the most complete option. odf-kit's reader covers the common case — semantic content — and is the right choice when you don't want a LibreOffice dependency or need browser compatibility.</p>
 
       <h2>3. Generate new .odt files</h2>
       <p>If you need to create .odt files programmatically — generating reports, invoices, contracts, letters, or any structured document from your application data — this is the area where the ecosystem was historically weakest.</p>
@@ -217,7 +235,7 @@ console.<span class="fn">log</span>(ast.metadata);  <span class="cmt">// author,
       <div class="pkg-card">
         <h4><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> <span class="pkg-status status-active">Active</span></h4>
         <div class="pkg-meta">npm install odf-kit · Apache-2.0 · Zero dependencies · Node.js + Browser</div>
-        <p>The only actively maintained JavaScript library for generating ODF documents. Build .odt files from scratch with headings, paragraphs, tables, images, lists, hyperlinks, bookmarks, and page layout — or fill existing .odt templates with data using a Mustache-style template engine. Works in Node.js and browsers with the same API. Zero runtime dependencies.</p>
+        <p>The only actively maintained JavaScript library for creating, filling, and reading ODF documents. Generate .odt files from scratch, fill existing .odt templates with data using a Mustache-style template engine, or convert .odt files to HTML with the built-in reader. Works in Node.js and browsers with the same API. Zero runtime dependencies.</p>
       </div>
 
       <div class="code-block"><pre>
@@ -277,9 +295,9 @@ doc.<span class="fn">addTable</span>([
           </tr>
           <tr>
             <td>Convert .odt → HTML</td>
-            <td>LibreOffice headless</td>
-            <td>No</td>
-            <td>No</td>
+            <td><code>odf-kit</code></td>
+            <td>Yes</td>
+            <td>Yes</td>
           </tr>
           <tr>
             <td>Convert .odt → PDF</td>
@@ -307,7 +325,7 @@ doc.<span class="fn">addTable</span>([
 
       <p>This is significant because .odt is the ISO standard format, required by the European Union, NATO, and 20+ national governments for official documents. Many organizations, schools, and non-profits default to LibreOffice and ODF. If you're building tools for these users, you need .odt support — and until recently, the JavaScript options were limited.</p>
 
-      <p><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> was built specifically to fill the generation and template-filling gap. It's the only actively maintained library for creating .odt files in JavaScript, and it works both server-side and in the browser with zero dependencies.</p>
+      <p><a href="https://www.npmjs.com/package/odf-kit">odf-kit</a> was built specifically to fill these gaps. It's the only actively maintained library for creating, filling, and reading .odt files in JavaScript, and it works both server-side and in the browser with zero dependencies.</p>
 
       <h2>Common workflows</h2>
 
@@ -316,6 +334,9 @@ doc.<span class="fn">addTable</span>([
 
       <h3>Fill templates in a CI/CD pipeline</h3>
       <p>Create a template in LibreOffice with <code>{placeholder}</code> fields, then use <code>odf-kit</code>'s <code>fillTemplate()</code> in Node.js to produce personalized documents at build time. See the <a href="fill-odt-template-javascript.html">template guide</a>.</p>
+
+      <h3>Convert .odt files to HTML without LibreOffice</h3>
+      <p>Use <code>odf-kit</code>'s built-in reader to convert .odt files to HTML entirely in JavaScript. No LibreOffice installation required, no server-side dependencies, works in the browser. Import from <code>odf-kit/reader</code> to keep the main bundle lean.</p>
 
       <h3>Parse uploaded .odt files and index their content</h3>
       <p>Use <code>officeparser</code> to extract text from .odt files uploaded by users. The extracted text can be stored in a database for full-text search, content analysis, or document management.</p>
