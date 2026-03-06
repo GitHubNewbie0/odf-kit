@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>odf-kit — OpenDocument Format (.odt) Library for Node.js and Browsers</title>
-  <meta name="description" content="Generate and fill OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch or fill existing templates with data — loops, conditionals, dot notation. Create reports, invoices, contracts, and letters with tables, formatting, images, and page layout. Client-side document generation with no server required. The modern simple-odf alternative. Apache 2.0 open source.">
+  <meta name="description" content="Generate, fill, and read OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch, fill existing templates with data, or convert .odt files to HTML with the built-in reader. Create reports, invoices, contracts, and letters. The modern simple-odf alternative. Apache 2.0 open source.">
   <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, client-side, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
@@ -12,14 +12,14 @@
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="odf-kit — Generate and Fill ODF Documents in JavaScript and TypeScript">
-  <meta property="og:description" content="Create .odt files from scratch or fill existing templates with data. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. The modern simple-odf replacement. Open source.">
+  <meta property="og:title" content="odf-kit — Generate, Fill, and Read ODF Documents in JavaScript and TypeScript">
+  <meta property="og:description" content="Create .odt files from scratch, fill templates with data, or convert .odt to HTML in pure JavaScript. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Apache 2.0 open source.">
   <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/">
   <meta property="og:site_name" content="odf-kit">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="odf-kit — Generate and Fill ODF Documents in JavaScript and TypeScript">
+  <meta name="twitter:title" content="odf-kit — Generate, Fill, and Read ODF Documents in JavaScript and TypeScript">
   <meta name="twitter:description" content="Create .odt files or fill templates with data in Node.js and browsers. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Open source simple-odf alternative.">
 
   <!-- Structured Data -->
@@ -627,10 +627,10 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.4.0 · Apache 2.0 · TypeScript + JavaScript</div>
-      <h1>Generate and fill OpenDocument<br>files with <span>odf-kit</span></h1>
+      <div class="hero-badge">v0.5.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <h1>Generate, fill, and read OpenDocument<br>files with <span>odf-kit</span></h1>
       <p class="hero-tagline">
-        Create .odt documents from scratch or fill existing templates with data.
+        Create .odt documents from scratch, fill existing templates with data, or convert .odt files to HTML — all in pure JavaScript.
         Build reports, invoices, letters, and contracts with tables, formatting, images, loops, and conditionals — in Node.js or directly in the browser.
       </p>
       <div class="hero-actions">
@@ -692,11 +692,12 @@
   <section class="code-section" id="example">
     <div class="container">
       <div class="section-label">Quick start</div>
-      <h2 class="section-title">Two ways to generate .odt files</h2>
-      <p class="section-desc">Build documents from scratch with a programmatic API, or fill existing templates created in LibreOffice. Both produce valid .odt files.</p>
+      <h2 class="section-title">Three ways to work with .odt files</h2>
+      <p class="section-desc">Build documents from scratch, fill existing templates, or read and convert existing .odt files to HTML — all in pure JavaScript.</p>
       <div class="code-tabs">
         <button class="code-tab active" onclick="switchTab('build')">Build from scratch</button>
         <button class="code-tab" onclick="switchTab('template')">Fill a template</button>
+        <button class="code-tab" onclick="switchTab('read')">Read &amp; convert</button>
       </div>
       <div class="code-block has-tabs">
         <div id="tab-build" class="code-panel active">
@@ -751,6 +752,26 @@ doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span clas
 writeFileSync(<span class="str">"invoice.odt"</span>, result);
 <span class="cmt">// → Valid .odt with all {placeholders} replaced</span></pre>
         </div>
+        <div id="tab-read" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="typ">readOdt</span>, <span class="typ">odtToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { <span class="typ">readFileSync</span> } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+
+<span class="cmt">// Convert to HTML in one call</span>
+<span class="kw">const</span> html = <span class="fn">odtToHtml</span>(bytes, { fragment: <span class="kw">true</span> });
+
+<span class="cmt">// Or parse to a structured document model</span>
+<span class="kw">const</span> doc = <span class="fn">readOdt</span>(bytes);
+console.<span class="fn">log</span>(doc.metadata.title);    <span class="cmt">// title from meta.xml</span>
+console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">// paragraphs, headings, tables...</span>
+
+<span class="cmt">// Walk the document model</span>
+<span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> doc.body) {
+  <span class="kw">if</span> (node.kind === <span class="str">"heading"</span>) console.<span class="fn">log</span>(<span class="str">`h${node.level}:`</span>, node.spans[<span class="num">0</span>].text);
+  <span class="kw">if</span> (node.kind === <span class="str">"paragraph"</span>) console.<span class="fn">log</span>(node.spans.<span class="fn">map</span>(<span class="typ">s</span> <span class="kw">=></span> s.text).<span class="fn">join</span>(<span class="str">""</span>));
+}</pre>
+        </div>
       </div>
     </div>
   </section>
@@ -798,6 +819,11 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
           <p>External hyperlinks, internal bookmark links. Formatted link text. Named anchor points.</p>
         </div>
         <div class="feature-card">
+          <div class="feature-icon">📖</div>
+          <h3>Read &amp; Convert to HTML</h3>
+          <p>Parse existing .odt files into a structured document model. Convert to HTML with <code>odtToHtml()</code>. Paragraphs, headings, tables, lists, formatting, hyperlinks. Pure JavaScript, no LibreOffice needed.</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <h3>Zero Transitive Dependencies</h3>
           <p>Single runtime dependency (fflate). No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
@@ -819,8 +845,8 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
       <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>Two modes, one library, every platform</h3>
-          <p>Build documents from scratch with a programmatic API, or fill existing .odt templates with data. Same API in Node.js and browsers — generate server-side or client-side with no server required.</p>
+          <h3>Three modes, one library, every platform</h3>
+          <p>Build documents from scratch, fill existing .odt templates with data, or read and convert .odt files to HTML. Same API in Node.js and browsers — no LibreOffice, no server dependencies required.</p>
         </div>
         <div class="why-item">
           <h3>Zero transitive dependencies</h3>
@@ -921,7 +947,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
     <div class="container">
       <div class="stats-grid">
         <div>
-          <div class="stat-value">222</div>
+          <div class="stat-value">313</div>
           <div class="stat-label">Tests passing</div>
         </div>
         <div>
@@ -929,7 +955,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
           <div class="stat-label">Transitive dependencies</div>
         </div>
         <div>
-          <div class="stat-value">6</div>
+          <div class="stat-value">7</div>
           <div class="stat-label">Development phases</div>
         </div>
         <div>
@@ -966,6 +992,10 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <p>Yes. odf-kit works both server-side in Node.js and client-side in the browser. You can generate .odt files on your backend and serve them as downloads, or generate them entirely in the browser — user data never leaves the page. The files open natively in LibreOffice Writer, and also work in Google Docs, Microsoft Word, and other applications that support ODF. See the <a href="guides/generate-odt-browser.html">browser generation guide</a> for a complete walkthrough.</p>
       </div>
       <div class="faq-item">
+        <h3>Can I read or convert an existing .odt file to HTML?</h3>
+        <p>Yes. Import <code>readOdt()</code> or <code>odtToHtml()</code> from <code>odf-kit/reader</code> to parse existing .odt files. <code>readOdt()</code> returns a structured document model with metadata, paragraphs, headings, tables, lists, and text formatting. <code>odtToHtml()</code> converts directly to HTML. Works in Node.js and browsers with zero dependencies — no LibreOffice required. See the <a href="guides/odt-javascript-ecosystem.html">ODT ecosystem guide</a> for a full comparison of parsing options.</p>
+      </div>
+      <div class="faq-item">
         <h3>What's the difference between .odt and .docx?</h3>
         <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. .docx is Microsoft's Office Open XML format. ODF is required by many governments and organizations that need vendor independence. odf-kit generates .odt files; if you need .docx, look at the <a href="https://www.npmjs.com/package/docx">docx</a> package.</p>
       </div>
@@ -988,7 +1018,7 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
   <section class="cta">
     <div class="container">
       <h2>Start generating ODF documents</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch or fill templates with data.</p>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, or read existing .odt files.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
@@ -1012,7 +1042,8 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
         <a href="guides/odf-government-compliance.html">Government Guide</a> · 
         <a href="guides/generate-odt-without-libreoffice.html">No-LibreOffice Guide</a> · 
         <a href="guides/docxtemplater-odf-alternative.html">docxtemplater Alternative</a> · 
-        <a href="guides/simple-odf-alternative.html">Migration Guide</a>
+        <a href="guides/simple-odf-alternative.html">Migration Guide</a> · 
+        <a href="guides/odt-javascript-ecosystem.html">ODT Ecosystem</a>
       </p>
       <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
     </div>
