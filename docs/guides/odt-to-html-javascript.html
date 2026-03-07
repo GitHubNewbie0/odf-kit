@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ODT to HTML in JavaScript — Convert .odt Files with odf-kit</title>
+  <meta name="description" content="Convert .odt files to HTML in Node.js with odf-kit. Pure JavaScript, no LibreOffice required. npm install odf-kit. Extracts text, headings, tables, lists, bold, italic, and hyperlinks.">
+  <meta name="keywords" content="odt to html javascript, npm odt-to-html, odt parser npm, read odt nodejs, convert odt html node, odt-parser npm, npm install odt-to-html, parse odt javascript, odt reader javascript, openDocument html conversion">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ODT to HTML in JavaScript — odf-kit">
+  <meta property="og:description" content="Convert .odt files to HTML in Node.js with odf-kit. Pure JavaScript, no LibreOffice required.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .comparison-table th { text-align: left; padding: 0.65rem 1rem; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .comparison-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .comparison-table tr td:first-child { color: var(--text); font-weight: 500; }
+    .check { color: #16a34a; }
+    .cross { color: #dc2626; }
+    .partial { color: #d97706; }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">/</span>
+      <span>Guides</span>
+      <span class="sep">/</span>
+      <span>ODT to HTML</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Developer Guide</div>
+      <h1>ODT to HTML in JavaScript</h1>
+      <p>Convert .odt files to HTML in Node.js — pure JavaScript, no LibreOffice required. odf-kit reads .odt files and outputs clean, semantic HTML with headings, tables, lists, and inline formatting preserved.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>The problem with ODT-to-HTML in JavaScript</h2>
+      <p>The JavaScript ecosystem has <code>mammoth</code> for .docx-to-HTML conversion. For .odt files, the options have been far worse: <code>odt2html</code> was abandoned in 2016, <code>odt.js</code> is limited and unmaintained, and most solutions fall back to shelling out to LibreOffice headless — which requires LibreOffice to be installed on the server, adds significant startup latency, and doesn't work in serverless or edge environments.</p>
+      <p>odf-kit fills this gap. The <code>odf-kit/reader</code> module is a pure JavaScript ODT parser that reads .odt files directly, with no native dependencies, no LibreOffice, and no subprocess calls.</p>
+
+      <h2>Installation</h2>
+      <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+      <p>Requires Node.js 22 or later. ESM only — use <code>import</code>, not <code>require</code>.</p>
+
+      <h2>Quick start: ODT to HTML in one line</h2>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">odtToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(readFileSync(<span class="str">"document.odt"</span>));
+<span class="kw">const</span> html = <span class="fn">odtToHtml</span>(bytes);
+
+<span class="cmt">// html is a complete HTML document string:</span>
+<span class="cmt">// &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;...&lt;/head&gt;&lt;body&gt;...&lt;/body&gt;&lt;/html&gt;</span></pre>
+      </div>
+
+      <h2>Fragment output (embed in an existing page)</h2>
+      <p>Pass <code>{ fragment: true }</code> to get just the body content without the HTML document wrapper — useful when embedding output into an existing page:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">odtToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(readFileSync(<span class="str">"document.odt"</span>));
+<span class="kw">const</span> fragment = <span class="fn">odtToHtml</span>(bytes, { fragment: <span class="kw">true</span> });
+
+<span class="cmt">// Returns inner body content only:</span>
+<span class="cmt">// &lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;Body text...&lt;/p&gt;&lt;table&gt;...&lt;/table&gt;</span></pre>
+      </div>
+
+      <h2>Access the document model</h2>
+      <p>Use <code>readOdt()</code> when you need access to the structured document model — for example to extract metadata, iterate over paragraphs, or build a custom renderer:</p>
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(readFileSync(<span class="str">"document.odt"</span>));
+<span class="kw">const</span> doc = <span class="fn">readOdt</span>(bytes);
+
+<span class="cmt">// Document metadata from meta.xml</span>
+console.<span class="fn">log</span>(doc.metadata.title);
+console.<span class="fn">log</span>(doc.metadata.creator);
+console.<span class="fn">log</span>(doc.metadata.creationDate);
+
+<span class="cmt">// Structured body — array of paragraphs, headings, lists, tables</span>
+<span class="kw">for</span> (<span class="kw">const</span> block <span class="kw">of</span> doc.body) {
+  <span class="kw">if</span> (block.kind === <span class="str">"heading"</span>) {
+    console.<span class="fn">log</span>(`H${block.level}: `, block.spans.<span class="fn">map</span>(s => s.text).<span class="fn">join</span>(<span class="str">""</span>));
+  }
+}
+
+<span class="cmt">// Or convert to HTML via toHtml()</span>
+<span class="kw">const</span> html = doc.<span class="fn">toHtml</span>({ fragment: <span class="kw">true</span> });</pre>
+      </div>
+
+      <h2>What gets extracted</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Element</th><th>HTML output</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Paragraphs</td><td><code>&lt;p&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Headings (levels 1–6)</td><td><code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Bold text</td><td><code>&lt;strong&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Italic text</td><td><code>&lt;em&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Underline</td><td><code>&lt;u&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Strikethrough</td><td><code>&lt;s&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Superscript / subscript</td><td><code>&lt;sup&gt;</code> / <code>&lt;sub&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Hyperlinks</td><td><code>&lt;a href&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Bullet lists</td><td><code>&lt;ul&gt;&lt;li&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Numbered lists</td><td><code>&lt;ol&gt;&lt;li&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Nested lists</td><td>Nested <code>&lt;ul&gt;</code>/<code>&lt;ol&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Tables (including merged cells)</td><td><code>&lt;table&gt;&lt;tr&gt;&lt;td&gt;</code> with colspan/rowspan</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Document metadata</td><td>title, creator, dates</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Line breaks</td><td><code>&lt;br&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Named styles (bold headings, etc.)</td><td>Resolved from styles.xml</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Images</td><td>—</td><td><span class="partial">Roadmap</span></td></tr>
+          <tr><td>Fonts, colors, font sizes</td><td>—</td><td><span class="partial">Roadmap</span></td></tr>
+          <tr><td>Footnotes / endnotes</td><td>—</td><td><span class="partial">Roadmap</span></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Why not shell out to LibreOffice?</h2>
+      <p>LibreOffice headless (<code>libreoffice --headless --convert-to html</code>) is the common fallback for ODT-to-HTML conversion. It works, but it comes with real costs:</p>
+      <ul>
+        <li><strong>Startup time</strong> — LibreOffice takes 2–5 seconds to start even for a small document</li>
+        <li><strong>Deployment complexity</strong> — LibreOffice must be installed on every server, container, and CI runner</li>
+        <li><strong>Serverless incompatibility</strong> — LibreOffice doesn't run on AWS Lambda, Vercel, Cloudflare Workers, or similar environments</li>
+        <li><strong>Size</strong> — LibreOffice is several hundred megabytes; it dominates Docker image size</li>
+        <li><strong>Security surface</strong> — a process spawned from your application with filesystem access is a meaningful attack surface</li>
+      </ul>
+      <p>odf-kit parses .odt files directly in JavaScript. No subprocess, no installed software, no startup penalty. It works anywhere Node.js runs.</p>
+
+      <h2>Comparison with other options</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Option</th><th>Pure JS</th><th>Maintained</th><th>Tables</th><th>Metadata</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>odf-kit/reader</td><td><span class="check">✓</span></td><td><span class="check">✓</span> Active (2026)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>LibreOffice headless</td><td><span class="cross">✗</span> Subprocess</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="partial">Partial</span></td></tr>
+          <tr><td>odt2html (npm)</td><td><span class="check">✓</span></td><td><span class="cross">✗</span> Abandoned (2016)</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+          <tr><td>odt.js</td><td><span class="check">✓</span></td><td><span class="cross">✗</span> Unmaintained</td><td><span class="partial">Partial</span></td><td><span class="cross">✗</span></td></tr>
+        </tbody>
+      </table>
+
+      <h2>odf-kit does more than read</h2>
+      <p>The same library that reads .odt files can also create them from scratch and fill existing templates with data. If you're building a document pipeline — generate, fill, or convert — odf-kit handles all three without additional dependencies.</p>
+      <ul>
+        <li><a href="fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — design in LibreOffice, fill from code</li>
+        <li><a href="../">Create .odt files programmatically</a> — headings, tables, images, lists, page layout</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Convert your first .odt file</h2>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
