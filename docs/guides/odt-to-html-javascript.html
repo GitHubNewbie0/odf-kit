@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ODT to HTML in JavaScript — Convert .odt Files with odf-kit</title>
+  <title>ODT to HTML JavaScript — npm odt-to-html for Node.js — odf-kit</title>
   <meta name="description" content="Convert .odt files to HTML in Node.js with odf-kit. Pure JavaScript, no LibreOffice required. npm install odf-kit. Extracts text, headings, tables, lists, bold, italic, and hyperlinks.">
   <meta name="keywords" content="odt to html javascript, npm odt-to-html, odt parser npm, read odt nodejs, convert odt html node, odt-parser npm, npm install odt-to-html, parse odt javascript, odt reader javascript, openDocument html conversion">
   <meta name="author" content="GitHubNewbie0">
@@ -96,6 +96,47 @@
       .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
     }
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is there an npm package to convert ODT to HTML in Node.js?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit includes an ODT-to-HTML reader as part of the main package: npm install odf-kit. Import odtToHtml from 'odf-kit/reader' and pass a Uint8Array of the .odt file. It returns a complete HTML string with headings, paragraphs, tables, lists, bold, italic, and hyperlinks — no LibreOffice required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does odf-kit work without LibreOffice installed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit is a pure JavaScript library with no native dependencies. It parses .odt files directly without spawning any subprocess or requiring LibreOffice to be installed. It works in Node.js, serverless environments (AWS Lambda, Vercel, Cloudflare Workers), and modern browsers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happened to the odt2html npm package?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The odt2html npm package was abandoned in 2016 and has not been maintained since. It also lacks table support and metadata extraction. odf-kit is the actively maintained replacement: it supports tables with merged cells, nested lists, hyperlinks, all inline formatting, and document metadata."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I convert an ODT file to HTML in Node.js?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install odf-kit with npm install odf-kit, then: import { odtToHtml } from 'odf-kit/reader'; import { readFileSync } from 'fs'; const html = odtToHtml(new Uint8Array(readFileSync('document.odt'))); Pass { fragment: true } as a second argument to get just the body content without the HTML document wrapper."
+        }
+      }
+    ]
+  }
+  </script>
 
   <script data-goatcounter="https://odf-kit.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>

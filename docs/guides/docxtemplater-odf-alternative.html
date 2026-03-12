@@ -36,6 +36,47 @@
   }
   </script>
 
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is docxtemplater open source?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "docxtemplater uses a dual-license model. The core library is open source (MIT licensed) and supports .docx and .pptx templates. However, most useful features — including ODF/.odt support, image insertion, HTML content, charts, and Excel templating — are sold as separate paid modules with a commercial license. There is no free way to use docxtemplater for .odt templates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does docxtemplater cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "docxtemplater's open-source core is free. Paid modules are sold individually or in bundles — a Pro plan covers 4 modules, and an Enterprise plan covers all modules. The ODF module (required for .odt template support) is one of these paid add-ons. Pricing is per-developer and listed on the docxtemplater website. odf-kit provides free, Apache 2.0 licensed ODF template filling as an alternative."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free open-source alternative to docxtemplater for ODT files?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit is a free, Apache 2.0 licensed JavaScript library for filling .odt templates with JSON data. It supports loops, conditionals, dot notation, and placeholder healing — with no paid modules and no license fees. It works in Node.js and browsers, and also supports creating .odt documents from scratch."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can docxtemplater fill ODT templates for free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. docxtemplater's free open-source core only handles .docx and .pptx files. ODT/.odt template support requires purchasing the ODF paid module. If you need free ODT template filling, odf-kit is a purpose-built alternative under the Apache 2.0 license."
+        }
+      }
+    ]
+  }
+  </script>
+
   <style>
     :root {
       --bg: #fafaf8;
@@ -342,6 +383,11 @@ doc.<span class="fn">addTable</span>([
       </div>
 
       <p>See the <a href="generate-odt-nodejs.html">full Node.js guide</a> or the <a href="generate-odt-browser.html">browser guide</a> for complete examples with formatting, images, page layout, headers, and footers.</p>
+
+      <h2>Is docxtemplater open source? What does it cost?</h2>
+      <p>docxtemplater uses a dual-license model. The core library is open source under the MIT license, which covers basic .docx and .pptx template filling. This is the version you get with a plain <code>npm install docxtemplater</code>.</p>
+      <p>However, the most useful features are sold as separate paid modules with commercial licenses — including ODF/.odt support, image insertion, HTML content, charts, and Excel templating. The ODF module, which is required to fill .odt templates, is one of these paid add-ons. There is no free path to using docxtemplater for .odt files. Pricing is per-developer; exact costs are listed on the docxtemplater website.</p>
+      <p>This is the gap odf-kit fills. odf-kit is Apache 2.0 licensed — the entire library, including ODF template filling, is free for commercial and non-commercial use with no per-developer fees, no modules to purchase, and no license keys.</p>
 
       <h2>When to use docxtemplater instead</h2>
       <p>If your primary format is .docx and you only occasionally need .odt, docxtemplater's ecosystem is broader and more mature for Word documents. If you need advanced features like image insertion inside templates, chart generation, or HTML-to-document conversion, docxtemplater's paid modules cover those use cases. odf-kit is focused specifically on ODF — it does that format well and for free, but it doesn't handle .docx at all.</p>
