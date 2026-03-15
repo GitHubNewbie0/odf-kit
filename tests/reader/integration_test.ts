@@ -1,7 +1,30 @@
 import { parseMetaXml } from "../../src/reader/parser.js";
 import { readOdt } from "../../src/reader/parser.js";
 import { OdtDocument } from "../../src/index.js";
-import type { ParagraphNode, HeadingNode, ListNode, TableNode } from "../../src/reader/types.js";
+import type {
+  ParagraphNode,
+  HeadingNode,
+  ListNode,
+  TableNode,
+  InlineNode,
+  TextSpan,
+} from "../../src/reader/types.js";
+
+// ============================================================
+// Type helper
+// ============================================================
+
+/**
+ * Filter an InlineNode array down to TextSpan nodes only.
+ *
+ * Required because spans is InlineNode[] in Tier 2 — it may also contain
+ * ImageNode, NoteNode, BookmarkNode, and FieldNode. Round-trip tests using
+ * the odf-kit generator only produce TextSpan nodes, so filtering is safe
+ * and keeps the test assertions unchanged from Tier 1.
+ */
+function textSpans(spans: InlineNode[]): TextSpan[] {
+  return spans.filter((s): s is TextSpan => !("kind" in s));
+}
 
 // ============================================================
 // parseMetaXml
@@ -112,7 +135,7 @@ describe("readOdt — round-trip paragraphs", () => {
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
     expect(paragraphs.length).toBeGreaterThanOrEqual(1);
     const first = paragraphs[0];
-    expect(first.spans.some((s) => s.text === "Hello, world!")).toBe(true);
+    expect(textSpans(first.spans).some((s) => s.text === "Hello, world!")).toBe(true);
   });
 
   test("reads multiple paragraphs in order", async () => {
@@ -124,7 +147,7 @@ describe("readOdt — round-trip paragraphs", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const texts = paragraphs.map((p) => p.spans.map((s) => s.text).join(""));
+    const texts = paragraphs.map((p) => textSpans(p.spans).map((s) => s.text).join(""));
     expect(texts).toContain("First");
     expect(texts).toContain("Second");
     expect(texts).toContain("Third");
@@ -143,7 +166,7 @@ describe("readOdt — round-trip paragraphs", () => {
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
     const first = paragraphs[0];
-    const boldSpan = first.spans.find((s) => s.bold === true);
+    const boldSpan = textSpans(first.spans).find((s) => s.bold === true);
     expect(boldSpan).toBeDefined();
     expect(boldSpan?.text).toBe("bold");
   });
@@ -157,7 +180,7 @@ describe("readOdt — round-trip paragraphs", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const italicSpan = paragraphs[0].spans.find((s) => s.italic === true);
+    const italicSpan = textSpans(paragraphs[0].spans).find((s) => s.italic === true);
     expect(italicSpan).toBeDefined();
     expect(italicSpan?.text).toBe("italic text");
   });
@@ -171,7 +194,7 @@ describe("readOdt — round-trip paragraphs", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const span = paragraphs[0].spans.find((s) => s.underline === true);
+    const span = textSpans(paragraphs[0].spans).find((s) => s.underline === true);
     expect(span).toBeDefined();
     expect(span?.text).toBe("underlined");
   });
@@ -185,7 +208,7 @@ describe("readOdt — round-trip paragraphs", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const span = paragraphs[0].spans.find((s) => s.strikethrough === true);
+    const span = textSpans(paragraphs[0].spans).find((s) => s.strikethrough === true);
     expect(span).toBeDefined();
     expect(span?.text).toBe("struck");
   });
@@ -205,7 +228,7 @@ describe("readOdt — round-trip headings", () => {
     const headings = parsed.body.filter((n) => n.kind === "heading") as HeadingNode[];
     expect(headings.length).toBeGreaterThanOrEqual(1);
     expect(headings[0].level).toBe(1);
-    expect(headings[0].spans.some((s) => s.text.includes("Chapter One"))).toBe(true);
+    expect(textSpans(headings[0].spans).some((s) => s.text.includes("Chapter One"))).toBe(true);
   });
 
   test("reads headings at multiple levels", async () => {
@@ -240,7 +263,7 @@ describe("readOdt — round-trip lists", () => {
     const list = lists[0];
     expect(list.ordered).toBe(false);
     expect(list.items).toHaveLength(3);
-    const texts = list.items.map((i) => i.spans.map((s) => s.text).join(""));
+    const texts = list.items.map((i) => textSpans(i.spans).map((s) => s.text).join(""));
     expect(texts).toContain("Apple");
     expect(texts).toContain("Banana");
     expect(texts).toContain("Cherry");
@@ -279,11 +302,15 @@ describe("readOdt — round-trip tables", () => {
     expect(table.rows).toHaveLength(2);
     expect(table.rows[0].cells).toHaveLength(2);
 
-    const row0texts = table.rows[0].cells.map((c) => c.spans.map((s) => s.text).join(""));
+    const row0texts = table.rows[0].cells.map((c) =>
+      textSpans(c.spans).map((s) => s.text).join(""),
+    );
     expect(row0texts).toContain("A");
     expect(row0texts).toContain("B");
 
-    const row1texts = table.rows[1].cells.map((c) => c.spans.map((s) => s.text).join(""));
+    const row1texts = table.rows[1].cells.map((c) =>
+      textSpans(c.spans).map((s) => s.text).join(""),
+    );
     expect(row1texts).toContain("C");
     expect(row1texts).toContain("D");
   });
@@ -361,7 +388,7 @@ describe("readOdt — round-trip hyperlinks", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const linkSpan = paragraphs[0].spans.find((s) => s.href !== undefined);
+    const linkSpan = textSpans(paragraphs[0].spans).find((s) => s.href !== undefined);
     expect(linkSpan).toBeDefined();
     expect(linkSpan?.href).toBe("https://example.com");
     expect(linkSpan?.text).toBe("our site");
@@ -374,8 +401,6 @@ describe("readOdt — round-trip hyperlinks", () => {
 
 describe("readOdt — mergeStyle tri-state formatting", () => {
   test("span with explicit normal weight inside bold paragraph is not bold", async () => {
-    // Create a paragraph where one run is bold via formatting and another
-    // explicitly resets to normal. The normal span must not inherit bold.
     const doc = new OdtDocument();
     doc.addParagraph((p) => {
       p.addText("bold", { bold: true });
@@ -386,8 +411,8 @@ describe("readOdt — mergeStyle tri-state formatting", () => {
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
     const first = paragraphs[0];
-    const boldSpan = first.spans.find((s) => s.text === "bold");
-    const normalSpan = first.spans.find((s) => s.text === "normal");
+    const boldSpan = textSpans(first.spans).find((s) => s.text === "bold");
+    const normalSpan = textSpans(first.spans).find((s) => s.text === "normal");
     expect(boldSpan?.bold).toBe(true);
     expect(normalSpan?.bold).toBeUndefined();
   });
@@ -404,9 +429,9 @@ describe("readOdt — mergeStyle tri-state formatting", () => {
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
     const first = paragraphs[0];
-    const both = first.spans.find((s) => s.text === "both");
-    const boldOnly = first.spans.find((s) => s.text === "bold only");
-    const plain = first.spans.find((s) => s.text === "plain");
+    const both = textSpans(first.spans).find((s) => s.text === "both");
+    const boldOnly = textSpans(first.spans).find((s) => s.text === "bold only");
+    const plain = textSpans(first.spans).find((s) => s.text === "plain");
     expect(both?.bold).toBe(true);
     expect(both?.italic).toBe(true);
     expect(boldOnly?.bold).toBe(true);

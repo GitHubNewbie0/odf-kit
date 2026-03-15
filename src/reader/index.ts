@@ -15,8 +15,12 @@
 
 export { readOdt } from "./parser.js";
 export type {
+  // Document root and metadata
   OdtDocumentModel,
   OdtMetadata,
+  HtmlOptions,
+
+  // Top-level body node union and block types
   BodyNode,
   ParagraphNode,
   HeadingNode,
@@ -25,8 +29,21 @@ export type {
   TableNode,
   TableRowNode,
   TableCellNode,
+
+  // Inline node union and all inline types
+  InlineNode,
   TextSpan,
-  HtmlOptions,
+  ImageNode,
+  NoteNode,
+  BookmarkNode,
+  FieldNode,
+
+  // Tier 2 style types
+  SpanStyle,
+  ParagraphStyle,
+  CellStyle,
+  RowStyle,
+  BorderStyle,
 } from "./types.js";
 
 import { readOdt } from "./parser.js";
