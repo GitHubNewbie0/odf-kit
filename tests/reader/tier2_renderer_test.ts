@@ -42,10 +42,9 @@ describe("renderHtml Tier 2 — hidden spans", () => {
 
 describe("renderHtml Tier 2 — SpanStyle inline CSS", () => {
   test("fontColor emits color CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "red", style: { fontColor: "#ff0000" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "red", style: { fontColor: "#ff0000" } }]), {
+      fragment: true,
+    });
     expect(html).toContain('style="color:#ff0000"');
     expect(html).toContain("red");
   });
@@ -56,50 +55,44 @@ describe("renderHtml Tier 2 — SpanStyle inline CSS", () => {
   });
 
   test("fontFamily emits font-family CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "arial", style: { fontFamily: "Arial" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "arial", style: { fontFamily: "Arial" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("font-family:Arial");
   });
 
   test("highlightColor emits background-color CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "highlighted", style: { highlightColor: "#ffff00" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "highlighted", style: { highlightColor: "#ffff00" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("background-color:#ffff00");
   });
 
   test("textTransform emits text-transform CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "caps", style: { textTransform: "uppercase" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "caps", style: { textTransform: "uppercase" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("text-transform:uppercase");
   });
 
   test("fontVariant emits font-variant CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "sc", style: { fontVariant: "small-caps" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "sc", style: { fontVariant: "small-caps" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("font-variant:small-caps");
   });
 
   test("textShadow emits text-shadow CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "shadow", style: { textShadow: "2px 2px #000000" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "shadow", style: { textShadow: "2px 2px #000000" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("text-shadow:2px 2px #000000");
   });
 
   test("letterSpacing emits letter-spacing CSS property", () => {
-    const html = renderHtml(
-      para([{ text: "spaced", style: { letterSpacing: "0.05em" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "spaced", style: { letterSpacing: "0.05em" } }]), {
+      fragment: true,
+    });
     expect(html).toContain("letter-spacing:0.05em");
   });
 
@@ -118,10 +111,9 @@ describe("renderHtml Tier 2 — SpanStyle inline CSS", () => {
   });
 
   test("SpanStyle wraps semantic formatting — bold inside span", () => {
-    const html = renderHtml(
-      para([{ text: "hi", bold: true, style: { fontColor: "#ff0000" } }]),
-      { fragment: true },
-    );
+    const html = renderHtml(para([{ text: "hi", bold: true, style: { fontColor: "#ff0000" } }]), {
+      fragment: true,
+    });
     // semantic <strong> inside <span style>
     expect(html).toContain("<strong>hi</strong>");
     expect(html).toContain('style="color:#ff0000"');
@@ -133,7 +125,7 @@ describe("renderHtml Tier 2 — SpanStyle inline CSS", () => {
       { fragment: true },
     );
     // href wraps everything
-    expect(html.indexOf('<a href=')).toBeLessThan(html.indexOf("<strong>"));
+    expect(html.indexOf("<a href=")).toBeLessThan(html.indexOf("<strong>"));
   });
 });
 
@@ -278,7 +270,7 @@ describe("renderHtml Tier 2 — images", () => {
   test("renders an image as <img> with data URI src", () => {
     const html = renderHtml(para([baseImage]), { fragment: true });
     expect(html).toContain("<img ");
-    expect(html).toContain("src=\"data:image/png;base64,iVBORw0KGgo=\"");
+    expect(html).toContain('src="data:image/png;base64,iVBORw0KGgo="');
   });
 
   test("always emits alt attribute (empty string when title absent)", () => {
@@ -466,11 +458,7 @@ describe("renderHtml Tier 2 — mixed inline content", () => {
       citation: "1",
       body: [{ kind: "paragraph", spans: [{ text: "Note." }] }],
     };
-    const spans: InlineNode[] = [
-      { text: "Before" },
-      note,
-      { text: "After" },
-    ];
+    const spans: InlineNode[] = [{ text: "Before" }, note, { text: "After" }];
     const html = renderHtml(para(spans), { fragment: true });
     expect(html.indexOf("Before")).toBeLessThan(html.indexOf("<sup"));
     expect(html.indexOf("</aside>")).toBeLessThan(html.indexOf("After"));

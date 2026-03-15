@@ -147,7 +147,11 @@ describe("readOdt — round-trip paragraphs", () => {
     const parsed = readOdt(bytes);
 
     const paragraphs = parsed.body.filter((n) => n.kind === "paragraph") as ParagraphNode[];
-    const texts = paragraphs.map((p) => textSpans(p.spans).map((s) => s.text).join(""));
+    const texts = paragraphs.map((p) =>
+      textSpans(p.spans)
+        .map((s) => s.text)
+        .join(""),
+    );
     expect(texts).toContain("First");
     expect(texts).toContain("Second");
     expect(texts).toContain("Third");
@@ -263,7 +267,11 @@ describe("readOdt — round-trip lists", () => {
     const list = lists[0];
     expect(list.ordered).toBe(false);
     expect(list.items).toHaveLength(3);
-    const texts = list.items.map((i) => textSpans(i.spans).map((s) => s.text).join(""));
+    const texts = list.items.map((i) =>
+      textSpans(i.spans)
+        .map((s) => s.text)
+        .join(""),
+    );
     expect(texts).toContain("Apple");
     expect(texts).toContain("Banana");
     expect(texts).toContain("Cherry");
@@ -303,13 +311,17 @@ describe("readOdt — round-trip tables", () => {
     expect(table.rows[0].cells).toHaveLength(2);
 
     const row0texts = table.rows[0].cells.map((c) =>
-      textSpans(c.spans).map((s) => s.text).join(""),
+      textSpans(c.spans)
+        .map((s) => s.text)
+        .join(""),
     );
     expect(row0texts).toContain("A");
     expect(row0texts).toContain("B");
 
     const row1texts = table.rows[1].cells.map((c) =>
-      textSpans(c.spans).map((s) => s.text).join(""),
+      textSpans(c.spans)
+        .map((s) => s.text)
+        .join(""),
     );
     expect(row1texts).toContain("C");
     expect(row1texts).toContain("D");
