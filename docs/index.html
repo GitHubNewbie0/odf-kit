@@ -4,23 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>odf-kit — OpenDocument Format (.odt) Library for Node.js and Browsers</title>
-  <meta name="description" content="Generate, fill, and read OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch, fill existing templates with data, or convert .odt files to HTML with the built-in reader. Create reports, invoices, contracts, and letters. The modern simple-odf alternative. Apache 2.0 open source.">
-  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, client-side, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement">
+  <meta name="description" content="Generate, fill, read, and convert OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch, fill existing templates with data, convert .odt files to HTML, or export to Typst for PDF generation. Create reports, invoices, contracts, and letters. The modern simple-odf alternative. Apache 2.0 open source.">
+  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, client-side, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement, odt to pdf, odt to typst, typst pdf">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/">
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="odf-kit — Generate, Fill, and Read ODF Documents in JavaScript and TypeScript">
-  <meta property="og:description" content="Create .odt files from scratch, fill templates with data, or convert .odt to HTML in pure JavaScript. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Apache 2.0 open source.">
+  <meta property="og:title" content="odf-kit — Generate, Fill, Read, and Convert ODF Documents in JavaScript and TypeScript">
+  <meta property="og:description" content="Create .odt files from scratch, fill templates with data, convert .odt to HTML, or export to Typst for PDF generation — in pure JavaScript. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Apache 2.0 open source.">
   <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/">
   <meta property="og:site_name" content="odf-kit">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="odf-kit — Generate, Fill, and Read ODF Documents in JavaScript and TypeScript">
-  <meta name="twitter:description" content="Create .odt files or fill templates with data in Node.js and browsers. Reports, invoices, contracts with tables, formatting, images, loops, conditionals. Open source simple-odf alternative.">
+  <meta name="twitter:title" content="odf-kit — Generate, Fill, Read, and Convert ODF Documents in JavaScript and TypeScript">
+  <meta name="twitter:description" content="Create .odt files, fill templates, convert to HTML, or export to Typst for PDF in Node.js and browsers. Reports, invoices, contracts. Open source simple-odf alternative.">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -28,12 +28,12 @@
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     "name": "odf-kit",
-    "description": "JavaScript and TypeScript library for generating and filling OpenDocument Format text documents (.odt files). Works in Node.js and browsers. Build documents from scratch with tables, text formatting, images, lists, hyperlinks, and page layout — or fill existing .odt templates with data using placeholders, loops, and conditionals. Client-side document generation with no server required. Used for automated report generation, invoice creation, contract templates, and document automation.",
+    "description": "JavaScript and TypeScript library for generating, filling, reading, and converting OpenDocument Format text documents (.odt files). Works in Node.js and browsers. Build documents from scratch with tables, text formatting, images, lists, hyperlinks, and page layout — or fill existing .odt templates with data using placeholders, loops, and conditionals. Read existing .odt files and convert to HTML. Export to Typst markup for PDF generation without LibreOffice. Client-side document generation with no server required.",
     "codeRepository": "https://github.com/GitHubNewbie0/odf-kit",
     "programmingLanguage": ["TypeScript", "JavaScript"],
     "license": "https://www.apache.org/licenses/LICENSE-2.0",
     "runtimePlatform": ["Node.js", "Web Browser"],
-    "keywords": "ODF, OpenDocument Format, document generation, .odt, LibreOffice, report generation, invoice generation, template engine, document template",
+    "keywords": "ODF, OpenDocument Format, document generation, .odt, LibreOffice, report generation, invoice generation, template engine, document template, typst, pdf",
     "targetProduct": {
       "@type": "SoftwareApplication",
       "name": "odf-kit",
@@ -62,7 +62,7 @@
         "name": "Is there a maintained alternative to simple-odf?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. odf-kit is a modern TypeScript library that replaces the abandoned simple-odf package. Unlike simple-odf, odf-kit generates proper ZIP-packaged .odt files (not flat XML), supports tables, images, lists, hyperlinks, page layout, template filling, and is actively maintained."
+          "text": "Yes. odf-kit is a modern TypeScript library that replaces the abandoned simple-odf package. Unlike simple-odf, odf-kit generates proper ZIP-packaged .odt files (not flat XML), supports tables, images, lists, hyperlinks, page layout, template filling, reading .odt files, and converting to HTML and Typst."
         }
       },
       {
@@ -71,6 +71,14 @@
         "acceptedAnswer": {
           "@type": "Answer",
           "text": "Yes. odf-kit's fillTemplate() function loads an existing .odt file created in LibreOffice, replaces {placeholders} with data, supports loops for repeating content, conditionals for optional sections, and dot notation for nested data. The template engine automatically handles LibreOffice's XML fragmentation of placeholder text."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I convert an ODT file to PDF without LibreOffice?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Import odtToTypst() from odf-kit/typst to convert any .odt file to Typst markup (.typ), then compile to PDF with the Typst CLI. odf-kit is the only JavaScript library with a built-in ODT-to-Typst emitter. Zero new dependencies — odf-kit/typst is a pure function over the document model."
         }
       },
       {
@@ -371,6 +379,7 @@
       display: flex;
       gap: 0;
       margin-bottom: 0;
+      flex-wrap: wrap;
     }
 
     .code-tab {
@@ -627,10 +636,10 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.5.2 · Apache 2.0 · TypeScript + JavaScript</div>
-      <h1>Generate, fill, and read OpenDocument<br>files with <span>odf-kit</span></h1>
+      <div class="hero-badge">v0.8.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <h1>Generate, fill, read, and convert<br>OpenDocument files with <span>odf-kit</span></h1>
       <p class="hero-tagline">
-        Create .odt documents from scratch, fill existing templates with data, or convert .odt files to HTML — all in pure JavaScript.
+        Create .odt documents from scratch, fill existing templates with data, convert .odt files to HTML, or export to Typst for PDF generation — all in pure JavaScript.
         Build reports, invoices, letters, and contracts with tables, formatting, images, loops, and conditionals — in Node.js or directly in the browser.
       </p>
       <div class="hero-actions">
@@ -692,12 +701,13 @@
   <section class="code-section" id="example">
     <div class="container">
       <div class="section-label">Quick start</div>
-      <h2 class="section-title">Three ways to work with .odt files</h2>
-      <p class="section-desc">Build documents from scratch, fill existing templates, or read and convert existing .odt files to HTML — all in pure JavaScript.</p>
+      <h2 class="section-title">Four ways to work with .odt files</h2>
+      <p class="section-desc">Build documents from scratch, fill existing templates, read and convert .odt files to HTML, or export to Typst for PDF generation — all in pure JavaScript.</p>
       <div class="code-tabs">
-        <button class="code-tab active" onclick="switchTab('build')">Build from scratch</button>
-        <button class="code-tab" onclick="switchTab('template')">Fill a template</button>
-        <button class="code-tab" onclick="switchTab('read')">Read &amp; convert</button>
+        <button class="code-tab active" onclick="switchTab('build', event)">Build from scratch</button>
+        <button class="code-tab" onclick="switchTab('template', event)">Fill a template</button>
+        <button class="code-tab" onclick="switchTab('read', event)">Read &amp; convert</button>
+        <button class="code-tab" onclick="switchTab('typst', event)">Export to Typst</button>
       </div>
       <div class="code-block has-tabs">
         <div id="tab-build" class="code-panel active">
@@ -772,6 +782,30 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
   <span class="kw">if</span> (node.kind === <span class="str">"paragraph"</span>) console.<span class="fn">log</span>(node.spans.<span class="fn">map</span>(<span class="typ">s</span> <span class="kw">=></span> s.text).<span class="fn">join</span>(<span class="str">""</span>));
 }</pre>
         </div>
+        <div id="tab-typst" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="typ">odtToTypst</span>, <span class="typ">modelToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
+<span class="kw">import</span> { <span class="typ">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { execSync } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+
+<span class="cmt">// One-call convenience wrapper</span>
+<span class="kw">const</span> typ = <span class="fn">odtToTypst</span>(bytes);
+writeFileSync(<span class="str">"document.typ"</span>, typ);
+
+<span class="cmt">// Compile to PDF with the Typst CLI (installed separately)</span>
+execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
+
+<span class="cmt">// Or use modelToTypst() when you already have a parsed model —</span>
+<span class="cmt">// parse once, emit to multiple formats</span>
+<span class="kw">const</span> model = <span class="fn">readOdt</span>(bytes);
+<span class="kw">const</span> html  = model.<span class="fn">toHtml</span>({ fragment: <span class="num">true</span> });
+<span class="kw">const</span> typst = <span class="fn">modelToTypst</span>(model);
+
+<span class="cmt">// odf-kit/typst is zero-dependency and browser-safe —</span>
+<span class="cmt">// the Typst CLI is only needed when you compile to PDF</span></pre>
+        </div>
       </div>
     </div>
   </section>
@@ -780,7 +814,7 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
   <section class="features" id="features">
     <div class="container">
       <div class="section-label">Features</div>
-      <h2 class="section-title">Everything you need to generate .odt files</h2>
+      <h2 class="section-title">Everything you need to work with .odt files</h2>
       <p class="section-desc">Built from the ground up for the ODF 1.2+ specification. Every feature validated against LibreOffice 24.2. Works in Node.js and modern browsers.</p>
       <div class="feature-grid">
         <div class="feature-card">
@@ -824,6 +858,11 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
           <p>Parse existing .odt files into a structured document model. Convert to HTML with <code>odtToHtml()</code>. Paragraphs, headings, tables, lists, formatting, hyperlinks. Pure JavaScript, no LibreOffice needed.</p>
         </div>
         <div class="feature-card">
+          <div class="feature-icon">📑</div>
+          <h3>Export to Typst for PDF</h3>
+          <p>Convert any .odt file to Typst markup with <code>odtToTypst()</code>, then compile to PDF with the Typst CLI. The only JavaScript library with a built-in ODT-to-Typst emitter. Zero new dependencies.</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <h3>Zero Transitive Dependencies</h3>
           <p>Single runtime dependency (fflate). No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
@@ -845,12 +884,12 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
       <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>Three modes, one library, every platform</h3>
-          <p>Build documents from scratch, fill existing .odt templates with data, or read and convert .odt files to HTML. Same API in Node.js and browsers — no LibreOffice, no server dependencies required.</p>
+          <h3>Four modes, one library, every platform</h3>
+          <p>Build documents from scratch, fill existing .odt templates with data, read and convert .odt files to HTML, or export to Typst for PDF generation. Same API in Node.js and browsers — no LibreOffice, no server dependencies required.</p>
         </div>
         <div class="why-item">
           <h3>Zero transitive dependencies</h3>
-          <p>Only fflate at runtime — zero transitive dependencies. Lightweight and audit-friendly for enterprise and government projects.</p>
+          <p>Only fflate at runtime — zero transitive dependencies. Lightweight and audit-friendly for enterprise and government projects. Every sub-export (<code>odf-kit/reader</code>, <code>odf-kit/typst</code>) maintains this guarantee.</p>
         </div>
         <div class="why-item">
           <h3>ODF 1.2+ and ISO/IEC 26300</h3>
@@ -928,6 +967,16 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
             <td>Partial</td>
           </tr>
           <tr>
+            <td>Read &amp; convert to HTML</td>
+            <td><span class="check">✓</span> Full reader with document model</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
+            <td>Export to Typst / PDF</td>
+            <td><span class="check">✓</span> Built-in Typst emitter</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
             <td>TypeScript</td>
             <td><span class="check">✓</span> Written in TypeScript</td>
             <td><span class="check">✓</span> Written in TypeScript</td>
@@ -947,7 +996,7 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
     <div class="container">
       <div class="stats-grid">
         <div>
-          <div class="stat-value">410</div>
+          <div class="stat-value">650</div>
           <div class="stat-label">Tests passing</div>
         </div>
         <div>
@@ -955,8 +1004,8 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
           <div class="stat-label">Transitive dependencies</div>
         </div>
         <div>
-          <div class="stat-value">7</div>
-          <div class="stat-label">Development phases</div>
+          <div class="stat-value">4</div>
+          <div class="stat-label">Document modes</div>
         </div>
         <div>
           <div class="stat-value">0</div>
@@ -978,6 +1027,10 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
       <div class="faq-item">
         <h3>Can I fill an existing .odt template with data?</h3>
         <p>Yes. Create a template in LibreOffice with {placeholders} in the text, then use <code>fillTemplate(templateBytes, data)</code>. It supports simple replacement, loops for repeating content ({#items}...{/items}), conditionals for optional sections, and dot notation for nested objects ({company.name}). The engine automatically handles LibreOffice's XML fragmentation of placeholder text. See the <a href="guides/fill-odt-template-javascript.html">template guide</a> for a full walkthrough.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I convert an ODT file to PDF without LibreOffice?</h3>
+        <p>Yes. Import <code>odtToTypst()</code> from <code>odf-kit/typst</code> to convert any .odt file to Typst markup, then compile to PDF with the <a href="https://typst.app/open-source/" rel="noopener">Typst CLI</a> (<code>typst compile document.typ document.pdf</code>). odf-kit is the only JavaScript library with a built-in ODT-to-Typst emitter. The emitter is zero-dependency and works in any environment — Node.js, browser, Deno, or Nextcloud Flow. See the <a href="guides/odt-to-typst-pdf.html">ODT to PDF guide</a> for a full walkthrough.</p>
       </div>
       <div class="faq-item">
         <h3>Is odf-kit a replacement for simple-odf?</h3>
@@ -1008,18 +1061,20 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
           <li><a href="guides/fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — template engine walkthrough</li>
           <li><a href="guides/odf-government-compliance.html">ODF for government compliance</a> — ISO 26300 mandates and implementation</li>
           <li><a href="guides/generate-odt-without-libreoffice.html">Generate .odt without LibreOffice</a> — lightweight alternative to headless LibreOffice</li>
+          <li><a href="guides/odt-to-typst-pdf.html">Convert ODT to PDF with Typst</a> — zero-dependency PDF generation without LibreOffice</li>
           <li><a href="guides/docxtemplater-odf-alternative.html">Free docxtemplater alternative for ODF</a> — comparison for .odt template filling</li>
           <li><a href="guides/simple-odf-alternative.html">Migrating from simple-odf</a> — comparison and migration guide</li>
-		  <li><a href="guides/odt-javascript-ecosystem.html">Working with ODT Files in JavaScript — Parse, Convert, and Generate .odt Documents</a> — ways of working with ODT Files in JavaScript guide</li>
+          <li><a href="guides/odt-javascript-ecosystem.html">Working with ODT Files in JavaScript</a> — parse, convert, and generate .odt documents</li>
           <li><a href="guides/odt-to-html-javascript.html">ODT to HTML in JavaScript</a> — convert .odt files to HTML with no LibreOffice required</li>
         </ul>
       </div>
     </div>
   </section>
+
   <section class="cta">
     <div class="container">
-      <h2>Start generating ODF documents</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, or read existing .odt files.</p>
+      <h2>Start working with ODF documents</h2>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, read existing .odt files, or export to Typst for PDF.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
@@ -1042,6 +1097,7 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
         <a href="guides/fill-odt-template-javascript.html">Template Guide</a> · 
         <a href="guides/odf-government-compliance.html">Government Guide</a> · 
         <a href="guides/generate-odt-without-libreoffice.html">No-LibreOffice Guide</a> · 
+        <a href="guides/odt-to-typst-pdf.html">ODT to PDF</a> · 
         <a href="guides/docxtemplater-odf-alternative.html">docxtemplater Alternative</a> · 
         <a href="guides/simple-odf-alternative.html">Migration Guide</a> · 
         <a href="guides/odt-javascript-ecosystem.html">ODT Ecosystem</a> · 
@@ -1052,7 +1108,7 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
   </footer>
 
   <script>
-    function switchTab(tab) {
+    function switchTab(tab, event) {
       document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
       event.target.classList.add('active');
