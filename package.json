@@ -13,6 +13,10 @@
     "./reader": {
       "types": "./dist/reader/index.d.ts",
       "import": "./dist/reader/index.js"
+    },
+	"./typst": {
+      "types": "./dist/typst/index.d.ts",
+      "import": "./dist/typst/index.js"
     }
   },
   "files": [
