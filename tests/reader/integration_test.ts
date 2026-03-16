@@ -353,7 +353,7 @@ describe("readOdt — toHtml", () => {
     const bytes = await doc.save();
     const html = readOdt(bytes).toHtml({ fragment: true });
     expect(html).toContain("Hello from toHtml");
-    expect(html).toContain("<p>");
+    expect(html).toContain("<p");
   });
 
   test("toHtml returns a full document by default", async () => {
@@ -371,7 +371,7 @@ describe("readOdt — toHtml", () => {
     const bytes = await doc.save();
     const html = readOdt(bytes).toHtml({ fragment: true });
     expect(html).not.toContain("<!DOCTYPE");
-    expect(html).toContain("<p>");
+    expect(html).toContain("<p");
   });
 
   test("odtToHtml convenience function produces the same output as readOdt().toHtml()", async () => {

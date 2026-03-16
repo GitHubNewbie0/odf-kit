@@ -1,5 +1,5 @@
 /**
- * Style registry for the odf-kit ODT reader (Tier 2).
+ * Style registry for the odf-kit ODT reader (Tier 2 / Tier 3).
  *
  * ODF documents store visual formatting in named and automatic styles that
  * reference each other through inheritance chains. This module parses both
@@ -19,6 +19,10 @@
  *  - Resolved results are cached so each family:name pair is walked once.
  *  - Font family resolution follows the ODF priority order: fo:font-family
  *    wins; if absent, style:font-name is resolved through the font-face map.
+ *
+ * Tier 3 addition:
+ *  - graphicProps bag: attributes from style:graphic-properties, used to
+ *    resolve style:wrap and other frame layout properties for images.
  */
 
 import type { XmlElementNode } from "./xml-parser.js";
@@ -33,17 +37,20 @@ import type { XmlElementNode } from "./xml-parser.js";
  * exactly as they appear in the XML; conversion to CSS units is the
  * responsibility of the renderer, not the registry.
  *
- * Three bags mirror ODF's own property grouping:
+ * Four bags mirror ODF's own property grouping:
  *  - textProps      — from style:text-properties
  *  - paragraphProps — from style:paragraph-properties
  *  - cellProps      — from style:table-cell-properties,
  *                     style:table-row-properties, and
  *                     style:table-column-properties
+ *  - graphicProps   — from style:graphic-properties (Tier 3)
  */
 export interface ResolvedStyle {
   textProps: Map<string, string>;
   paragraphProps: Map<string, string>;
   cellProps: Map<string, string>;
+  /** Attributes from style:graphic-properties. Used to resolve style:wrap. */
+  graphicProps: Map<string, string>;
 }
 
 /**
@@ -83,6 +90,8 @@ interface RawStyle {
   textProps: Map<string, string>;
   paragraphProps: Map<string, string>;
   cellProps: Map<string, string>;
+  /** Attributes from style:graphic-properties. Tier 3 addition. */
+  graphicProps: Map<string, string>;
 }
 
 // ============================================================
@@ -111,11 +120,12 @@ function findChildren(node: XmlElementNode, tag: string): XmlElementNode[] {
 // ============================================================
 
 /**
- * The ODF property element tags that map to each of our three bags.
+ * The ODF property element tags that map to each of our four bags.
  * A single style element may contain more than one of these children.
  */
 const TEXT_PROPS_TAG = "style:text-properties";
 const PARA_PROPS_TAG = "style:paragraph-properties";
+const GRAPHIC_PROPS_TAG = "style:graphic-properties";
 
 /**
  * Tags whose attributes all land in cellProps.
@@ -143,6 +153,7 @@ function collectRawStyle(
   const textProps = new Map<string, string>();
   const paragraphProps = new Map<string, string>();
   const cellProps = new Map<string, string>();
+  const graphicProps = new Map<string, string>();
 
   for (const child of styleEl.children) {
     if (child.type !== "element") continue;
@@ -155,6 +166,10 @@ function collectRawStyle(
       for (const [k, v] of Object.entries(child.attrs)) {
         paragraphProps.set(k, v);
       }
+    } else if (child.tag === GRAPHIC_PROPS_TAG) {
+      for (const [k, v] of Object.entries(child.attrs)) {
+        graphicProps.set(k, v);
+      }
     } else if (CELL_PROPS_TAGS.has(child.tag)) {
       for (const [k, v] of Object.entries(child.attrs)) {
         cellProps.set(k, v);
@@ -162,7 +177,7 @@ function collectRawStyle(
     }
   }
 
-  return { family, parentName, displayName, textProps, paragraphProps, cellProps };
+  return { family, parentName, displayName, textProps, paragraphProps, cellProps, graphicProps };
 }
 
 // ============================================================
@@ -311,7 +326,7 @@ export function buildRegistry(
  * not found in either map — callers may always safely access the Maps.
  *
  * @param registry - Registry produced by buildRegistry().
- * @param family   - ODF style family, e.g. "text", "paragraph", "table-cell".
+ * @param family   - ODF style family, e.g. "text", "paragraph", "graphic".
  * @param name     - The style:name value to resolve.
  * @returns Fully merged property Maps for this style.
  */
@@ -326,6 +341,7 @@ export function resolve(registry: StyleRegistry, family: string, name: string): 
     textProps: new Map(defaultRaw?.textProps),
     paragraphProps: new Map(defaultRaw?.paragraphProps),
     cellProps: new Map(defaultRaw?.cellProps),
+    graphicProps: new Map(defaultRaw?.graphicProps),
   };
 
   // 2. Find the starting style — automatic overrides named for same key.
@@ -354,6 +370,7 @@ export function resolve(registry: StyleRegistry, family: string, name: string): 
     for (const [k, v] of raw.textProps) result.textProps.set(k, v);
     for (const [k, v] of raw.paragraphProps) result.paragraphProps.set(k, v);
     for (const [k, v] of raw.cellProps) result.cellProps.set(k, v);
+    for (const [k, v] of raw.graphicProps) result.graphicProps.set(k, v);
   }
 
   // 5. Cache and return.

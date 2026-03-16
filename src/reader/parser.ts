@@ -10,10 +10,23 @@
  * 2. Parse manifest.xml → build MIME type map for images
  * 3. Parse styles.xml and content.xml with parseXml
  * 4. Build style maps (semantic: bold/italic) and registry (visual: color/font)
- * 5. Extract tracked-change deletion IDs from office:text
+ * 5. Extract tracked-change changed-region metadata from office:text
  * 6. Walk office:body/office:text to produce BodyNode[]
- * 7. Parse meta.xml for document metadata
- * 8. Return OdtDocumentModel with body, metadata, and toHtml()
+ * 7. Parse page layout and master-page header/footer content from styles.xml
+ * 8. Parse meta.xml for document metadata
+ * 9. Return OdtDocumentModel with body, metadata, page layout, headers/footers,
+ *    and toHtml()
+ *
+ * Tier 3 additions:
+ *  - ParagraphStyle: text-align, margins, padding, line-height on paragraphs and headings
+ *  - ImageNode.wrapMode: style:wrap resolved from graphic style via registry
+ *  - PageLayout: page dimensions and margins from style:page-layout in styles.xml
+ *  - Header/footer content: parsed from style:master-page in styles.xml
+ *  - SectionNode: text:section surfaces as a named block node (was transparent)
+ *  - Tracked changes (all three modes):
+ *      "final"    — accept all: insertions kept, deletions suppressed (unchanged behavior)
+ *      "original" — reject all: insertions suppressed, deletions restored
+ *      "changes"  — full model: TrackedChangeNode emitted for block-level change markers
  *
  * Exported for unit testing: parseMetaXml is tested in isolation.
  * Internal helpers are tested indirectly through readOdt round-trip tests.
@@ -39,13 +52,18 @@ import type {
   TextSpan,
   InlineNode,
   SpanStyle,
+  ParagraphStyle,
   ImageNode,
   NoteNode,
   FieldNode,
   CellStyle,
   RowStyle,
   BorderStyle,
+  SectionNode,
+  TrackedChangeNode,
+  PageLayout,
   HtmlOptions,
+  ReadOdtOptions,
 } from "./types.js";
 
 // ============================================================
@@ -133,6 +151,60 @@ function makeSpan(
 }
 
 // ============================================================
+// Internal tracked-change region model
+// ============================================================
+
+/**
+ * Metadata for a single changed region from text:tracked-changes.
+ *
+ * deletionEl is the raw text:deletion element, stored for lazy body
+ * parsing when a text:change point marker is encountered during body
+ * walking. Body parsing requires a fully built ParseContext, so it
+ * cannot happen during the initial changed-region scan.
+ */
+interface ChangedRegion {
+  type: "insertion" | "deletion" | "format-change";
+  author?: string;
+  date?: string;
+  /** Raw text:deletion element. Present only for deletion regions. */
+  deletionEl?: XmlElementNode;
+}
+
+/**
+ * Mutable tracking state for inline and block-level change marker
+ * processing. Shared via ParseContext so state persists across recursive
+ * parseSpans calls within the same paragraph.
+ *
+ * skipping:  true when currently inside an insertion region that should
+ *            be suppressed ("original" mode only).
+ * changeId:  the change ID that opened the current skip zone.
+ */
+interface SkipState {
+  skipping: boolean;
+  changeId?: string;
+}
+
+/**
+ * Mutable collection state for block-level insertion tracking in
+ * "changes" mode.
+ *
+ * When collecting is true, body nodes are pushed into buffer instead of
+ * the main nodes array. When the matching text:change-end is encountered,
+ * the buffer is wrapped in a TrackedChangeNode and pushed to nodes.
+ *
+ * collecting:  true when inside a block-spanning insertion region.
+ * changeId:    the change ID that opened the collection zone.
+ * buffer:      accumulates body nodes belonging to the insertion.
+ * region:      the ChangedRegion metadata for the active insertion.
+ */
+interface CollectState {
+  collecting: boolean;
+  changeId?: string;
+  buffer: BodyNode[];
+  region?: ChangedRegion;
+}
+
+// ============================================================
 // Parse context
 // ============================================================
 
@@ -141,7 +213,7 @@ function makeSpan(
  *
  * Passed through the entire parse chain so individual parsers can
  * resolve both semantic (bold/italic) and visual (color/font) styles,
- * look up image bytes, and skip tracked-change deletions.
+ * look up image bytes, and handle tracked changes per the requested mode.
  */
 interface ParseContext {
   /** Semantic character styles keyed by style:name. */
@@ -154,8 +226,21 @@ interface ParseContext {
   imageBytes: Map<string, Uint8Array>;
   /** ZIP path → MIME type from manifest.xml. */
   manifestTypes: Map<string, string>;
-  /** Change IDs that map to tracked deletions — content is excluded. */
-  deletionIds: Set<string>;
+  /** Tracked-change regions keyed by text:id. */
+  changedRegions: Map<string, ChangedRegion>;
+  /** Tracked-changes rendering mode. */
+  trackedChanges: "final" | "original" | "changes";
+  /**
+   * Mutable skip state for original mode.
+   * Shared across all recursive parseSpans calls within a body walk.
+   */
+  skipState: SkipState;
+  /**
+   * Mutable collection state for changes mode block-level insertions.
+   * When collecting, body nodes are buffered and wrapped in a
+   * TrackedChangeNode when the matching text:change-end is hit.
+   */
+  collectState: CollectState;
 }
 
 // ============================================================
@@ -279,30 +364,74 @@ function parseManifest(manifestXml: string): Map<string, string> {
 }
 
 // ============================================================
-// Tracked-change deletion ID extraction
+// Tracked-change region scanner
 // ============================================================
 
 /**
- * Scan the text:tracked-changes block (if present) and return the set
- * of change IDs that correspond to deletions. Body content referencing
- * these IDs is excluded from the parse output (flattened to accepted state).
+ * Scan the text:tracked-changes block (if present) and build a map of
+ * change ID → ChangedRegion metadata.
+ *
+ * For deletions, the raw text:deletion element is stored for lazy body
+ * parsing when the matching text:change point marker is encountered
+ * during body walking (at which point ParseContext is available).
+ *
+ * For insertions and format-changes, no body content is stored here —
+ * their content lives inline in the body between change markers.
+ *
+ * @param bodyTextEl - The office:text element containing text:tracked-changes.
+ * @returns Map of text:id → ChangedRegion.
  */
-function parseDeletionIds(bodyTextEl: XmlElementNode): Set<string> {
-  const ids = new Set<string>();
+function parseChangedRegions(bodyTextEl: XmlElementNode): Map<string, ChangedRegion> {
+  const regions = new Map<string, ChangedRegion>();
   const tcEl = findElement(bodyTextEl, "text:tracked-changes");
-  if (!tcEl) return ids;
+  if (!tcEl) return regions;
 
   for (const child of tcEl.children) {
     if (child.type !== "element" || child.tag !== "text:changed-region") continue;
     const id = child.attrs["text:id"];
     if (!id) continue;
-    const hasDeletion = child.children.some(
-      (c) => c.type === "element" && c.tag === "text:deletion",
-    );
-    if (hasDeletion) ids.add(id);
+
+    let type: "insertion" | "deletion" | "format-change" | undefined;
+    let deletionEl: XmlElementNode | undefined;
+    let author: string | undefined;
+    let date: string | undefined;
+
+    for (const regionChild of child.children) {
+      if (regionChild.type !== "element") continue;
+
+      if (regionChild.tag === "text:insertion") {
+        type = "insertion";
+        const creatorEl = findElement(regionChild, "dc:creator");
+        if (creatorEl) author = textContent(creatorEl);
+        const dateEl = findElement(regionChild, "dc:date");
+        if (dateEl) date = textContent(dateEl);
+      } else if (regionChild.tag === "text:deletion") {
+        type = "deletion";
+        deletionEl = regionChild;
+        const creatorEl = findElement(regionChild, "dc:creator");
+        if (creatorEl) author = textContent(creatorEl);
+        const dateEl = findElement(regionChild, "dc:date");
+        if (dateEl) date = textContent(dateEl);
+      } else if (regionChild.tag === "text:format-change") {
+        type = "format-change";
+        const creatorEl = findElement(regionChild, "dc:creator");
+        if (creatorEl) author = textContent(creatorEl);
+        const dateEl = findElement(regionChild, "dc:date");
+        if (dateEl) date = textContent(dateEl);
+      }
+    }
+
+    if (!type) continue;
+
+    const region: ChangedRegion = { type };
+    if (author) region.author = author;
+    if (date) region.date = date;
+    if (deletionEl) region.deletionEl = deletionEl;
+
+    regions.set(id, region);
   }
 
-  return ids;
+  return regions;
 }
 
 // ============================================================
@@ -320,11 +449,6 @@ function parsePt(value: string): number | undefined {
   return isNaN(n) ? undefined : n;
 }
 
-/**
- * Encode raw image bytes as a base64 string suitable for use in a
- * data: URI. Uses Node.js Buffer, which is available in all target
- * environments (Node.js 22+).
- */
 /**
  * Encode raw bytes as a base64 string.
  *
@@ -413,6 +537,83 @@ function extractSpanStyle(
   const letterSpacing = textProps.get("fo:letter-spacing");
   if (letterSpacing && letterSpacing !== "normal") {
     style.letterSpacing = letterSpacing;
+    hasAny = true;
+  }
+
+  return hasAny ? style : undefined;
+}
+
+// ============================================================
+// Tier 3 — Paragraph layout extraction
+// ============================================================
+
+/**
+ * Extract a ParagraphStyle from the paragraphProps of a resolved style.
+ *
+ * Maps ODF paragraph property attributes to ParagraphStyle fields. Returns
+ * undefined when none of the supported properties are set so
+ * ParagraphNode.paragraphStyle is absent entirely for unstyled paragraphs.
+ *
+ * fo:text-align values are passed through verbatim per ODF 1.2 §20.216
+ * ("start", "end", "left", "right", "center", "justify") — all are valid
+ * CSS text-align values in modern browsers.
+ *
+ * fo:margin-top/fo:space-before both map to marginTop. ODF producers use
+ * both; fo:margin-top takes precedence when both are present.
+ * Similarly fo:margin-bottom / fo:space-after → marginBottom.
+ */
+function extractParagraphStyle(paragraphProps: Map<string, string>): ParagraphStyle | undefined {
+  const style: ParagraphStyle = {};
+  let hasAny = false;
+
+  const textAlign = paragraphProps.get("fo:text-align");
+  if (textAlign) {
+    style.textAlign = textAlign;
+    hasAny = true;
+  }
+
+  const marginLeft = paragraphProps.get("fo:margin-left");
+  if (marginLeft) {
+    style.marginLeft = marginLeft;
+    hasAny = true;
+  }
+
+  const marginRight = paragraphProps.get("fo:margin-right");
+  if (marginRight) {
+    style.marginRight = marginRight;
+    hasAny = true;
+  }
+
+  // fo:margin-top takes precedence over fo:space-before when both present
+  const marginTop = paragraphProps.get("fo:margin-top") ?? paragraphProps.get("fo:space-before");
+  if (marginTop) {
+    style.marginTop = marginTop;
+    hasAny = true;
+  }
+
+  // fo:margin-bottom takes precedence over fo:space-after when both present
+  const marginBottom =
+    paragraphProps.get("fo:margin-bottom") ?? paragraphProps.get("fo:space-after");
+  if (marginBottom) {
+    style.marginBottom = marginBottom;
+    hasAny = true;
+  }
+
+  const paddingLeft = paragraphProps.get("fo:padding-left");
+  if (paddingLeft) {
+    style.paddingLeft = paddingLeft;
+    hasAny = true;
+  }
+
+  const paddingRight = paragraphProps.get("fo:padding-right");
+  if (paddingRight) {
+    style.paddingRight = paddingRight;
+    hasAny = true;
+  }
+
+  const lineHeight = paragraphProps.get("fo:line-height");
+  if (lineHeight) {
+    style.lineHeight = lineHeight;
     hasAny = true;
   }
 
@@ -521,8 +722,19 @@ const FIELD_TYPE_MAP: Record<string, string> = {
  *
  * Handles: text:span, text:a, text:line-break, text:tab, text:s,
  * draw:frame (images), text:note, text:bookmark, text:bookmark-start,
- * text:bookmark-end, text:bookmark-ref, text:change-start/end (skipped),
+ * text:bookmark-end, text:bookmark-ref, tracked-change inline markers,
  * and all ODF text field elements.
+ *
+ * Tier 3 tracked-change handling (inline markers):
+ *  "final":    change markers skipped; insertion content included normally.
+ *  "original": text:change-start for an insertion → activate skip zone;
+ *              text:change-end → deactivate skip zone; content inside
+ *              a skip zone is suppressed. text:change (inline deletion
+ *              point) is skipped — deleted content lives only in the
+ *              registry and is not inline.
+ *  "changes":  all inline markers skipped transparently; inline insertion
+ *              content is included normally. Block-level change markers
+ *              emit TrackedChangeNode in parseBodyNodes.
  *
  * @param node            - Container element whose children are walked.
  * @param ctx             - Parse context with style maps, registry, and images.
@@ -540,6 +752,22 @@ function parseSpans(
   const spans: InlineNode[] = [];
 
   for (const child of node.children) {
+    // Suppress all output when inside a skip zone (original mode, insertion region)
+    if (ctx.skipState.skipping) {
+      if (child.type === "element") {
+        if (child.tag === "text:change-end") {
+          const changeId = child.attrs["text:change-id"];
+          if (changeId === ctx.skipState.changeId) {
+            ctx.skipState.skipping = false;
+            ctx.skipState.changeId = undefined;
+          }
+        }
+        // text:change-start nested inside a skip zone: extend skip to innermost end
+        // All other elements: suppressed
+      }
+      continue;
+    }
+
     if (child.type === "text") {
       if (child.text.length > 0) {
         spans.push(makeSpan(child.text, baseStyle, href, baseVisualStyle));
@@ -647,6 +875,14 @@ function parseSpans(
         const anchorType = child.attrs["text:anchor-type"];
         if (anchorType) imageNode.anchorType = anchorType;
 
+        // Tier 3: resolve wrapMode from the frame's graphic style
+        const frameStyleName = child.attrs["draw:style-name"];
+        if (frameStyleName) {
+          const graphicResolved = resolve(ctx.registry, "graphic", frameStyleName);
+          const wrapMode = graphicResolved.graphicProps.get("style:wrap");
+          if (wrapMode) imageNode.wrapMode = wrapMode;
+        }
+
         // Resolve MIME type: manifest.xml (authoritative) → loext:mime-type (fallback)
         const xhref = imageEl.attrs["xlink:href"];
         const mediaType =
@@ -673,10 +909,40 @@ function parseSpans(
         break;
       }
 
-      case "text:change-start":
-      case "text:change-end":
+      // ── Tracked-change inline markers ────────────────────────────────────
+
+      case "text:change-start": {
+        const changeId = child.attrs["text:change-id"];
+        if (!changeId) break;
+        const region = ctx.changedRegions.get(changeId);
+        if (!region) break;
+        // "original": suppress insertion content between this marker and its end
+        if (ctx.trackedChanges === "original" && region.type === "insertion") {
+          ctx.skipState.skipping = true;
+          ctx.skipState.changeId = changeId;
+        }
+        // "final" and "changes": transparent — skip the marker, keep the content
+        break;
+      }
+
+      case "text:change-end": {
+        const changeId = child.attrs["text:change-id"];
+        // Clear skip state if this end matches the active skip zone.
+        // (Already cleared in the skip-zone branch above when skipping;
+        //  this handles the non-skipping case gracefully.)
+        if (ctx.skipState.changeId === changeId) {
+          ctx.skipState.skipping = false;
+          ctx.skipState.changeId = undefined;
+        }
+        break;
+      }
+
       case "text:change":
-        // Tracked-change structural markers carry no content — skip
+        // Inline deletion / format-change point marker.
+        // "final":    no-op — deleted content is not inline, nothing to restore.
+        // "original": no-op — deleted content not restored inline; only block-level
+        //             text:change markers between paragraphs restore content.
+        // "changes":  cannot emit TrackedChangeNode (not an InlineNode); skip.
         break;
 
       default: {
@@ -857,17 +1123,52 @@ function parseTable(tableEl: XmlElementNode, ctx: ParseContext): TableNode {
 }
 
 /**
- * Walk the children of an <office:text> (or <text:section>) element and
- * produce an ordered array of BodyNode objects.
+ * Walk the children of a body container element (office:text, text:section,
+ * style:header, style:footer, text:note-body, etc.) and produce an ordered
+ * array of BodyNode objects.
  *
- * Handles paragraphs, headings, lists, tables, and sections (transparent
- * containers). text:tracked-changes and all other elements are skipped.
+ * Tier 3 additions:
+ *  - text:section surfaces as SectionNode (was transparent in Tier 2).
+ *  - Block-level tracked-change markers (text:change, text:change-start,
+ *    text:change-end between paragraphs) are handled per the active mode.
+ *
+ * Block-level change marker semantics:
+ *  "final":    all markers skipped; body nodes emitted normally.
+ *  "original": text:change-start for insertion → suppress following nodes
+ *              until matching text:change-end; text:change for deletion →
+ *              emit the deleted BodyNode content from the registry.
+ *  "changes":  text:change → emit TrackedChangeNode with deletion/format-
+ *              change content; text:change-start → emit TrackedChangeNode
+ *              for insertion and suppress following nodes until matching
+ *              text:change-end (insertion content wrapped in the node).
+ *
+ * text:tracked-changes is always skipped — it is metadata, not content.
  */
 function parseBodyNodes(bodyTextEl: XmlElementNode, ctx: ParseContext): BodyNode[] {
   const nodes: BodyNode[] = [];
 
   for (const child of bodyTextEl.children) {
     if (child.type !== "element") continue;
+
+    // ── Block-level skip zone (original mode, block-spanning insertions) ──
+    if (ctx.skipState.skipping) {
+      if (child.tag === "text:change-end") {
+        const changeId = child.attrs["text:change-id"];
+        if (changeId === ctx.skipState.changeId) {
+          ctx.skipState.skipping = false;
+          ctx.skipState.changeId = undefined;
+        }
+      }
+      // All other nodes within the skip zone are suppressed
+      continue;
+    }
+
+    // ── Routing: collect into insertion buffer or emit to main nodes ──────
+    // In "changes" mode, nodes between a text:change-start and its matching
+    // text:change-end for an insertion are buffered. The buffer is wrapped
+    // in a TrackedChangeNode when the end marker is hit. All other nodes
+    // go directly to `nodes`.
+    const dest: BodyNode[] = ctx.collectState.collecting ? ctx.collectState.buffer : nodes;
 
     switch (child.tag) {
       case "text:p": {
@@ -876,9 +1177,11 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, ctx: ParseContext): BodyNode
           paraStyleName !== undefined ? (ctx.charStyles.get(paraStyleName) ?? {}) : {};
 
         let textStyle: SpanStyle | undefined;
+        let paragraphStyle: ParagraphStyle | undefined;
         if (paraStyleName) {
           const resolved = resolve(ctx.registry, "paragraph", paraStyleName);
           textStyle = extractSpanStyle(resolved.textProps, ctx.registry);
+          paragraphStyle = extractParagraphStyle(resolved.paragraphProps);
         }
 
         const para: ParagraphNode = {
@@ -887,7 +1190,8 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, ctx: ParseContext): BodyNode
         };
         if (paraStyleName) para.styleName = paraStyleName;
         if (textStyle) para.textStyle = textStyle;
-        nodes.push(para);
+        if (paragraphStyle) para.paragraphStyle = paragraphStyle;
+        dest.push(para);
         break;
       }
 
@@ -899,9 +1203,11 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, ctx: ParseContext): BodyNode
           headingStyleName !== undefined ? (ctx.charStyles.get(headingStyleName) ?? {}) : {};
 
         let textStyle: SpanStyle | undefined;
+        let paragraphStyle: ParagraphStyle | undefined;
         if (headingStyleName) {
           const resolved = resolve(ctx.registry, "paragraph", headingStyleName);
           textStyle = extractSpanStyle(resolved.textProps, ctx.registry);
+          paragraphStyle = extractParagraphStyle(resolved.paragraphProps);
         }
 
         const heading: HeadingNode = {
@@ -911,28 +1217,318 @@ function parseBodyNodes(bodyTextEl: XmlElementNode, ctx: ParseContext): BodyNode
         };
         if (headingStyleName) heading.styleName = headingStyleName;
         if (textStyle) heading.textStyle = textStyle;
-        nodes.push(heading);
+        if (paragraphStyle) heading.paragraphStyle = paragraphStyle;
+        dest.push(heading);
         break;
       }
 
       case "text:list":
-        nodes.push(parseList(child, ctx));
+        dest.push(parseList(child, ctx));
         break;
 
       case "table:table":
-        nodes.push(parseTable(child, ctx));
+        dest.push(parseTable(child, ctx));
         break;
 
-      case "text:section":
-        // Sections are transparent containers — recurse into their content
-        nodes.push(...parseBodyNodes(child, ctx));
+      case "text:section": {
+        // Tier 3: surface as SectionNode instead of transparent recursion
+        const sectionName = child.attrs["text:name"];
+        const sectionBody = parseBodyNodes(child, ctx);
+        const sectionNode: SectionNode = { kind: "section", body: sectionBody };
+        if (sectionName) sectionNode.name = sectionName;
+        dest.push(sectionNode);
+        break;
+      }
+
+      // ── Block-level tracked-change markers ──────────────────────────────
+
+      case "text:change": {
+        const changeId = child.attrs["text:change-id"];
+        if (!changeId) break;
+        const region = ctx.changedRegions.get(changeId);
+        if (!region) break;
+
+        if (ctx.trackedChanges === "original" && region.type === "deletion") {
+          // Restore deleted block content at this position
+          if (region.deletionEl) {
+            nodes.push(...parseBodyNodes(region.deletionEl, ctx));
+          }
+        } else if (ctx.trackedChanges === "changes") {
+          // Emit a TrackedChangeNode with deletion/format-change content.
+          // Deletions carry restored content from the registry; format-changes
+          // have an empty body (no content moved, only style changed).
+          const body: BodyNode[] =
+            region.type === "deletion" && region.deletionEl
+              ? parseBodyNodes(region.deletionEl, ctx)
+              : [];
+          const tcNode: TrackedChangeNode = {
+            kind: "tracked-change",
+            changeType: region.type,
+            changeId,
+            body,
+          };
+          if (region.author) tcNode.author = region.author;
+          if (region.date) tcNode.date = region.date;
+          nodes.push(tcNode);
+        }
+        // "final": skip — deletions are not in the body, nothing to suppress
+        break;
+      }
+
+      case "text:change-start": {
+        const changeId = child.attrs["text:change-id"];
+        if (!changeId) break;
+        const region = ctx.changedRegions.get(changeId);
+        if (!region) break;
+
+        if (ctx.trackedChanges === "original" && region.type === "insertion") {
+          // Suppress the following block nodes (the inserted content) until
+          // the matching text:change-end
+          ctx.skipState.skipping = true;
+          ctx.skipState.changeId = changeId;
+        } else if (ctx.trackedChanges === "changes" && region.type === "insertion") {
+          // Activate collection mode. Subsequent body nodes go into the buffer
+          // until the matching text:change-end closes the zone and wraps the
+          // buffer in a TrackedChangeNode pushed to the main nodes array.
+          ctx.collectState.collecting = true;
+          ctx.collectState.changeId = changeId;
+          ctx.collectState.buffer = [];
+          ctx.collectState.region = region;
+        }
+        // "final": transparent — skip marker, insertion content emitted normally
+        break;
+      }
+
+      case "text:change-end": {
+        const changeId = child.attrs["text:change-id"];
+
+        // Close an active collection zone when the end marker matches
+        if (
+          ctx.collectState.collecting &&
+          changeId === ctx.collectState.changeId &&
+          ctx.collectState.region
+        ) {
+          const region = ctx.collectState.region;
+          const tcNode: TrackedChangeNode = {
+            kind: "tracked-change",
+            changeType: "insertion",
+            changeId: ctx.collectState.changeId!,
+            body: ctx.collectState.buffer,
+          };
+          if (region.author) tcNode.author = region.author;
+          if (region.date) tcNode.date = region.date;
+          nodes.push(tcNode);
+
+          // Reset collection state
+          ctx.collectState.collecting = false;
+          ctx.collectState.changeId = undefined;
+          ctx.collectState.buffer = [];
+          ctx.collectState.region = undefined;
+        }
+        // "original": skip-zone end handled at top of loop
+        // "final" / unmatched: transparent — skip the marker
+        break;
+      }
+
+      case "text:tracked-changes":
+        // Metadata block — never emit as body content
         break;
 
-      // text:tracked-changes and all other top-level elements: skip
+      // All other top-level elements: skip
     }
   }
 
   return nodes;
+}
+
+// ============================================================
+// Tier 3 — Page layout parser
+// ============================================================
+
+/**
+ * Parse the default page layout from styles.xml.
+ *
+ * ODF page layout structure (styles.xml):
+ *  office:automatic-styles → style:page-layout (named)
+ *  office:master-styles    → style:master-page (references layout by name)
+ *
+ * The default master page is the one named "Standard" (LibreOffice default),
+ * or the first master page when no "Standard" page exists.
+ *
+ * @param stylesRoot - Parsed root of styles.xml.
+ * @returns PageLayout when a page layout is found, undefined otherwise.
+ */
+function parsePageLayout(stylesRoot: XmlElementNode): PageLayout | undefined {
+  // Locate the default master page
+  const masterStylesEl = findElement(stylesRoot, "office:master-styles");
+  if (!masterStylesEl) return undefined;
+
+  let masterPage: XmlElementNode | undefined;
+  for (const child of masterStylesEl.children) {
+    if (child.type !== "element" || child.tag !== "style:master-page") continue;
+    // Prefer "Standard"; otherwise take the first master page found
+    if (!masterPage || child.attrs["style:name"] === "Standard") {
+      masterPage = child;
+    }
+    if (child.attrs["style:name"] === "Standard") break;
+  }
+  if (!masterPage) return undefined;
+
+  const layoutName = masterPage.attrs["style:page-layout-name"];
+  if (!layoutName) return undefined;
+
+  // Locate the named page-layout in automatic-styles
+  const autoStylesEl = findElement(stylesRoot, "office:automatic-styles");
+  if (!autoStylesEl) return undefined;
+
+  let pageLayoutEl: XmlElementNode | undefined;
+  for (const child of autoStylesEl.children) {
+    if (
+      child.type === "element" &&
+      child.tag === "style:page-layout" &&
+      child.attrs["style:name"] === layoutName
+    ) {
+      pageLayoutEl = child;
+      break;
+    }
+  }
+  if (!pageLayoutEl) return undefined;
+
+  const propsEl = findElement(pageLayoutEl, "style:page-layout-properties");
+  if (!propsEl) return undefined;
+
+  const layout: PageLayout = {};
+  let hasAny = false;
+
+  const width = propsEl.attrs["fo:page-width"];
+  if (width) {
+    layout.width = width;
+    hasAny = true;
+  }
+
+  const height = propsEl.attrs["fo:page-height"];
+  if (height) {
+    layout.height = height;
+    hasAny = true;
+  }
+
+  const mt = propsEl.attrs["fo:margin-top"];
+  if (mt) {
+    layout.marginTop = mt;
+    hasAny = true;
+  }
+
+  const mb = propsEl.attrs["fo:margin-bottom"];
+  if (mb) {
+    layout.marginBottom = mb;
+    hasAny = true;
+  }
+
+  const ml = propsEl.attrs["fo:margin-left"];
+  if (ml) {
+    layout.marginLeft = ml;
+    hasAny = true;
+  }
+
+  const mr = propsEl.attrs["fo:margin-right"];
+  if (mr) {
+    layout.marginRight = mr;
+    hasAny = true;
+  }
+
+  // Derive orientation by comparing dimensions
+  if (layout.width && layout.height) {
+    const w = parseFloat(layout.width);
+    const h = parseFloat(layout.height);
+    if (!isNaN(w) && !isNaN(h)) {
+      layout.orientation = w > h ? "landscape" : "portrait";
+      hasAny = true;
+    }
+  }
+
+  return hasAny ? layout : undefined;
+}
+
+// ============================================================
+// Tier 3 — Master page header/footer parser
+// ============================================================
+
+/**
+ * Parse the header and footer zones from the default master page.
+ *
+ * ODF master page structure (styles.xml → office:master-styles):
+ *  style:master-page
+ *    style:header       — default header (all pages except first when
+ *                         style:header-first is present)
+ *    style:footer       — default footer
+ *    style:header-first — first-page header (requires style:display="true"
+ *                         on the master page)
+ *    style:footer-first — first-page footer
+ *
+ * Each zone element contains text:p / text:h / text:list / table:table
+ * children — the same elements as office:text — so parseBodyNodes is
+ * used directly. The result is BodyNode[] for each zone.
+ *
+ * @param stylesRoot - Parsed root of styles.xml.
+ * @param ctx        - Parse context for style and image resolution.
+ * @returns Object with up to four BodyNode[] arrays; each absent when
+ *   the zone element is not present in the document.
+ */
+function parseMasterPageContent(
+  stylesRoot: XmlElementNode,
+  ctx: ParseContext,
+): {
+  header?: BodyNode[];
+  footer?: BodyNode[];
+  firstPageHeader?: BodyNode[];
+  firstPageFooter?: BodyNode[];
+} {
+  const result: {
+    header?: BodyNode[];
+    footer?: BodyNode[];
+    firstPageHeader?: BodyNode[];
+    firstPageFooter?: BodyNode[];
+  } = {};
+
+  const masterStylesEl = findElement(stylesRoot, "office:master-styles");
+  if (!masterStylesEl) return result;
+
+  // Find the default master page (same logic as parsePageLayout)
+  let masterPage: XmlElementNode | undefined;
+  for (const child of masterStylesEl.children) {
+    if (child.type !== "element" || child.tag !== "style:master-page") continue;
+    if (!masterPage || child.attrs["style:name"] === "Standard") {
+      masterPage = child;
+    }
+    if (child.attrs["style:name"] === "Standard") break;
+  }
+  if (!masterPage) return result;
+
+  const headerEl = findElement(masterPage, "style:header");
+  if (headerEl) {
+    const body = parseBodyNodes(headerEl, ctx);
+    if (body.length > 0) result.header = body;
+  }
+
+  const footerEl = findElement(masterPage, "style:footer");
+  if (footerEl) {
+    const body = parseBodyNodes(footerEl, ctx);
+    if (body.length > 0) result.footer = body;
+  }
+
+  const firstHeaderEl = findElement(masterPage, "style:header-first");
+  if (firstHeaderEl) {
+    const body = parseBodyNodes(firstHeaderEl, ctx);
+    if (body.length > 0) result.firstPageHeader = body;
+  }
+
+  const firstFooterEl = findElement(masterPage, "style:footer-first");
+  if (firstFooterEl) {
+    const body = parseBodyNodes(firstFooterEl, ctx);
+    if (body.length > 0) result.firstPageFooter = body;
+  }
+
+  return result;
 }
 
 // ============================================================
@@ -981,12 +1577,15 @@ export function parseMetaXml(metaXml: string): OdtMetadata {
  * Parse an .odt file and return a structured document model.
  *
  * Reads content.xml for the document body and automatic styles,
- * styles.xml for named styles and font faces, meta.xml for document
- * metadata, and META-INF/manifest.xml for image MIME types. Extracts
- * all Pictures/* entries for embedded image resolution.
+ * styles.xml for named styles, font faces, page layout, and master page
+ * header/footer content, meta.xml for document metadata, and
+ * META-INF/manifest.xml for image MIME types. Extracts all Pictures/*
+ * entries for embedded image resolution.
  *
- * @param bytes - The raw .odt file as a Uint8Array.
- * @returns A populated OdtDocumentModel with body, metadata, and toHtml().
+ * @param bytes   - The raw .odt file as a Uint8Array.
+ * @param options - Optional read options. See ReadOdtOptions.
+ * @returns A populated OdtDocumentModel with body, metadata, page layout,
+ *   headers/footers, and toHtml().
  * @throws Error if the input is not a valid ZIP or is missing content.xml.
  *
  * @example
@@ -997,9 +1596,15 @@ export function parseMetaXml(metaXml: string): OdtMetadata {
  * const bytes = new Uint8Array(readFileSync("document.odt"));
  * const doc = readOdt(bytes);
  * console.log(doc.body.length, "body nodes");
+ * console.log(doc.pageLayout?.orientation);
+ *
+ * // Review mode
+ * const review = readOdt(bytes, { trackedChanges: "changes" });
  * ```
  */
-export function readOdt(bytes: Uint8Array): OdtDocumentModel {
+export function readOdt(bytes: Uint8Array, options?: ReadOdtOptions): OdtDocumentModel {
+  const trackedChanges = options?.trackedChanges ?? "final";
+
   const zip = unzipSync(bytes);
 
   const contentXmlBytes = zip["content.xml"];
@@ -1031,13 +1636,15 @@ export function readOdt(bytes: Uint8Array): OdtDocumentModel {
   // Build semantic style maps (bold, italic, list types)
   const { charStyles, listOrdered } = buildStyleMaps(contentRoot, stylesRoot);
 
-  // Build visual style registry (color, font, size, cell styles)
+  // Build visual style registry (color, font, size, cell styles, graphic styles)
   const registry = buildRegistry(contentRoot, stylesRoot);
 
-  // Extract deletion IDs for tracked-change flattening
+  // Extract tracked-change region metadata
   const bodyEl = findElement(contentRoot, "office:body");
   const bodyTextEl = bodyEl ? findElement(bodyEl, "office:text") : undefined;
-  const deletionIds = bodyTextEl ? parseDeletionIds(bodyTextEl) : new Set<string>();
+  const changedRegions = bodyTextEl
+    ? parseChangedRegions(bodyTextEl)
+    : new Map<string, ChangedRegion>();
 
   const ctx: ParseContext = {
     charStyles,
@@ -1045,16 +1652,32 @@ export function readOdt(bytes: Uint8Array): OdtDocumentModel {
     registry,
     imageBytes,
     manifestTypes,
-    deletionIds,
+    changedRegions,
+    trackedChanges,
+    skipState: { skipping: false },
+    collectState: { collecting: false, buffer: [] },
   };
 
   const body: BodyNode[] = bodyTextEl ? parseBodyNodes(bodyTextEl, ctx) : [];
 
+  // Parse page layout and header/footer from styles.xml
+  const pageLayout = stylesRoot ? parsePageLayout(stylesRoot) : undefined;
+  const masterPageContent = stylesRoot ? parseMasterPageContent(stylesRoot, ctx) : {};
+
   return {
     metadata,
     body,
-    toHtml(options?: HtmlOptions): string {
-      return renderHtml(body, options);
+    ...(pageLayout && { pageLayout }),
+    ...(masterPageContent.header && { header: masterPageContent.header }),
+    ...(masterPageContent.footer && { footer: masterPageContent.footer }),
+    ...(masterPageContent.firstPageHeader && {
+      firstPageHeader: masterPageContent.firstPageHeader,
+    }),
+    ...(masterPageContent.firstPageFooter && {
+      firstPageFooter: masterPageContent.firstPageFooter,
+    }),
+    toHtml(htmlOptions?: HtmlOptions): string {
+      return renderHtml(body, htmlOptions);
     },
   };
 }

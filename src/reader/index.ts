@@ -19,6 +19,7 @@ export type {
   OdtDocumentModel,
   OdtMetadata,
   HtmlOptions,
+  ReadOdtOptions,
 
   // Top-level body node union and block types
   BodyNode,
@@ -30,6 +31,10 @@ export type {
   TableRowNode,
   TableCellNode,
 
+  // Tier 3 block types
+  SectionNode,
+  TrackedChangeNode,
+
   // Inline node union and all inline types
   InlineNode,
   TextSpan,
@@ -40,23 +45,29 @@ export type {
 
   // Tier 2 style types
   SpanStyle,
-  ParagraphStyle,
   CellStyle,
   RowStyle,
   BorderStyle,
+
+  // Tier 3 style and layout types
+  ParagraphStyle,
+  PageLayout,
 } from "./types.js";
 
 import { readOdt } from "./parser.js";
-import type { HtmlOptions } from "./types.js";
+import type { HtmlOptions, ReadOdtOptions } from "./types.js";
 
 /**
  * Convert an .odt file directly to an HTML string.
  *
  * Convenience wrapper around readOdt().toHtml(). Use readOdt() directly
- * when you need access to the document model or metadata.
+ * when you need access to the document model, metadata, page layout, or
+ * header/footer content.
  *
  * @param bytes - The raw .odt file as a Uint8Array.
  * @param options - HTML output options.
+ * @param readOptions - Options controlling how the document is parsed
+ *   (e.g. tracked-changes mode). Passed to readOdt().
  * @returns HTML string. Full document by default; inner fragment when
  *   options.fragment is true.
  *
@@ -69,6 +80,10 @@ import type { HtmlOptions } from "./types.js";
  * const html = odtToHtml(bytes, { fragment: true });
  * ```
  */
-export function odtToHtml(bytes: Uint8Array, options?: HtmlOptions): string {
-  return readOdt(bytes).toHtml(options);
+export function odtToHtml(
+  bytes: Uint8Array,
+  options?: HtmlOptions,
+  readOptions?: ReadOdtOptions,
+): string {
+  return readOdt(bytes, readOptions).toHtml(options);
 }

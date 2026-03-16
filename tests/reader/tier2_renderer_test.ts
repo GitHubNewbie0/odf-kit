@@ -194,7 +194,7 @@ describe("renderHtml Tier 2 — cell and row styles", () => {
     expect(html).toContain("vertical-align:middle");
   });
 
-  test("cell columnWidth is NOT emitted as layout CSS in Tier 2", () => {
+  test("cell columnWidth is emitted as <colgroup><col> layout (Tier 3), not on <td>", () => {
     const body: BodyNode[] = [
       {
         kind: "table",
@@ -206,8 +206,9 @@ describe("renderHtml Tier 2 — cell and row styles", () => {
       },
     ];
     const html = renderHtml(body, { fragment: true });
-    expect(html).not.toContain("5cm");
-    expect(html).not.toContain("width");
+    // Width is applied via <colgroup> not via inline style on <td>
+    expect(html).toContain('<col style="width:5cm">');
+    expect(html).not.toMatch(/<td[^>]*width:5cm/);
   });
 
   test("row backgroundColor emits background-color on <tr>", () => {

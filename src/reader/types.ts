@@ -13,8 +13,10 @@
  * embedded images as base64; footnotes and endnotes with full rich bodies;
  * bookmarks; text fields; and tracked-change flattening.
  *
- * Tier 3 (future): paragraph alignment, margins, spacing, table column
- * widths as layout, float positioning, headers/footers, page geometry.
+ * Tier 3 adds page layout: paragraph alignment, margins, spacing, table
+ * column widths as layout, image float positioning, headers and footers,
+ * page geometry, named sections, and a full tracked-changes model with
+ * three rendering modes (final, original, changes).
  */
 
 // ============================================================
@@ -62,6 +64,83 @@ export interface SpanStyle {
   textShadow?: string;
   /** fo:letter-spacing → "0.05em". CSS-ready, no transformation needed. */
   letterSpacing?: string;
+}
+
+// ============================================================
+// Tier 3 — Paragraph layout style
+// ============================================================
+
+/**
+ * Paragraph-level layout properties from style:paragraph-properties.
+ *
+ * All values are CSS-ready strings (lengths include units: "1.5cm", "150%").
+ * fo:text-align values are passed through verbatim per ODF 1.2 §20.216:
+ * "start" | "end" | "left" | "right" | "center" | "justify". All six are
+ * valid CSS text-align values in modern browsers; normalizing start/end to
+ * left/right would break RTL documents.
+ */
+export interface ParagraphStyle {
+  /**
+   * fo:text-align → "start" | "end" | "left" | "right" | "center" | "justify".
+   * ODF spec values passed through as-is; all are valid CSS text-align values.
+   */
+  textAlign?: string;
+  /** fo:margin-left → "1.5cm". Left indent. */
+  marginLeft?: string;
+  /** fo:margin-right → "1.5cm". Right indent. */
+  marginRight?: string;
+  /**
+   * fo:margin-top → "0.5cm". Space above the paragraph.
+   * Also written as fo:space-before in some ODF producers — both map here.
+   */
+  marginTop?: string;
+  /**
+   * fo:margin-bottom → "0.5cm". Space below the paragraph.
+   * Also written as fo:space-after in some ODF producers — both map here.
+   */
+  marginBottom?: string;
+  /** fo:padding-left → "0.2cm". */
+  paddingLeft?: string;
+  /** fo:padding-right → "0.2cm". */
+  paddingRight?: string;
+  /**
+   * fo:line-height → "150%" or "0.6cm".
+   * ODF accepts both percentage and length values; stored as-is.
+   */
+  lineHeight?: string;
+}
+
+// ============================================================
+// Tier 3 — Page geometry
+// ============================================================
+
+/**
+ * Physical page dimensions and margins from the default page layout
+ * (style:page-layout / style:page-layout-properties in styles.xml).
+ *
+ * All dimension values are CSS-ready strings including units (e.g. "21cm").
+ * orientation is derived from comparing fo:page-width to fo:page-height;
+ * it is absent when the layout element is missing from the document.
+ */
+export interface PageLayout {
+  /** fo:page-width → "21cm". Full page width including margins. */
+  width?: string;
+  /** fo:page-height → "29.7cm". Full page height including margins. */
+  height?: string;
+  /** fo:margin-top → "2.54cm". */
+  marginTop?: string;
+  /** fo:margin-bottom → "2.54cm". */
+  marginBottom?: string;
+  /** fo:margin-left → "2.54cm". */
+  marginLeft?: string;
+  /** fo:margin-right → "2.54cm". */
+  marginRight?: string;
+  /**
+   * Derived from fo:page-width vs fo:page-height.
+   * "landscape" when width > height; "portrait" otherwise.
+   * Absent when the page-layout-properties element is not found.
+   */
+  orientation?: "portrait" | "landscape";
 }
 
 // ============================================================
@@ -114,14 +193,18 @@ export interface TextSpan {
  * An image embedded in the document at its inline position.
  *
  * draw:frame / draw:image in ODF. Appears in spans[] at the position of
- * the draw:frame element regardless of anchor type. Float positioning
- * (anchorType) is preserved for Tier 3 layout decisions.
+ * the draw:frame element regardless of anchor type.
  *
  * data is always base64-encoded binary — the parser resolves the ZIP
  * entry at parse time so consumers never need to touch the ZIP.
  *
  * Accessibility metadata (title → alt, description → aria-describedby)
- * is the only JavaScript ODT library that preserves both fields.
+ * is preserved; odf-kit is the only JavaScript ODT library that preserves
+ * both fields.
+ *
+ * Tier 3 additions:
+ *  - wrapMode: from style:wrap on the frame's graphic style. Controls float
+ *    positioning in the HTML renderer.
  */
 export interface ImageNode {
   kind: "image";
@@ -145,9 +228,20 @@ export interface ImageNode {
   description?: string;
   /**
    * text:anchor-type → "as-char" | "paragraph" | "char" | "page".
-   * Preserved for Tier 3 float layout; not used by the Tier 2 renderer.
+   * Preserved for consumers; used alongside wrapMode for layout decisions.
    */
   anchorType?: string;
+  /**
+   * style:wrap from style:graphic-properties on the frame's named style.
+   * Controls how surrounding text wraps around the image.
+   *  "left"        — image floats left, text wraps on right
+   *  "right"       — image floats right, text wraps on left
+   *  "parallel"    — text wraps on both sides (CSS does not support; no float)
+   *  "run-through" — image overlaps text (CSS does not support; no float)
+   *  "none"        — no text wrap; image is a block
+   * Absent when no graphic style is associated with the frame.
+   */
+  wrapMode?: string;
 }
 
 /**
@@ -231,8 +325,8 @@ export interface FieldNode {
  *
  * Narrowing pattern:
  *   for (const node of para.spans) {
- *     if ('kind' in node && node.kind === 'image') { ... }
- *     else { // TextSpan — no `kind` property }
+ *     if ("kind" in node) { ... } // ImageNode | NoteNode | BookmarkNode | FieldNode
+ *     else { ... }                // TextSpan (no kind property)
  *   }
  */
 export type InlineNode = TextSpan | ImageNode | NoteNode | BookmarkNode | FieldNode;
@@ -262,8 +356,8 @@ export interface BorderStyle {
  * Visual properties for a table cell.
  *
  * columnWidth is stored for completeness (from style:table-column-properties
- * via the cell style resolution) but is not applied to table layout in
- * Tier 2 — that is a Tier 3 concern.
+ * via the cell style resolution) and is applied to table layout in Tier 3
+ * via <colgroup><col style="width:X"> in the HTML renderer.
  */
 export interface CellStyle {
   /** fo:background-color on table-cell-properties. */
@@ -274,7 +368,7 @@ export interface CellStyle {
   verticalAlign?: string;
   /**
    * style:column-width → "5cm". CSS-ready.
-   * Stored for consumers; not used by the Tier 2 HTML renderer for layout.
+   * Applied as <col style="width:X"> in the Tier 3 HTML renderer.
    */
   columnWidth?: string;
 }
@@ -291,18 +385,8 @@ export interface RowStyle {
 }
 
 // ============================================================
-// Block nodes (updated for Tier 2)
+// Block nodes (updated for Tier 2 and Tier 3)
 // ============================================================
-
-/**
- * Paragraph-level layout properties.
- *
- * Empty in Tier 2 — defined now so the interface exists and Tier 3 can
- * populate it (text-align, margins, spacing, line-height) without any
- * breaking change to the node shape.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; Tier 3 will add text-align, margins, and spacing without a breaking change
-export interface ParagraphStyle {}
 
 /** A paragraph in the document body. */
 export interface ParagraphNode {
@@ -319,8 +403,8 @@ export interface ParagraphNode {
    */
   textStyle?: SpanStyle;
   /**
-   * Paragraph layout properties. Empty interface in Tier 2;
-   * Tier 3 will populate with alignment, margins, and spacing.
+   * Paragraph layout properties: alignment, margins, padding, line-height.
+   * Absent when none of the supported properties are set in the style.
    */
   paragraphStyle?: ParagraphStyle;
   /**
@@ -339,7 +423,7 @@ export interface HeadingNode {
   styleName?: string;
   /** Heading-level text defaults from the heading style's text-properties. */
   textStyle?: SpanStyle;
-  /** Heading layout properties. Empty in Tier 2; populated in Tier 3. */
+  /** Heading layout properties: alignment, margins, padding, line-height. */
   paragraphStyle?: ParagraphStyle;
   /** Inline content. Widened from TextSpan[] to InlineNode[]. */
   spans: InlineNode[];
@@ -402,14 +486,87 @@ export interface TableNode {
 }
 
 // ============================================================
-// Top-level unions and document root (unchanged from Tier 1)
+// Tier 3 — Block nodes
+// ============================================================
+
+/**
+ * A named document section.
+ *
+ * ODF <text:section> elements are named regions that may carry
+ * protection, visibility, and linking properties. In Tier 3 they
+ * are surfaced as first-class block nodes rather than transparent
+ * containers, so consumers can identify section boundaries.
+ *
+ * name corresponds to text:name on the section element.
+ * body contains the full ordered BodyNode content of the section.
+ */
+export interface SectionNode {
+  kind: "section";
+  /** text:name — the author-assigned section name. */
+  name?: string;
+  /** Ordered body content of the section. */
+  body: BodyNode[];
+}
+
+/**
+ * A tracked change node surfaced when readOdt is called with
+ * trackedChanges: "changes".
+ *
+ * ODF §5.5 defines three change types:
+ *  - insertion:     text was added; body contains the inserted content.
+ *  - deletion:      text was removed; body contains the deleted content
+ *                   restored from the text:tracked-changes registry.
+ *  - format-change: formatting was altered; body is empty (no content
+ *                   moved, only style attributes changed).
+ *
+ * In "final" mode (default) these nodes are never emitted — insertions
+ * appear as normal body content and deletions are suppressed.
+ * In "original" mode these nodes are also never emitted — insertions are
+ * suppressed and deletions appear as normal body content.
+ * In "changes" mode every tracked change emits one TrackedChangeNode at
+ * the position of its change marker in the body.
+ *
+ * author corresponds to dc:creator on the changed-region element.
+ * date is the dc:date value — an ISO 8601 date-time string.
+ */
+export interface TrackedChangeNode {
+  kind: "tracked-change";
+  /** Type of change as defined in ODF §5.5. */
+  changeType: "insertion" | "deletion" | "format-change";
+  /** text:id of the changed-region — stable cross-reference identifier. */
+  changeId: string;
+  /** dc:creator on the changed-region element. */
+  author?: string;
+  /** dc:date on the changed-region element — ISO 8601 date-time string. */
+  date?: string;
+  /**
+   * Content associated with the change.
+   *  - insertion: the inserted body content.
+   *  - deletion:  the deleted body content restored from the registry.
+   *  - format-change: always empty — no content was moved.
+   */
+  body: BodyNode[];
+}
+
+// ============================================================
+// Top-level unions and document root
 // ============================================================
 
 /**
  * Discriminated union of all node types that can appear in the
- * document body. Use the kind property to narrow to a specific type.
+ * document body or in header/footer content. Use the kind property
+ * to narrow to a specific type.
+ *
+ * SectionNode and TrackedChangeNode were added in Tier 3 (v0.7.0).
+ * Exhaustive switches on BodyNode must handle all six members.
  */
-export type BodyNode = ParagraphNode | HeadingNode | ListNode | TableNode;
+export type BodyNode =
+  | ParagraphNode
+  | HeadingNode
+  | ListNode
+  | TableNode
+  | SectionNode
+  | TrackedChangeNode;
 
 /** Document metadata extracted from meta.xml. */
 export interface OdtMetadata {
@@ -430,13 +587,59 @@ export interface HtmlOptions {
    * Default: false.
    */
   fragment?: boolean;
+  /**
+   * Controls how tracked changes are rendered. Mirrors the trackedChanges
+   * option on ReadOdtOptions.
+   *
+   * "final" (default): insertions rendered as normal content; deletions
+   *   suppressed. Same output as before Tier 3.
+   * "original": insertions suppressed; deletions rendered as normal content.
+   * "changes": TrackedChangeNode values rendered as <ins>, <del>, or
+   *   <span class="odf-format-change"> with data-author and data-date.
+   *
+   * This option applies to TrackedChangeNode members already in the body
+   * model. If readOdt was called with trackedChanges: "final" (default),
+   * no TrackedChangeNode values exist and this option has no effect.
+   * Set readOdt and toHtml to the same mode for consistent results.
+   */
+  trackedChanges?: "final" | "original" | "changes";
+}
+
+/**
+ * Options for readOdt().
+ *
+ * Controls how tracked changes in the source document are processed
+ * during parsing. The choice determines what appears in the body array.
+ */
+export interface ReadOdtOptions {
+  /**
+   * Controls tracked-change processing. ODF §5.5.
+   *
+   * "final" (default): show the document as if all changes were accepted.
+   *   Insertions appear as normal body content; deletions are suppressed.
+   *   No TrackedChangeNode values are emitted. This is the behavior that
+   *   existed before Tier 3 and is unchanged.
+   *
+   * "original": show the document as if all changes were rejected.
+   *   Insertions are suppressed; deleted content is restored from the
+   *   text:tracked-changes registry at the correct body position.
+   *   No TrackedChangeNode values are emitted.
+   *
+   * "changes": expose all tracked changes in the document model.
+   *   TrackedChangeNode values are emitted in body order at the position
+   *   of each change marker. Insertion nodes carry the inserted content;
+   *   deletion nodes carry the restored deleted content; format-change
+   *   nodes have an empty body. Use toHtml({ trackedChanges: "changes" })
+   *   to render them as <ins>, <del>, and <span class="odf-format-change">.
+   */
+  trackedChanges?: "final" | "original" | "changes";
 }
 
 /**
  * The parsed ODT document returned by readOdt().
  *
- * Provides typed access to the document body and metadata, plus a
- * convenience method for HTML conversion.
+ * Provides typed access to the document body, metadata, page layout,
+ * and header/footer content, plus a convenience method for HTML conversion.
  *
  * @example
  * ```typescript
@@ -446,6 +649,7 @@ export interface HtmlOptions {
  * const bytes = new Uint8Array(readFileSync("document.odt"));
  * const doc = readOdt(bytes);
  * console.log(doc.metadata.title);
+ * console.log(doc.pageLayout?.orientation);
  * const html = doc.toHtml({ fragment: true });
  * ```
  */
@@ -453,10 +657,35 @@ export interface OdtDocumentModel {
   /** Document metadata from meta.xml. */
   readonly metadata: OdtMetadata;
   /**
-   * Ordered list of body nodes: paragraphs, headings, lists, and tables
-   * in document order.
+   * Ordered list of body nodes: paragraphs, headings, lists, tables,
+   * sections, and (in "changes" mode) tracked-change nodes.
    */
   readonly body: BodyNode[];
+  /**
+   * Physical page dimensions and margins from the default page layout
+   * in styles.xml. Absent when the document contains no page layout.
+   */
+  readonly pageLayout?: PageLayout;
+  /**
+   * Default header content, parsed as BodyNode[].
+   * Absent when the document has no default header.
+   */
+  readonly header?: BodyNode[];
+  /**
+   * Default footer content, parsed as BodyNode[].
+   * Absent when the document has no default footer.
+   */
+  readonly footer?: BodyNode[];
+  /**
+   * First-page header content (style:header-first on the master page).
+   * Absent when the document has no first-page header.
+   */
+  readonly firstPageHeader?: BodyNode[];
+  /**
+   * First-page footer content (style:footer-first on the master page).
+   * Absent when the document has no first-page footer.
+   */
+  readonly firstPageFooter?: BodyNode[];
   /**
    * Convert the document to an HTML string.
    *
