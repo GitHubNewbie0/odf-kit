@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convert ODT to PDF in JavaScript — No LibreOffice Required — odf-kit</title>
+  <meta name="description" content="Convert .odt files to PDF in Node.js without LibreOffice. Use odf-kit to export ODT to Typst markup, then compile to PDF with the Typst CLI. Pure JavaScript, zero new dependencies.">
+  <meta name="keywords" content="odt to pdf javascript, convert odt to pdf nodejs, odt to pdf without libreoffice, odt pdf node, typst pdf javascript, odt typst pdf, openDocument pdf conversion, odt to pdf npm, javascript pdf from odt, odt pdf no libreoffice">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Convert ODT to PDF in JavaScript — No LibreOffice Required — odf-kit">
+  <meta property="og:description" content="Convert .odt files to PDF in Node.js without LibreOffice. Export to Typst markup with odf-kit, then compile to PDF. Pure JavaScript, zero new dependencies.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content h3 { font-size: 1.05rem; font-weight: 600; margin: 1.75rem 0 0.5rem; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content ol { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .comparison-table th { text-align: left; padding: 0.65rem 1rem; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .comparison-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .comparison-table tr td:first-child { color: var(--text); font-weight: 500; }
+    .check { color: #16a34a; }
+    .cross { color: #dc2626; }
+    .partial { color: #d97706; }
+    .pipeline { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1.25rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+    .pipeline-step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 1rem; color: var(--text); }
+    .pipeline-arrow { color: var(--text-secondary); font-size: 1.1rem; }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
+      .pipeline { gap: 0.35rem; }
+      .pipeline-step { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I convert an ODT file to PDF in Node.js without LibreOffice?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use odf-kit's built-in Typst emitter: import odtToTypst from 'odf-kit/typst', pass the .odt bytes, and write the returned .typ string to disk. Then compile to PDF with the Typst CLI: typst compile document.typ document.pdf. odf-kit is zero-dependency and works in any JavaScript environment — no LibreOffice installation required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there an npm package to convert ODT to PDF?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit includes a built-in ODT-to-Typst emitter: npm install odf-kit, then import odtToTypst from 'odf-kit/typst'. It converts any .odt file to Typst markup which can be compiled to PDF with the Typst CLI. odf-kit is the only JavaScript library with a built-in ODT-to-Typst emitter."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Typst and why use it for PDF generation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Typst is a modern open-source document compilation system that produces high-quality PDFs from plain text markup. Unlike LibreOffice, it starts in milliseconds, runs as a single binary with no installation wizard, works on all platforms, and produces clean, well-typeset output. The Typst CLI can be installed via npm, Homebrew, winget, or system package managers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I convert ODT to PDF in a serverless environment?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The odf-kit Typst emitter (odtToTypst) runs anywhere JavaScript runs — Node.js, browsers, Deno, Bun, Cloudflare Workers. Compiling the .typ output to PDF requires the Typst CLI, which is a single small binary that works on Linux (including Lambda and container environments). The Typst WASM build also enables fully in-browser PDF compilation."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- GoatCounter Analytics -->
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="../">odf-kit</a>
+      <span class="sep">›</span>
+      <a href="../">Guides</a>
+      <span class="sep">›</span>
+      <span>ODT to PDF</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">odf-kit/typst · v0.8.0 · Zero dependencies</div>
+      <h1>Convert ODT to PDF in JavaScript<br>without LibreOffice</h1>
+      <p>Use odf-kit's built-in Typst emitter to convert any .odt file to Typst markup, then compile to PDF with the Typst CLI. Pure JavaScript — no LibreOffice, no docxtemplater, no server dependencies.</p>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="container">
+
+      <h2>The pipeline</h2>
+      <p>odf-kit reads the .odt file and emits Typst markup. The Typst CLI compiles it to PDF. odf-kit handles the hard part — Typst handles the rendering.</p>
+
+      <div class="pipeline">
+        <div class="pipeline-step">.odt file</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">odtToTypst()</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">.typ markup</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">typst compile</div>
+        <span class="pipeline-arrow">→</span>
+        <div class="pipeline-step">.pdf</div>
+      </div>
+
+      <h2>Quick start</h2>
+      <p>Install odf-kit and the Typst CLI:</p>
+
+      <div class="code-block">
+        <pre><span class="cmt"># Install odf-kit</span>
+npm install odf-kit
+
+<span class="cmt"># Install the Typst CLI (choose one)</span>
+npm install -g typst          <span class="cmt"># via npm</span>
+brew install typst            <span class="cmt"># macOS</span>
+winget install --id Typst.Typst  <span class="cmt"># Windows</span></pre>
+      </div>
+
+      <p>Convert a .odt file to PDF:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">odtToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { execSync } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+
+<span class="cmt">// Step 1 — convert .odt to Typst markup</span>
+<span class="kw">const</span> typ = <span class="fn">odtToTypst</span>(bytes);
+<span class="fn">writeFileSync</span>(<span class="str">"document.typ"</span>, typ);
+
+<span class="cmt">// Step 2 — compile to PDF</span>
+<span class="fn">execSync</span>(<span class="str">"typst compile document.typ document.pdf"</span>);
+
+<span class="cmt">// document.pdf is ready</span></pre>
+      </div>
+
+      <h2>Parse once, emit to multiple formats</h2>
+      <p>If you already have a parsed <code>OdtDocumentModel</code> — for example from <code>readOdt()</code> — use <code>modelToTypst()</code> directly to avoid re-parsing the file. This is the preferred approach when generating both HTML and PDF from the same document:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { <span class="fn">modelToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { execSync } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+
+<span class="cmt">// Parse once</span>
+<span class="kw">const</span> model = <span class="fn">readOdt</span>(bytes);
+
+<span class="cmt">// Emit to HTML</span>
+<span class="kw">const</span> html = model.<span class="fn">toHtml</span>({ fragment: <span class="kw">true</span> });
+<span class="fn">writeFileSync</span>(<span class="str">"document.html"</span>, html);
+
+<span class="cmt">// Emit to Typst, compile to PDF</span>
+<span class="kw">const</span> typ = <span class="fn">modelToTypst</span>(model);
+<span class="fn">writeFileSync</span>(<span class="str">"document.typ"</span>, typ);
+<span class="fn">execSync</span>(<span class="str">"typst compile document.typ document.pdf"</span>);</pre>
+      </div>
+
+      <h2>What gets converted</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>ODT element</th><th>Typst output</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Headings (levels 1–6)</td><td><code>= H1</code>, <code>== H2</code>, …</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Paragraphs</td><td>Block text with blank-line separation</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Text alignment</td><td><code>#align(center)[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Bold</td><td><code>*text*</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Italic</td><td><code>_text_</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Underline</td><td><code>#underline[text]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Strikethrough</td><td><code>#strike[text]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Superscript / subscript</td><td><code>#super[]</code> / <code>#sub[]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Hyperlinks</td><td><code>#link("url")[text]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Font color</td><td><code>#text(fill: rgb("…"))[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Font size</td><td><code>#text(size: 14pt)[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Font family</td><td><code>#text(font: "…")[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Highlight color</td><td><code>#highlight(fill: rgb("…"))[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Unordered lists</td><td><code>- item</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Ordered lists</td><td><code>+ item</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Nested lists</td><td>Two-space indent per level</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Tables</td><td><code>#table(columns: N, …)</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Table column widths</td><td><code>columns: (5cm, 10cm)</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Footnotes / endnotes</td><td><code>#footnote[…]</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Bookmarks</td><td><code>&lt;label&gt;</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Page number field</td><td><code>#counter(page).display()</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Page count field</td><td><code>#counter(page).final().first()</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Named sections</td><td>Comment header + body</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Tracked changes</td><td><code>#underline[]</code> / <code>#strike[]</code> / transparent</td><td><span class="check">✓</span></td></tr>
+          <tr><td>Page geometry</td><td><code>#set page(width:, height:, margin: (…))</code></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Images</td><td>Comment placeholder (see below)</td><td><span class="partial">Placeholder</span></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Images in the PDF</h2>
+      <p>Typst does not support inline base64 image data without filesystem access. Each image in the source .odt is emitted as a comment placeholder at its document position:</p>
+
+      <div class="code-block">
+        <pre><span class="cmt">/* [image: logo 10cm × 6cm] */</span></pre>
+      </div>
+
+      <p>To include images in the final PDF, extract the image data from the document model and write the files alongside the <code>.typ</code> output before compiling:</p>
+
+      <div class="code-block">
+        <pre><span class="kw">import</span> { <span class="fn">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
+<span class="kw">import</span> { <span class="fn">modelToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { execSync } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+<span class="kw">const</span> model = <span class="fn">readOdt</span>(bytes);
+
+<span class="cmt">// Extract images from the model and write them to disk</span>
+<span class="kw">let</span> typ = <span class="fn">modelToTypst</span>(model);
+<span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> model.body) {
+  <span class="kw">if</span> (node.kind === <span class="str">"paragraph"</span>) {
+    <span class="kw">for</span> (<span class="kw">const</span> span <span class="kw">of</span> node.spans) {
+      <span class="kw">if</span> (<span class="str">"kind"</span> <span class="kw">in</span> span && span.kind === <span class="str">"image"</span> && span.name) {
+        <span class="kw">const</span> ext = (span.mediaType ?? <span class="str">"image/png"</span>).<span class="fn">split</span>(<span class="str">"/"</span>)[<span class="num">1</span>];
+        <span class="kw">const</span> filename = `${span.name}.${ext}`;
+        <span class="fn">writeFileSync</span>(filename, <span class="typ">Buffer</span>.<span class="fn">from</span>(span.data, <span class="str">"base64"</span>));
+        <span class="cmt">// Substitute the placeholder with a real #image() call</span>
+        typ = typ.<span class="fn">replace</span>(
+          `/* [image: ${span.name}`,
+          `#image("${filename}") /* was:`
+        );
+      }
+    }
+  }
+}
+
+<span class="fn">writeFileSync</span>(<span class="str">"document.typ"</span>, typ);
+<span class="fn">execSync</span>(<span class="str">"typst compile document.typ document.pdf"</span>);</pre>
+      </div>
+
+      <h2>Why not shell out to LibreOffice?</h2>
+      <p>LibreOffice headless (<code>libreoffice --headless --convert-to pdf</code>) is the traditional approach. It works, but comes with real costs in production:</p>
+      <ul>
+        <li><strong>Startup time</strong> — LibreOffice takes 2–5 seconds per conversion even for small documents</li>
+        <li><strong>Deployment size</strong> — LibreOffice is several hundred megabytes and dominates Docker image size</li>
+        <li><strong>Serverless incompatibility</strong> — LibreOffice doesn't run on AWS Lambda, Vercel, Cloudflare Workers, or similar environments without significant workarounds</li>
+        <li><strong>Security surface</strong> — spawning a process with filesystem access from your application is a meaningful attack surface</li>
+        <li><strong>Fragility</strong> — headless LibreOffice is notoriously unreliable in containerized environments; fonts, locale, and display settings all affect output</li>
+      </ul>
+      <p>The Typst CLI is a single small binary that starts in milliseconds, produces deterministic output, and runs cleanly in containers. odf-kit's Typst emitter adds zero new JavaScript dependencies.</p>
+
+      <h2>Comparison with other approaches</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Approach</th><th>No LibreOffice</th><th>No subprocess</th><th>Serverless</th><th>npm install</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>odf-kit + Typst CLI</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="partial">Typst only</span></td>
+            <td><span class="check">✓</span> (container)</td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>LibreOffice headless</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span> OS install</td>
+          </tr>
+          <tr>
+            <td>docxtemplater + LibreOffice</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="partial">Partial</span></td>
+          </tr>
+          <tr>
+            <td>Pandoc (ODT → PDF)</td>
+            <td><span class="cross">✗</span> Needs LaTeX</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span> OS install</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Typst CLI installation options</h2>
+
+      <div class="code-block">
+        <pre><span class="cmt"># via npm (works on all platforms)</span>
+npm install -g typst
+
+<span class="cmt"># macOS (Homebrew)</span>
+brew install typst
+
+<span class="cmt"># Windows (winget)</span>
+winget install --id Typst.Typst
+
+<span class="cmt"># Linux (many distros — check repology.org/project/typst)</span>
+sudo apt install typst       <span class="cmt"># Debian/Ubuntu (if available)</span>
+sudo pacman -S typst          <span class="cmt"># Arch Linux</span>
+
+<span class="cmt"># Verify installation</span>
+typst --version</pre>
+      </div>
+
+      <h2>ESM setup</h2>
+      <p><code>odf-kit</code> is ESM-only. Your script must use <code>import</code> syntax. Either add <code>"type": "module"</code> to your <code>package.json</code>, or use a <code>.mjs</code> file extension:</p>
+
+      <div class="code-block">
+        <pre><span class="cmt">// package.json</span>
+{
+  <span class="str">"type"</span>: <span class="str">"module"</span>
+}
+
+<span class="cmt">// convert.mjs — or convert.js with "type": "module" above</span>
+<span class="kw">import</span> { <span class="fn">odtToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { execSync } <span class="kw">from</span> <span class="str">"node:child_process"</span>;
+
+<span class="kw">const</span> [,, input, output] = process.argv;
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(input));
+<span class="fn">writeFileSync</span>(<span class="str">"out.typ"</span>, <span class="fn">odtToTypst</span>(bytes));
+<span class="fn">execSync</span>(`typst compile out.typ ${output}`);</pre>
+      </div>
+
+      <h2>odf-kit does more than convert</h2>
+      <p>The same library that converts .odt files to PDF can also create .odt files from scratch, fill existing templates with data, and read .odt files as structured HTML. One install, one dependency.</p>
+      <ul>
+        <li><a href="odt-to-html-javascript.html">Convert .odt to HTML in JavaScript</a> — extract content for web display</li>
+        <li><a href="fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — design in LibreOffice, fill from code</li>
+        <li><a href="generate-odt-nodejs.html">Generate .odt files in Node.js</a> — build documents from scratch</li>
+        <li><a href="generate-odt-without-libreoffice.html">Generate .odt without LibreOffice</a> — lightweight alternative overview</li>
+      </ul>
+
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Convert your first .odt to PDF</h2>
+      <p>Install odf-kit and the Typst CLI. No LibreOffice required.</p>
+      <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+      <div class="cta-buttons">
+        <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+        <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
