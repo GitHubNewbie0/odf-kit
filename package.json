@@ -1,6 +1,6 @@
 {
   "name": "odf-kit",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Create OpenDocument Format files (.odt, .ods, .odp, .odg) in TypeScript/JavaScript. Works in Node.js and browsers.",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,7 +14,7 @@
       "types": "./dist/reader/index.d.ts",
       "import": "./dist/reader/index.js"
     },
-	"./typst": {
+    "./typst": {
       "types": "./dist/typst/index.d.ts",
       "import": "./dist/typst/index.js"
     }
