@@ -1,35 +1,38 @@
 # odf-kit
 
-Create, fill, read, and convert OpenDocument Format files (.odt) in TypeScript/JavaScript. Build documents from scratch with a clean API, fill existing templates with data, read .odt files into a structured model, or export to Typst for PDF generation. Works in Node.js and browsers. No LibreOffice dependency — just spec-compliant ODF files.
+Generate, fill, read, and convert OpenDocument Format files (.odt) in TypeScript and JavaScript. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
 
-**Four ways to work with .odt files:**
+**[Documentation & examples →](https://githubnewbie0.github.io/odf-kit/)**
+
+```bash
+npm install odf-kit
+```
+
+## Four ways to work with ODT files
 
 ```typescript
-// 1. Build from scratch
+// 1. Build a document from scratch
 import { OdtDocument } from "odf-kit";
 
 const doc = new OdtDocument();
 doc.addHeading("Quarterly Report", 1);
-doc.addParagraph("Revenue exceeded expectations across all divisions.");
+doc.addParagraph("Revenue exceeded expectations.");
 doc.addTable([
   ["Division", "Q4 Revenue", "Growth"],
   ["North", "$2.1M", "+12%"],
   ["South", "$1.8M", "+8%"],
-  ["West", "$3.2M", "+15%"],
-], { border: "0.5pt solid #000000" });
-
+]);
 const bytes = await doc.save();
 ```
 
 ```typescript
-// 2. Fill an existing template
+// 2. Fill an existing .odt template with data
 import { fillTemplate } from "odf-kit";
-import { readFileSync, writeFileSync } from "fs";
 
 const template = readFileSync("invoice-template.odt");
 const result = fillTemplate(template, {
   customer: "Acme Corp",
-  date: "2026-02-23",
+  date: "2026-03-19",
   items: [
     { product: "Widget", qty: 5, price: "$125" },
     { product: "Gadget", qty: 3, price: "$120" },
@@ -41,50 +44,25 @@ writeFileSync("invoice.odt", result);
 ```
 
 ```typescript
-// 3. Read and convert to HTML
+// 3. Read an existing .odt file
 import { readOdt, odtToHtml } from "odf-kit/reader";
-import { readFileSync } from "node:fs";
 
-const bytes = new Uint8Array(readFileSync("document.odt"));
-const html = odtToHtml(bytes, { fragment: true });
-
-// Or parse to a structured document model
-const doc = readOdt(bytes);
-console.log(doc.metadata.title);
-for (const node of doc.body) {
-  if (node.kind === "heading") console.log(`h${node.level}:`, node.spans[0].text);
-}
+const bytes = readFileSync("report.odt");
+const model = readOdt(bytes);              // structured document model
+const html  = odtToHtml(bytes);            // styled HTML string
 ```
 
 ```typescript
-// 4. Export to Typst for PDF generation
-import { odtToTypst, modelToTypst } from "odf-kit/typst";
-import { readFileSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+// 4. Convert .odt to Typst for PDF generation
+import { odtToTypst } from "odf-kit/typst";
+import { execSync } from "child_process";
 
-const bytes = new Uint8Array(readFileSync("document.odt"));
-
-// Convert to Typst markup
-const typ = odtToTypst(bytes);
-writeFileSync("document.typ", typ);
-
-// Compile to PDF with the Typst CLI (installed separately)
-execSync("typst compile document.typ document.pdf");
-
-// Or parse once and emit to multiple formats
-import { readOdt } from "odf-kit/reader";
-const model = readOdt(bytes);
-const html  = model.toHtml({ fragment: true });
-const typst = modelToTypst(model);
+const typst = odtToTypst(readFileSync("letter.odt"));
+writeFileSync("letter.typ", typst);
+execSync("typst compile letter.typ letter.pdf");
 ```
 
-Generated `.odt` files open in LibreOffice, Apache OpenOffice, OnlyOffice, Collabora, Google Docs, Microsoft Office, and any ODF-compliant application.
-
-## Why odf-kit?
-
-**ODF is the ISO standard (ISO/IEC 26300) for documents.** It's the default format for LibreOffice, the standard required by many governments, and the best choice for long-term document preservation. Until now, JavaScript developers had no maintained library for generating proper ODF files.
-
-odf-kit fills that gap with a single runtime dependency, full TypeScript types, and an API designed to feel familiar to anyone who has used a document-generation library.
+---
 
 ## Installation
 
@@ -92,286 +70,57 @@ odf-kit fills that gap with a single runtime dependency, full TypeScript types, 
 npm install odf-kit
 ```
 
-Works in Node.js 22+ and modern browsers. ESM only.
+Node.js 22+ required. ESM only. Three sub-exports:
 
-**Browser** — use any bundler (Vite, webpack, esbuild, Rollup):
-
-```bash
-npm install odf-kit
+```typescript
+import { OdtDocument, fillTemplate } from "odf-kit";          // build + fill
+import { readOdt, odtToHtml }        from "odf-kit/reader";   // read + convert to HTML
+import { odtToTypst, modelToTypst }  from "odf-kit/typst";    // convert to Typst
 ```
 
-```javascript
-import { OdtDocument } from "odf-kit";
-```
+Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. The only runtime dependency is [fflate](https://github.com/101arrowz/fflate) for ZIP packaging — no transitive dependencies.
 
-Your bundler resolves everything automatically — no extra configuration needed.
+---
 
-## Browser Usage
+## Browser usage
 
-odf-kit generates documents entirely client-side. No server required — user data never leaves the browser.
+odf-kit generates and reads documents entirely client-side. No server required.
 
 ```javascript
 import { OdtDocument } from "odf-kit";
 
 const doc = new OdtDocument();
 doc.addHeading("Generated in the Browser", 1);
-doc.addParagraph("This document was created without any server.");
+doc.addParagraph("Created without any server.");
 
 const bytes = await doc.save();
-
-// Trigger download
-const blob = new Blob([bytes], {
-  type: "application/vnd.oasis.opendocument.text",
-});
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url;
+const blob = new Blob([bytes], { type: "application/vnd.oasis.opendocument.text" });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement("a");
+a.href     = url;
 a.download = "document.odt";
 a.click();
 URL.revokeObjectURL(url);
 ```
 
-Template filling works the same way — pass template bytes from a `<input type="file">` or `fetch()`:
+Template filling and reading work the same way — pass `Uint8Array` bytes from a `<input type="file">` or `fetch()`.
 
-```javascript
-import { fillTemplate } from "odf-kit";
+---
 
-// From a file input
-const file = document.getElementById("template-input").files[0];
-const templateBytes = new Uint8Array(await file.arrayBuffer());
+## Build: programmatic document creation
 
-const result = fillTemplate(templateBytes, {
-  name: "Alice",
-  company: "Acme Corp",
-});
-
-// Download the filled document
-const blob = new Blob([result], {
-  type: "application/vnd.oasis.opendocument.text",
-});
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url;
-a.download = "filled.odt";
-a.click();
-URL.revokeObjectURL(url);
-```
-
-## Features
-
-- **Template engine** — fill existing `.odt` templates with `{placeholders}`, loops, conditionals, and nested data
-- **Text** — paragraphs, headings (levels 1–6), bold, italic, underline, strikethrough, superscript, subscript, font size, font family, text color, highlight color
-- **Tables** — column widths, cell borders (per-table, per-cell, per-side), background colors, cell merging (colspan/rowspan), rich text in cells
-- **Page layout** — page size, margins, orientation, headers, footers, page numbers, page breaks
-- **Lists** — bullet lists, numbered lists, nesting up to 6 levels, formatted items
-- **Images** — embedded PNG/JPEG/GIF/SVG/WebP/BMP/TIFF, standalone or inline, configurable sizing and anchoring
-- **Links** — external hyperlinks, internal bookmark links, formatted link text
-- **Bookmarks** — named anchor points for internal navigation
-- **Tab stops** — left, center, right alignment with configurable positions
-- **Read & convert** — parse .odt files into a structured document model; convert to HTML with `odtToHtml()`
-- **Export to Typst** — convert any .odt file to Typst markup with `odtToTypst()`; compile to PDF with the Typst CLI
-
-## Template Engine
-
-Create a `.odt` template in LibreOffice (or any ODF editor) with `{placeholders}` in the text, then fill it with data:
+### Text and formatting
 
 ```typescript
-import { fillTemplate } from "odf-kit";
-import { readFileSync, writeFileSync } from "fs";
+doc.addHeading("Chapter 1", 1);
 
-const template = readFileSync("template.odt");
-const result = fillTemplate(template, {
-  name: "Alice",
-  company: { name: "Acme Corp", address: "123 Main St" },
-});
-writeFileSync("output.odt", result);
-```
-
-### Simple replacement
-
-Use `{tag}` for simple value substitution. Values are automatically XML-escaped.
-
-```
-Dear {name},
-
-Your order #{orderNumber} has been shipped to {address}.
-```
-
-### Dot notation
-
-Access nested objects with `{object.property}`:
-
-```
-Company: {company.name}
-City: {company.address.city}
-```
-
-### Loops
-
-Use `{#tag}...{/tag}` with an array to repeat content:
-
-```
-{#items}
-Product: {product} — Qty: {qty} — Price: {price}
-{/items}
-```
-
-```typescript
-fillTemplate(template, {
-  items: [
-    { product: "Widget", qty: 5, price: "$125" },
-    { product: "Gadget", qty: 3, price: "$120" },
-  ],
-});
-```
-
-Loop items inherit parent data, so you can reference top-level values inside a loop. Item properties override parent properties of the same name.
-
-### Conditionals
-
-Use `{#tag}...{/tag}` with a truthy or falsy value to include or remove content:
-
-```
-{#showDiscount}
-You qualify for a {percent}% discount!
-{/showDiscount}
-```
-
-```typescript
-fillTemplate(template, {
-  showDiscount: true,
-  percent: 10,
-});
-```
-
-Falsy values (`false`, `null`, `undefined`, `0`, `""`, `[]`) remove the section. Truthy values include it.
-
-### Nesting
-
-Loops and conditionals nest freely:
-
-```typescript
-fillTemplate(template, {
-  departments: [
-    {
-      name: "Engineering",
-      members: [
-        { name: "Alice", isLead: true },
-        { name: "Bob", isLead: false },
-      ],
-    },
-    {
-      name: "Design",
-      members: [{ name: "Carol", isLead: false }],
-    },
-  ],
-});
-```
-
-### How it works
-
-LibreOffice often fragments user-typed text like `{name}` across multiple XML elements due to editing history or spell check. odf-kit's template engine handles this automatically with a two-pass pipeline: first it reassembles fragmented placeholders, then it replaces them with your data. Headers and footers in `styles.xml` are processed alongside the document body.
-
-Template syntax follows [Mustache](https://mustache.github.io/) conventions, proven in document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's engine is a clean-room implementation purpose-built for ODF.
-
-## Reading and Converting .odt Files
-
-Import from `odf-kit/reader` to parse existing .odt files:
-
-```typescript
-import { readOdt, odtToHtml } from "odf-kit/reader";
-import { readFileSync } from "node:fs";
-
-const bytes = new Uint8Array(readFileSync("document.odt"));
-
-// One-call HTML conversion
-const html = odtToHtml(bytes, { fragment: true });
-
-// Or access the full document model
-const doc = readOdt(bytes);
-console.log(doc.metadata.title);
-console.log(doc.pageLayout?.orientation);
-
-for (const node of doc.body) {
-  if (node.kind === "heading")   console.log(`h${node.level}:`, node.spans[0].text);
-  if (node.kind === "paragraph") console.log(node.spans.map(s => s.text).join(""));
-  if (node.kind === "table")     console.log(`table: ${node.rows.length} rows`);
-}
-```
-
-The document model covers headings, paragraphs, tables, lists, images, footnotes, bookmarks, text fields, named sections, tracked changes, page layout, and headers/footers.
-
-## Exporting to Typst for PDF Generation
-
-Import from `odf-kit/typst` to convert .odt files to [Typst](https://typst.app/) markup, which can then be compiled to PDF:
-
-```typescript
-import { odtToTypst, modelToTypst } from "odf-kit/typst";
-import { readOdt } from "odf-kit/reader";
-import { readFileSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
-
-const bytes = new Uint8Array(readFileSync("document.odt"));
-
-// Convenience wrapper — parse and emit in one call
-const typ = odtToTypst(bytes);
-writeFileSync("document.typ", typ);
-execSync("typst compile document.typ document.pdf");
-```
-
-Use `modelToTypst()` when you already have a parsed model — parse once, emit to multiple formats without re-reading the file:
-
-```typescript
-const model = readOdt(bytes);
-const html  = model.toHtml({ fragment: true });    // HTML
-const typst = modelToTypst(model);                 // Typst markup
-```
-
-Both functions are zero-dependency pure functions — no filesystem access, no child process, no Typst installation required at import time. `odf-kit/typst` works in Node.js, browsers, Deno, and any other JavaScript environment.
-
-**Installing the Typst CLI** (only needed to compile to PDF):
-
-```bash
-# macOS
-brew install typst
-
-# Windows
-winget install --id Typst.Typst
-
-# Linux / via npm
-npm install -g typst
-```
-
-**Typst coverage:** headings, paragraphs (with text-align), bold, italic, underline, strikethrough, superscript, subscript, hyperlinks, footnotes, bookmarks as labels, text fields (page number, page count), unordered and ordered lists with nesting, tables with column widths, named sections, tracked changes (final/original/changes modes), page geometry via `#set page()`, and SpanStyle character properties (color, size, font family, highlight).
-
-Images are emitted as comment placeholders — Typst does not support inline base64 data without filesystem access. Extract `ImageNode.data` from the model and write image files alongside the `.typ` output, then substitute the placeholders with `#image("filename")` calls.
-
-## Quick Start — Programmatic Creation
-
-### Simple document
-
-```typescript
-import { OdtDocument } from "odf-kit";
-
-const doc = new OdtDocument();
-doc.setMetadata({ title: "My Document", creator: "Jane Doe" });
-doc.addHeading("Introduction", 1);
-doc.addParagraph("This is a simple ODF text document.");
-doc.addParagraph("It opens in LibreOffice, Google Docs, and Microsoft Office.");
-
-const bytes = await doc.save(); // Uint8Array — valid .odt file
-```
-
-### Formatted text
-
-```typescript
 doc.addParagraph((p) => {
   p.addText("This is ");
-  p.addText("bold", { bold: true });
+  p.addText("bold",   { bold: true });
   p.addText(", ");
   p.addText("italic", { italic: true });
   p.addText(", and ");
-  p.addText("red", { color: "red", fontSize: 16 });
+  p.addText("red",    { color: "red", fontSize: 16 });
   p.addText(".");
 });
 
@@ -387,35 +136,33 @@ doc.addParagraph((p) => {
 ### Tables
 
 ```typescript
-// Simple — array of arrays
+// Simple
 doc.addTable([
-  ["Name", "Age", "City"],
-  ["Alice", "30", "Portland"],
-  ["Bob", "25", "Seattle"],
+  ["Name",  "Age", "City"],
+  ["Alice", "30",  "Portland"],
+  ["Bob",   "25",  "Seattle"],
 ]);
 
-// With options
+// With column widths and borders
 doc.addTable([
   ["Product", "Price"],
-  ["Widget", "$9.99"],
+  ["Widget",  "$9.99"],
 ], { columnWidths: ["8cm", "4cm"], border: "0.5pt solid #000000" });
 
 // Full control — builder callback
 doc.addTable((t) => {
   t.addRow((r) => {
-    r.addCell("Name", { bold: true, backgroundColor: "#DDDDDD" });
+    r.addCell("Name",   { bold: true, backgroundColor: "#DDDDDD" });
     r.addCell("Status", { bold: true, backgroundColor: "#DDDDDD" });
   });
   t.addRow((r) => {
-    r.addCell((c) => {
-      c.addText("Project Alpha", { bold: true });
-    });
+    r.addCell((c) => { c.addText("Project Alpha", { bold: true }); });
     r.addCell("Complete", { color: "green" });
   });
 }, { columnWidths: ["8cm", "4cm"] });
 ```
 
-### Page layout
+### Page layout, headers, footers
 
 ```typescript
 doc.setPageLayout({
@@ -430,19 +177,14 @@ doc.setHeader((h) => {
   h.addPageNumber();
 });
 
-doc.setFooter("© 2026 Acme Corp — Page ###"); // ### = page number
+doc.setFooter("© 2026 Acme Corp — Page ###");  // ### = page number
 
-doc.addHeading("Chapter 1", 1);
-doc.addParagraph("First chapter content.");
 doc.addPageBreak();
-doc.addHeading("Chapter 2", 1);
-doc.addParagraph("Second chapter content.");
 ```
 
 ### Lists
 
 ```typescript
-// Simple
 doc.addList(["Apples", "Bananas", "Cherries"]);
 doc.addList(["First", "Second", "Third"], { type: "numbered" });
 
@@ -467,22 +209,16 @@ import { readFile } from "fs/promises";
 
 const logo = await readFile("logo.png");
 
-// Standalone image
-doc.addImage(logo, {
-  width: "10cm",
-  height: "6cm",
-  mimeType: "image/png",
-});
+doc.addImage(logo, { width: "10cm", height: "6cm", mimeType: "image/png" });
 
-// Inline image in text
+// Inline image inside a paragraph
 doc.addParagraph((p) => {
-  p.addText("Company logo: ");
+  p.addText("Logo: ");
   p.addImage(logo, { width: "2cm", height: "1cm", mimeType: "image/png" });
-  p.addText(" — Acme Corp");
 });
 ```
 
-In a browser, get image bytes from `fetch()` or a file input instead of `readFile()`:
+In a browser, use `fetch()` or a file input instead of `readFile()`:
 
 ```javascript
 const response = await fetch("logo.png");
@@ -498,11 +234,9 @@ doc.addParagraph((p) => {
 });
 
 doc.addParagraph((p) => {
-  p.addText("Visit ");
   p.addLink("our website", "https://example.com", { bold: true });
   p.addText(" or go back to the ");
   p.addLink("introduction", "#introduction");
-  p.addText(".");
 });
 ```
 
@@ -510,10 +244,8 @@ doc.addParagraph((p) => {
 
 ```typescript
 doc.addParagraph((p) => {
-  p.addText("Item");
-  p.addTab();
-  p.addText("Qty");
-  p.addTab();
+  p.addText("Item");  p.addTab();
+  p.addText("Qty");   p.addTab();
   p.addText("$100.00");
 }, {
   tabStops: [
@@ -525,8 +257,6 @@ doc.addParagraph((p) => {
 
 ### Method chaining
 
-Every method returns the document, so you can chain calls:
-
 ```typescript
 const bytes = await new OdtDocument()
   .setMetadata({ title: "Report" })
@@ -536,9 +266,156 @@ const bytes = await new OdtDocument()
   .addHeading("Summary", 1)
   .addParagraph("All systems operational.")
   .addTable([["System", "Status"], ["API", "OK"], ["DB", "OK"]])
-  .addList(["No incidents", "No alerts"], { type: "numbered" })
   .save();
 ```
+
+---
+
+## Fill: template engine
+
+Create a `.odt` template in LibreOffice with `{placeholders}`, then fill it programmatically.
+
+### Simple replacement
+
+```
+Dear {name},
+
+Your order #{orderNumber} has shipped to {address}.
+```
+
+### Dot notation
+
+```
+Company: {company.name}
+City: {company.address.city}
+```
+
+### Loops
+
+```
+{#items}
+Product: {product} — Qty: {qty} — Price: {price}
+{/items}
+```
+
+```typescript
+fillTemplate(template, {
+  items: [
+    { product: "Widget", qty: 5, price: "$125" },
+    { product: "Gadget", qty: 3, price: "$120" },
+  ],
+});
+```
+
+### Conditionals
+
+```
+{#showDiscount}
+You qualify for a {percent}% discount!
+{/showDiscount}
+```
+
+Falsy values (`false`, `null`, `undefined`, `0`, `""`, `[]`) remove the block. Truthy values include it. Loops and conditionals nest freely.
+
+### How it works
+
+LibreOffice often fragments typed text like `{name}` across multiple XML elements due to editing history or spell check. odf-kit handles this automatically with a two-pass pipeline: first it reassembles fragmented placeholders, then replaces them with data. Headers and footers in `styles.xml` are processed alongside the document body.
+
+Template syntax follows [Mustache](https://mustache.github.io/) conventions, established for document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's engine is a clean-room implementation built for ODF — no code from either project was used.
+
+---
+
+## Read: ODT document model
+
+`odf-kit/reader` parses `.odt` files into a structured model and renders to HTML.
+
+```typescript
+import { readOdt, odtToHtml } from "odf-kit/reader";
+import { readFileSync } from "fs";
+
+const bytes = readFileSync("report.odt");
+
+// Structured model
+const model = readOdt(bytes);
+console.log(model.body);        // BodyNode[]
+console.log(model.pageLayout);  // PageLayout
+console.log(model.header);      // HeaderFooterContent
+
+// Styled HTML
+const html = odtToHtml(bytes);
+
+// With tracked changes mode
+const final    = odtToHtml(bytes, {}, { trackedChanges: "final" });
+const original = odtToHtml(bytes, {}, { trackedChanges: "original" });
+const marked   = odtToHtml(bytes, {}, { trackedChanges: "changes" });
+```
+
+### What the reader extracts
+
+**Tier 1 — Structure:** paragraphs, headings, tables, lists, images, notes, bookmarks, fields, hyperlinks, tracked changes (all three ODF-defined modes: final/original/changes).
+
+**Tier 2 — Styling:** span styles (bold, italic, font, color, highlight, underline, strikethrough, superscript, subscript), image float/wrap mode, footnotes/endnotes, cell and row background colors, style inheritance and resolution.
+
+**Tier 3 — Layout:** paragraph styles (alignment, margins, padding, line height), table column widths, page geometry (size, margins, orientation), headers and footers (all four zones: default, first page, left/right), sections, tracked change metadata (author, date).
+
+### Document model types
+
+```typescript
+import type {
+  OdtDocumentModel,
+  BodyNode,          // ParagraphNode | HeadingNode | TableNode | ListNode |
+                     // ImageNode | SectionNode | TrackedChangeNode
+  ParagraphNode,
+  HeadingNode,
+  TableNode,
+  ListNode,
+  ImageNode,
+  SectionNode,
+  TrackedChangeNode,
+  InlineNode,        // TextNode | SpanNode | ImageNode | NoteNode |
+                     // BookmarkNode | FieldNode | LinkNode
+  PageLayout,
+  ReadOdtOptions,
+} from "odf-kit/reader";
+```
+
+---
+
+## Typst: ODT to PDF
+
+`odf-kit/typst` converts `.odt` files to [Typst](https://typst.app/) markup for PDF generation. No LibreOffice, no headless browser — just the Typst CLI.
+
+```typescript
+import { odtToTypst, modelToTypst } from "odf-kit/typst";
+import { readFileSync, writeFileSync } from "fs";
+import { execSync } from "child_process";
+
+// Convenience wrapper — ODT bytes → Typst string
+const typst = odtToTypst(readFileSync("letter.odt"));
+writeFileSync("letter.typ", typst);
+execSync("typst compile letter.typ letter.pdf");
+
+// From a model (if you already have one from readOdt)
+import { readOdt } from "odf-kit/reader";
+const model  = readOdt(readFileSync("letter.odt"));
+const typst2 = modelToTypst(model);
+```
+
+Both functions return a plain string — no filesystem access, no CLI dependency, no side effects. You control how the `.typ` file is compiled. Works in any JavaScript environment including browsers.
+
+### Tracked changes in Typst output
+
+```typescript
+import type { TypstEmitOptions } from "odf-kit/typst";
+
+const options: TypstEmitOptions = { trackedChanges: "final" };     // accepted text only
+const options2: TypstEmitOptions = { trackedChanges: "original" }; // before changes
+const options3: TypstEmitOptions = { trackedChanges: "changes" };  // annotated markup
+```
+
+See the [complete ODT to PDF with Typst guide](https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html) for installation, font setup, and real-world examples.
+
+---
 
 ## API Reference
 
@@ -548,15 +425,15 @@ const bytes = await new OdtDocument()
 |--------|-------------|
 | `setMetadata(options)` | Set title, creator, description |
 | `setPageLayout(options)` | Set page size, margins, orientation |
-| `setHeader(content)` | Set page header (string or builder callback) |
-| `setFooter(content)` | Set page footer (string or builder callback) |
-| `addHeading(content, level?)` | Add a heading (string or builder callback, level 1–6) |
-| `addParagraph(content, options?)` | Add a paragraph (string or builder callback) |
-| `addTable(content, options?)` | Add a table (string[][] or builder callback) |
-| `addList(content, options?)` | Add a list (string[] or builder callback) |
-| `addImage(data, options)` | Add a standalone image |
-| `addPageBreak()` | Insert a page break |
-| `save()` | Generate .odt file as `Promise<Uint8Array>` |
+| `setHeader(content)` | Set page header (string or builder) |
+| `setFooter(content)` | Set page footer (string or builder) |
+| `addHeading(content, level?)` | Add heading (level 1–6) |
+| `addParagraph(content, options?)` | Add paragraph (string or builder) |
+| `addTable(content, options?)` | Add table (string[][] or builder) |
+| `addList(content, options?)` | Add list (string[] or builder) |
+| `addImage(data, options)` | Add standalone image |
+| `addPageBreak()` | Insert page break |
+| `save()` | Generate `.odt` as `Promise<Uint8Array>` |
 
 ### fillTemplate
 
@@ -564,111 +441,61 @@ const bytes = await new OdtDocument()
 function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `templateBytes` | `Uint8Array` | Raw bytes of a `.odt` template file |
-| `data` | `TemplateData` | Key-value data for placeholder replacement |
-| **Returns** | `Uint8Array` | A new `.odt` file with all placeholders replaced |
-
-`TemplateData` is `Record<string, unknown>` — any JSON-serializable object.
-
-**Template syntax:**
+`TemplateData` is `Record<string, unknown>` — any JSON-serializable value.
 
 | Syntax | Description |
 |--------|-------------|
-| `{tag}` | Replace with value from data |
+| `{tag}` | Replace with value |
 | `{object.property}` | Dot notation for nested objects |
 | `{#tag}...{/tag}` | Loop (array) or conditional (truthy/falsy) |
 
-### odf-kit/reader
+### readOdt / odtToHtml
 
 ```typescript
-import { readOdt, odtToHtml } from "odf-kit/reader";
-
-// Parse .odt bytes to a structured document model
-readOdt(bytes: Uint8Array, options?: ReadOdtOptions): OdtDocumentModel
-
-// Convert .odt bytes directly to HTML
-odtToHtml(bytes: Uint8Array, options?: HtmlOptions, readOptions?: ReadOdtOptions): string
+function readOdt(bytes: Uint8Array, options?: ReadOdtOptions): OdtDocumentModel
+function odtToHtml(
+  bytes: Uint8Array,
+  htmlOptions?: HtmlOptions,
+  readOptions?: ReadOdtOptions
+): string
 ```
 
-`OdtDocumentModel` provides `body`, `metadata`, `pageLayout`, `header`, `footer`, and a `toHtml()` method. `BodyNode` is a discriminated union: `"paragraph"`, `"heading"`, `"list"`, `"table"`, `"section"`, `"tracked-change"`.
-
-### odf-kit/typst
+### odtToTypst / modelToTypst
 
 ```typescript
-import { modelToTypst, odtToTypst } from "odf-kit/typst";
-
-// Primary function — pure model walker, no re-parsing
-modelToTypst(model: OdtDocumentModel, options?: TypstEmitOptions): string
-
-// Convenience wrapper — readOdt() + modelToTypst() in one call
-odtToTypst(bytes: Uint8Array, options?: TypstEmitOptions & ReadOdtOptions): string
+function odtToTypst(bytes: Uint8Array, options?: TypstEmitOptions): string
+function modelToTypst(model: OdtDocumentModel, options?: TypstEmitOptions): string
 ```
-
-`TypstEmitOptions`:
-
-| Option | Values | Default | Description |
-|--------|--------|---------|-------------|
-| `trackedChanges` | `"final"` \| `"original"` \| `"changes"` | `"final"` | How tracked changes are emitted |
-
-Both functions are zero-dependency pure functions. No filesystem access, no child process, no Typst CLI required at import time.
 
 ### TextFormatting
-
-Accepted by `addText()`, `addLink()`, and `addCell()`:
 
 ```typescript
 {
   bold?: boolean,
   italic?: boolean,
-  fontWeight?: "normal" | "bold",
-  fontStyle?: "normal" | "italic",
-  fontSize?: number | string,       // 12 or "12pt"
-  fontFamily?: string,               // "Arial"
-  color?: string,                    // "#FF0000" or "red"
+  fontSize?: number | string,    // 12 or "12pt"
+  fontFamily?: string,
+  color?: string,                // "#FF0000" or "red"
   underline?: boolean,
   strikethrough?: boolean,
   superscript?: boolean,
   subscript?: boolean,
-  highlightColor?: string,           // "#FFFF00" or "yellow"
+  highlightColor?: string,
 }
 ```
 
-`fontSize` as a number assumes points. Both `{ bold: true }` and `{ fontWeight: "bold" }` work. When both are provided, the explicit property wins.
-
-### ImageOptions
+### TableOptions / CellOptions
 
 ```typescript
+// TableOptions
+{ columnWidths?: string[], border?: string }
+
+// CellOptions (extends TextFormatting)
 {
-  width: string,       // "10cm", "4in" — required
-  height: string,      // "6cm", "3in" — required
-  mimeType: string,    // "image/png", "image/jpeg" — required
-  anchor?: "as-character" | "paragraph",
-}
-```
-
-### TableOptions
-
-```typescript
-{
-  columnWidths?: string[],  // ["5cm", "3cm"]
-  border?: string,          // "0.5pt solid #000000"
-}
-```
-
-### CellOptions
-
-Extends `TextFormatting` with:
-
-```typescript
-{
-  backgroundColor?: string,  // "#EEEEEE" or "lightgray"
+  backgroundColor?: string,
   border?: string,
-  borderTop?: string,
-  borderBottom?: string,
-  borderLeft?: string,
-  borderRight?: string,
+  borderTop?: string, borderBottom?: string,
+  borderLeft?: string, borderRight?: string,
   colSpan?: number,
   rowSpan?: number,
 }
@@ -678,53 +505,105 @@ Extends `TextFormatting` with:
 
 ```typescript
 {
-  width?: string,              // "21cm" (default: A4)
-  height?: string,             // "29.7cm"
+  width?: string,           // "21cm" (A4 default)
+  height?: string,          // "29.7cm"
   orientation?: "portrait" | "landscape",
-  marginTop?: string,          // "2cm" (default)
+  marginTop?: string,       // "2cm" default
   marginBottom?: string,
   marginLeft?: string,
   marginRight?: string,
 }
 ```
 
-## Platform Support
+---
 
-odf-kit works anywhere that supports ES2022 and ESM:
+## Platform support
 
-- **Node.js** 22 and later
-- **Browsers** — Chrome, Firefox, Safari, Edge (all modern versions)
-- **Deno**, **Bun**, **Cloudflare Workers**
+| Platform | Support |
+|----------|---------|
+| Node.js 22+ | ✅ Full |
+| Chrome, Firefox, Safari, Edge | ✅ Full |
+| Deno, Bun | ✅ Full |
+| Cloudflare Workers | ✅ Full |
 
-The library uses only standard JavaScript APIs (`TextEncoder`, `Uint8Array`) plus [fflate](https://github.com/101arrowz/fflate) for ZIP packaging. The TypeScript build enforces this — Node-specific APIs cannot exist in the library source code, guaranteeing cross-platform compatibility.
+ESM only. Zero Node-specific APIs in the library source — enforced at the TypeScript level, guaranteeing cross-platform compatibility.
 
-## Status
+---
 
-**v0.8.0** — Typst emitter: `odf-kit/typst` sub-export with `modelToTypst()` and `odtToTypst()`. Zero new dependencies. 650 tests passing.
+## Why odf-kit?
 
-**v0.7.0** — Tier 3 reader: ParagraphStyle, PageLayout, headers/footers, SectionNode, TrackedChangeNode (final/original/changes modes), image float, table column widths, graphicProps registry. 579 tests.
+**ODF is the ISO standard (ISO/IEC 26300) for documents.** It's the default format for LibreOffice, mandatory for many governments and public sector organisations, and the best choice for long-term document preservation.
 
-**v0.6.0** — Tier 2 reader: SpanStyle (colors, fonts, sizes), ImageNode, NoteNode, BookmarkNode, FieldNode, cell/row styles, registry. 483 tests.
+- **Single runtime dependency** — fflate for ZIP. No transitive dependencies.
+- **Spec-compliant output** — every generated file passes the OASIS ODF validator. Enforced on every commit by CI.
+- **Four complete capability modes** — build, fill, read, convert. Not just generation.
+- **Zero-dependency Typst emitter** — the only JavaScript library with built-in ODT→Typst conversion for PDF generation.
+- **TypeScript-first** — full types across all three sub-exports.
+- **Apache 2.0** — use freely in commercial and open source projects.
 
-**v0.5.2** — Tier 1 reader review: 7 bugs fixed, 11 new tests. ODF validator in CI.
+---
 
-**v0.5.0** — Real-world document testing, generation repair plan (16 gaps fixed), template engine review (7 bugs fixed). 410 tests.
+## Comparison
 
-**v0.3.0** — Template engine with loops, conditionals, dot notation, and automatic placeholder healing. 222 tests passing.
+| Feature | odf-kit | simple-odf | docxtemplater |
+|---------|---------|------------|---------------|
+| Generate .odt from scratch | ✅ | ⚠️ flat XML only | ❌ |
+| Fill .odt templates | ✅ | ❌ | ✅ .docx only |
+| Read .odt files | ✅ | ❌ | ❌ |
+| Convert to HTML | ✅ | ❌ | ❌ |
+| Convert to Typst / PDF | ✅ | ❌ | ❌ |
+| Browser support | ✅ | ❌ | ✅ |
+| Maintained | ✅ | ❌ abandoned 2021 | ✅ |
+| Open source | ✅ Apache 2.0 | ✅ MIT | ⚠️ paid for advanced features |
+
+---
+
+## Specification compliance
+
+odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP packaging (mimetype stored uncompressed as the first entry per spec), manifest, metadata, and all required namespace declarations. The OASIS ODF validator runs on every push via GitHub Actions.
+
+---
+
+## Version history
+
+**v0.8.0** — `odf-kit/typst` sub-export: `odtToTypst()` and `modelToTypst()`. Zero-dependency ODT→Typst emitter for PDF generation via Typst CLI. 650+ tests passing.
+
+**v0.7.0** — Tier 3 reader: paragraph styles, page geometry, headers/footers (all four zones), sections, tracked changes (all three ODF modes). `SectionNode`, `TrackedChangeNode` added to `BodyNode` union.
+
+**v0.6.0** — Tier 2 reader: span styles, image float/wrap, footnotes/endnotes, bookmarks, fields, cell/row styles, full style inheritance.
+
+**v0.5.0** — `odf-kit/reader` sub-export: `readOdt()`, `odtToHtml()`. Tier 1: paragraphs, headings, tables, lists, images, notes, tracked changes.
+
+**v0.4.0** — Generation repair: 16 spec compliance gaps fixed, OASIS ODF validator added to CI.
+
+**v0.3.0** — Template engine: loops, conditionals, dot notation, automatic XML fragment healing.
 
 **v0.2.0** — Migrated to fflate (zero transitive dependencies).
 
-**v0.1.0** — Complete ODT programmatic creation: text, tables, page layout, lists, images, links, bookmarks. 102 tests.
+**v0.1.0** — Programmatic ODT creation: text, tables, page layout, lists, images, links, bookmarks.
 
-ODS (spreadsheets), ODP (presentations), and ODG (drawings) are planned for future releases.
+---
 
-## Specification Compliance
+## Guides
 
-odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP packaging (mimetype stored uncompressed as the first entry), manifest, metadata, and all required namespace declarations. Every generated file is validated against the OASIS ODF validator on every CI push.
+Full walkthroughs and real-world examples on the documentation site:
+
+- [Generate ODT files in Node.js](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-nodejs.html)
+- [Generate ODT files in the browser](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html)
+- [Fill ODT templates in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html)
+- [Convert ODT to HTML in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html)
+- [ODT to PDF via Typst](https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html)
+- [Generate ODT without LibreOffice](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html)
+- [ODF government compliance](https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html)
+- [simple-odf alternative](https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html)
+- [docxtemplater alternative for ODF](https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html)
+- [ODT JavaScript ecosystem](https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html)
+
+---
 
 ## Contributing
 
-Issues and pull requests are welcome at [github.com/GitHubNewbie0/odf-kit](https://github.com/GitHubNewbie0/odf-kit).
+Issues and pull requests welcome at [github.com/GitHubNewbie0/odf-kit](https://github.com/GitHubNewbie0/odf-kit).
 
 ```bash
 git clone https://github.com/GitHubNewbie0/odf-kit.git
@@ -734,9 +613,22 @@ npm run build
 npm test
 ```
 
+Full pipeline before submitting a PR:
+
+```bash
+npm run format:check
+npm run lint
+npm run build
+npm test
+```
+
+---
+
 ## Acknowledgments
 
-Template syntax follows [Mustache](https://mustache.github.io/) conventions, adapted for document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's template engine is a clean-room implementation purpose-built for ODF — no code from either project was used. We credit both projects for establishing the patterns that make document templates intuitive.
+Template syntax follows [Mustache](https://mustache.github.io/) conventions, established for document templating by [docxtemplater](https://docxtemplater.com/). odf-kit's engine is a clean-room implementation purpose-built for ODF — no code from either project was used.
+
+---
 
 ## License
 
