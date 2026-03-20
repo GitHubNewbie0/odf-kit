@@ -598,6 +598,8 @@ Full walkthroughs and real-world examples on the documentation site:
 - [simple-odf alternative](https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html)
 - [docxtemplater alternative for ODF](https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html)
 - [ODT JavaScript ecosystem](https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html)
+- [Free ODT to HTML converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/odt-to-html.html)
+- [Free ODT to PDF converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/odt-to-pdf.html)
 
 ---
 
