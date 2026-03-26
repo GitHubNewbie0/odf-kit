@@ -408,7 +408,14 @@ export function generateContent(
       case "paragraph": {
         const styleName = resolveParagraphStyleName(element, "Standard", paraStyleMap);
         const p = el("text:p").attr("text:style-name", styleName);
-        imageCounter = appendRuns(p, element.runs ?? [], textStyleMap, imageMap, imageCounter, graphicStyleMap);
+        imageCounter = appendRuns(
+          p,
+          element.runs ?? [],
+          textStyleMap,
+          imageMap,
+          imageCounter,
+          graphicStyleMap,
+        );
         textContainer.appendChild(p);
         break;
       }
@@ -421,7 +428,14 @@ export function generateContent(
         const h = el("text:h")
           .attr("text:style-name", styleName)
           .attr("text:outline-level", String(level));
-        imageCounter = appendRuns(h, element.runs ?? [], textStyleMap, imageMap, imageCounter, graphicStyleMap);
+        imageCounter = appendRuns(
+          h,
+          element.runs ?? [],
+          textStyleMap,
+          imageMap,
+          imageCounter,
+          graphicStyleMap,
+        );
         textContainer.appendChild(h);
         break;
       }
@@ -450,7 +464,14 @@ export function generateContent(
         if (element.list) {
           const listName = `L${listCounter}`;
           textContainer.appendChild(
-            buildListElement(listName, element.list, textStyleMap, imageMap, imageCounter, graphicStyleMap),
+            buildListElement(
+              listName,
+              element.list,
+              textStyleMap,
+              imageMap,
+              imageCounter,
+              graphicStyleMap,
+            ),
           );
           imageCounter += countImagesInList(element.list);
           listCounter++;
@@ -782,7 +803,14 @@ function buildTableElement(
 
       // Cell content paragraph
       const p = el("text:p").attr("text:style-name", "Standard");
-      imageCounter = appendRuns(p, cell.runs, textStyleMap, imageMap, imageCounter, graphicStyleMap);
+      imageCounter = appendRuns(
+        p,
+        cell.runs,
+        textStyleMap,
+        imageMap,
+        imageCounter,
+        graphicStyleMap,
+      );
       cellEl.appendChild(p);
 
       rowEl.appendChild(cellEl);
@@ -1306,7 +1334,14 @@ function buildListElement(
 
       // Paragraph with the item text
       const p = el("text:p").attr("text:style-name", paraStyleName);
-      imageCounter = appendRuns(p, item.runs, textStyleMap, imageMap, imageCounter, graphicStyleMap);
+      imageCounter = appendRuns(
+        p,
+        item.runs,
+        textStyleMap,
+        imageMap,
+        imageCounter,
+        graphicStyleMap,
+      );
       itemEl.appendChild(p);
 
       // Nested sub-list (goes inside the same list-item)
