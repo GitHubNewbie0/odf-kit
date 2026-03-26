@@ -136,6 +136,14 @@ export class ParagraphBuilder {
       alt: options.alt,
       description: options.description,
       name: options.name,
+      wrapMode: options.wrapMode,
+      margin: options.margin,
+      marginTop: options.marginTop,
+      marginBottom: options.marginBottom,
+      marginLeft: options.marginLeft,
+      marginRight: options.marginRight,
+      border: options.border,
+      opacity: options.opacity,
     };
     this.runs.push({ text: "", image: imageData });
     return this;

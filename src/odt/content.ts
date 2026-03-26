@@ -140,6 +140,139 @@ function normalizeCellStyle(
   return result;
 }
 
+// ─── Graphic Style ────────────────────────────────────────────────────
+
+/** Normalized graphic frame properties ready for ODF style generation. */
+interface NormalizedGraphicStyle {
+  wrapMode?: "left" | "right" | "none";
+  marginTop?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  marginRight?: string;
+  border?: string;
+  opacity?: number;
+}
+
+/** Generate a stable key for a NormalizedGraphicStyle for deduplication. */
+function graphicStyleKey(gs: NormalizedGraphicStyle): string {
+  const parts: string[] = [];
+  if (gs.wrapMode) parts.push(`wrap:${gs.wrapMode}`);
+  if (gs.marginTop) parts.push(`mt:${gs.marginTop}`);
+  if (gs.marginBottom) parts.push(`mb:${gs.marginBottom}`);
+  if (gs.marginLeft) parts.push(`ml:${gs.marginLeft}`);
+  if (gs.marginRight) parts.push(`mr:${gs.marginRight}`);
+  if (gs.border) parts.push(`border:${gs.border}`);
+  if (gs.opacity !== undefined) parts.push(`opacity:${gs.opacity}`);
+  return parts.join("|");
+}
+
+/** Normalize ImageData graphic properties into a NormalizedGraphicStyle. */
+function normalizeGraphicStyle(image: ImageData): NormalizedGraphicStyle {
+  const result: NormalizedGraphicStyle = {};
+  if (image.wrapMode) result.wrapMode = image.wrapMode;
+  // Side-specific margins override the uniform margin shorthand
+  const margin = image.margin;
+  result.marginTop = image.marginTop ?? margin;
+  result.marginBottom = image.marginBottom ?? margin;
+  result.marginLeft = image.marginLeft ?? margin;
+  result.marginRight = image.marginRight ?? margin;
+  if (image.border) result.border = image.border;
+  if (image.opacity !== undefined) result.opacity = image.opacity;
+  // Clean up undefined values
+  if (!result.marginTop) delete result.marginTop;
+  if (!result.marginBottom) delete result.marginBottom;
+  if (!result.marginLeft) delete result.marginLeft;
+  if (!result.marginRight) delete result.marginRight;
+  return result;
+}
+
+/**
+ * Build a map from graphic style key → [style name, normalized graphic style].
+ * Scans all elements and inline image runs for images that need a graphic style.
+ */
+function buildGraphicStyleMap(
+  elements: ContentElement[],
+): Map<string, [string, NormalizedGraphicStyle]> {
+  const map = new Map<string, [string, NormalizedGraphicStyle]>();
+  let counter = 1;
+
+  function registerImage(image: ImageData): void {
+    const normalized = normalizeGraphicStyle(image);
+    const key = graphicStyleKey(normalized);
+    if (key === "") return;
+    if (!map.has(key)) {
+      map.set(key, [`Gr${counter}`, normalized]);
+      counter++;
+    }
+  }
+
+  function registerRuns(runs: TextRun[]): void {
+    for (const run of runs) {
+      if (run.image) registerImage(run.image);
+    }
+  }
+
+  for (const element of elements) {
+    if (element.type === "image" && element.image) {
+      registerImage(element.image);
+    }
+    if (element.runs) {
+      registerRuns(element.runs);
+    }
+    if (element.type === "table" && element.table) {
+      for (const row of element.table.rows) {
+        for (const cell of row.cells) {
+          registerRuns(cell.runs);
+        }
+      }
+    }
+    if (element.type === "list" && element.list) {
+      for (const item of element.list.items) {
+        registerRuns(item.runs);
+      }
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Build a graphic automatic style element.
+ */
+function buildGraphicStyle(styleName: string, gs: NormalizedGraphicStyle): XmlElement {
+  const style = el("style:style")
+    .attr("style:name", styleName)
+    .attr("style:family", "graphic")
+    .attr("style:parent-style-name", "Graphics");
+
+  const props = el("style:graphic-properties");
+
+  if (gs.wrapMode) {
+    props.attr("style:wrap", gs.wrapMode);
+  }
+  if (gs.marginTop) {
+    props.attr("fo:margin-top", gs.marginTop);
+  }
+  if (gs.marginBottom) {
+    props.attr("fo:margin-bottom", gs.marginBottom);
+  }
+  if (gs.marginLeft) {
+    props.attr("fo:margin-left", gs.marginLeft);
+  }
+  if (gs.marginRight) {
+    props.attr("fo:margin-right", gs.marginRight);
+  }
+  if (gs.border) {
+    props.attr("fo:border", gs.border);
+  }
+  if (gs.opacity !== undefined) {
+    props.attr("draw:opacity", `${gs.opacity}%`);
+  }
+
+  style.appendChild(props);
+  return style;
+}
+
 // ─── Content Generation ──────────────────────────────────────────────
 
 /**
@@ -164,6 +297,9 @@ export function generateContent(
 
   // Collect paragraph styles (alignment, spacing, indentation, tab stops)
   const paraStyleMap = buildParagraphStyleMap(elements);
+
+  // Collect graphic styles (wrapMode, margins, border, opacity)
+  const graphicStyleMap = buildGraphicStyleMap(elements);
 
   // Image counter for draw:name attributes
   let imageCounter = 1;
@@ -232,6 +368,11 @@ export function generateContent(
     autoStyles.appendChild(buildRowStyle(styleName, rs));
   }
 
+  // Graphic styles (Gr1, Gr2, ...)
+  for (const [styleName, gs] of graphicStyleMap.values()) {
+    autoStyles.appendChild(buildGraphicStyle(styleName, gs));
+  }
+
   // List styles (L1, L2, ...)
   let listCounter = 1;
   for (const element of elements) {
@@ -267,7 +408,7 @@ export function generateContent(
       case "paragraph": {
         const styleName = resolveParagraphStyleName(element, "Standard", paraStyleMap);
         const p = el("text:p").attr("text:style-name", styleName);
-        imageCounter = appendRuns(p, element.runs ?? [], textStyleMap, imageMap, imageCounter);
+        imageCounter = appendRuns(p, element.runs ?? [], textStyleMap, imageMap, imageCounter, graphicStyleMap);
         textContainer.appendChild(p);
         break;
       }
@@ -280,7 +421,7 @@ export function generateContent(
         const h = el("text:h")
           .attr("text:style-name", styleName)
           .attr("text:outline-level", String(level));
-        imageCounter = appendRuns(h, element.runs ?? [], textStyleMap, imageMap, imageCounter);
+        imageCounter = appendRuns(h, element.runs ?? [], textStyleMap, imageMap, imageCounter, graphicStyleMap);
         textContainer.appendChild(h);
         break;
       }
@@ -296,6 +437,7 @@ export function generateContent(
               rowStyleMap,
               imageMap,
               imageCounter,
+              graphicStyleMap,
             ),
           );
           // Count images in this table to advance the counter
@@ -308,7 +450,7 @@ export function generateContent(
         if (element.list) {
           const listName = `L${listCounter}`;
           textContainer.appendChild(
-            buildListElement(listName, element.list, textStyleMap, imageMap, imageCounter),
+            buildListElement(listName, element.list, textStyleMap, imageMap, imageCounter, graphicStyleMap),
           );
           imageCounter += countImagesInList(element.list);
           listCounter++;
@@ -322,7 +464,7 @@ export function generateContent(
       case "image": {
         if (element.image && imageMap) {
           const p = el("text:p").attr("text:style-name", "Standard");
-          p.appendChild(buildImageFrame(element.image, imageMap, imageCounter));
+          p.appendChild(buildImageFrame(element.image, imageMap, imageCounter, graphicStyleMap));
           imageCounter++;
           textContainer.appendChild(p);
         }
@@ -549,6 +691,7 @@ function buildTableElement(
   rowStyleMap: Map<string, [string, NormalizedRowStyle]>,
   imageMap?: Map<ImageData, string>,
   imageCounterStart?: number,
+  graphicStyleMap: Map<string, [string, NormalizedGraphicStyle]> = new Map(),
 ): XmlElement {
   let imageCounter = imageCounterStart ?? 1;
 
@@ -639,7 +782,7 @@ function buildTableElement(
 
       // Cell content paragraph
       const p = el("text:p").attr("text:style-name", "Standard");
-      imageCounter = appendRuns(p, cell.runs, textStyleMap, imageMap, imageCounter);
+      imageCounter = appendRuns(p, cell.runs, textStyleMap, imageMap, imageCounter, graphicStyleMap);
       cellEl.appendChild(p);
 
       rowEl.appendChild(cellEl);
@@ -722,6 +865,7 @@ function appendRuns(
   styleMap: Map<string, [string, NormalizedFormatting]>,
   imageMap?: Map<ImageData, string>,
   imageCounter: number = 1,
+  graphicStyleMap: Map<string, [string, NormalizedGraphicStyle]> = new Map(),
 ): number {
   for (const run of runs) {
     // Tab element
@@ -762,7 +906,7 @@ function appendRuns(
     // Image
     if (run.image) {
       if (imageMap) {
-        parent.appendChild(buildImageFrame(run.image, imageMap, imageCounter));
+        parent.appendChild(buildImageFrame(run.image, imageMap, imageCounter, graphicStyleMap));
         imageCounter++;
       }
       continue;
@@ -1138,6 +1282,7 @@ function buildListElement(
   textStyleMap: Map<string, [string, NormalizedFormatting]>,
   imageMap?: Map<ImageData, string>,
   imageCounterStart?: number,
+  graphicStyleMap: Map<string, [string, NormalizedGraphicStyle]> = new Map(),
 ): XmlElement {
   const isBullet = (list.options?.type ?? "bullet") === "bullet";
   const paraStyleName = isBullet ? "List_20_Bullet" : "List_20_Number";
@@ -1161,7 +1306,7 @@ function buildListElement(
 
       // Paragraph with the item text
       const p = el("text:p").attr("text:style-name", paraStyleName);
-      imageCounter = appendRuns(p, item.runs, textStyleMap, imageMap, imageCounter);
+      imageCounter = appendRuns(p, item.runs, textStyleMap, imageMap, imageCounter, graphicStyleMap);
       itemEl.appendChild(p);
 
       // Nested sub-list (goes inside the same list-item)
@@ -1188,6 +1333,7 @@ function buildImageFrame(
   image: ImageData,
   imageMap: Map<ImageData, string>,
   imageCounter: number,
+  graphicStyleMap: Map<string, [string, NormalizedGraphicStyle]>,
 ): XmlElement {
   const imagePath = imageMap.get(image);
   if (!imagePath) {
@@ -1199,6 +1345,15 @@ function buildImageFrame(
     .attr("text:anchor-type", image.anchor)
     .attr("svg:width", image.width)
     .attr("svg:height", image.height);
+
+  // Resolve graphic style name if any graphic properties are set
+  const gsKey = graphicStyleKey(normalizeGraphicStyle(image));
+  if (gsKey !== "") {
+    const entry = graphicStyleMap.get(gsKey);
+    if (entry) {
+      frame.attr("draw:style-name", entry[0]);
+    }
+  }
 
   if (image.alt) {
     frame.appendChild(el("svg:title").text(image.alt));

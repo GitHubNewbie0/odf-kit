@@ -286,6 +286,59 @@ export interface ImageOptions {
    * { name: "formula-1" }
    */
   name?: string;
+
+  /**
+   * How text wraps around the image frame.
+   * - `"left"` — image floats left, text wraps on the right
+   * - `"right"` — image floats right, text wraps on the left
+   * - `"none"` — no text wrap; image sits in its own block
+   *
+   * Requires `anchor: "paragraph"` or `anchor: "page"` to take effect.
+   *
+   * @example
+   * { wrapMode: "left", marginRight: "0.3cm" }
+   */
+  wrapMode?: "left" | "right" | "none";
+
+  /**
+   * Space between the image frame and surrounding text/content.
+   * Accepts values with units (e.g. `"0.3cm"`, `"6pt"`).
+   * Applies to all four sides unless the side-specific properties are used.
+   *
+   * @example
+   * { wrapMode: "left", margin: "0.2cm" }
+   */
+  margin?: string;
+
+  /** Space above the image frame. Overrides `margin` for the top side. */
+  marginTop?: string;
+
+  /** Space below the image frame. Overrides `margin` for the bottom side. */
+  marginBottom?: string;
+
+  /** Space to the left of the image frame. Overrides `margin` for the left side. */
+  marginLeft?: string;
+
+  /** Space to the right of the image frame. Overrides `margin` for the right side. */
+  marginRight?: string;
+
+  /**
+   * Border around the image frame. Uses CSS border shorthand format:
+   * `"<width> <style> <color>"` (e.g. `"0.5pt solid #000000"`).
+   *
+   * @example
+   * { border: "1pt solid #cccccc" }
+   */
+  border?: string;
+
+  /**
+   * Opacity of the image frame as a percentage (0–100).
+   * `100` is fully opaque (default), `0` is fully transparent.
+   *
+   * @example
+   * { opacity: 50 }
+   */
+  opacity?: number;
 }
 
 /**
@@ -315,6 +368,30 @@ export interface ImageData {
 
   /** Override for the draw:name attribute on the frame. */
   name?: string;
+
+  /** Text wrap mode — maps to style:wrap on style:graphic-properties. */
+  wrapMode?: "left" | "right" | "none";
+
+  /** Uniform margin around the frame (all sides). */
+  margin?: string;
+
+  /** Top margin. Overrides margin for the top side. */
+  marginTop?: string;
+
+  /** Bottom margin. Overrides margin for the bottom side. */
+  marginBottom?: string;
+
+  /** Left margin. Overrides margin for the left side. */
+  marginLeft?: string;
+
+  /** Right margin. Overrides margin for the right side. */
+  marginRight?: string;
+
+  /** Border around the frame — CSS shorthand (e.g. "0.5pt solid #000000"). */
+  border?: string;
+
+  /** Opacity as a percentage (0–100). */
+  opacity?: number;
 }
 
 // ─── List Types ──────────────────────────────────────────────────────

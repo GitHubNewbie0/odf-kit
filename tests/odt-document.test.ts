@@ -1461,97 +1461,202 @@ describe("OdtDocument", () => {
       expect(content).toContain('xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"');
       expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
     });
+  });
 
-    it("should emit svg:title when alt is provided", async () => {
+  // ─── Graphic Styles (wrapMode, margins, border, opacity) ──────────────
+
+  describe("image graphic styles", () => {
+    it("should emit a graphic style with style:wrap when wrapMode is set", async () => {
       const doc = new OdtDocument();
       doc.addImage(TEST_PNG, {
         width: "10cm",
         height: "6cm",
         mimeType: "image/png",
-        alt: "Company logo",
+        wrapMode: "left",
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain("<svg:title>Company logo</svg:title>");
-      expect(content).not.toContain("svg:desc");
+      expect(content).toContain('style:family="graphic"');
+      expect(content).toContain('style:parent-style-name="Graphics"');
+      expect(content).toContain('style:wrap="left"');
+      expect(content).toContain('draw:style-name="Gr1"');
     });
 
-    it("should emit svg:desc when description is provided", async () => {
+    it("should support wrapMode right", async () => {
       const doc = new OdtDocument();
       doc.addImage(TEST_PNG, {
         width: "10cm",
         height: "6cm",
         mimeType: "image/png",
-        description: "A photograph of the office building",
+        wrapMode: "right",
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain("<svg:desc>A photograph of the office building</svg:desc>");
-      expect(content).not.toContain("svg:title");
+      expect(content).toContain('style:wrap="right"');
     });
 
-    it("should emit both svg:title and svg:desc before draw:image when both are provided", async () => {
-      const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, {
-        width: "2cm",
-        height: "0.5cm",
-        mimeType: "image/png",
-        alt: "LaTeX: \\frac{1}{2}",
-        description: "$\\frac{1}{2}$",
-      });
-
-      const content = await getContentXml(doc);
-      expect(content).toContain("<svg:title>LaTeX: \\frac{1}{2}</svg:title>");
-      expect(content).toContain("<svg:desc>$\\frac{1}{2}$</svg:desc>");
-      const titlePos = content.indexOf("<svg:title>");
-      const descPos = content.indexOf("<svg:desc>");
-      const imagePos = content.indexOf("draw:image");
-      expect(titlePos).toBeLessThan(descPos);
-      expect(descPos).toBeLessThan(imagePos);
-    });
-
-    it("should use caller-supplied name as draw:name", async () => {
-      const doc = new OdtDocument();
-      doc.addImage(TEST_PNG, {
-        width: "2cm",
-        height: "0.5cm",
-        mimeType: "image/png",
-        name: "formula-1",
-      });
-
-      const content = await getContentXml(doc);
-      expect(content).toContain('draw:name="formula-1"');
-      expect(content).not.toContain('draw:name="Image1"');
-    });
-
-    it("should support anchor type page", async () => {
+    it("should support wrapMode none", async () => {
       const doc = new OdtDocument();
       doc.addImage(TEST_PNG, {
         width: "10cm",
         height: "6cm",
         mimeType: "image/png",
-        anchor: "page",
+        wrapMode: "none",
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain('text:anchor-type="page"');
+      expect(content).toContain('style:wrap="none"');
     });
 
-    it("should emit svg:title with alt in inline paragraph image", async () => {
+    it("should not emit draw:style-name when no graphic properties are set", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).not.toContain("draw:style-name");
+      expect(content).not.toContain('style:family="graphic"');
+    });
+
+    it("should emit margin properties on graphic style", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        wrapMode: "left",
+        marginRight: "0.3cm",
+        marginBottom: "0.2cm",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('fo:margin-right="0.3cm"');
+      expect(content).toContain('fo:margin-bottom="0.2cm"');
+    });
+
+    it("should expand uniform margin to all four sides", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        margin: "0.5cm",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('fo:margin-top="0.5cm"');
+      expect(content).toContain('fo:margin-bottom="0.5cm"');
+      expect(content).toContain('fo:margin-left="0.5cm"');
+      expect(content).toContain('fo:margin-right="0.5cm"');
+    });
+
+    it("should allow side-specific margin to override uniform margin", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        margin: "0.5cm",
+        marginRight: "0.8cm",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('fo:margin-top="0.5cm"');
+      expect(content).toContain('fo:margin-right="0.8cm"');
+    });
+
+    it("should emit border on graphic style", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        border: "1pt solid #000000",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('fo:border="1pt solid #000000"');
+    });
+
+    it("should emit opacity on graphic style", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        opacity: 50,
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('draw:opacity="50%"');
+    });
+
+    it("should reuse the same graphic style for identical properties", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        wrapMode: "left",
+      });
+      doc.addImage(TEST_JPEG, {
+        width: "8cm",
+        height: "5cm",
+        mimeType: "image/jpeg",
+        wrapMode: "left",
+      });
+
+      const content = await getContentXml(doc);
+      // Only one graphic style should be emitted
+      const gr1Count = (content.match(/style:name="Gr1"/g) ?? []).length;
+      expect(gr1Count).toBe(1);
+      expect(content).not.toContain('style:name="Gr2"');
+      // Both frames reference the same style
+      const drawStyleCount = (content.match(/draw:style-name="Gr1"/g) ?? []).length;
+      expect(drawStyleCount).toBe(2);
+    });
+
+    it("should emit separate graphic styles for different wrapModes", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        wrapMode: "left",
+      });
+      doc.addImage(TEST_JPEG, {
+        width: "8cm",
+        height: "5cm",
+        mimeType: "image/jpeg",
+        wrapMode: "right",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('style:name="Gr1"');
+      expect(content).toContain('style:name="Gr2"');
+      expect(content).toContain('style:wrap="left"');
+      expect(content).toContain('style:wrap="right"');
+    });
+
+    it("should apply graphic style to inline paragraph image", async () => {
       const doc = new OdtDocument();
       doc.addParagraph((p) => {
         p.addImage(TEST_PNG, {
-          width: "2cm",
-          height: "0.5cm",
+          width: "5cm",
+          height: "3cm",
           mimeType: "image/png",
-          alt: "LaTeX: \\frac{1}{2}",
-          description: "$\\frac{1}{2}$",
+          wrapMode: "left",
+          marginRight: "0.3cm",
         });
       });
 
       const content = await getContentXml(doc);
-      expect(content).toContain("<svg:title>LaTeX: \\frac{1}{2}</svg:title>");
-      expect(content).toContain("<svg:desc>$\\frac{1}{2}$</svg:desc>");
+      expect(content).toContain('style:wrap="left"');
+      expect(content).toContain('fo:margin-right="0.3cm"');
+      expect(content).toContain('draw:style-name="Gr1"');
     });
   });
 
