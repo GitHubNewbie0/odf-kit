@@ -1461,6 +1461,98 @@ describe("OdtDocument", () => {
       expect(content).toContain('xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"');
       expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
     });
+
+    it("should emit svg:title when alt is provided", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        alt: "Company logo",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain("<svg:title>Company logo</svg:title>");
+      expect(content).not.toContain("svg:desc");
+    });
+
+    it("should emit svg:desc when description is provided", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        description: "A photograph of the office building",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain("<svg:desc>A photograph of the office building</svg:desc>");
+      expect(content).not.toContain("svg:title");
+    });
+
+    it("should emit both svg:title and svg:desc before draw:image when both are provided", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "2cm",
+        height: "0.5cm",
+        mimeType: "image/png",
+        alt: "LaTeX: \\frac{1}{2}",
+        description: "$\\frac{1}{2}$",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain("<svg:title>LaTeX: \\frac{1}{2}</svg:title>");
+      expect(content).toContain("<svg:desc>$\\frac{1}{2}$</svg:desc>");
+      const titlePos = content.indexOf("<svg:title>");
+      const descPos = content.indexOf("<svg:desc>");
+      const imagePos = content.indexOf("draw:image");
+      expect(titlePos).toBeLessThan(descPos);
+      expect(descPos).toBeLessThan(imagePos);
+    });
+
+    it("should use caller-supplied name as draw:name", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "2cm",
+        height: "0.5cm",
+        mimeType: "image/png",
+        name: "formula-1",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('draw:name="formula-1"');
+      expect(content).not.toContain('draw:name="Image1"');
+    });
+
+    it("should support anchor type page", async () => {
+      const doc = new OdtDocument();
+      doc.addImage(TEST_PNG, {
+        width: "10cm",
+        height: "6cm",
+        mimeType: "image/png",
+        anchor: "page",
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain('text:anchor-type="page"');
+    });
+
+    it("should emit svg:title with alt in inline paragraph image", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph((p) => {
+        p.addImage(TEST_PNG, {
+          width: "2cm",
+          height: "0.5cm",
+          mimeType: "image/png",
+          alt: "LaTeX: \\frac{1}{2}",
+          description: "$\\frac{1}{2}$",
+        });
+      });
+
+      const content = await getContentXml(doc);
+      expect(content).toContain("<svg:title>LaTeX: \\frac{1}{2}</svg:title>");
+      expect(content).toContain("<svg:desc>$\\frac{1}{2}$</svg:desc>");
+    });
   });
 
   // ─── Repair Plan: Generation Side Fixes ─────────────────────────────

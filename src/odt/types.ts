@@ -253,8 +253,39 @@ export interface ImageOptions {
    * How the image is anchored in the document.
    * - `"as-character"` — inline with text (default for images inside paragraphs)
    * - `"paragraph"` — anchored to the paragraph (default for standalone `addImage()`)
+   * - `"page"` — anchored to the page (positioned relative to the page)
    */
-  anchor?: "as-character" | "paragraph";
+  anchor?: "as-character" | "paragraph" | "page";
+
+  /**
+   * Accessible label for the image. Maps to `<svg:title>` inside the draw frame.
+   * Used by screen readers and accessibility tools.
+   *
+   * @example
+   * { alt: "Company logo" }
+   * { alt: "LaTeX: \\frac{1}{2}" }
+   */
+  alt?: string;
+
+  /**
+   * Detailed description of the image content. Maps to `<svg:desc>` inside
+   * the draw frame. Useful for preserving metadata such as LaTeX source,
+   * formula text, or extended captions for round-trip editing.
+   *
+   * @example
+   * { description: "$\\frac{1}{2}$" }
+   */
+  description?: string;
+
+  /**
+   * Override the auto-generated frame name. Maps to `draw:name` on the
+   * draw frame. Useful when stable, predictable names are needed for
+   * round-trip editing or LibreOffice extension integration.
+   *
+   * @example
+   * { name: "formula-1" }
+   */
+  name?: string;
 }
 
 /**
@@ -274,7 +305,16 @@ export interface ImageData {
   mimeType: string;
 
   /** Anchor type. */
-  anchor: "as-character" | "paragraph";
+  anchor: "as-character" | "paragraph" | "page";
+
+  /** Accessible label — maps to `<svg:title>`. */
+  alt?: string;
+
+  /** Detailed description — maps to `<svg:desc>`. */
+  description?: string;
+
+  /** Override for the draw:name attribute on the frame. */
+  name?: string;
 }
 
 // ─── List Types ──────────────────────────────────────────────────────

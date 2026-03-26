@@ -363,6 +363,9 @@ export class OdtDocument {
       height: options.height,
       mimeType: options.mimeType,
       anchor: options.anchor ?? "paragraph",
+      alt: options.alt,
+      description: options.description,
+      name: options.name,
     };
     this.elements.push({
       type: "image",

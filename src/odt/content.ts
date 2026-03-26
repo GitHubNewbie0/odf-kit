@@ -1195,10 +1195,17 @@ function buildImageFrame(
   }
 
   const frame = el("draw:frame")
-    .attr("draw:name", `Image${imageCounter}`)
+    .attr("draw:name", image.name ?? `Image${imageCounter}`)
     .attr("text:anchor-type", image.anchor)
     .attr("svg:width", image.width)
     .attr("svg:height", image.height);
+
+  if (image.alt) {
+    frame.appendChild(el("svg:title").text(image.alt));
+  }
+  if (image.description) {
+    frame.appendChild(el("svg:desc").text(image.description));
+  }
 
   const drawImage = el("draw:image")
     .attr("xlink:href", imagePath)

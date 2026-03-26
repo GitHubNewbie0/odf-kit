@@ -133,6 +133,9 @@ export class ParagraphBuilder {
       height: options.height,
       mimeType: options.mimeType,
       anchor: options.anchor ?? "as-character",
+      alt: options.alt,
+      description: options.description,
+      name: options.name,
     };
     this.runs.push({ text: "", image: imageData });
     return this;
