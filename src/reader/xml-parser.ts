@@ -41,16 +41,28 @@ export type XmlNode = XmlElementNode | XmlTextNode;
  * always receive plain character strings, never entity references.
  */
 function decodeEntities(raw: string): string {
-  return (
-    raw
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'")
-      // Numeric character references: decimal (&#160;) and hex (&#xA0;)
-      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-      .replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+  // Single-pass replacement prevents any decoded character from being
+  // processed a second time (e.g. &amp;lt; → &lt; → <).
+  return raw.replace(
+    /&(?:amp|lt|gt|quot|apos);|&#x([0-9a-fA-F]+);|&#([0-9]+);/g,
+    (entity, hex, dec) => {
+      if (hex !== undefined) return String.fromCodePoint(parseInt(hex, 16));
+      if (dec !== undefined) return String.fromCodePoint(parseInt(dec, 10));
+      switch (entity) {
+        case "&amp;":
+          return "&";
+        case "&lt;":
+          return "<";
+        case "&gt;":
+          return ">";
+        case "&quot;":
+          return '"';
+        case "&apos;":
+          return "'";
+        default:
+          return entity;
+      }
+    },
   );
 }
 
