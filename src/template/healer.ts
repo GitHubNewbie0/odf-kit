@@ -145,7 +145,7 @@ function removeEmptySpans(xml: string): string {
   let prev: string;
   do {
     prev = result;
-    result = result.replace(/<text:span(?:\s[^>]*)?>(?:<\/text:span>)/g, "");
+    result = result.replace(/<text:span(?:\s+[^>]*)?>(?:<\/text:span>)/g, "");
   } while (result !== prev);
   return result;
 }

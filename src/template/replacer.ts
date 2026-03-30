@@ -243,7 +243,7 @@ function replaceSimple(xml: string, data: TemplateData): string {
  * Remove empty <text:span ...></text:span> pairs from an XML string.
  */
 function removeEmptySpans(xml: string): string {
-  return xml.replace(/<text:span(?:\s[^>]*)?>(?:<\/text:span>)/g, "");
+  return xml.replace(/<text:span(?:\s+[^>]*)?>(?:<\/text:span>)/g, "");
 }
 
 /**
