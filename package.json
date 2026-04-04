@@ -14,6 +14,10 @@
       "types": "./dist/odt/index.d.ts",
       "import": "./dist/odt/index.js"
     },
+    "./ods": {
+      "types": "./dist/ods/index.d.ts",
+      "import": "./dist/ods/index.js"
+    },
     "./template": {
       "types": "./dist/template/index.d.ts",
       "import": "./dist/template/index.js"
