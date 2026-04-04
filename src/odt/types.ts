@@ -139,6 +139,13 @@ export interface TextRun {
    * The `text` property is ignored.
    */
   image?: ImageData;
+
+  /**
+   * If true, inserts a line break (`text:line-break`) at this position.
+   * Equivalent to `<br>` in HTML — a soft line break within the same paragraph.
+   * The `text` property is ignored.
+   */
+  lineBreak?: boolean;
 }
 
 // ─── Paragraph Options ───────────────────────────────────────────────
@@ -224,6 +231,13 @@ export interface ParagraphOptions {
    * Tab stops for this paragraph. Used with `addTab()` in the paragraph builder.
    */
   tabStops?: TabStop[];
+
+  /**
+   * Border on the bottom edge of the paragraph. Uses CSS border shorthand:
+   * `"<width> <style> <color>"` (e.g. `"0.5pt solid #000000"`).
+   * Used to render horizontal rules (`<hr>`) in HTML→ODT conversion.
+   */
+  borderBottom?: string;
 }
 
 // ─── Image Types ────────────────────────────────────────────────────

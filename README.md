@@ -1,6 +1,6 @@
 # odf-kit
 
-Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
+Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Convert HTML to ODT. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
 
 **[Documentation & examples →](https://githubnewbie0.github.io/odf-kit/)**
 
@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Five ways to work with ODF files
+## Six ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -26,7 +26,22 @@ const bytes = await doc.save();
 ```
 
 ```typescript
-// 2. Build an ODS spreadsheet from scratch
+// 2. Convert HTML to ODT
+import { htmlToOdt } from "odf-kit";
+
+const html = `
+  <h1>Meeting Notes</h1>
+  <p>Attendees: <strong>Alice</strong>, Bob, Carol</p>
+  <ul>
+    <li>Project status</li>
+    <li>Budget review</li>
+  </ul>
+`;
+const bytes = await htmlToOdt(html, { pageFormat: "A4" });
+```
+
+```typescript
+// 3. Build an ODS spreadsheet from scratch
 import { OdsDocument } from "odf-kit";
 
 const doc = new OdsDocument();
@@ -41,7 +56,7 @@ const bytes = await doc.save();
 ```
 
 ```typescript
-// 3. Fill an existing .odt template with data
+// 4. Fill an existing .odt template with data
 import { fillTemplate } from "odf-kit";
 
 const template = readFileSync("invoice-template.odt");
@@ -59,7 +74,7 @@ writeFileSync("invoice.odt", result);
 ```
 
 ```typescript
-// 4. Read an existing .odt file
+// 5. Read an existing .odt file
 import { readOdt, odtToHtml } from "odf-kit/reader";
 
 const bytes = readFileSync("report.odt");
@@ -68,7 +83,7 @@ const html  = odtToHtml(bytes);            // styled HTML string
 ```
 
 ```typescript
-// 5. Convert .odt to Typst for PDF generation
+// 6. Convert .odt to Typst for PDF generation
 import { odtToTypst } from "odf-kit/typst";
 import { execSync } from "child_process";
 
@@ -88,9 +103,9 @@ npm install odf-kit
 Node.js 22+ required. ESM only. Sub-exports:
 
 ```typescript
-import { OdtDocument, OdsDocument, fillTemplate } from "odf-kit";   // build + fill
-import { readOdt, odtToHtml }                     from "odf-kit/reader"; // read + HTML
-import { odtToTypst, modelToTypst }               from "odf-kit/typst";  // Typst/PDF
+import { OdtDocument, OdsDocument, htmlToOdt, fillTemplate } from "odf-kit"; // build + convert + fill
+import { readOdt, odtToHtml }                                from "odf-kit/reader"; // read + HTML
+import { odtToTypst, modelToTypst }                          from "odf-kit/typst";  // Typst/PDF
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. The only runtime dependency is [fflate](https://github.com/101arrowz/fflate) for ZIP packaging — no transitive dependencies.
@@ -374,6 +389,74 @@ const bytes = await doc.save();
 
 ---
 
+## Convert: HTML to ODT
+
+`htmlToOdt()` converts an HTML string to a `.odt` file. This is the missing conversion direction — the entire industry converts ODT→HTML for web display. `htmlToOdt` brings content back into the open standard with no LibreOffice, no Pandoc, and no server-side dependencies.
+
+The primary use case is Nextcloud Text ODT export: Nextcloud Text produces clean, well-formed HTML that maps directly to ODT elements.
+
+### Basic usage
+
+```typescript
+import { htmlToOdt } from "odf-kit";
+
+const html = `
+  <h1>Meeting Notes</h1>
+  <p>Attendees: <strong>Alice</strong>, Bob, Carol</p>
+  <h2>Action Items</h2>
+  <table>
+    <tr><th>Owner</th><th>Task</th><th>Due</th></tr>
+    <tr><td>Alice</td><td>Send report</td><td>Friday</td></tr>
+  </table>
+`;
+
+// A4 is the default — correct for Europe and most of the world
+const bytes = await htmlToOdt(html);
+
+// US letter
+const bytes = await htmlToOdt(html, { pageFormat: "letter" });
+```
+
+Both fragment HTML (`<h1>...</h1><p>...</p>`) and full documents (`<html><body>...</body></html>`) are accepted.
+
+### Page formats
+
+| Format | Dimensions | Default margins | Typical use |
+|---|---|---|---|
+| `"A4"` | 21 × 29.7 cm | 2.5 cm | Europe, ISO standard **(default)** |
+| `"letter"` | 21.59 × 27.94 cm | 2.54 cm | USA, Canada |
+| `"legal"` | 21.59 × 35.56 cm | 2.54 cm | USA legal |
+| `"A3"` | 29.7 × 42 cm | 2.5 cm | Large format |
+| `"A5"` | 14.8 × 21 cm | 2 cm | Small booklets |
+
+```typescript
+// Landscape with custom margins
+const bytes = await htmlToOdt(html, {
+  pageFormat: "A4",
+  orientation: "landscape",
+  marginTop: "1.5cm",
+  marginBottom: "1.5cm",
+});
+
+// With metadata
+const bytes = await htmlToOdt(html, {
+  pageFormat: "letter",
+  metadata: { title: "Meeting Notes", creator: "Alice" },
+});
+```
+
+### Supported HTML elements
+
+**Block:** `<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>` (nested lists supported), `<table>` / `<thead>` / `<tbody>` / `<tr>` / `<td>` / `<th>`, `<blockquote>` (indented), `<pre>` (monospace), `<hr>` (paragraph with bottom border), `<figure>` / `<figcaption>`, `<div>` / `<section>` / `<article>` / `<main>` (transparent).
+
+**Inline:** `<strong>` / `<b>`, `<em>` / `<i>`, `<u>`, `<s>` / `<del>`, `<sup>`, `<sub>`, `<a href>`, `<code>` (monospace), `<mark>` (highlight), `<span style="">` (inline CSS), `<br>` (line break).
+
+**Inline CSS on `<span>`:** `color`, `font-size` (px/pt/em), `font-family`, `font-weight`, `font-style`, `text-decoration`.
+
+**Images:** skipped in v1 — v2 will add an `images` option for pre-fetched bytes.
+
+---
+
 ## Fill: template engine
 
 Create a `.odt` template in LibreOffice with `{placeholders}`, then fill it programmatically.
@@ -573,6 +656,22 @@ interface OdsCellObject extends OdsCellOptions {
 }
 ```
 
+### htmlToOdt
+
+```typescript
+function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promise<Uint8Array>
+
+interface HtmlToOdtOptions {
+  pageFormat?: "A4" | "letter" | "legal" | "A3" | "A5"; // default: "A4"
+  orientation?: "portrait" | "landscape";
+  marginTop?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  marginRight?: string;
+  metadata?: { title?: string; creator?: string; description?: string };
+}
+```
+
 ### fillTemplate
 
 ```typescript
@@ -675,7 +774,8 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 - **Single runtime dependency** — fflate for ZIP. No transitive dependencies.
 - **Spec-compliant output** — every generated file passes the OASIS ODF validator. Enforced on every commit by CI.
 - **Multiple ODF formats** — ODT documents and ODS spreadsheets from the same library.
-- **Five complete capability modes** — build ODT, build ODS, fill templates, read, convert. Not just generation.
+- **Six complete capability modes** — build ODT, build ODS, convert HTML→ODT, fill templates, read, convert to Typst/PDF. Not just generation.
+- **HTML→ODT conversion** — the missing direction. Bring web content back into the ISO open standard with no LibreOffice or Pandoc dependency.
 - **Zero-dependency Typst emitter** — the only JavaScript library with built-in ODT→Typst conversion for PDF generation.
 - **TypeScript-first** — full types across all sub-exports.
 - **Apache 2.0** — use freely in commercial and open source projects.
@@ -688,6 +788,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 |---------|---------|------------|---------------|
 | Generate .odt from scratch | ✅ | ⚠️ flat XML only | ❌ |
 | Generate .ods from scratch | ✅ | ❌ | ❌ |
+| Convert HTML → ODT | ✅ | ❌ | ❌ |
 | Fill .odt templates | ✅ | ❌ | ✅ .docx only |
 | Read .odt files | ✅ | ❌ | ❌ |
 | Convert to HTML | ✅ | ❌ | ❌ |
@@ -705,6 +806,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.9.2** — `htmlToOdt()`: HTML→ODT conversion with page format presets (A4/letter/legal/A3/A5), full inline formatting, lists, tables, blockquote, pre, hr, and inline CSS. `addLineBreak()` on `ParagraphBuilder`. `borderBottom` on `ParagraphOptions`. 769 tests passing.
 
 **v0.9.0** — ODS spreadsheet generation: `OdsDocument`, multiple sheets, auto-typed cells, formulas, date formatting (ISO/DMY/MDY), row and cell formatting, column widths, row heights, style deduplication. 707 tests passing.
 

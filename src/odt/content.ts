@@ -896,6 +896,12 @@ function appendRuns(
   graphicStyleMap: Map<string, [string, NormalizedGraphicStyle]> = new Map(),
 ): number {
   for (const run of runs) {
+    // Line break
+    if (run.lineBreak) {
+      parent.appendChild(el("text:line-break"));
+      continue;
+    }
+
     // Tab element
     if (run.field === "tab") {
       parent.appendChild(el("text:tab"));
@@ -1071,6 +1077,7 @@ function hasParagraphOptions(opts: ParagraphOptions | undefined): boolean {
     opts.lineHeight !== undefined ||
     opts.indentLeft ||
     opts.indentFirst ||
+    opts.borderBottom ||
     (opts.tabStops && opts.tabStops.length > 0)
   );
 }
@@ -1088,6 +1095,7 @@ function paragraphOptionsKey(opts: ParagraphOptions): string {
   if (opts.lineHeight !== undefined) parts.push(`lh:${opts.lineHeight}`);
   if (opts.indentLeft) parts.push(`il:${opts.indentLeft}`);
   if (opts.indentFirst) parts.push(`if:${opts.indentFirst}`);
+  if (opts.borderBottom) parts.push(`bdb:${opts.borderBottom}`);
   if (opts.tabStops && opts.tabStops.length > 0) {
     parts.push(`ts:${tabStopsKey(opts.tabStops)}`);
   }
@@ -1182,6 +1190,10 @@ function buildParagraphStyle(
   }
   if (opts.indentFirst) {
     paraProps.attr("fo:text-indent", opts.indentFirst);
+    hasParaProps = true;
+  }
+  if (opts.borderBottom) {
+    paraProps.attr("fo:border-bottom", opts.borderBottom);
     hasParaProps = true;
   }
   if (opts.tabStops && opts.tabStops.length > 0) {

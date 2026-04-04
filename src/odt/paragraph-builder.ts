@@ -148,4 +148,25 @@ export class ParagraphBuilder {
     this.runs.push({ text: "", image: imageData });
     return this;
   }
+
+  /**
+   * Insert a line break at the current position.
+   *
+   * Equivalent to `<br>` in HTML — a soft line break within the same paragraph.
+   * The word processor renders subsequent text on the next line without starting
+   * a new paragraph.
+   *
+   * @returns This builder, for chaining.
+   *
+   * @example
+   * doc.addParagraph((p) => {
+   *   p.addText("Line one");
+   *   p.addLineBreak();
+   *   p.addText("Line two");
+   * });
+   */
+  addLineBreak(): this {
+    this.runs.push({ text: "", lineBreak: true });
+    return this;
+  }
 }

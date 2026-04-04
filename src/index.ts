@@ -6,6 +6,7 @@ export { ParagraphBuilder } from "./odt/index.js";
 export { HeaderFooterBuilder } from "./odt/index.js";
 export { TableBuilder, RowBuilder, CellBuilder } from "./odt/index.js";
 export { ListBuilder } from "./odt/index.js";
+export { htmlToOdt } from "./odt/index.js";
 export type {
   ContentElement,
   TextFormatting,
@@ -18,6 +19,7 @@ export type {
   ListOptions,
   ImageOptions,
   ImageData,
+  HtmlToOdtOptions,
 } from "./odt/index.js";
 export type { MetadataOptions } from "./core/index.js";
 export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
