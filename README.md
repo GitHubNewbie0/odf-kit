@@ -1,6 +1,6 @@
 # odf-kit
 
-Generate, fill, read, and convert OpenDocument Format files (.odt) in TypeScript and JavaScript. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
+Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
 
 **[Documentation & examples →](https://githubnewbie0.github.io/odf-kit/)**
 
@@ -8,10 +8,10 @@ Generate, fill, read, and convert OpenDocument Format files (.odt) in TypeScript
 npm install odf-kit
 ```
 
-## Four ways to work with ODT files
+## Five ways to work with ODF files
 
 ```typescript
-// 1. Build a document from scratch
+// 1. Build an ODT document from scratch
 import { OdtDocument } from "odf-kit";
 
 const doc = new OdtDocument();
@@ -26,7 +26,22 @@ const bytes = await doc.save();
 ```
 
 ```typescript
-// 2. Fill an existing .odt template with data
+// 2. Build an ODS spreadsheet from scratch
+import { OdsDocument } from "odf-kit";
+
+const doc = new OdsDocument();
+const sheet = doc.addSheet("Sales");
+sheet.addRow(["Month", "Revenue", "Growth"], { bold: true, backgroundColor: "#DDDDDD" });
+sheet.addRow(["January", 12500, 0.08]);
+sheet.addRow(["February", 14200, 0.136]);
+sheet.addRow(["Total", { value: "=SUM(B2:B3)", type: "formula" }]);
+sheet.setColumnWidth(0, "4cm");
+sheet.setColumnWidth(1, "4cm");
+const bytes = await doc.save();
+```
+
+```typescript
+// 3. Fill an existing .odt template with data
 import { fillTemplate } from "odf-kit";
 
 const template = readFileSync("invoice-template.odt");
@@ -44,7 +59,7 @@ writeFileSync("invoice.odt", result);
 ```
 
 ```typescript
-// 3. Read an existing .odt file
+// 4. Read an existing .odt file
 import { readOdt, odtToHtml } from "odf-kit/reader";
 
 const bytes = readFileSync("report.odt");
@@ -53,7 +68,7 @@ const html  = odtToHtml(bytes);            // styled HTML string
 ```
 
 ```typescript
-// 4. Convert .odt to Typst for PDF generation
+// 5. Convert .odt to Typst for PDF generation
 import { odtToTypst } from "odf-kit/typst";
 import { execSync } from "child_process";
 
@@ -70,12 +85,12 @@ execSync("typst compile letter.typ letter.pdf");
 npm install odf-kit
 ```
 
-Node.js 22+ required. ESM only. Three sub-exports:
+Node.js 22+ required. ESM only. Sub-exports:
 
 ```typescript
-import { OdtDocument, fillTemplate } from "odf-kit";          // build + fill
-import { readOdt, odtToHtml }        from "odf-kit/reader";   // read + convert to HTML
-import { odtToTypst, modelToTypst }  from "odf-kit/typst";    // convert to Typst
+import { OdtDocument, OdsDocument, fillTemplate } from "odf-kit";   // build + fill
+import { readOdt, odtToHtml }                     from "odf-kit/reader"; // read + HTML
+import { odtToTypst, modelToTypst }               from "odf-kit/typst";  // Typst/PDF
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. The only runtime dependency is [fflate](https://github.com/101arrowz/fflate) for ZIP packaging — no transitive dependencies.
@@ -107,7 +122,7 @@ Template filling and reading work the same way — pass `Uint8Array` bytes from 
 
 ---
 
-## Build: programmatic document creation
+## Build: ODT documents
 
 ### Text and formatting
 
@@ -267,6 +282,94 @@ const bytes = await new OdtDocument()
   .addParagraph("All systems operational.")
   .addTable([["System", "Status"], ["API", "OK"], ["DB", "OK"]])
   .save();
+```
+
+---
+
+## Build: ODS spreadsheets
+
+`OdsDocument` generates `.ods` spreadsheet files with multiple sheets, typed cells, formatting, and formulas.
+
+### Cell types
+
+Values are auto-typed from their JavaScript type. Use an explicit `OdsCellObject` when you need formulas or per-cell overrides.
+
+```typescript
+import { OdsDocument } from "odf-kit";
+
+const doc = new OdsDocument();
+const sheet = doc.addSheet("Data");
+
+sheet.addRow([
+  "Text",             // string
+  42,                 // float
+  new Date("2026-01-15"),  // date
+  true,               // boolean
+  null,               // empty cell
+  { value: "=SUM(B1:B10)", type: "formula" },  // formula — explicit required
+]);
+```
+
+### Row and cell formatting
+
+Options on `addRow()` apply to all cells in the row. Per-cell options inside an `OdsCellObject` override the row defaults.
+
+```typescript
+// Bold header row with background
+sheet.addRow(["Month", "Revenue", "Notes"], {
+  bold: true,
+  backgroundColor: "#DDDDDD",
+  align: "center",
+});
+
+// Mixed: row default + per-cell override
+sheet.addRow([
+  "January",
+  { value: 12500, type: "float", color: "#006600" },  // green text on this cell only
+  "On track",
+], { italic: true });
+```
+
+Available formatting options: `bold`, `italic`, `fontSize`, `fontFamily`, `color`, `underline`, `backgroundColor`, `border`, `borderTop/Bottom/Left/Right`, `align`, `verticalAlign`, `padding`, `wrap`.
+
+### Date formatting
+
+```typescript
+// Document-level default
+doc.setDateFormat("DD/MM/YYYY");  // "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY"
+
+// Per-row or per-cell override
+sheet.addRow([{ value: new Date("2026-12-25"), type: "date", dateFormat: "MM/DD/YYYY" }]);
+```
+
+The `office:date-value` attribute always stores the ISO date — display format is separate.
+
+### Column widths and row heights
+
+```typescript
+sheet.setColumnWidth(0, "4cm");
+sheet.setColumnWidth(1, "8cm");
+
+sheet.addRow(["Header"]);
+sheet.setRowHeight(0, "1.5cm");
+```
+
+### Multiple sheets
+
+```typescript
+const doc = new OdsDocument();
+doc.setMetadata({ title: "Annual Report", creator: "Acme Corp" });
+
+const q1 = doc.addSheet("Q1");
+q1.addRow(["Month", "Revenue"], { bold: true });
+q1.addRow(["January", 12500]);
+q1.addRow(["March", 14800]);
+
+const q2 = doc.addSheet("Q2");
+q2.addRow(["Month", "Revenue"], { bold: true });
+q2.addRow(["April", 15300]);
+
+const bytes = await doc.save();
 ```
 
 ---
@@ -435,6 +538,41 @@ See the [complete ODT to PDF with Typst guide](https://githubnewbie0.github.io/o
 | `addPageBreak()` | Insert page break |
 | `save()` | Generate `.odt` as `Promise<Uint8Array>` |
 
+### OdsDocument
+
+| Method | Description |
+|--------|-------------|
+| `setMetadata(options)` | Set title, creator, description |
+| `setDateFormat(format)` | Set default date display format (`"YYYY-MM-DD"` \| `"DD/MM/YYYY"` \| `"MM/DD/YYYY"`) |
+| `addSheet(name)` | Add a sheet tab — returns `OdsSheet` |
+| `save()` | Generate `.ods` as `Promise<Uint8Array>` |
+
+### OdsSheet
+
+| Method | Description |
+|--------|-------------|
+| `addRow(values, options?)` | Add a row of cells with optional formatting defaults |
+| `setColumnWidth(colIndex, width)` | Set column width (e.g. `"4cm"`) |
+| `setRowHeight(rowIndex, height)` | Set row height (e.g. `"1cm"`) |
+
+### OdsCellValue
+
+```typescript
+type OdsCellValue =
+  | string          // → string cell
+  | number          // → float cell
+  | boolean         // → boolean cell
+  | Date            // → date cell
+  | null            // → empty cell
+  | undefined       // → empty cell
+  | OdsCellObject;  // → explicit type (required for formulas)
+
+interface OdsCellObject extends OdsCellOptions {
+  value: string | number | boolean | Date | null;
+  type: "string" | "float" | "date" | "boolean" | "formula";
+}
+```
+
 ### fillTemplate
 
 ```typescript
@@ -536,9 +674,10 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 
 - **Single runtime dependency** — fflate for ZIP. No transitive dependencies.
 - **Spec-compliant output** — every generated file passes the OASIS ODF validator. Enforced on every commit by CI.
-- **Four complete capability modes** — build, fill, read, convert. Not just generation.
+- **Multiple ODF formats** — ODT documents and ODS spreadsheets from the same library.
+- **Five complete capability modes** — build ODT, build ODS, fill templates, read, convert. Not just generation.
 - **Zero-dependency Typst emitter** — the only JavaScript library with built-in ODT→Typst conversion for PDF generation.
-- **TypeScript-first** — full types across all three sub-exports.
+- **TypeScript-first** — full types across all sub-exports.
 - **Apache 2.0** — use freely in commercial and open source projects.
 
 ---
@@ -548,6 +687,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 | Feature | odf-kit | simple-odf | docxtemplater |
 |---------|---------|------------|---------------|
 | Generate .odt from scratch | ✅ | ⚠️ flat XML only | ❌ |
+| Generate .ods from scratch | ✅ | ❌ | ❌ |
 | Fill .odt templates | ✅ | ❌ | ✅ .docx only |
 | Read .odt files | ✅ | ❌ | ❌ |
 | Convert to HTML | ✅ | ❌ | ❌ |
@@ -565,6 +705,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.9.0** — ODS spreadsheet generation: `OdsDocument`, multiple sheets, auto-typed cells, formulas, date formatting (ISO/DMY/MDY), row and cell formatting, column widths, row heights, style deduplication. 707 tests passing.
 
 **v0.8.0** — `odf-kit/typst` sub-export: `odtToTypst()` and `modelToTypst()`. Zero-dependency ODT→Typst emitter for PDF generation via Typst CLI. 650+ tests passing.
 
