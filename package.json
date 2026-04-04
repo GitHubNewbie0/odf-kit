@@ -10,6 +10,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./odt": {
+      "types": "./dist/odt/index.d.ts",
+      "import": "./dist/odt/index.js"
+    },
+    "./template": {
+      "types": "./dist/template/index.d.ts",
+      "import": "./dist/template/index.js"
+    },
     "./reader": {
       "types": "./dist/reader/index.d.ts",
       "import": "./dist/reader/index.js"

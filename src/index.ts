@@ -22,3 +22,12 @@ export type {
 export type { MetadataOptions } from "./core/index.js";
 export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
 export type { TemplateData } from "./template/index.js";
+export { OdsDocument } from "./ods/index.js";
+export { OdsSheet } from "./ods/index.js";
+export type {
+  OdsCellValue,
+  OdsCellObject,
+  OdsCellOptions,
+  OdsRowOptions,
+  OdsDateFormat,
+} from "./ods/index.js";
