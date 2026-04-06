@@ -130,6 +130,9 @@ function dateFormatToStyleName(format: OdsDateFormat): string {
   }
 }
 
+/** Style name for the auto-detected datetime format (date + time). */
+const DATETIME_STYLE_NAME = "Ndate-dt";
+
 /** Build a number:date-style element for automatic-styles. */
 function buildDateFormatStyle(format: OdsDateFormat): XmlElement {
   const dateStyle = el("number:date-style").attr("style:name", dateFormatToStyleName(format));
@@ -172,6 +175,43 @@ function formatDateISO(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Return true if the Date has a nonzero UTC time component.
+ * Used to decide whether to render as a date-only or datetime value.
+ */
+function isDatetime(date: Date): boolean {
+  return (
+    date.getUTCHours() !== 0 ||
+    date.getUTCMinutes() !== 0 ||
+    date.getUTCSeconds() !== 0 ||
+    date.getUTCMilliseconds() !== 0
+  );
+}
+
+/**
+ * Format a Date as an ISO datetime string (YYYY-MM-DDTHH:MM:SS).
+ * Always uses UTC to avoid timezone offsets.
+ */
+function formatDatetimeISO(date: Date): string {
+  const y = date.getUTCFullYear();
+  const mo = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  const h = String(date.getUTCHours()).padStart(2, "0");
+  const mi = String(date.getUTCMinutes()).padStart(2, "0");
+  const s = String(date.getUTCSeconds()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:${mi}:${s}`;
+}
+
+/**
+ * Format a Date as a display string for a datetime cell: "YYYY-MM-DD HH:MM:SS".
+ */
+function formatDatetimeDisplay(date: Date): string {
+  const h = String(date.getUTCHours()).padStart(2, "0");
+  const mi = String(date.getUTCMinutes()).padStart(2, "0");
+  const s = String(date.getUTCSeconds()).padStart(2, "0");
+  return `${formatDateISO(date)} ${h}:${mi}:${s}`;
+}
+
 /** Format a Date for display according to the given format. */
 function formatDateDisplay(date: Date, format: OdsDateFormat): string {
   const y = String(date.getUTCFullYear());
@@ -185,6 +225,37 @@ function formatDateDisplay(date: Date, format: OdsDateFormat): string {
     case "MM/DD/YYYY":
       return `${m}/${d}/${y}`;
   }
+}
+
+/** Build a number:date-style element for datetime display (YYYY-MM-DD HH:MM:SS). */
+function buildDatetimeFormatStyle(): XmlElement {
+  const dtStyle = el("number:date-style").attr("style:name", DATETIME_STYLE_NAME);
+  dtStyle.appendChild(el("number:year").attr("number:style", "long"));
+  dtStyle.appendChild(el("number:text").text("-"));
+  dtStyle.appendChild(el("number:month").attr("number:style", "long"));
+  dtStyle.appendChild(el("number:text").text("-"));
+  dtStyle.appendChild(el("number:day").attr("number:style", "long"));
+  dtStyle.appendChild(el("number:text").text(" "));
+  dtStyle.appendChild(el("number:hours").attr("number:style", "long"));
+  dtStyle.appendChild(el("number:text").text(":"));
+  dtStyle.appendChild(el("number:minutes").attr("number:style", "long"));
+  dtStyle.appendChild(el("number:text").text(":"));
+  dtStyle.appendChild(el("number:seconds").attr("number:style", "long"));
+  return dtStyle;
+}
+
+/** Return true if any date cell in any sheet has a nonzero UTC time component. */
+function hasDatetimeCells(sheets: OdsSheetData[]): boolean {
+  for (const sheet of sheets) {
+    for (const row of sheet.rows) {
+      for (const cell of row.cells) {
+        if (cell.type === "date" && cell.value instanceof Date && isDatetime(cell.value)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 /** Resolve the effective date format for a cell: cell > row > document default. */
@@ -235,7 +306,9 @@ function buildCellStyleMap(
         const effective = mergeOptions(row.options, cell.options);
         const dataStyleName =
           cell.type === "date"
-            ? dateFormatToStyleName(effectiveDateFormat(cell, row, defaultDateFormat))
+            ? cell.value instanceof Date && isDatetime(cell.value)
+              ? DATETIME_STYLE_NAME
+              : dateFormatToStyleName(effectiveDateFormat(cell, row, defaultDateFormat))
             : undefined;
 
         const normalized = normalizeOdsCellStyle(effective, dataStyleName);
@@ -455,7 +528,12 @@ function buildCellElement(
   // Effective options: row defaults merged with cell overrides
   const effective = mergeOptions(row.options, cell.options);
   const cellDateFmt = effectiveDateFormat(cell, row, defaultDateFormat);
-  const dataStyleName = cell.type === "date" ? dateFormatToStyleName(cellDateFmt) : undefined;
+  const dataStyleName =
+    cell.type === "date"
+      ? cell.value instanceof Date && isDatetime(cell.value)
+        ? DATETIME_STYLE_NAME
+        : dateFormatToStyleName(cellDateFmt)
+      : undefined;
 
   // Look up deduplicated cell style
   const normalized = normalizeOdsCellStyle(effective, dataStyleName);
@@ -481,8 +559,13 @@ function buildCellElement(
     case "date": {
       const date = cell.value as Date;
       cellEl.attr("office:value-type", "date");
-      cellEl.attr("office:date-value", formatDateISO(date));
-      cellEl.appendChild(el("text:p").text(formatDateDisplay(date, cellDateFmt)));
+      if (isDatetime(date)) {
+        cellEl.attr("office:date-value", formatDatetimeISO(date));
+        cellEl.appendChild(el("text:p").text(formatDatetimeDisplay(date)));
+      } else {
+        cellEl.attr("office:date-value", formatDateISO(date));
+        cellEl.appendChild(el("text:p").text(formatDateDisplay(date, cellDateFmt)));
+      }
       break;
     }
 
@@ -569,11 +652,12 @@ export function generateOdsContent(
 ): string {
   // Collect all style information up front
   const usedDateFormats = collectUsedDateFormats(sheets, defaultDateFormat);
+  const needsDatetime = hasDatetimeCells(sheets);
   const cellStyleMap = buildCellStyleMap(sheets, defaultDateFormat);
   const { widthMap, optimalStyleName: optimalColStyle } = buildColumnStyleMap(sheets);
   const { heightMap, optimalStyleName: optimalRowStyle } = buildRowStyleMap(sheets);
 
-  // Root element — ODS uses office, style, text, table, fo, number namespaces
+  // Root element — ODS uses office, style, text, table, fo, number, of namespaces
   const root = el("office:document-content")
     .attr("xmlns:office", ODF_NS.office)
     .attr("xmlns:style", ODF_NS.style)
@@ -581,6 +665,7 @@ export function generateOdsContent(
     .attr("xmlns:table", ODF_NS.table)
     .attr("xmlns:fo", ODF_NS.fo)
     .attr("xmlns:number", ODF_NS.number)
+    .attr("xmlns:of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2")
     .attr("office:version", ODF_VERSION);
 
   // Automatic styles
@@ -589,6 +674,11 @@ export function generateOdsContent(
   // Date format styles — only those actually used in this document
   for (const format of usedDateFormats) {
     autoStyles.appendChild(buildDateFormatStyle(format));
+  }
+
+  // Datetime style — emitted only if any date cell has a nonzero time component
+  if (needsDatetime) {
+    autoStyles.appendChild(buildDatetimeFormatStyle());
   }
 
   // Table styles — one per sheet

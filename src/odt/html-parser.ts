@@ -200,8 +200,9 @@ function walkBlockElement(
       walkBlockChildren(
         node.children,
         doc,
-        mergeParagraphOptions(defaultParaOpts, { indentLeft: BLOCKQUOTE_INDENT }) ??
-          { indentLeft: BLOCKQUOTE_INDENT },
+        mergeParagraphOptions(defaultParaOpts, { indentLeft: BLOCKQUOTE_INDENT }) ?? {
+          indentLeft: BLOCKQUOTE_INDENT,
+        },
       );
       break;
     }
