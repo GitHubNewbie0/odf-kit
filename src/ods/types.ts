@@ -1,7 +1,14 @@
 // ─── Cell Value Types ─────────────────────────────────────────────────
 
 /** Recognized cell types in ODS. */
-export type OdsCellType = "string" | "float" | "date" | "boolean" | "formula";
+export type OdsCellType =
+  | "string"
+  | "float"
+  | "date"
+  | "boolean"
+  | "formula"
+  | "percentage"
+  | "currency";
 
 /** Built-in date display formats. */
 export type OdsDateFormat = "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY";
@@ -11,14 +18,6 @@ export type OdsDateFormat = "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY";
  *
  * Applied at the row level (as defaults for all cells) or at the cell level
  * (as overrides for a single cell via {@link OdsCellObject}).
- *
- * @example
- * // Row-level defaults
- * sheet.addRow(["Header", "Value"], { bold: true, backgroundColor: "#DDDDDD" });
- *
- * @example
- * // Cell-level overrides inside OdsCellObject
- * sheet.addRow([{ value: "Special", type: "string", color: "#FF0000" }]);
  */
 export interface OdsCellOptions {
   /** Bold text. */
@@ -36,22 +35,18 @@ export interface OdsCellOptions {
   /** Font family (e.g. `"Arial"`, `"Liberation Sans"`). */
   fontFamily?: string;
 
-  /**
-   * Text color. Accepts hex (`"#FF0000"`) or CSS named colors (`"red"`).
-   */
+  /** Text color. Accepts hex (`"#FF0000"`) or CSS named colors (`"red"`). */
   color?: string;
 
   /** Underline the text. */
   underline?: boolean;
 
-  /**
-   * Cell background color. Accepts hex (`"#DDDDDD"`) or CSS named colors.
-   */
+  /** Cell background color. Accepts hex (`"#DDDDDD"`) or CSS named colors. */
   backgroundColor?: string;
 
   /**
-   * Border on all four sides. Uses CSS border shorthand:
-   * `"<width> <style> <color>"` (e.g. `"0.5pt solid #000000"`).
+   * Border on all four sides. CSS shorthand: `"<width> <style> <color>"`
+   * (e.g. `"0.5pt solid #000000"`).
    */
   border?: string;
 
@@ -84,6 +79,25 @@ export interface OdsCellOptions {
    * Overrides the document-level default set via `OdsDocument.setDateFormat()`.
    */
   dateFormat?: OdsDateFormat;
+
+  /**
+   * Number display format. Applies when the cell contains a numeric value.
+   *
+   * Predefined formats:
+   * - `"integer"`          — 1,234 (no decimal places, thousands separator)
+   * - `"decimal:N"`        — 1,234.56 (N decimal places, thousands separator)
+   * - `"percentage"`       — 12.34% (raw value × 100, 2 decimal places)
+   * - `"percentage:N"`     — 12.3% (N decimal places)
+   * - `"currency:CODE"`    — €1,234.56 (ISO 4217 code, 2 decimal places)
+   * - `"currency:CODE:N"`  — €1,234.6 (currency with N decimal places)
+   *
+   * @example
+   * { value: 1234567.89, type: "float", numberFormat: "decimal:2" }
+   * { value: 0.1234, type: "percentage", numberFormat: "percentage:1" }
+   * { value: 1234.56, type: "currency", numberFormat: "currency:EUR" }
+   * { value: 9999, type: "float", numberFormat: "integer" }
+   */
+  numberFormat?: string;
 }
 
 /**
@@ -95,23 +109,28 @@ export type OdsRowOptions = OdsCellOptions;
 /**
  * Explicit typed cell — use when automatic type detection is insufficient.
  *
- * Required for formula cells. Also allows per-cell formatting that overrides
- * the row-level defaults set in `addRow()`.
- *
- * Extends {@link OdsCellOptions} so individual cell formatting can override
- * row-level defaults.
+ * Required for formula, percentage, and currency cells. Also allows per-cell
+ * formatting that overrides row-level defaults.
  *
  * @example
  * // Formula — explicit type required
  * { value: "=SUM(B1:B10)", type: "formula" }
  *
  * @example
- * // Date with per-cell format override
- * { value: new Date("2026-01-15"), type: "date", dateFormat: "DD/MM/YYYY" }
+ * // Percentage
+ * { value: 0.1234, type: "percentage", numberFormat: "percentage:1" }
  *
  * @example
- * // String with bold override inside a non-bold row
- * { value: "Total", type: "string", bold: true }
+ * // Currency
+ * { value: 1234.56, type: "currency", numberFormat: "currency:EUR" }
+ *
+ * @example
+ * // Merged cell spanning 3 columns
+ * { value: "Q1 Report", type: "string", colSpan: 3, bold: true }
+ *
+ * @example
+ * // Hyperlink
+ * { value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" }
  */
 export interface OdsCellObject extends OdsCellOptions {
   /** The cell value. */
@@ -119,6 +138,28 @@ export interface OdsCellObject extends OdsCellOptions {
 
   /** The explicit cell type. */
   type: OdsCellType;
+
+  /**
+   * Span this cell across N columns (default 1).
+   * The spanned columns in the same row are automatically filled with
+   * covered cells.
+   */
+  colSpan?: number;
+
+  /**
+   * Span this cell across N rows (default 1).
+   * The spanned cells in subsequent rows at the same column position are
+   * automatically filled with covered cells.
+   */
+  rowSpan?: number;
+
+  /**
+   * Hyperlink URL. When set, the cell text becomes a clickable link.
+   *
+   * @example
+   * { value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" }
+   */
+  href?: string;
 }
 
 /**
@@ -132,11 +173,7 @@ export interface OdsCellObject extends OdsCellOptions {
  * - `null` / `undefined` → empty cell
  *
  * @example
- * // Primitives — auto-typed
  * sheet.addRow(["Hello", 42, new Date("2026-01-15"), true]);
- *
- * @example
- * // Mix of primitives and explicit objects
  * sheet.addRow(["Total", { value: "=SUM(B1:B10)", type: "formula" }]);
  */
 export type OdsCellValue = string | number | boolean | Date | null | undefined | OdsCellObject;
@@ -153,6 +190,15 @@ export interface OdsCellData {
 
   /** Cell-level formatting options — merged with row options at render time. */
   options?: OdsCellOptions;
+
+  /** Column span — number of columns this cell covers (default 1). */
+  colSpan?: number;
+
+  /** Row span — number of rows this cell covers (default 1). */
+  rowSpan?: number;
+
+  /** Hyperlink URL — when set, cell text is rendered as a link. */
+  href?: string;
 }
 
 /** Internal representation of a row. */
@@ -183,4 +229,13 @@ export interface OdsSheetData {
 
   /** Sparse column definitions keyed by zero-based column index. */
   columns: Map<number, OdsColumnData>;
+
+  /** Number of rows to freeze at the top (0 = no freeze). */
+  freezeRows?: number;
+
+  /** Number of columns to freeze at the left (0 = no freeze). */
+  freezeColumns?: number;
+
+  /** Sheet tab color (hex e.g. `"#FF0000"` or CSS named color). */
+  tabColor?: string;
 }

@@ -391,15 +391,76 @@ sheet.setRowHeight(0, "1.5cm");
 
 ```typescript
 const doc = new OdsDocument();
-const q1 = doc.addSheet("Q1");
+const q1 = doc.addSheet("Q1").setTabColor("#4CAF50");
+const q2 = doc.addSheet("Q2").setTabColor("#2196F3");
 q1.addRow(["Month", "Revenue"], { bold: true });
 q1.addRow(["January", 12500]);
 
-const q2 = doc.addSheet("Q2");
-q2.addRow(["Month", "Revenue"], { bold: true });
-q2.addRow(["April", 15300]);
+const q2sheet = doc.addSheet("Summary");
+q2sheet.addRow(["Total", 27700]);
 
 const bytes = await doc.save();
+```
+
+### Number formats
+
+```typescript
+sheet.addRow([{ value: 9999, type: "float", numberFormat: "integer" }]);           // 9,999
+sheet.addRow([{ value: 1234.567, type: "float", numberFormat: "decimal:2" }]);     // 1,234.57
+sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage" }]); // 12.34%
+sheet.addRow([{ value: 0.075, type: "percentage", numberFormat: "percentage:1" }]);// 7.5%
+sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);// €1,234.56
+sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD:0" }]);// $100
+
+// Row-level number format — applies to all cells in the row
+sheet.addRow([1000, 2000, 3000], { numberFormat: "integer" });
+```
+
+### Merged cells
+
+```typescript
+// Span across 3 columns
+sheet.addRow([{ value: "Q1 Sales Report", type: "string", colSpan: 3, bold: true }]);
+sheet.addRow(["Region", "Units", "Revenue"]);
+
+// Span across 2 rows
+sheet.addRow([{ value: "North", type: "string", rowSpan: 2 }, "Jan", 12500]);
+sheet.addRow(["Feb", 14200]); // "North" continues from above
+
+// Combined colSpan + rowSpan
+sheet.addRow([{ value: "Big Cell", type: "string", colSpan: 2, rowSpan: 2 }, "C"]);
+```
+
+### Freeze rows and columns
+
+```typescript
+// Freeze the header row
+sheet.addRow(["Name", "Amount", "Date"], { bold: true });
+sheet.freezeRows(1);
+
+// Freeze first column
+sheet.freezeColumns(1);
+
+// Both
+sheet.freezeRows(1).freezeColumns(1);
+```
+
+### Hyperlinks in cells
+
+```typescript
+sheet.addRow([{
+  value: "odf-kit on GitHub",
+  type: "string",
+  href: "https://github.com/GitHubNewbie0/odf-kit",
+}]);
+```
+
+### Sheet tab color
+
+```typescript
+doc.addSheet("Q1").setTabColor("#4CAF50");  // green
+doc.addSheet("Q2").setTabColor("#2196F3");  // blue
+doc.addSheet("Q3").setTabColor("#F44336");  // red
 ```
 
 ---
@@ -632,6 +693,9 @@ interface TiptapToOdtOptions extends HtmlToOdtOptions {
 | `sheet.addRow(values, options?)` | Add a row of cells |
 | `sheet.setColumnWidth(index, width)` | Set column width |
 | `sheet.setRowHeight(index, height)` | Set row height |
+| `sheet.freezeRows(N?)` | Freeze top N rows (default 1) |
+| `sheet.freezeColumns(N?)` | Freeze left N columns (default 1) |
+| `sheet.setTabColor(color)` | Set sheet tab color |
 
 ### fillTemplate
 
@@ -697,7 +761,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 | Feature | odf-kit | simple-odf | docxtemplater |
 |---------|---------|------------|---------------|
 | Generate .odt from scratch | ✅ | ⚠️ flat XML only | ❌ |
-| Generate .ods from scratch | ✅ | ❌ | ❌ |
+| Generate .ods from scratch | ✅ merged cells, freeze, number formats, hyperlinks | ❌ | ❌ |
 | Convert HTML → ODT | ✅ | ❌ | ❌ |
 | Convert Markdown → ODT | ✅ | ❌ | ❌ |
 | Convert TipTap JSON → ODT | ✅ | ❌ | ❌ |
@@ -718,6 +782,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.9.7** — ODS enhancements: number formats (integer, decimal:N, percentage, currency), merged cells (colSpan/rowSpan), freeze rows/columns, hyperlinks in cells, sheet tab color. 849 tests passing.
 
 **v0.9.6** — `tiptapToOdt()`: TipTap/ProseMirror JSON→ODT conversion. `TiptapNode`, `TiptapMark`, `TiptapToOdtOptions` types. `unknownNodeHandler` for custom extensions. Image support via pre-fetched bytes map. 817 tests passing.
 

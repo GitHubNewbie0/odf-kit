@@ -5,6 +5,20 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.7] - 2026-04-10
+
+### Added
+
+- **Number formats** — `numberFormat` option on `OdsCellOptions` for professional numeric display. Formats: `"integer"` (1,234), `"decimal:N"` (1,234.56), `"percentage"` / `"percentage:N"` (12.34%), `"currency:CODE"` / `"currency:CODE:N"` (€1,234.56). Applies at row level (default for all cells) or per cell. Style deduplication — identical formats share one ODF style element.
+- **Percentage cells** — `type: "percentage"` on `OdsCellObject`. Stores raw decimal, displays as percentage.
+- **Currency cells** — `type: "currency"` on `OdsCellObject` with `numberFormat: "currency:CODE"`. Supports 30+ ISO 4217 currency codes with correct symbols.
+- **Merged cells** — `colSpan` and `rowSpan` on `OdsCellObject`. Automatically emits `table:covered-table-cell` elements for spanned positions. Supports combined colSpan + rowSpan and merges at any column position.
+- **Freeze rows/columns** — `sheet.freezeRows(N)` and `sheet.freezeColumns(N)` on `OdsSheet`. Generates `settings.xml` in the ODS ZIP with LibreOffice-compatible freeze configuration. `settings.xml` only emitted when at least one sheet has freeze settings.
+- **Hyperlinks in ODS cells** — `href` on `OdsCellObject`. Cell text rendered as `text:a` link with `xlink:href`. `xmlns:xlink` namespace declared on document root.
+- **Sheet tab color** — `sheet.setTabColor(color)` on `OdsSheet`. Accepts hex (`"#FF0000"`) or CSS named colors. Emits `table:tab-color` on the sheet's table style.
+- **`OdsCellType`** exported from public API.
+- 32 new tests (849 total).
+
 ## [0.9.6] - 2026-04-10
 
 ### Added
@@ -155,6 +169,7 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[0.9.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.7
 [0.9.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.6
 [0.9.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.5
 [0.9.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.4

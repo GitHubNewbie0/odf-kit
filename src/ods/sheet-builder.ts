@@ -21,7 +21,8 @@ import type {
  *   .addRow(["February", 14200.00])
  *   .addRow(["Total", { value: "=SUM(B2:B3)", type: "formula" }])
  *   .setColumnWidth(0, "4cm")
- *   .setColumnWidth(1, "5cm");
+ *   .setColumnWidth(1, "5cm")
+ *   .freezeRows(1);
  */
 export class OdsSheet {
   /** Internal sheet data — used by OdsDocument.save(). */
@@ -44,26 +45,20 @@ export class OdsSheet {
    * - `boolean` → boolean
    * - `string` → string (never auto-detected as formula)
    * - `null` / `undefined` → empty cell
-   * - {@link OdsCellObject} → explicit type (required for formulas)
-   *
-   * Row options apply formatting defaults to every cell in the row.
-   * Per-cell {@link OdsCellObject} options override row-level defaults.
+   * - {@link OdsCellObject} → explicit type (required for formulas, percentages, currencies)
    *
    * @param values - Array of cell values in column order.
    * @param options - Optional formatting defaults for all cells in this row.
    * @returns This sheet, for chaining.
    *
    * @example
-   * // Simple auto-typed row
-   * sheet.addRow([1.23, "Text", new Date("2026-01-15"), true]);
-   *
-   * @example
-   * // Header row with formatting
    * sheet.addRow(["Month", "Revenue"], { bold: true, backgroundColor: "#DDDDDD" });
-   *
-   * @example
-   * // Row with a formula cell
-   * sheet.addRow(["Total", { value: "=SUM(B1:B10)", type: "formula" }]);
+   * sheet.addRow(["January", 12500.00]);
+   * sheet.addRow(["Total", { value: "=SUM(B2:B3)", type: "formula" }]);
+   * sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage:1" }]);
+   * sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);
+   * sheet.addRow([{ value: "Report", type: "string", colSpan: 3, bold: true }]);
+   * sheet.addRow([{ value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" }]);
    */
   addRow(values: OdsCellValue[], options?: OdsRowOptions): this {
     const cells: OdsCellData[] = values.map((v) => toCellData(v));
@@ -74,16 +69,9 @@ export class OdsSheet {
   /**
    * Set the width of a column.
    *
-   * May be called before or after adding rows. Uses zero-based column index.
-   * Columns without an explicit width use the application's optimal width.
-   *
    * @param colIndex - Zero-based column index.
    * @param width - Width with units (e.g. `"3cm"`, `"1.5in"`).
    * @returns This sheet, for chaining.
-   *
-   * @example
-   * sheet.setColumnWidth(0, "4cm");
-   * sheet.setColumnWidth(1, "8cm");
    */
   setColumnWidth(colIndex: number, width: string): this {
     this.data.columns.set(colIndex, { width });
@@ -93,17 +81,9 @@ export class OdsSheet {
   /**
    * Set the height of a row.
    *
-   * The row must already exist (added via {@link addRow}). Uses zero-based
-   * row index. Silently ignored for out-of-range indices.
-   * Rows without an explicit height use the application's optimal height.
-   *
    * @param rowIndex - Zero-based row index.
    * @param height - Height with units (e.g. `"1cm"`, `"18pt"`).
    * @returns This sheet, for chaining.
-   *
-   * @example
-   * sheet.addRow(["Header"]);
-   * sheet.setRowHeight(0, "1cm");
    */
   setRowHeight(rowIndex: number, height: string): this {
     const row = this.data.rows[rowIndex];
@@ -112,28 +92,72 @@ export class OdsSheet {
     }
     return this;
   }
+
+  /**
+   * Freeze the top N rows so they remain visible when scrolling down.
+   *
+   * Typically used to keep a header row visible. Call after adding rows.
+   *
+   * @param rows - Number of rows to freeze (default 1).
+   * @returns This sheet, for chaining.
+   *
+   * @example
+   * sheet.addRow(["Name", "Amount", "Date"], { bold: true });
+   * sheet.freezeRows(1);
+   */
+  freezeRows(rows: number = 1): this {
+    this.data.freezeRows = rows;
+    return this;
+  }
+
+  /**
+   * Freeze the left N columns so they remain visible when scrolling right.
+   *
+   * @param cols - Number of columns to freeze (default 1).
+   * @returns This sheet, for chaining.
+   *
+   * @example
+   * sheet.freezeColumns(1); // freeze the first column
+   */
+  freezeColumns(cols: number = 1): this {
+    this.data.freezeColumns = cols;
+    return this;
+  }
+
+  /**
+   * Set the sheet tab color.
+   *
+   * @param color - Hex color (`"#FF0000"`) or CSS named color (`"red"`).
+   * @returns This sheet, for chaining.
+   *
+   * @example
+   * doc.addSheet("Q1").setTabColor("#4CAF50");
+   * doc.addSheet("Q2").setTabColor("#2196F3");
+   */
+  setTabColor(color: string): this {
+    this.data.tabColor = color;
+    return this;
+  }
 }
 
 // ─── Internal Helpers ─────────────────────────────────────────────────
 
-/**
- * Convert an OdsCellValue to internal OdsCellData with resolved type.
- */
 function toCellData(value: OdsCellValue): OdsCellData {
   if (value === null || value === undefined) {
     return { value: null, type: "empty" };
   }
 
-  // OdsCellObject — has an explicit 'type' field alongside 'value'
   if (isOdsCellObject(value)) {
     return {
       value: value.value,
       type: value.type,
       options: extractCellOptions(value),
+      colSpan: value.colSpan,
+      rowSpan: value.rowSpan,
+      href: value.href,
     };
   }
 
-  // Auto-typed primitives
   if (value instanceof Date) {
     return { value, type: "date" };
   }
@@ -143,21 +167,13 @@ function toCellData(value: OdsCellValue): OdsCellData {
   if (typeof value === "number") {
     return { value, type: "float" };
   }
-  // string — never auto-detected as formula
   return { value: value as string, type: "string" };
 }
 
-/**
- * Type guard: returns true when value is an OdsCellObject.
- */
 function isOdsCellObject(value: OdsCellValue): value is OdsCellObject {
   return typeof value === "object" && value !== null && !(value instanceof Date) && "type" in value;
 }
 
-/**
- * Extract OdsCellOptions fields from an OdsCellObject, excluding 'value' and 'type'.
- * Returns undefined when no formatting options are present.
- */
 function extractCellOptions(obj: OdsCellObject): OdsCellOptions | undefined {
   const opts: OdsCellOptions = {};
   if (obj.bold !== undefined) opts.bold = obj.bold;
@@ -177,5 +193,6 @@ function extractCellOptions(obj: OdsCellObject): OdsCellOptions | undefined {
   if (obj.padding !== undefined) opts.padding = obj.padding;
   if (obj.wrap !== undefined) opts.wrap = obj.wrap;
   if (obj.dateFormat !== undefined) opts.dateFormat = obj.dateFormat;
+  if (obj.numberFormat !== undefined) opts.numberFormat = obj.numberFormat;
   return Object.keys(opts).length > 0 ? opts : undefined;
 }

@@ -34,6 +34,7 @@ export type {
   OdsCellValue,
   OdsCellObject,
   OdsCellOptions,
+  OdsCellType,
   OdsRowOptions,
   OdsDateFormat,
 } from "./ods/index.js";

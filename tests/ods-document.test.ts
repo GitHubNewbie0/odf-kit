@@ -450,3 +450,320 @@ describe("OdsDocument — styles.xml", () => {
     expect(styles).toContain('style:page-layout-name="Mlayout"');
   });
 });
+
+// ─── Number Formats ───────────────────────────────────────────────────
+
+describe("OdsDocument — number formats", () => {
+  test("integer format emits number:decimal-places=0 and grouping=true", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234, type: "float", numberFormat: "integer" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('number:decimal-places="0"');
+    expect(content).toContain('number:grouping="true"');
+  });
+
+  test("decimal:2 format emits number:decimal-places=2 and grouping=true", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234.56, type: "float", numberFormat: "decimal:2" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('number:decimal-places="2"');
+    expect(content).toContain('number:grouping="true"');
+  });
+
+  test("decimal:0 format emits number:decimal-places=0", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 42, type: "float", numberFormat: "decimal:0" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('number:decimal-places="0"');
+  });
+
+  test("percentage format emits office:value-type=percentage", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('office:value-type="percentage"');
+    expect(content).toContain('office:value="0.1234"');
+    expect(content).toContain('number:decimal-places="2"');
+  });
+
+  test("percentage:1 format emits 1 decimal place", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 0.333, type: "percentage", numberFormat: "percentage:1" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('number:decimal-places="1"');
+  });
+
+  test("currency:EUR format emits number:currency-style and office:currency=EUR", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("number:currency-style");
+    expect(content).toContain('office:value-type="currency"');
+    expect(content).toContain('office:currency="EUR"');
+    expect(content).toContain("€");
+  });
+
+  test("currency:USD format emits $ symbol", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('office:currency="USD"');
+    expect(content).toContain("$");
+  });
+
+  test("currency:GBP:0 format emits 0 decimal places", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 500, type: "currency", numberFormat: "currency:GBP:0" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('office:currency="GBP"');
+    expect(content).toContain('number:decimal-places="0"');
+  });
+
+  test("two cells with same numberFormat share one style", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([
+      { value: 1000, type: "float", numberFormat: "decimal:2" },
+      { value: 2000, type: "float", numberFormat: "decimal:2" },
+    ]);
+    const { "content.xml": content } = await extractFiles(doc);
+    // Only one Nnum-dec2 style element should exist
+    const matches = content.match(/style:name="Nnum-dec2"/g);
+    expect(matches).toHaveLength(1);
+  });
+
+  test("numberFormat on row options applies to all cells", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([1000, 2000, 3000], { numberFormat: "integer" });
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("Nnum-int");
+  });
+});
+
+// ─── Merged Cells ─────────────────────────────────────────────────────
+
+describe("OdsDocument — merged cells", () => {
+  test("colSpan:3 emits table:number-columns-spanned=3 and 2 covered cells", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Header", type: "string", colSpan: 3 }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:number-columns-spanned="3"');
+    expect(content).toContain("table:covered-table-cell");
+  });
+
+  test("rowSpan:2 emits table:number-rows-spanned=2 and covered cell in next row", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Span", type: "string", rowSpan: 2 }, "B1"]);
+    sheet.addRow(["B2"]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:number-rows-spanned="2"');
+    expect(content).toContain("table:covered-table-cell");
+  });
+
+  test("colSpan and rowSpan combined", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Big", type: "string", colSpan: 2, rowSpan: 2 }, "C1"]);
+    sheet.addRow(["C2", "D2"]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:number-columns-spanned="2"');
+    expect(content).toContain('table:number-rows-spanned="2"');
+    expect(content).toContain("table:covered-table-cell");
+  });
+
+  test("colSpan at non-zero column position", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["A1", { value: "Merged", type: "string", colSpan: 2 }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:number-columns-spanned="2"');
+    expect(content).toContain("table:covered-table-cell");
+  });
+
+  test("merged cell with formatting", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([
+      { value: "Title", type: "string", colSpan: 3, bold: true, backgroundColor: "#DDDDDD" },
+    ]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:number-columns-spanned="3"');
+    expect(content).toContain("fo:font-weight");
+  });
+});
+
+// ─── Freeze Rows/Columns ──────────────────────────────────────────────
+
+describe("OdsDocument — freeze rows/columns", () => {
+  test("no freeze — settings.xml not generated", async () => {
+    const doc = new OdsDocument();
+    doc.addSheet("Sheet1");
+    const bytes = await doc.save();
+    const files = unzipSync(bytes);
+    expect(files["settings.xml"]).toBeUndefined();
+  });
+
+  test("freezeRows(1) generates settings.xml", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const files = await extractFiles(doc);
+    expect(files["settings.xml"]).toBeDefined();
+  });
+
+  test("freezeRows(1) sets VerticalSplitMode=2 and VerticalSplitPosition=1", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain("VerticalSplitMode");
+    expect(settings).toContain(">2<");
+    expect(settings).toContain("VerticalSplitPosition");
+    expect(settings).toContain(">1<");
+  });
+
+  test("freezeRows(3) sets VerticalSplitPosition=3", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(3);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain(">3<");
+  });
+
+  test("freezeColumns(1) sets HorizontalSplitMode=2 and HorizontalSplitPosition=1", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeColumns(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain("HorizontalSplitMode");
+    expect(settings).toContain("HorizontalSplitPosition");
+    expect(settings).toContain(">1<");
+  });
+
+  test("freezeRows and freezeColumns combined", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    sheet.freezeColumns(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain("VerticalSplitMode");
+    expect(settings).toContain("HorizontalSplitMode");
+  });
+
+  test("settings.xml contains sheet name", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("MySalesData");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain("MySalesData");
+  });
+
+  test("settings.xml is in manifest", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const { "META-INF/manifest.xml": manifest } = await extractFiles(doc);
+    expect(manifest).toContain("settings.xml");
+  });
+
+  test("only sheets with freeze appear in settings.xml", async () => {
+    const doc = new OdsDocument();
+    const s1 = doc.addSheet("Frozen");
+    doc.addSheet("NotFrozen");
+    s1.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain("Frozen");
+    expect(settings).not.toContain("NotFrozen");
+  });
+});
+
+// ─── Hyperlinks ───────────────────────────────────────────────────────
+
+describe("OdsDocument — hyperlinks", () => {
+  test("href on cell emits text:a with xlink:href", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([
+      { value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" },
+    ]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("text:a");
+    expect(content).toContain("https://github.com/GitHubNewbie0/odf-kit");
+    expect(content).toContain('xlink:type="simple"');
+  });
+
+  test("hyperlink cell contains the link text", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Click here", type: "string", href: "https://example.com" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("Click here");
+    expect(content).toContain("https://example.com");
+  });
+
+  test("xlink namespace declared on root element", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Link", type: "string", href: "https://example.com" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
+  });
+
+  test("hyperlink with formatting", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: "Bold link", type: "string", href: "https://example.com", bold: true }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("fo:font-weight");
+    expect(content).toContain("https://example.com");
+  });
+
+  test("cell without href has no text:a element", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["plain text"]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).not.toContain("text:a");
+  });
+});
+
+// ─── Sheet Tab Color ──────────────────────────────────────────────────
+
+describe("OdsDocument — sheet tab color", () => {
+  test("setTabColor emits table:tab-color on table style", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.setTabColor("#FF0000");
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain('table:tab-color="#FF0000"');
+  });
+
+  test("different sheets can have different tab colors", async () => {
+    const doc = new OdsDocument();
+    const s1 = doc.addSheet("Red");
+    const s2 = doc.addSheet("Blue");
+    s1.setTabColor("#FF0000");
+    s2.setTabColor("#0000FF");
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).toContain("#FF0000");
+    expect(content).toContain("#0000FF");
+  });
+
+  test("sheet without tab color has no table:tab-color attribute", async () => {
+    const doc = new OdsDocument();
+    doc.addSheet("Sheet1");
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).not.toContain("table:tab-color");
+  });
+});

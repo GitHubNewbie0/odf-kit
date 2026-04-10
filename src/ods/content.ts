@@ -12,10 +12,6 @@ import type {
 
 // ─── Normalized Cell Style ────────────────────────────────────────────
 
-/**
- * Resolved cell style properties ready for ODF style generation.
- * Captures text formatting, cell formatting, and optional data style reference.
- */
 interface NormalizedCellStyle {
   // Text properties
   fontWeight?: string;
@@ -34,11 +30,10 @@ interface NormalizedCellStyle {
   verticalAlign?: string;
   padding?: string;
   wrap?: boolean;
-  // Data style reference (links cell style to number:date-style)
+  // Data style reference (links cell style to number:date-style or number:number-style)
   dataStyleName?: string;
 }
 
-/** Generate a stable deduplication key for a NormalizedCellStyle. */
 function cellStyleKey(cs: NormalizedCellStyle): string {
   const parts: string[] = [];
   if (cs.fontWeight) parts.push(`fw:${cs.fontWeight}`);
@@ -60,7 +55,6 @@ function cellStyleKey(cs: NormalizedCellStyle): string {
   return parts.join("|");
 }
 
-/** Normalize OdsCellOptions (merged effective options) into a NormalizedCellStyle. */
 function normalizeOdsCellStyle(
   opts: OdsCellOptions | undefined,
   dataStyleName: string | undefined,
@@ -75,7 +69,6 @@ function normalizeOdsCellStyle(
   if (opts?.underline) result.underline = true;
   if (opts?.backgroundColor) result.backgroundColor = opts.backgroundColor;
 
-  // Border resolution: side-specific overrides uniform shorthand
   const border = opts?.border;
   result.borderTop = opts?.borderTop ?? border;
   result.borderBottom = opts?.borderBottom ?? border;
@@ -95,17 +88,12 @@ function normalizeOdsCellStyle(
   return result;
 }
 
-/** Normalize a fontSize value to an ODF string with units. */
 function normalizeFontSize(fontSize: number | string): string {
   return typeof fontSize === "number" ? `${fontSize}pt` : fontSize;
 }
 
 // ─── Option Merging ───────────────────────────────────────────────────
 
-/**
- * Merge row-level options with cell-level options.
- * Cell options take precedence over row options for any property defined in both.
- */
 function mergeOptions(
   rowOpts: OdsRowOptions | undefined,
   cellOpts: OdsCellOptions | undefined,
@@ -118,7 +106,6 @@ function mergeOptions(
 
 // ─── Date Format Helpers ──────────────────────────────────────────────
 
-/** Map a date format enum value to its number:date-style name. */
 function dateFormatToStyleName(format: OdsDateFormat): string {
   switch (format) {
     case "YYYY-MM-DD":
@@ -130,13 +117,10 @@ function dateFormatToStyleName(format: OdsDateFormat): string {
   }
 }
 
-/** Style name for the auto-detected datetime format (date + time). */
 const DATETIME_STYLE_NAME = "Ndate-dt";
 
-/** Build a number:date-style element for automatic-styles. */
 function buildDateFormatStyle(format: OdsDateFormat): XmlElement {
   const dateStyle = el("number:date-style").attr("style:name", dateFormatToStyleName(format));
-
   switch (format) {
     case "YYYY-MM-DD":
       dateStyle.appendChild(el("number:year").attr("number:style", "long"));
@@ -160,14 +144,9 @@ function buildDateFormatStyle(format: OdsDateFormat): XmlElement {
       dateStyle.appendChild(el("number:year").attr("number:style", "long"));
       break;
   }
-
   return dateStyle;
 }
 
-/**
- * Format a Date as an ISO date string (YYYY-MM-DD).
- * Always uses UTC to avoid timezone offsets shifting the date.
- */
 function formatDateISO(date: Date): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -175,10 +154,6 @@ function formatDateISO(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-/**
- * Return true if the Date has a nonzero UTC time component.
- * Used to decide whether to render as a date-only or datetime value.
- */
 function isDatetime(date: Date): boolean {
   return (
     date.getUTCHours() !== 0 ||
@@ -188,10 +163,6 @@ function isDatetime(date: Date): boolean {
   );
 }
 
-/**
- * Format a Date as an ISO datetime string (YYYY-MM-DDTHH:MM:SS).
- * Always uses UTC to avoid timezone offsets.
- */
 function formatDatetimeISO(date: Date): string {
   const y = date.getUTCFullYear();
   const mo = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -202,9 +173,6 @@ function formatDatetimeISO(date: Date): string {
   return `${y}-${mo}-${d}T${h}:${mi}:${s}`;
 }
 
-/**
- * Format a Date as a display string for a datetime cell: "YYYY-MM-DD HH:MM:SS".
- */
 function formatDatetimeDisplay(date: Date): string {
   const h = String(date.getUTCHours()).padStart(2, "0");
   const mi = String(date.getUTCMinutes()).padStart(2, "0");
@@ -212,7 +180,6 @@ function formatDatetimeDisplay(date: Date): string {
   return `${formatDateISO(date)} ${h}:${mi}:${s}`;
 }
 
-/** Format a Date for display according to the given format. */
 function formatDateDisplay(date: Date, format: OdsDateFormat): string {
   const y = String(date.getUTCFullYear());
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -227,7 +194,6 @@ function formatDateDisplay(date: Date, format: OdsDateFormat): string {
   }
 }
 
-/** Build a number:date-style element for datetime display (YYYY-MM-DD HH:MM:SS). */
 function buildDatetimeFormatStyle(): XmlElement {
   const dtStyle = el("number:date-style").attr("style:name", DATETIME_STYLE_NAME);
   dtStyle.appendChild(el("number:year").attr("number:style", "long"));
@@ -244,7 +210,6 @@ function buildDatetimeFormatStyle(): XmlElement {
   return dtStyle;
 }
 
-/** Return true if any date cell in any sheet has a nonzero UTC time component. */
 function hasDatetimeCells(sheets: OdsSheetData[]): boolean {
   for (const sheet of sheets) {
     for (const row of sheet.rows) {
@@ -258,7 +223,6 @@ function hasDatetimeCells(sheets: OdsSheetData[]): boolean {
   return false;
 }
 
-/** Resolve the effective date format for a cell: cell > row > document default. */
 function effectiveDateFormat(
   cell: OdsCellData,
   row: OdsRowData,
@@ -267,9 +231,163 @@ function effectiveDateFormat(
   return cell.options?.dateFormat ?? row.options?.dateFormat ?? defaultFormat;
 }
 
+// ─── Number Format Helpers ────────────────────────────────────────────
+
+/**
+ * Parse a numberFormat string and return a stable style name.
+ * Returns undefined if the format string is not recognized.
+ *
+ * Format strings:
+ *   "integer"          → "Nnum-int"
+ *   "decimal:N"        → "Nnum-decN"
+ *   "percentage"       → "Nnum-pct2"
+ *   "percentage:N"     → "Nnum-pctN"
+ *   "currency:CODE"    → "Nnum-CODE2"   (lowercase code)
+ *   "currency:CODE:N"  → "Nnum-CODEN"
+ */
+function numberFormatToStyleName(format: string): string | undefined {
+  if (format === "integer") return "Nnum-int";
+
+  const decMatch = format.match(/^decimal:(\d+)$/);
+  if (decMatch) return `Nnum-dec${decMatch[1]}`;
+
+  if (format === "percentage") return "Nnum-pct2";
+  const pctMatch = format.match(/^percentage:(\d+)$/);
+  if (pctMatch) return `Nnum-pct${pctMatch[1]}`;
+
+  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?$/);
+  if (curMatch) {
+    const code = curMatch[1].toLowerCase();
+    const decimals = curMatch[2] ?? "2";
+    return `Nnum-${code}${decimals}`;
+  }
+
+  return undefined;
+}
+
+/** Currency code → symbol mapping for common currencies. */
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  JPY: "¥",
+  CNY: "¥",
+  CHF: "Fr",
+  CAD: "CA$",
+  AUD: "A$",
+  INR: "₹",
+  KRW: "₩",
+  SEK: "kr",
+  NOK: "kr",
+  DKK: "kr",
+  PLN: "zł",
+  CZK: "Kč",
+  HUF: "Ft",
+  RON: "lei",
+  BGN: "лв",
+  HRK: "kn",
+  RUB: "₽",
+  TRY: "₺",
+  BRL: "R$",
+  MXN: "MX$",
+  ZAR: "R",
+  SGD: "S$",
+  HKD: "HK$",
+  NZD: "NZ$",
+  ILS: "₪",
+  AED: "د.إ",
+  SAR: "﷼",
+};
+
+/** Build a number:number-style or number:currency-style element. */
+function buildNumberFormatStyle(format: string): XmlElement | undefined {
+  const styleName = numberFormatToStyleName(format);
+  if (!styleName) return undefined;
+
+  if (format === "integer") {
+    const s = el("number:number-style").attr("style:name", styleName);
+    s.appendChild(
+      el("number:number")
+        .attr("number:decimal-places", "0")
+        .attr("number:grouping", "true")
+        .attr("number:min-integer-digits", "1"),
+    );
+    return s;
+  }
+
+  const decMatch = format.match(/^decimal:(\d+)$/);
+  if (decMatch) {
+    const s = el("number:number-style").attr("style:name", styleName);
+    s.appendChild(
+      el("number:number")
+        .attr("number:decimal-places", decMatch[1])
+        .attr("number:grouping", "true")
+        .attr("number:min-integer-digits", "1"),
+    );
+    return s;
+  }
+
+  if (format === "percentage") {
+    const s = el("number:number-style").attr("style:name", styleName);
+    s.appendChild(
+      el("number:number").attr("number:decimal-places", "2").attr("number:min-integer-digits", "1"),
+    );
+    s.appendChild(el("number:text").text("%"));
+    return s;
+  }
+
+  const pctMatch = format.match(/^percentage:(\d+)$/);
+  if (pctMatch) {
+    const s = el("number:number-style").attr("style:name", styleName);
+    s.appendChild(
+      el("number:number")
+        .attr("number:decimal-places", pctMatch[1])
+        .attr("number:min-integer-digits", "1"),
+    );
+    s.appendChild(el("number:text").text("%"));
+    return s;
+  }
+
+  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?$/);
+  if (curMatch) {
+    const code = curMatch[1];
+    const decimals = curMatch[2] ?? "2";
+    const symbol = CURRENCY_SYMBOLS[code] ?? code;
+    const s = el("number:currency-style").attr("style:name", styleName);
+    s.appendChild(
+      el("number:currency-symbol")
+        .attr("number:language", "en")
+        .attr("number:country", "US")
+        .text(symbol),
+    );
+    s.appendChild(
+      el("number:number")
+        .attr("number:decimal-places", decimals)
+        .attr("number:grouping", "true")
+        .attr("number:min-integer-digits", "1"),
+    );
+    return s;
+  }
+
+  return undefined;
+}
+
+/** Collect all unique numberFormat values used across all sheets. */
+function collectUsedNumberFormats(sheets: OdsSheetData[]): Set<string> {
+  const used = new Set<string>();
+  for (const sheet of sheets) {
+    for (const row of sheet.rows) {
+      for (const cell of row.cells) {
+        const fmt = cell.options?.numberFormat ?? row.options?.numberFormat;
+        if (fmt) used.add(fmt);
+      }
+    }
+  }
+  return used;
+}
+
 // ─── Style Collection ─────────────────────────────────────────────────
 
-/** Scan all sheets for date formats actually used — only emit those styles. */
 function collectUsedDateFormats(
   sheets: OdsSheetData[],
   defaultFormat: OdsDateFormat,
@@ -288,9 +406,23 @@ function collectUsedDateFormats(
 }
 
 /**
- * Build a map from cell style key → [style name, normalized style].
- * Deduplicates identical styles across all sheets and rows.
+ * Resolve the data style name for a cell — covers both date and number formats.
  */
+function resolveDataStyleName(
+  cell: OdsCellData,
+  row: OdsRowData,
+  defaultDateFormat: OdsDateFormat,
+): string | undefined {
+  if (cell.type === "date") {
+    return cell.value instanceof Date && isDatetime(cell.value)
+      ? DATETIME_STYLE_NAME
+      : dateFormatToStyleName(effectiveDateFormat(cell, row, defaultDateFormat));
+  }
+  const fmt = cell.options?.numberFormat ?? row.options?.numberFormat;
+  if (fmt) return numberFormatToStyleName(fmt);
+  return undefined;
+}
+
 function buildCellStyleMap(
   sheets: OdsSheetData[],
   defaultDateFormat: OdsDateFormat,
@@ -304,13 +436,7 @@ function buildCellStyleMap(
         if (cell.type === "empty") continue;
 
         const effective = mergeOptions(row.options, cell.options);
-        const dataStyleName =
-          cell.type === "date"
-            ? cell.value instanceof Date && isDatetime(cell.value)
-              ? DATETIME_STYLE_NAME
-              : dateFormatToStyleName(effectiveDateFormat(cell, row, defaultDateFormat))
-            : undefined;
-
+        const dataStyleName = resolveDataStyleName(cell, row, defaultDateFormat);
         const normalized = normalizeOdsCellStyle(effective, dataStyleName);
         const key = cellStyleKey(normalized);
         if (key === "") continue;
@@ -326,10 +452,6 @@ function buildCellStyleMap(
   return map;
 }
 
-/**
- * Build a map from column width → style name, plus the shared optimal style name.
- * Columns without explicit widths share one "optimal" style.
- */
 function buildColumnStyleMap(sheets: OdsSheetData[]): {
   widthMap: Map<string, string>;
   optimalStyleName: string;
@@ -349,10 +471,6 @@ function buildColumnStyleMap(sheets: OdsSheetData[]): {
   return { widthMap, optimalStyleName: `co${counter}` };
 }
 
-/**
- * Build a map from row height → style name, plus the shared optimal style name.
- * Rows without explicit heights share one "optimal" style.
- */
 function buildRowStyleMap(sheets: OdsSheetData[]): {
   heightMap: Map<string, string>;
   optimalStyleName: string;
@@ -374,14 +492,16 @@ function buildRowStyleMap(sheets: OdsSheetData[]): {
 
 // ─── Style Element Builders ───────────────────────────────────────────
 
-function buildTableStyle(styleName: string): XmlElement {
+function buildTableStyle(styleName: string, tabColor?: string): XmlElement {
   const style = el("style:style")
     .attr("style:name", styleName)
     .attr("style:family", "table")
     .attr("style:master-page-name", "Default");
-  style.appendChild(
-    el("style:table-properties").attr("table:display", "true").attr("style:writing-mode", "lr-tb"),
-  );
+  const tableProps = el("style:table-properties")
+    .attr("table:display", "true")
+    .attr("style:writing-mode", "lr-tb");
+  if (tabColor) tableProps.attr("table:tab-color", tabColor);
+  style.appendChild(tableProps);
   return style;
 }
 
@@ -425,7 +545,6 @@ function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement 
     style.attr("style:data-style-name", cs.dataStyleName);
   }
 
-  // Table cell properties
   const hasCellProps =
     cs.backgroundColor ||
     cs.borderTop ||
@@ -449,7 +568,6 @@ function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement 
     style.appendChild(cellProps);
   }
 
-  // Text properties — tripled for Western/Asian/Complex script consistency
   const hasTextProps =
     cs.fontWeight || cs.fontStyle || cs.fontSize || cs.fontFamily || cs.color || cs.underline;
 
@@ -485,7 +603,6 @@ function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement 
     style.appendChild(textProps);
   }
 
-  // Paragraph properties for text alignment (fo:text-align lives here in ODS)
   if (cs.textAlign) {
     style.appendChild(el("style:paragraph-properties").attr("fo:text-align", cs.textAlign));
   }
@@ -495,14 +612,15 @@ function buildCellStyle(styleName: string, cs: NormalizedCellStyle): XmlElement 
 
 // ─── Column Count ─────────────────────────────────────────────────────
 
-/**
- * Determine the number of columns in a sheet.
- * Takes the maximum of: cells in any row, and the highest explicit column index + 1.
- */
 function getColumnCount(sheet: OdsSheetData): number {
   let max = 0;
   for (const row of sheet.rows) {
-    max = Math.max(max, row.cells.length);
+    // Account for colSpan when computing column count
+    let colCount = 0;
+    for (const cell of row.cells) {
+      colCount += cell.colSpan ?? 1;
+    }
+    max = Math.max(max, colCount);
   }
   for (const colIdx of sheet.columns.keys()) {
     max = Math.max(max, colIdx + 1);
@@ -525,17 +643,15 @@ function buildCellElement(
 
   const cellEl = el("table:table-cell");
 
-  // Effective options: row defaults merged with cell overrides
-  const effective = mergeOptions(row.options, cell.options);
-  const cellDateFmt = effectiveDateFormat(cell, row, defaultDateFormat);
-  const dataStyleName =
-    cell.type === "date"
-      ? cell.value instanceof Date && isDatetime(cell.value)
-        ? DATETIME_STYLE_NAME
-        : dateFormatToStyleName(cellDateFmt)
-      : undefined;
+  // Column and row span
+  const colSpan = cell.colSpan ?? 1;
+  const rowSpan = cell.rowSpan ?? 1;
+  if (colSpan > 1) cellEl.attr("table:number-columns-spanned", String(colSpan));
+  if (rowSpan > 1) cellEl.attr("table:number-rows-spanned", String(rowSpan));
 
-  // Look up deduplicated cell style
+  // Effective options and style lookup
+  const effective = mergeOptions(row.options, cell.options);
+  const dataStyleName = resolveDataStyleName(cell, row, defaultDateFormat);
   const normalized = normalizeOdsCellStyle(effective, dataStyleName);
   const key = cellStyleKey(normalized);
   if (key !== "") {
@@ -543,28 +659,65 @@ function buildCellElement(
     if (entry) cellEl.attr("table:style-name", entry[0]);
   }
 
+  // Cell content — build the text:p content, wrapping in text:a for hyperlinks
+  const buildTextP = (content: string): XmlElement => {
+    const p = el("text:p");
+    if (cell.href) {
+      const a = el("text:a")
+        .attr("xlink:type", "simple")
+        .attr("xlink:href", cell.href)
+        .text(content);
+      p.appendChild(a);
+    } else {
+      p.text(content);
+    }
+    return p;
+  };
+
   // Value type, value attributes, and display paragraph
   switch (cell.type) {
     case "string":
       cellEl.attr("office:value-type", "string");
-      cellEl.appendChild(el("text:p").text(String(cell.value ?? "")));
+      cellEl.appendChild(buildTextP(String(cell.value ?? "")));
       break;
 
     case "float":
       cellEl.attr("office:value-type", "float");
       cellEl.attr("office:value", String(cell.value));
-      cellEl.appendChild(el("text:p").text(String(cell.value)));
+      cellEl.appendChild(buildTextP(String(cell.value)));
       break;
+
+    case "percentage": {
+      // ODS stores raw decimal, displays as percentage
+      const rawVal = Number(cell.value ?? 0);
+      cellEl.attr("office:value-type", "percentage");
+      cellEl.attr("office:value", String(rawVal));
+      // Display value: multiply by 100 for display (LibreOffice recalculates)
+      cellEl.appendChild(buildTextP(String(rawVal)));
+      break;
+    }
+
+    case "currency": {
+      const fmt = cell.options?.numberFormat ?? row.options?.numberFormat ?? "";
+      const curMatch = fmt.match(/^currency:([A-Z]{3})/);
+      const currencyCode = curMatch ? curMatch[1] : "USD";
+      cellEl.attr("office:value-type", "currency");
+      cellEl.attr("office:currency", currencyCode);
+      cellEl.attr("office:value", String(cell.value));
+      cellEl.appendChild(buildTextP(String(cell.value)));
+      break;
+    }
 
     case "date": {
       const date = cell.value as Date;
+      const cellDateFmt = effectiveDateFormat(cell, row, defaultDateFormat);
       cellEl.attr("office:value-type", "date");
       if (isDatetime(date)) {
         cellEl.attr("office:date-value", formatDatetimeISO(date));
-        cellEl.appendChild(el("text:p").text(formatDatetimeDisplay(date)));
+        cellEl.appendChild(buildTextP(formatDatetimeDisplay(date)));
       } else {
         cellEl.attr("office:date-value", formatDateISO(date));
-        cellEl.appendChild(el("text:p").text(formatDateDisplay(date, cellDateFmt)));
+        cellEl.appendChild(buildTextP(formatDateDisplay(date, cellDateFmt)));
       }
       break;
     }
@@ -572,15 +725,14 @@ function buildCellElement(
     case "boolean":
       cellEl.attr("office:value-type", "boolean");
       cellEl.attr("office:boolean-value", cell.value ? "true" : "false");
-      cellEl.appendChild(el("text:p").text(cell.value ? "TRUE" : "FALSE"));
+      cellEl.appendChild(buildTextP(cell.value ? "TRUE" : "FALSE"));
       break;
 
     case "formula": {
-      // Prepend OpenFormula namespace prefix; LibreOffice recalculates on open
       cellEl.attr("table:formula", `of:${String(cell.value)}`);
       cellEl.attr("office:value-type", "float");
       cellEl.attr("office:value", "0");
-      cellEl.appendChild(el("text:p").text("0"));
+      cellEl.appendChild(buildTextP("0"));
       break;
     }
   }
@@ -605,13 +757,12 @@ function buildSheetElement(
     .attr("table:name", sheet.name)
     .attr("table:style-name", tableStyleName);
 
-  // Column definitions — one per column
+  // Column definitions
   for (let colIdx = 0; colIdx < numCols; colIdx++) {
     const colData = sheet.columns.get(colIdx);
     const colStyleName = colData?.width
       ? (widthMap.get(colData.width) ?? optimalColStyle)
       : optimalColStyle;
-
     tableEl.appendChild(
       el("table:table-column")
         .attr("table:style-name", colStyleName)
@@ -619,16 +770,74 @@ function buildSheetElement(
     );
   }
 
-  // Row definitions
-  for (const row of sheet.rows) {
+  // Two-pass approach for rowSpan:
+  // Pass 1: build a set of (rowIndex, colIndex) positions covered by rowSpan cells
+  const coveredCells = new Set<string>();
+
+  // Track physical column positions accounting for colSpan
+  for (let rowIdx = 0; rowIdx < sheet.rows.length; rowIdx++) {
+    const row = sheet.rows[rowIdx];
+    let physicalCol = 0;
+
+    for (const cell of row.cells) {
+      // Skip positions already covered
+      while (coveredCells.has(`${rowIdx}:${physicalCol}`)) {
+        physicalCol++;
+      }
+
+      const colSpan = cell.colSpan ?? 1;
+      const rowSpan = cell.rowSpan ?? 1;
+
+      // Mark all covered cells for rowSpan
+      if (rowSpan > 1) {
+        for (let rs = 1; rs < rowSpan; rs++) {
+          for (let cs = 0; cs < colSpan; cs++) {
+            coveredCells.add(`${rowIdx + rs}:${physicalCol + cs}`);
+          }
+        }
+      }
+      // Mark covered cells for colSpan within the same row
+      // (these are emitted as covered cells inline — no need to track separately)
+
+      physicalCol += colSpan;
+    }
+  }
+
+  // Pass 2: build row elements
+  for (let rowIdx = 0; rowIdx < sheet.rows.length; rowIdx++) {
+    const row = sheet.rows[rowIdx];
     const rowStyleName = row.height
       ? (heightMap.get(row.height) ?? optimalRowStyle)
       : optimalRowStyle;
 
     const rowEl = el("table:table-row").attr("table:style-name", rowStyleName);
 
+    let physicalCol = 0;
+
     for (const cell of row.cells) {
+      // Emit covered cells for any rowSpan from previous rows
+      while (coveredCells.has(`${rowIdx}:${physicalCol}`)) {
+        rowEl.appendChild(el("table:covered-table-cell"));
+        physicalCol++;
+      }
+
+      // Emit the actual cell
       rowEl.appendChild(buildCellElement(cell, row, cellStyleMap, defaultDateFormat));
+
+      const colSpan = cell.colSpan ?? 1;
+
+      // Emit inline covered cells for colSpan
+      for (let cs = 1; cs < colSpan; cs++) {
+        rowEl.appendChild(el("table:covered-table-cell"));
+      }
+
+      physicalCol += colSpan;
+    }
+
+    // Fill any remaining covered cells at end of row
+    while (coveredCells.has(`${rowIdx}:${physicalCol}`)) {
+      rowEl.appendChild(el("table:covered-table-cell"));
+      physicalCol++;
     }
 
     tableEl.appendChild(rowEl);
@@ -641,23 +850,19 @@ function buildSheetElement(
 
 /**
  * Generate the content.xml for an ODS document.
- *
- * @param sheets - Sheet data in tab order.
- * @param defaultDateFormat - Document-level default date display format.
- * @returns Serialized content.xml string.
  */
 export function generateOdsContent(
   sheets: OdsSheetData[],
   defaultDateFormat: OdsDateFormat,
 ): string {
-  // Collect all style information up front
   const usedDateFormats = collectUsedDateFormats(sheets, defaultDateFormat);
   const needsDatetime = hasDatetimeCells(sheets);
+  const usedNumberFormats = collectUsedNumberFormats(sheets);
   const cellStyleMap = buildCellStyleMap(sheets, defaultDateFormat);
   const { widthMap, optimalStyleName: optimalColStyle } = buildColumnStyleMap(sheets);
   const { heightMap, optimalStyleName: optimalRowStyle } = buildRowStyleMap(sheets);
 
-  // Root element — ODS uses office, style, text, table, fo, number, of namespaces
+  // Root element — add xlink namespace for hyperlinks
   const root = el("office:document-content")
     .attr("xmlns:office", ODF_NS.office)
     .attr("xmlns:style", ODF_NS.style)
@@ -666,46 +871,49 @@ export function generateOdsContent(
     .attr("xmlns:fo", ODF_NS.fo)
     .attr("xmlns:number", ODF_NS.number)
     .attr("xmlns:of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2")
+    .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
     .attr("office:version", ODF_VERSION);
 
-  // Automatic styles
   const autoStyles = el("office:automatic-styles");
 
-  // Date format styles — only those actually used in this document
+  // Date format styles
   for (const format of usedDateFormats) {
     autoStyles.appendChild(buildDateFormatStyle(format));
   }
-
-  // Datetime style — emitted only if any date cell has a nonzero time component
   if (needsDatetime) {
     autoStyles.appendChild(buildDatetimeFormatStyle());
   }
 
-  // Table styles — one per sheet
-  for (let i = 0; i < sheets.length; i++) {
-    autoStyles.appendChild(buildTableStyle(`ta${i + 1}`));
+  // Number format styles
+  for (const format of usedNumberFormats) {
+    const styleEl = buildNumberFormatStyle(format);
+    if (styleEl) autoStyles.appendChild(styleEl);
   }
 
-  // Column styles: shared optimal-width style, then width-specific styles
+  // Table styles — pass tab color
+  for (let i = 0; i < sheets.length; i++) {
+    autoStyles.appendChild(buildTableStyle(`ta${i + 1}`, sheets[i].tabColor));
+  }
+
+  // Column styles
   autoStyles.appendChild(buildOptimalColumnStyle(optimalColStyle));
   for (const [width, styleName] of widthMap) {
     autoStyles.appendChild(buildColumnStyle(styleName, width));
   }
 
-  // Row styles: shared optimal-height style, then height-specific styles
+  // Row styles
   autoStyles.appendChild(buildOptimalRowStyle(optimalRowStyle));
   for (const [height, styleName] of heightMap) {
     autoStyles.appendChild(buildRowStyle(styleName, height));
   }
 
-  // Cell styles (deduplicated)
+  // Cell styles
   for (const [styleName, cs] of cellStyleMap.values()) {
     autoStyles.appendChild(buildCellStyle(styleName, cs));
   }
 
   root.appendChild(autoStyles);
 
-  // Body → spreadsheet → sheets
   const body = el("office:body");
   const spreadsheet = el("office:spreadsheet");
 
@@ -732,11 +940,6 @@ export function generateOdsContent(
 
 /**
  * Generate the styles.xml for an ODS document.
- *
- * ODS requires styles.xml for:
- * - The `Default` table-cell style (referenced via `style:parent-style-name` on
- *   all automatic cell styles, and via `table:default-cell-style-name` on columns)
- * - The master page definition (referenced via `style:master-page-name` on table styles)
  */
 export function generateOdsStyles(): string {
   const root = el("office:document-styles")
@@ -745,21 +948,18 @@ export function generateOdsStyles(): string {
     .attr("xmlns:fo", ODF_NS.fo)
     .attr("office:version", ODF_VERSION);
 
-  // Named styles — Default table-cell style
   const styles = el("office:styles");
   styles.appendChild(
     el("style:style").attr("style:name", "Default").attr("style:family", "table-cell"),
   );
   root.appendChild(styles);
 
-  // Automatic styles — page layout required for master page reference
   const autoStyles = el("office:automatic-styles");
   const pageLayout = el("style:page-layout").attr("style:name", "Mlayout");
   pageLayout.appendChild(el("style:page-layout-properties"));
   autoStyles.appendChild(pageLayout);
   root.appendChild(autoStyles);
 
-  // Master styles — Default master page referenced by table styles
   const masterStyles = el("office:master-styles");
   masterStyles.appendChild(
     el("style:master-page").attr("style:name", "Default").attr("style:page-layout-name", "Mlayout"),
