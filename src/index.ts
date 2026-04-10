@@ -7,6 +7,7 @@ export { TableBuilder, RowBuilder, CellBuilder } from "./odt/index.js";
 export { ListBuilder } from "./odt/index.js";
 export { htmlToOdt } from "./odt/index.js";
 export { markdownToOdt } from "./odt/index.js";
+export { tiptapToOdt } from "./odt/index.js";
 export type {
   ContentElement,
   TextFormatting,
@@ -20,6 +21,9 @@ export type {
   ImageOptions,
   ImageData,
   HtmlToOdtOptions,
+  TiptapNode,
+  TiptapMark,
+  TiptapToOdtOptions,
 } from "./odt/index.js";
 export type { MetadataOptions } from "./core/index.js";
 export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
