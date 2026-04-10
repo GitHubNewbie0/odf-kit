@@ -5,6 +5,23 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8] - 2026-04-10
+
+### Added
+
+- **`readOds()`** — Parse an ODS file into a structured `OdsDocumentModel`. Returns typed JavaScript values — `string`, `number`, `boolean`, `Date` — never display-formatted strings. Available via `odf-kit/ods-reader`.
+- **`odsToHtml()`** — Convert an ODS file directly to an HTML string. Each sheet rendered as a `<table>` with inline styles. Available via `odf-kit/ods-reader`.
+- **`OdsDocumentModel`** — sheets → rows → cells with `value`, `type`, `formula?`, `displayText?`, `colSpan?`, `rowSpan?`, `formatting?`.
+- **Cell types:** `"string"`, `"float"`, `"date"`, `"boolean"`, `"formula"`, `"empty"`, `"covered"`.
+- **Formula cells** — `value` is the cached result, `formula` is the original formula string (e.g. `"=SUM(A1:A10)"`).
+- **Merged cell handling** — primary cell has `colSpan`/`rowSpan`, covered cells have `type: "covered"` and `value: null` at correct physical column indices.
+- **Cell formatting** — `OdsCellFormatting` with bold, italic, underline, fontSize, fontFamily, color, backgroundColor, textAlign, verticalAlign, numberFormat, dateFormat. Set `includeFormatting: false` for faster parsing when only values are needed.
+- **Sheet metadata** — tab color, freeze rows/columns read from settings.xml.
+- **Document metadata** — title, creator, description from meta.xml.
+- **`odf-kit/ods-reader`** sub-export added.
+- **`odf-kit/odt-reader`** alias added for `odf-kit/reader` — consistent naming with `odf-kit/ods-reader`.
+- 40 new tests (889 total).
+
 ## [0.9.7] - 2026-04-10
 
 ### Added
@@ -169,6 +186,7 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[0.9.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.8
 [0.9.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.7
 [0.9.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.6
 [0.9.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.5

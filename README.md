@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Eight ways to work with ODF files
+## Nine ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -119,7 +119,16 @@ const html  = odtToHtml(bytes);            // styled HTML string
 ```
 
 ```typescript
-// 8. Convert .odt to Typst for PDF generation
+// 8. Read an existing .ods spreadsheet
+import { readOds, odsToHtml } from "odf-kit/ods-reader";
+
+const bytes = readFileSync("data.ods");
+const model = readOds(bytes);              // structured model — typed values
+const html  = odsToHtml(bytes);            // HTML table string
+```
+
+```typescript
+// 9. Convert .odt to Typst for PDF generation
 import { odtToTypst } from "odf-kit/typst";
 import { execSync } from "child_process";
 
@@ -140,7 +149,8 @@ Node.js 22+ required. ESM only. Sub-exports:
 
 ```typescript
 import { OdtDocument, OdsDocument, htmlToOdt, markdownToOdt, tiptapToOdt, fillTemplate } from "odf-kit";
-import { readOdt, odtToHtml }                from "odf-kit/reader";
+import { readOdt, odtToHtml } from "odf-kit/odt-reader";
+import { readOds, odsToHtml } from "odf-kit/ods-reader";
 import { odtToTypst, modelToTypst }          from "odf-kit/typst";
 ```
 
@@ -597,7 +607,7 @@ Falsy values (`false`, `null`, `undefined`, `0`, `""`, `[]`) remove the block. T
 `odf-kit/reader` parses `.odt` files into a structured model and renders to HTML.
 
 ```typescript
-import { readOdt, odtToHtml } from "odf-kit/reader";
+import { readOdt, odtToHtml } from "odf-kit/odt-reader";
 
 const bytes = readFileSync("report.odt");
 const model = readOdt(bytes);
@@ -607,6 +617,65 @@ const html  = odtToHtml(bytes);
 const final    = odtToHtml(bytes, {}, { trackedChanges: "final" });
 const original = odtToHtml(bytes, {}, { trackedChanges: "original" });
 const marked   = odtToHtml(bytes, {}, { trackedChanges: "changes" });
+```
+
+---
+
+## Read: ODS Spreadsheets
+
+`odf-kit/ods-reader` parses `.ods` files into a structured model and renders to HTML.
+
+```typescript
+import { readOds, odsToHtml } from "odf-kit/ods-reader";
+import { readFileSync } from "fs";
+
+const bytes = readFileSync("data.ods");
+
+// Structured model — typed JavaScript values
+const model = readOds(bytes);
+for (const sheet of model.sheets) {
+  console.log(sheet.name);
+  for (const row of sheet.rows) {
+    for (const cell of row.cells) {
+      console.log(cell.colIndex, cell.type, cell.value);
+      // e.g. 0 "float" 1234.56
+      // e.g. 1 "string" "Hello"
+      // e.g. 2 "date" Date { 2026-01-15 }
+      // e.g. 3 "formula" 100  (cell.formula = "=SUM(A1:A10)")
+      // e.g. 4 "covered" null (part of a merged cell)
+    }
+  }
+}
+
+// HTML table
+const html = odsToHtml(bytes);
+
+// Fast mode — values only, no formatting
+const model2 = readOds(bytes, { includeFormatting: false });
+```
+
+### Cell types
+
+| Type | `value` | Notes |
+|------|---------|-------|
+| `"string"` | `string` | |
+| `"float"` | `number` | Includes percentage and currency cells |
+| `"date"` | `Date` (UTC) | |
+| `"boolean"` | `boolean` | |
+| `"formula"` | cached result | `cell.formula` has original string e.g. `"=SUM(A1:A10)"` |
+| `"empty"` | `null` | |
+| `"covered"` | `null` | Covered by a merge — correct `colIndex` always maintained |
+
+### Merged cells
+
+Primary cells have `colSpan` and/or `rowSpan`. Covered cells have `type: "covered"`, `value: null`, and the correct physical `colIndex` — no offset confusion.
+
+```typescript
+// A1:C1 merged — reading row 0:
+// cell 0: { type: "string", value: "Header", colSpan: 3 }
+// cell 1: { type: "covered", value: null, colIndex: 1 }
+// cell 2: { type: "covered", value: null, colIndex: 2 }
+// cell 3: { type: "string", value: "D1", colIndex: 3 }  ← always correct
 ```
 
 ---
@@ -782,6 +851,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.9.8** — ODS reader: `readOds()` and `odsToHtml()` via `odf-kit/ods-reader`. Typed values, formula strings, merged cell handling, formatting, metadata. `odf-kit/odt-reader` alias added. 889 tests passing.
 
 **v0.9.7** — ODS enhancements: number formats (integer, decimal:N, percentage, currency), merged cells (colSpan/rowSpan), freeze rows/columns, hyperlinks in cells, sheet tab color. 849 tests passing.
 
