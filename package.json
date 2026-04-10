@@ -14,6 +14,10 @@
       "types": "./dist/odt/index.d.ts",
       "import": "./dist/odt/index.js"
     },
+    "./odt-reader": {
+      "types": "./dist/reader/index.d.ts",
+      "import": "./dist/reader/index.js"
+    },
     "./ods": {
       "types": "./dist/ods/index.d.ts",
       "import": "./dist/ods/index.js"
