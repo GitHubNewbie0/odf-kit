@@ -5,6 +5,19 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2026-04-10
+
+### Added
+
+- **`tiptapToOdt()`** — Convert TipTap/ProseMirror JSON directly to ODT. Accepts the JSON object returned by `editor.getJSON()` in TipTap and returns a valid `.odt` file as `Uint8Array`. No dependency on `@tiptap/core` — walks the JSON tree as a plain object.
+- **Supported block nodes:** `doc`, `paragraph`, `heading` (levels 1–6), `bulletList`, `orderedList`, `listItem` (nested), `blockquote`, `codeBlock`, `horizontalRule`, `hardBreak`, `image`, `table`, `tableRow`, `tableCell`, `tableHeader`.
+- **Supported marks:** `bold`, `italic`, `underline`, `strike`, `code`, `link`, `textStyle` (color, fontSize, fontFamily), `highlight`, `superscript`, `subscript`.
+- **Image support:** Data URIs decoded and embedded directly. Other URLs looked up in the `images` option (`Record<src, Uint8Array>`). Unknown URLs emit a placeholder paragraph.
+- **`unknownNodeHandler`** callback in `TiptapToOdtOptions` — handle custom TipTap extensions without waiting for odf-kit to add support.
+- **`TiptapNode`**, **`TiptapMark`**, **`TiptapToOdtOptions`** types exported.
+- All `HtmlToOdtOptions` apply (page format, margins, orientation, metadata).
+- 31 new tests (817 total).
+
 ## [0.9.5] - 2026-04-09
 
 ### Added
@@ -142,6 +155,7 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[0.9.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.6
 [0.9.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.5
 [0.9.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.4
 [0.9.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.2
