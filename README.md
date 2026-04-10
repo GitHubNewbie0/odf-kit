@@ -455,6 +455,8 @@ Supports headings, paragraphs, bold, italic, lists (nested), tables, links, bloc
 
 `tiptapToOdt()` converts TipTap/ProseMirror `JSONContent` directly to ODT. No dependency on `@tiptap/core` — walks the JSON tree as a plain object. This is the most direct integration path for any TipTap-based editor (dDocs, Outline, Novel, BlockNote, etc.).
 
+**Conversion happens entirely in your environment.** No document content is sent to external services — unlike cloud-based ODT conversion APIs. Suitable for sensitive documents, air-gapped environments, and applications with GDPR or data sovereignty requirements.
+
 ```typescript
 import { tiptapToOdt } from "odf-kit";
 
