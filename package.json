@@ -26,7 +26,11 @@
       "types": "./dist/ods-reader/index.d.ts",
       "import": "./dist/ods-reader/index.js"
     },
-    "./template": {
+    "./xlsx": {
+      "types": "./dist/xlsx/index.d.ts",
+      "import": "./dist/xlsx/index.js"
+    },
+	"./template": {
       "types": "./dist/template/index.d.ts",
       "import": "./dist/template/index.js"
     },
