@@ -5,6 +5,22 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.9] - 2026-04-11
+
+### Added
+
+- **`xlsxToOds()`** — Convert an `.xlsx` file to an `.ods` file. Available via `odf-kit/xlsx`. Zero new dependencies — parses XLSX XML directly using fflate (already present) and odf-kit's existing XML parser.
+- **XLSX parser** — Reads `xl/workbook.xml`, `xl/_rels/workbook.xml.rels`, `xl/sharedStrings.xml`, `xl/styles.xml`, and `xl/worksheets/sheet*.xml`. No dependency on SheetJS or any external library.
+- **Cell types supported:** string, number, boolean, date (with Excel serial → `Date` conversion including Lotus 1900 leap year bug correction), formula (cached result + formula string), error (as string).
+- **Date detection** — Built-in XLSX date format IDs (14–17, 22, 27–36, 45–47, 50–58) plus custom format code analysis.
+- **Merged cells** — `colSpan`/`rowSpan` preserved via `<mergeCells>` parsing.
+- **Freeze rows/columns** — Detected from `<pane state="frozen">` in sheet XML.
+- **Multi-sheet workbooks** — All sheets converted in tab order.
+- **`readXlsx()`** — Lower-level function returning an `XlsxWorkbook` intermediate model. Exported from `odf-kit/xlsx` for callers who need the parsed model directly.
+- **`odf-kit/xlsx`** sub-export added.
+- Supports `.xlsx` and `.xlsm` (macro-enabled, same XML structure). Does not support legacy `.xls` (binary) or `.xlsb` (binary XML).
+- 47 new tests (936 total).
+
 ## [0.9.8] - 2026-04-10
 
 ### Added
@@ -186,6 +202,7 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[0.9.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.9
 [0.9.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.8
 [0.9.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.7
 [0.9.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.6

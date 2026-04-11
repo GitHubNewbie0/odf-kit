@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Nine ways to work with ODF files
+## Ten ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -128,7 +128,15 @@ const html  = odsToHtml(bytes);            // HTML table string
 ```
 
 ```typescript
-// 9. Convert .odt to Typst for PDF generation
+// 9. Convert .xlsx to .ods — no external dependencies
+import { xlsxToOds } from "odf-kit/xlsx"
+
+const bytes = await xlsxToOds(readFileSync("report.xlsx"))
+writeFileSync("report.ods", bytes)
+```
+
+```typescript
+// 10. Convert .odt to Typst for PDF generation
 import { odtToTypst } from "odf-kit/typst";
 import { execSync } from "child_process";
 
@@ -680,6 +688,43 @@ Primary cells have `colSpan` and/or `rowSpan`. Covered cells have `type: "covere
 
 ---
 
+## Convert: XLSX → ODS
+
+`odf-kit/xlsx` converts `.xlsx` spreadsheets to `.ods` with no external dependencies — parses XLSX XML directly using fflate (already in odf-kit) and our own XML parser. Supports `.xlsx` and `.xlsm`. Does not support legacy `.xls` (binary format).
+
+```typescript
+import { xlsxToOds } from "odf-kit/xlsx"
+import { readFileSync, writeFileSync } from "fs"
+
+// Simple conversion
+const bytes = await xlsxToOds(readFileSync("report.xlsx"))
+writeFileSync("report.ods", bytes)
+
+// With options
+const bytes2 = await xlsxToOds(readFileSync("report.xlsx"), {
+  dateFormat: "DD/MM/YYYY",
+  metadata: { title: "Q4 Report", creator: "Alice" },
+})
+
+// Works with ArrayBuffer too (browser-friendly)
+const bytes3 = await xlsxToOds(arrayBuffer)
+```
+
+**What is preserved:**
+- All sheets in tab order, with their names
+- Cell values: strings, numbers, booleans, dates, formula cached results
+- Formula strings
+- Merged cells (colSpan/rowSpan)
+- Freeze rows/columns
+- Multiple sheets
+
+**What is not preserved** (out of scope for v0.9.9):
+- Cell formatting (colors, fonts, borders)
+- Column widths and row heights
+- Charts, images, pivot tables
+
+---
+
 ## Typst: ODT to PDF
 
 ```typescript
@@ -851,6 +896,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.9.9** — `xlsxToOds()` via `odf-kit/xlsx`. XLSX→ODS conversion with zero new dependencies. 936 tests passing.
 
 **v0.9.8** — ODS reader: `readOds()` and `odsToHtml()` via `odf-kit/ods-reader`. Typed values, formula strings, merged cell handling, formatting, metadata. `odf-kit/odt-reader` alias added. 889 tests passing.
 
