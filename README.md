@@ -1,6 +1,6 @@
 # odf-kit
 
-Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Convert HTML, Markdown, and TipTap JSON to ODT. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
+Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Convert HTML, Markdown, TipTap JSON, and DOCX to ODT. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
 
 **[Documentation & examples →](https://githubnewbie0.github.io/odf-kit/)**
 
@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Ten ways to work with ODF files
+## Eleven ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -145,6 +145,21 @@ writeFileSync("letter.typ", typst);
 execSync("typst compile letter.typ letter.pdf");
 ```
 
+```typescript
+// 11. Convert .docx to .odt — pure ESM, zero new dependencies, browser-safe
+import { docxToOdt } from "odf-kit/docx";
+
+const { bytes, warnings } = await docxToOdt(readFileSync("report.docx"));
+writeFileSync("report.odt", bytes);
+if (warnings.length > 0) console.warn(warnings);
+
+// With options
+const { bytes: bytes2 } = await docxToOdt(readFileSync("report.docx"), {
+  pageFormat: "letter",
+  styleMap: { "Section Title": 1 }, // map custom Word style → heading level
+});
+```
+
 ---
 
 ## Installation
@@ -160,6 +175,7 @@ import { OdtDocument, OdsDocument, htmlToOdt, markdownToOdt, tiptapToOdt, fillTe
 import { readOdt, odtToHtml } from "odf-kit/odt-reader";
 import { readOds, odsToHtml } from "odf-kit/ods-reader";
 import { odtToTypst, modelToTypst }          from "odf-kit/typst";
+import { docxToOdt }                         from "odf-kit/docx";
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. Runtime dependencies: [fflate](https://github.com/101arrowz/fflate) for ZIP, [marked](https://marked.js.org/) for Markdown parsing.
@@ -739,6 +755,27 @@ execSync("typst compile letter.typ letter.pdf");
 
 ## API Reference
 
+### docxToOdt
+
+```typescript
+import { docxToOdt } from "odf-kit/docx"
+
+const { bytes, warnings } = await docxToOdt(input, options?)
+
+interface DocxToOdtOptions {
+  pageFormat?:         "A4" | "letter" | "legal" | "A3" | "A5";
+  orientation?:        "portrait" | "landscape";
+  preservePageLayout?: boolean;              // default: true — read layout from DOCX
+  styleMap?:           Record<string, number>; // custom style name → heading level
+  metadata?:           { title?: string; creator?: string; description?: string };
+}
+
+interface DocxToOdtResult {
+  bytes:    Uint8Array;   // the .odt file
+  warnings: string[];     // content that could not be fully converted
+}
+```
+
 ### htmlToOdt / markdownToOdt
 
 ```typescript
@@ -862,7 +899,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 - **Two runtime dependencies** — fflate (ZIP) and marked (Markdown parsing). No transitive dependencies.
 - **Spec-compliant output** — every generated file passes the OASIS ODF validator. Enforced on every commit by CI.
 - **Multiple ODF formats** — ODT documents and ODS spreadsheets from the same library.
-- **Eight complete capability modes** — build ODT, build ODS, convert HTML→ODT, convert Markdown→ODT, convert TipTap JSON→ODT, fill templates, read, convert to Typst/PDF.
+- **Nine complete capability modes** — build ODT, build ODS, convert HTML→ODT, convert Markdown→ODT, convert TipTap JSON→ODT, convert DOCX→ODT, fill templates, read, convert to Typst/PDF.
 - **TipTap/ProseMirror integration** — direct JSON→ODT conversion for any TipTap-based editor, no intermediate HTML step.
 - **Zero-dependency Typst emitter** — the only JavaScript library with built-in ODT→Typst conversion for PDF generation.
 - **TypeScript-first** — full types across all sub-exports.
@@ -879,6 +916,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 | Convert HTML → ODT | ✅ | ❌ | ❌ |
 | Convert Markdown → ODT | ✅ | ❌ | ❌ |
 | Convert TipTap JSON → ODT | ✅ | ❌ | ❌ |
+| Convert DOCX → ODT | ✅ native, browser-safe | ❌ | ❌ |
 | Fill .odt templates | ✅ | ❌ | ✅ .docx only |
 | Read .odt files | ✅ | ❌ | ❌ |
 | Convert to HTML | ✅ | ❌ | ❌ |
@@ -896,6 +934,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.10.0** — `docxToOdt()` via `odf-kit/docx`. Native DOCX→ODT converter — pure ESM, zero new dependencies, browser-safe. Preserves text, headings, formatting, tables, lists, images (actual dimensions), hyperlinks, bookmarks, footnotes, page layout, headers/footers, and tracked changes. Spec-validated against ECMA-376 5th edition. 1053 tests passing.
 
 **v0.9.9** — `xlsxToOds()` via `odf-kit/xlsx`. XLSX→ODS conversion with zero new dependencies. 936 tests passing.
 

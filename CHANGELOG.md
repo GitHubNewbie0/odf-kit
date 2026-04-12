@@ -5,6 +5,26 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-04-12
+
+### Added
+
+- **`docxToOdt()`** — Convert `.docx` files directly to `.odt`. Pure ESM, zero new dependencies, runs in Node.js 22+ and browsers. No CommonJS, no LibreOffice, no intermediate HTML step. Available via `odf-kit/docx`.
+- **Native DOCX parser** — Reads the full DOCX ZIP structure: `word/document.xml`, `word/styles.xml`, `word/numbering.xml`, `word/_rels/document.xml.rels`, `word/footnotes.xml`, `word/endnotes.xml`, `word/header*.xml`, `word/footer*.xml`, `word/settings.xml`, `word/media/*`, `docProps/core.xml`.
+- **Content preserved:** paragraphs, headings (style-name and outlineLvl detection), bold, italic, underline, strikethrough, superscript/subscript, small caps, all caps, font size, font family, text color, highlight color, text alignment, paragraph spacing (before/after), line height, indentation (left, right, first-line/hanging), bullet lists, numbered lists (decimal, roman, alpha), nested lists, tables (column widths, merged cells — colSpan and rowSpan, cell background color, vertical alignment), hyperlinks (external and internal anchor), bookmarks (two-pass cross-paragraph resolution), images (actual EMU dimensions, not defaulted to 10cm), page layout (size, margins, orientation from `w:sectPr`), headers and footers, footnotes and endnotes, page breaks, tabs, line breaks, tracked changes (final-text mode — insertions included, deletions skipped).
+- **Metadata** — title, creator, description read from `docProps/core.xml` (Dublin Core / OCP core properties).
+- **Style inheritance** — `w:basedOn` chain walked at conversion time; each style layer correctly overrides its parent.
+- **Complex fields** — `w:fldChar`/`w:instrText` HYPERLINK fields handled via state machine in addition to `w:hyperlink` elements. `w:fldSimple` fields (including in headers/footers) also handled.
+- **`w:pict` legacy VML images** — Dimensions parsed from `v:shape style` attribute; image bytes loaded via `v:imagedata r:id`.
+- **`w:sdt` structured document tags** — Always unwrapped and processed; checkboxes rendered as ☐/☑.
+- **`pageBreakBefore`** paragraph property respected — emits a page break before the affected paragraph.
+- **`DocxToOdtOptions`** — `pageFormat`, `orientation`, `preservePageLayout` (default: true), `styleMap` (custom style name → heading level), `metadata` override.
+- **`DocxToOdtResult`** — `{ bytes: Uint8Array, warnings: string[] }`. Warnings report content that could not be fully converted (unrecognised fields, missing images, mid-document section breaks, etc.).
+- **`odf-kit/docx`** sub-export added.
+- **Deprecates** `@odf-kit/docx-to-odt` (CommonJS, browser-incompatible) — use `odf-kit/docx` instead.
+- Spec-validated against ECMA-376 5th edition Part 1 (WordprocessingML). Every XSD schema element verified against the authoritative spec PDF.
+- 117 new tests (1053 total, 23 test suites).
+
 ## [0.9.9] - 2026-04-11
 
 ### Added
@@ -202,6 +222,7 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[0.10.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.0
 [0.9.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.9
 [0.9.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.8
 [0.9.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.7
@@ -221,3 +242,4 @@ Initial release. Complete ODT generation support.
 [0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.1.0
+
