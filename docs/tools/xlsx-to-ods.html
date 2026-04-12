@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XLSX to ODS Converter — Free, Private, Browser-Based | odf-kit</title>
+  <meta name="description" content="Convert Excel XLSX files to OpenDocument ODS format instantly in your browser. Free, private — your file never leaves your device. Powered by odf-kit.">
+  <meta name="keywords" content="XLSX to ODS, convert XLSX to ODS, Excel to OpenDocument, xlsx ods converter, odf-kit, free XLSX converter, browser XLSX converter, LibreOffice spreadsheet">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="XLSX to ODS Converter — Free, Private, Browser-Based">
+  <meta property="og:description" content="Convert Excel XLSX files to ODS format instantly in your browser. Free and private — your file never leaves your device. Powered by odf-kit.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "XLSX to ODS Converter",
+    "description": "Free browser-based tool to convert Microsoft Excel (.xlsx) files to OpenDocument Spreadsheet (.ods) format. No upload, no server — conversion runs entirely in your browser using odf-kit.",
+    "url": "https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #dbeafe;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --success-bg: #f0fdf4;
+      --success-border: #86efac;
+      --success-text: #166534;
+      --error-bg: #fef2f2;
+      --error-border: #fca5a5;
+      --error-text: #991b1b;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      background: var(--surface);
+    }
+    nav .inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .hero {
+      padding: 4rem 0 3rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 0.25rem 0.8rem;
+      border-radius: 100px;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto 1rem;
+    }
+    .privacy-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--success-text);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+    }
+
+    .tool-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--surface);
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+    .drop-title { font-size: 1.05rem; font-weight: 500; margin-bottom: 0.35rem; }
+    .drop-sub { font-size: 0.85rem; color: var(--text-secondary); }
+    .drop-sub strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .status {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .status.loading {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid #bfdbfe;
+    }
+    .status.error {
+      display: block;
+      background: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid var(--error-border);
+    }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid #bfdbfe;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result { display: none; margin-top: 2rem; }
+    .result.visible { display: block; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .result-title { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+    .result-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+    .result-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: #ccc; }
+    .btn-sm { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+
+    /* Sheet tabs */
+    .sheet-tabs {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+    .sheet-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .sheet-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+      border-bottom-color: var(--surface);
+      margin-bottom: -1px;
+    }
+    .sheet-tab:not(.active):hover { color: var(--text); }
+
+    /* Spreadsheet preview */
+    .sheet-preview-wrap {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 8px 8px 8px;
+      overflow: auto;
+      max-height: 500px;
+      background: var(--surface);
+    }
+    .sheet-preview-wrap table {
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 100%;
+    }
+    .sheet-preview-wrap td, .sheet-preview-wrap th {
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.65rem;
+      white-space: nowrap;
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sheet-preview-wrap .row-header {
+      background: #f5f5f0;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      text-align: center;
+      min-width: 2.5rem;
+      position: sticky;
+      left: 0;
+    }
+    .sheet-preview-wrap .col-header {
+      background: #f5f5f0;
+      font-weight: 600;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .sheet-preview-wrap .col-header.row-header {
+      z-index: 2;
+    }
+    .cell-number { text-align: right; }
+    .cell-date { text-align: center; font-family: 'JetBrains Mono', monospace; }
+    .cell-bool { text-align: center; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    .convert-another {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .convert-another p { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .info-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .info-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+
+    .dev-cta { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .dev-cta-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .dev-cta-text { flex: 1; min-width: 240px; }
+    .dev-cta-text h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .dev-cta-text p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.6; }
+    .code-snippet {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--code-text);
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .kw { color: #cba6f7; }
+    .str { color: #a6e3a1; }
+    .fn { color: #f9e2af; }
+    .cmt { color: #6c7086; }
+    .typ { color: #89b4fa; }
+
+    footer { padding: 2.5rem 0; text-align: center; }
+    footer p { font-size: 0.82rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.8rem; }
+      .result-header { flex-direction: column; align-items: flex-start; }
+      .dev-cta-inner { flex-direction: column; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a href="../" class="nav-brand"><span>odf-kit</span></a>
+    <div class="nav-links">
+      <a href="../">Docs</a>
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Free online tool</div>
+    <h1>XLSX to ODS converter</h1>
+    <p class="hero-sub">Convert Excel spreadsheets to OpenDocument format instantly — right in your browser. No upload, no account, no limits.</p>
+    <div class="privacy-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Your file never leaves your device
+    </div>
+  </div>
+</section>
+
+<section class="tool-section">
+  <div class="container">
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".xlsx,.xlsm">
+      <span class="drop-icon">📊</span>
+      <p class="drop-title">Drop your .xlsx file here</p>
+      <p class="drop-sub">or click to browse &nbsp;·&nbsp; <strong>.xlsx</strong> and <strong>.xlsm</strong> files</p>
+    </div>
+
+    <div class="status loading" id="statusLoading">
+      <div class="spinner"></div>
+      <span>Converting…</span>
+    </div>
+
+    <div class="status error" id="statusError"></div>
+
+    <div class="result" id="result">
+      <div class="result-header">
+        <div>
+          <span class="result-title">Converted: </span>
+          <span class="result-filename" id="resultFilename"></span>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-primary btn-sm" id="downloadBtn">⬇ Download .ods</button>
+        </div>
+      </div>
+
+      <div class="sheet-tabs" id="sheetTabs"></div>
+      <div class="sheet-preview-wrap" id="sheetPreview"></div>
+
+      <div class="convert-another">
+        <p>Want to convert another file?</p>
+        <button class="btn btn-secondary btn-sm" id="resetBtn">Convert another</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="container">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">How it works</p>
+    <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.4rem;">Private, fast, free</h2>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">Unlike other converters, your spreadsheet never leaves your computer.</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>🔒 Fully private</h3>
+        <p>Your XLSX file is read and converted locally by your browser. No data is sent to any server. Works offline after the page loads.</p>
+      </div>
+      <div class="info-card">
+        <h3>⚡ Instant conversion</h3>
+        <p>Conversion runs in milliseconds using odf-kit's pure JavaScript XLSX parser. No waiting for uploads or server processing.</p>
+      </div>
+      <div class="info-card">
+        <h3>📋 What is preserved</h3>
+        <p>All sheets, cell values (strings, numbers, dates, booleans, formulas), merged cells, and freeze rows/columns.</p>
+      </div>
+      <div class="info-card">
+        <h3>🆓 Free, always</h3>
+        <p>No file size limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dev-cta">
+  <div class="container">
+    <div class="dev-cta-inner">
+      <div class="dev-cta-text">
+        <h2>Need XLSX → ODS conversion in your app?</h2>
+        <p><strong>odf-kit</strong> is a free, open source JavaScript library that converts XLSX to ODS with zero server dependencies. Works in Node.js and browsers. No SheetJS, no external APIs — pure JavaScript.</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <a href="../" class="btn btn-primary btn-sm">View documentation</a>
+          <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
+<span class="kw">import</span> { <span class="typ">xlsxToOds</span> } <span class="kw">from</span> <span class="str">"odf-kit/xlsx"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());
+<span class="kw">const</span> ods = <span class="kw">await</span> <span class="fn">xlsxToOds</span>(bytes);
+
+<span class="cmt">// ods → Uint8Array, save as .ods file</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:3rem 0;border-bottom:1px solid var(--border);">
+  <div class="container">
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.02em;">More odf-kit tools &amp; guides</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;font-size:0.88rem;">
+      <a href="odt-to-html.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to HTML converter →</a>
+      <a href="odt-to-pdf.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to PDF converter →</a>
+      <a href="../guides/generate-odt-nodejs.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Generate ODT files in Node.js →</a>
+      <a href="../guides/generate-odt-browser.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Generate ODT in the browser →</a>
+      <a href="../guides/fill-odt-template-javascript.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Fill ODT templates in JavaScript →</a>
+      <a href="../guides/simple-odf-alternative.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">simple-odf alternative →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and TypeScript ·
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a> ·
+      Apache 2.0
+    </p>
+  </div>
+</footer>
+
+<script type="module">
+  import { xlsxToOds } from 'https://esm.sh/odf-kit@0.9.9/xlsx';
+  import { readOds }   from 'https://esm.sh/odf-kit@0.9.9/ods-reader';
+
+  const dropZone    = document.getElementById('dropZone');
+  const fileInput   = document.getElementById('fileInput');
+  const statusLoad  = document.getElementById('statusLoading');
+  const statusError = document.getElementById('statusError');
+  const result      = document.getElementById('result');
+  const resultFile  = document.getElementById('resultFilename');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const sheetTabs   = document.getElementById('sheetTabs');
+  const sheetPreview = document.getElementById('sheetPreview');
+
+  let odsBytes = null;
+  let odsModel = null;
+  let currentFilename = '';
+
+  // Column index → letter (0 → A, 25 → Z, 26 → AA)
+  function colLetter(n) {
+    let s = '';
+    n++;
+    while (n > 0) {
+      n--;
+      s = String.fromCharCode(65 + (n % 26)) + s;
+      n = Math.floor(n / 26);
+    }
+    return s;
+  }
+
+  function renderSheet(sheetIndex) {
+    const sheet = odsModel.sheets[sheetIndex];
+    if (!sheet || sheet.rows.length === 0) {
+      sheetPreview.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-secondary);font-size:0.88rem;">Empty sheet</div>';
+      return;
+    }
+
+    // Find max column
+    let maxCol = 0;
+    for (const row of sheet.rows) {
+      for (const cell of row.cells) {
+        if (cell.colIndex > maxCol) maxCol = cell.colIndex;
+      }
+    }
+
+    // Build table
+    const table = document.createElement('table');
+
+    // Column header row
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const cornerTh = document.createElement('th');
+    cornerTh.className = 'col-header row-header';
+    headerRow.appendChild(cornerTh);
+    for (let c = 0; c <= maxCol; c++) {
+      const th = document.createElement('th');
+      th.className = 'col-header';
+      th.textContent = colLetter(c);
+      headerRow.appendChild(th);
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    for (const row of sheet.rows) {
+      const tr = document.createElement('tr');
+      const rowTh = document.createElement('td');
+      rowTh.className = 'row-header';
+      rowTh.textContent = row.index + 1;
+      tr.appendChild(rowTh);
+
+      // Build cell map for this row
+      const cellMap = new Map();
+      for (const cell of row.cells) cellMap.set(cell.colIndex, cell);
+
+      for (let c = 0; c <= maxCol; c++) {
+        const cell = cellMap.get(c);
+        const td = document.createElement('td');
+
+        if (!cell || cell.type === 'empty' || cell.type === 'covered') {
+          tr.appendChild(td);
+          continue;
+        }
+
+        if (cell.colSpan > 1) td.colSpan = cell.colSpan;
+        if (cell.rowSpan > 1) td.rowSpan = cell.rowSpan;
+
+        if (cell.displayText) {
+          td.textContent = cell.displayText;
+        } else if (cell.value instanceof Date) {
+          td.textContent = cell.value.toISOString().slice(0, 10);
+          td.className = 'cell-date';
+        } else if (typeof cell.value === 'number') {
+          td.textContent = cell.value.toString();
+          td.className = 'cell-number';
+        } else if (typeof cell.value === 'boolean') {
+          td.textContent = cell.value ? 'TRUE' : 'FALSE';
+          td.className = 'cell-bool';
+        } else {
+          td.textContent = cell.value ?? '';
+        }
+
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    sheetPreview.innerHTML = '';
+    sheetPreview.appendChild(table);
+  }
+
+  function buildSheetTabs() {
+    sheetTabs.innerHTML = '';
+    odsModel.sheets.forEach((sheet, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'sheet-tab' + (i === 0 ? ' active' : '');
+      btn.textContent = sheet.name;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        renderSheet(i);
+      });
+      sheetTabs.appendChild(btn);
+    });
+  }
+
+  function showLoading() {
+    statusLoad.style.display = 'flex';
+    statusError.style.display = 'none';
+    result.classList.remove('visible');
+  }
+
+  function showError(msg) {
+    statusLoad.style.display = 'none';
+    statusError.style.display = 'block';
+    statusError.textContent = msg;
+  }
+
+  function showResult(bytes, model, filename) {
+    statusLoad.style.display = 'none';
+    odsBytes = bytes;
+    odsModel = model;
+    currentFilename = filename.replace(/\.xlsx?$/i, '.ods').replace(/\.xlsm$/i, '.ods');
+    resultFile.textContent = filename;
+    buildSheetTabs();
+    renderSheet(0);
+    result.classList.add('visible');
+  }
+
+  async function convertFile(file) {
+    if (!file || !/\.(xlsx|xlsm)$/i.test(file.name)) {
+      showError('Please select an .xlsx or .xlsm file.');
+      return;
+    }
+    showLoading();
+    try {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      const ods = await xlsxToOds(bytes);
+      const model = readOds(ods);
+      showResult(ods, model, file.name);
+    } catch (err) {
+      showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .xlsx file.'));
+    }
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) convertFile(e.target.files[0]);
+  });
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) convertFile(file);
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!odsBytes) return;
+    const blob = new Blob([odsBytes], { type: 'application/vnd.oasis.opendocument.spreadsheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentFilename;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    result.classList.remove('visible');
+    statusError.style.display = 'none';
+    fileInput.value = '';
+    odsBytes = null;
+    odsModel = null;
+    currentFilename = '';
+    sheetTabs.innerHTML = '';
+    sheetPreview.innerHTML = '';
+  });
+</script>
+
+</body>
+</html>
