@@ -41,6 +41,10 @@
     "./typst": {
       "types": "./dist/typst/index.d.ts",
       "import": "./dist/typst/index.js"
+    },
+    "./docx": {
+      "types": "./dist/docx/index.d.ts",
+      "import": "./dist/docx/index.js"
     }
   },
   "files": [

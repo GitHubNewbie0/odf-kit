@@ -38,3 +38,5 @@ export type {
   OdsRowOptions,
   OdsDateFormat,
 } from "./ods/index.js";
+export { docxToOdt } from "./docx/index.js";
+export type { DocxToOdtOptions, DocxToOdtResult } from "./docx/index.js";
