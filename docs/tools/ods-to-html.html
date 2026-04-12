@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ODS to HTML Converter — Free, Private, Browser-Based | odf-kit</title>
+  <meta name="description" content="Convert ODS (OpenDocument Spreadsheet) files to HTML tables instantly in your browser. Free, private — your file never leaves your device. Powered by odf-kit.">
+  <meta name="keywords" content="ods to html, convert ods to html, OpenDocument spreadsheet html, ods html table, odf-kit, free ods converter, browser ods converter, LibreOffice spreadsheet to html">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ODS to HTML Converter — Free, Private, Browser-Based">
+  <meta property="og:description" content="Convert ODS spreadsheet files to HTML tables instantly in your browser. Free and private — your file never leaves your device. Powered by odf-kit.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ODS to HTML Converter",
+    "description": "Free browser-based tool to convert OpenDocument Spreadsheet (.ods) files to HTML tables. No upload, no server — conversion runs entirely in your browser using odf-kit.",
+    "url": "https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #5a5a5a;
+      --accent: #2563eb; --accent-hover: #1d4ed8; --accent-light: #dbeafe;
+      --border: #e5e5e0; --code-bg: #1e1e2e; --code-text: #cdd6f4;
+      --tag-bg: #f0fdf4; --tag-text: #166534; --tag-border: #bbf7d0;
+      --success-bg: #f0fdf4; --success-border: #86efac; --success-text: #166534;
+      --error-bg: #fef2f2; --error-border: #fca5a5; --error-text: #991b1b;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    nav { border-bottom: 1px solid var(--border); padding: 1rem 0; background: var(--surface); }
+    nav .inner { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 500; color: var(--text); text-decoration: none; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { font-size: 0.88rem; color: var(--text-secondary); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+
+    .hero { padding: 4rem 0 3rem; text-align: center; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.8rem; border-radius: 100px; margin-bottom: 1.25rem; }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 540px; margin: 0 auto 1rem; }
+    .privacy-note { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--success-text); background: var(--success-bg); border: 1px solid var(--success-border); padding: 0.3rem 0.9rem; border-radius: 100px; }
+
+    .tool-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+
+    .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--surface); position: relative; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); }
+    .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+    .drop-title { font-size: 1.05rem; font-weight: 500; margin-bottom: 0.35rem; }
+    .drop-sub { font-size: 0.85rem; color: var(--text-secondary); }
+    .drop-sub strong { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); }
+
+    .status { display: none; margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; }
+    .status.loading { display: flex; align-items: center; gap: 0.6rem; background: var(--accent-light); color: var(--accent); border: 1px solid #bfdbfe; }
+    .status.error { display: block; background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
+    .spinner { width: 16px; height: 16px; border: 2px solid #bfdbfe; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result { display: none; margin-top: 2rem; }
+    .result.visible { display: block; }
+
+    .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+    .result-title { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+    .result-filename { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+    .result-actions { display: flex; gap: 0.5rem; }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; text-decoration: none; padding: 0.5rem 1rem; border-radius: 7px; border: none; cursor: pointer; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .btn-sm { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+
+    /* Output tabs */
+    .output-tabs { display: flex; gap: 0; margin-bottom: 0; }
+    .output-tab { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500; padding: 0.5rem 1rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; transition: all 0.15s; }
+    .output-tab.active { background: var(--surface); color: var(--text); border-color: var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; }
+    .output-tab:not(.active):hover { color: var(--text); }
+    .output-panel { display: none; }
+    .output-panel.active { display: block; }
+
+    /* Preview */
+    .html-preview { border: 1px solid var(--border); border-radius: 0 8px 8px 8px; background: var(--surface); padding: 1.5rem 2rem; min-height: 200px; max-height: 500px; overflow-y: auto; font-size: 0.9rem; line-height: 1.7; }
+    .html-preview h2 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+    .html-preview h2:first-child { margin-top: 0; }
+    .html-preview table { border-collapse: collapse; width: 100%; margin: 0.5rem 0 1rem; font-size: 0.85em; overflow-x: auto; display: block; }
+    .html-preview td, .html-preview th { border: 1px solid var(--border); padding: 0.35em 0.65em; white-space: nowrap; }
+    .html-preview th { background: #f5f5f0; font-weight: 600; }
+
+    /* Source */
+    .code-output { background: var(--code-bg); border-radius: 0 8px 8px 8px; padding: 1.25rem 1.5rem; overflow: auto; max-height: 500px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.65; color: var(--code-text); white-space: pre-wrap; word-break: break-all; }
+
+    .convert-another { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .convert-another p { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .info-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .info-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+
+    .dev-cta { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .dev-cta-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap; }
+    .dev-cta-text { flex: 1; min-width: 240px; }
+    .dev-cta-text h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .dev-cta-text p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.6; }
+    .code-snippet { background: var(--code-bg); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--code-text); white-space: pre; overflow-x: auto; }
+    .kw { color: #cba6f7; } .str { color: #a6e3a1; } .fn { color: #f9e2af; } .cmt { color: #6c7086; } .typ { color: #89b4fa; }
+
+    footer { padding: 2.5rem 0; text-align: center; }
+    footer p { font-size: 0.82rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.8rem; }
+      .result-header { flex-direction: column; align-items: flex-start; }
+      .dev-cta-inner { flex-direction: column; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a href="../" class="nav-brand"><span>odf-kit</span></a>
+    <div class="nav-links">
+      <a href="../">Docs</a>
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Free online tool</div>
+    <h1>ODS to HTML converter</h1>
+    <p class="hero-sub">Convert OpenDocument spreadsheets to HTML tables instantly — right in your browser.</p>
+    <div class="privacy-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Your file never leaves your device
+    </div>
+  </div>
+</section>
+
+<section class="tool-section">
+  <div class="container">
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".ods">
+      <span class="drop-icon">📊</span>
+      <p class="drop-title">Drop your .ods file here</p>
+      <p class="drop-sub">or click to browse &nbsp;·&nbsp; <strong>.ods</strong> files only</p>
+    </div>
+
+    <div class="status loading" id="statusLoading">
+      <div class="spinner"></div>
+      <span>Converting…</span>
+    </div>
+    <div class="status error" id="statusError"></div>
+
+    <div class="result" id="result">
+      <div class="result-header">
+        <div>
+          <span class="result-title">Converted: </span>
+          <span class="result-filename" id="resultFilename"></span>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-secondary btn-sm" id="copyBtn">Copy HTML</button>
+          <button class="btn btn-primary btn-sm" id="downloadBtn">Download .html</button>
+        </div>
+      </div>
+
+      <div class="output-tabs">
+        <button class="output-tab active" data-tab="preview">Preview</button>
+        <button class="output-tab" data-tab="source">HTML source</button>
+      </div>
+
+      <div class="output-panel active" id="tab-preview">
+        <div class="html-preview" id="htmlPreview"></div>
+      </div>
+      <div class="output-panel" id="tab-source">
+        <div class="code-output" id="htmlSource"></div>
+      </div>
+
+      <div class="convert-another">
+        <p>Want to convert another file?</p>
+        <button class="btn btn-secondary btn-sm" id="resetBtn">Convert another</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="container">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">How it works</p>
+    <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.4rem;">Private, fast, free</h2>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">No uploads, no accounts, no limits. Conversion runs entirely in your browser.</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>🔒 Fully private</h3>
+        <p>Your ODS file is read locally by your browser. No data is sent to any server. Works offline after the page loads.</p>
+      </div>
+      <div class="info-card">
+        <h3>⚡ Instant conversion</h3>
+        <p>Conversion runs in milliseconds using odf-kit's pure JavaScript reader. No waiting for upload or server processing.</p>
+      </div>
+      <div class="info-card">
+        <h3>📋 Clean HTML output</h3>
+        <p>Each sheet becomes an HTML table. Cell values, merged cells, and basic formatting are all preserved in the output.</p>
+      </div>
+      <div class="info-card">
+        <h3>🆓 Free, always</h3>
+        <p>No file size limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dev-cta">
+  <div class="container">
+    <div class="dev-cta-inner">
+      <div class="dev-cta-text">
+        <h2>Need ODS → HTML in your app?</h2>
+        <p><strong>odf-kit</strong> is a free, open source JavaScript library. <code style="font-family:'JetBrains Mono',monospace;font-size:0.88em;background:#f5f5f0;padding:0.1em 0.35em;border-radius:3px;">odsToHtml()</code> converts any <code style="font-family:'JetBrains Mono',monospace;font-size:0.88em;background:#f5f5f0;padding:0.1em 0.35em;border-radius:3px;">.ods</code> file to an HTML string in Node.js or the browser. No server, no LibreOffice.</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <a href="../" class="btn btn-primary btn-sm">View documentation</a>
+          <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
+<span class="kw">import</span> { <span class="typ">odsToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/ods-reader"</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());
+<span class="kw">const</span> html = <span class="fn">odsToHtml</span>(bytes);
+
+<span class="cmt">// html → string with one &lt;table&gt; per sheet</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:3rem 0;border-bottom:1px solid var(--border);">
+  <div class="container">
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.02em;">More odf-kit tools &amp; guides</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;font-size:0.88rem;">
+      <a href="odt-to-html.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to HTML converter →</a>
+      <a href="xlsx-to-ods.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free XLSX to ODS converter →</a>
+      <a href="markdown-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free Markdown to ODT converter →</a>
+      <a href="html-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free HTML to ODT converter →</a>
+      <a href="odt-to-pdf.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to PDF converter →</a>
+      <a href="../guides/generate-odt-nodejs.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Generate ODT files in Node.js →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and TypeScript ·
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a> ·
+      Apache 2.0
+    </p>
+  </div>
+</footer>
+
+<script type="module">
+  import { odsToHtml } from 'https://esm.sh/odf-kit@0.9.9/ods-reader';
+
+  const dropZone    = document.getElementById('dropZone');
+  const fileInput   = document.getElementById('fileInput');
+  const statusLoad  = document.getElementById('statusLoading');
+  const statusError = document.getElementById('statusError');
+  const result      = document.getElementById('result');
+  const htmlPreview = document.getElementById('htmlPreview');
+  const htmlSource  = document.getElementById('htmlSource');
+  const resultFile  = document.getElementById('resultFilename');
+  const copyBtn     = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+
+  let currentHtml = '';
+  let currentFilename = '';
+
+  function showLoading() {
+    statusLoad.style.display = 'flex';
+    statusError.style.display = 'none';
+    result.classList.remove('visible');
+  }
+
+  function showError(msg) {
+    statusLoad.style.display = 'none';
+    statusError.style.display = 'block';
+    statusError.textContent = msg;
+  }
+
+  function showResult(html, filename) {
+    statusLoad.style.display = 'none';
+    currentHtml = html;
+    currentFilename = filename.replace(/\.ods$/i, '.html');
+    resultFile.textContent = filename;
+    htmlPreview.innerHTML = html;
+    htmlSource.textContent = html;
+    result.classList.add('visible');
+  }
+
+  async function convertFile(file) {
+    if (!file || !file.name.toLowerCase().endsWith('.ods')) {
+      showError('Please select an .ods file.');
+      return;
+    }
+    showLoading();
+    try {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      const html = odsToHtml(bytes);
+      showResult(html, file.name);
+    } catch (err) {
+      showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .ods file.'));
+    }
+  }
+
+  fileInput.addEventListener('change', (e) => { if (e.target.files[0]) convertFile(e.target.files[0]); });
+
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) convertFile(e.dataTransfer.files[0]);
+  });
+
+  document.querySelectorAll('.output-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.output-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(currentHtml).then(() => {
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy HTML'; }, 2000);
+    });
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const blob = new Blob([currentHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentFilename;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    result.classList.remove('visible');
+    statusError.style.display = 'none';
+    fileInput.value = '';
+    currentHtml = '';
+    currentFilename = '';
+  });
+</script>
+
+</body>
+</html>
