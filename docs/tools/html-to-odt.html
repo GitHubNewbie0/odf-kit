@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to ODT Converter — Free, Private, Browser-Based | odf-kit</title>
+  <meta name="description" content="Convert HTML to ODT (OpenDocument Text) instantly in your browser. Free, private — nothing is sent to any server. Powered by odf-kit.">
+  <meta name="keywords" content="html to odt, convert html to odt, html openDocument, html libreoffice, odf-kit, free html converter, browser html to odt converter, html to word open document">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HTML to ODT Converter — Free, Private, Browser-Based">
+  <meta property="og:description" content="Convert HTML to OpenDocument Text (.odt) instantly in your browser. Free and private — nothing is sent to any server. Powered by odf-kit.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "HTML to ODT Converter",
+    "description": "Free browser-based tool to convert HTML to OpenDocument Text (.odt). No upload, no server — conversion runs entirely in your browser using odf-kit.",
+    "url": "https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #5a5a5a;
+      --accent: #2563eb; --accent-hover: #1d4ed8; --accent-light: #dbeafe;
+      --border: #e5e5e0; --code-bg: #1e1e2e; --code-text: #cdd6f4;
+      --tag-bg: #f0fdf4; --tag-text: #166534; --tag-border: #bbf7d0;
+      --success-bg: #f0fdf4; --success-border: #86efac; --success-text: #166534;
+      --error-bg: #fef2f2; --error-border: #fca5a5; --error-text: #991b1b;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    nav { border-bottom: 1px solid var(--border); padding: 1rem 0; background: var(--surface); }
+    nav .inner { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 500; color: var(--text); text-decoration: none; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { font-size: 0.88rem; color: var(--text-secondary); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+
+    .hero { padding: 4rem 0 3rem; text-align: center; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.8rem; border-radius: 100px; margin-bottom: 1.25rem; }
+    .hero h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 540px; margin: 0 auto 1rem; }
+    .privacy-note { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--success-text); background: var(--success-bg); border: 1px solid var(--success-border); padding: 0.3rem 0.9rem; border-radius: 100px; }
+
+    .tool-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+
+    .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    @media (max-width: 640px) { .editor-layout { grid-template-columns: 1fr; } }
+
+    .editor-pane label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+    .html-input { width: 100%; min-height: 360px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.65; background: var(--code-bg); color: var(--code-text); border: 1px solid transparent; border-radius: 8px; resize: vertical; outline: none; transition: border-color 0.15s; }
+    .html-input:focus { border-color: var(--accent); }
+    .html-input::placeholder { color: #585b70; }
+
+    .preview-frame { width: 100%; min-height: 360px; max-height: 480px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+
+    .options-row { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .option-group { display: flex; align-items: center; gap: 0.5rem; }
+    .option-group label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+    .option-group select { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 0.35rem 0.65rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; outline: none; }
+    .option-group select:focus { border-color: var(--accent); }
+
+    .convert-row { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+
+    .status { display: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.88rem; }
+    .status.loading { display: flex; align-items: center; gap: 0.6rem; background: var(--accent-light); color: var(--accent); border: 1px solid #bfdbfe; }
+    .status.error { display: block; background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
+    .status.success { display: flex; align-items: center; gap: 0.5rem; background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+    .spinner { width: 14px; height: 14px; border: 2px solid #bfdbfe; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; text-decoration: none; padding: 0.5rem 1.1rem; border-radius: 7px; border: none; cursor: pointer; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .btn-sm { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+
+    .info-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .info-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+
+    .dev-cta { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .dev-cta-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap; }
+    .dev-cta-text { flex: 1; min-width: 240px; }
+    .dev-cta-text h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .dev-cta-text p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.6; }
+    .code-snippet { background: var(--code-bg); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--code-text); white-space: pre; overflow-x: auto; }
+    .kw { color: #cba6f7; } .str { color: #a6e3a1; } .fn { color: #f9e2af; } .cmt { color: #6c7086; } .typ { color: #89b4fa; }
+
+    footer { padding: 2.5rem 0; text-align: center; }
+    footer p { font-size: 0.82rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a href="../" class="nav-brand"><span>odf-kit</span></a>
+    <div class="nav-links">
+      <a href="../">Docs</a>
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Free online tool</div>
+    <h1>HTML to ODT converter</h1>
+    <p class="hero-sub">Paste your HTML and download a ready-to-open LibreOffice document — instantly, in your browser.</p>
+    <div class="privacy-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Nothing is sent to any server
+    </div>
+  </div>
+</section>
+
+<section class="tool-section">
+  <div class="container">
+
+    <div class="editor-layout">
+      <div class="editor-pane">
+        <label for="htmlInput">HTML input</label>
+        <textarea class="html-input" id="htmlInput" spellcheck="false" placeholder="<h1>Hello World</h1>
+
+<p>Paste or type your <strong>HTML</strong> here.</p>
+
+<h2>Supported elements</h2>
+<ul>
+  <li>Headings h1–h6</li>
+  <li>Bold, italic, underline</li>
+  <li>Lists (ordered and unordered)</li>
+  <li>Tables</li>
+  <li>Links and blockquotes</li>
+  <li>Code blocks</li>
+</ul>
+
+<table>
+  <tr><th>Name</th><th>Score</th></tr>
+  <tr><td>Alice</td><td>98</td></tr>
+  <tr><td>Bob</td><td>87</td></tr>
+</table>"></textarea>
+      </div>
+      <div class="editor-pane">
+        <label>Live preview</label>
+        <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin" title="HTML preview"></iframe>
+      </div>
+    </div>
+
+    <div class="options-row">
+      <div class="option-group">
+        <label for="pageFormat">Page format</label>
+        <select id="pageFormat">
+          <option value="A4" selected>A4</option>
+          <option value="letter">US Letter</option>
+          <option value="legal">Legal</option>
+          <option value="A3">A3</option>
+          <option value="A5">A5</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label for="orientation">Orientation</label>
+        <select id="orientation">
+          <option value="portrait" selected>Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="convert-row">
+      <div id="statusMsg" class="status"></div>
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-left:auto;">
+        <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
+        <button class="btn btn-primary" id="convertBtn">⬇ Download .odt</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="container">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">How it works</p>
+    <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.4rem;">Private, fast, free</h2>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">Conversion runs entirely in your browser — no server, no account, no file size limits.</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>🔒 Fully private</h3>
+        <p>Your HTML never leaves your browser. No network requests are made during conversion. Works offline after the page loads.</p>
+      </div>
+      <div class="info-card">
+        <h3>⚡ Instant conversion</h3>
+        <p>Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting for upload or server processing.</p>
+      </div>
+      <div class="info-card">
+        <h3>📋 What is supported</h3>
+        <p>h1–h6, p, strong, em, u, s, ul, ol, li (nested), table, tr, td, th, a, blockquote, pre, code, hr, br, and inline styles.</p>
+      </div>
+      <div class="info-card">
+        <h3>🆓 Free, always</h3>
+        <p>No character limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dev-cta">
+  <div class="container">
+    <div class="dev-cta-inner">
+      <div class="dev-cta-text">
+        <h2>Need HTML → ODT in your app?</h2>
+        <p><strong>odf-kit</strong> is a free, open source JavaScript library. <code style="font-family:'JetBrains Mono',monospace;font-size:0.88em;background:#f5f5f0;padding:0.1em 0.35em;border-radius:3px;">htmlToOdt()</code> converts any HTML string to a valid <code style="font-family:'JetBrains Mono',monospace;font-size:0.88em;background:#f5f5f0;padding:0.1em 0.35em;border-radius:3px;">.odt</code> file in Node.js or the browser. No server, no LibreOffice.</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <a href="../" class="btn btn-primary btn-sm">View documentation</a>
+          <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px;">
+        <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
+<span class="kw">import</span> { <span class="typ">htmlToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="kw">const</span> html = <span class="str">`&lt;h1&gt;Report&lt;/h1&gt;&lt;p&gt;Content here.&lt;/p&gt;`</span>;
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">htmlToOdt</span>(html, {
+  pageFormat: <span class="str">"A4"</span>,
+});
+
+<span class="cmt">// bytes → Uint8Array, save as .odt file</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:3rem 0;border-bottom:1px solid var(--border);">
+  <div class="container">
+    <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.02em;">More odf-kit tools &amp; guides</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;font-size:0.88rem;">
+      <a href="odt-to-html.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to HTML converter →</a>
+      <a href="xlsx-to-ods.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free XLSX to ODS converter →</a>
+      <a href="markdown-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free Markdown to ODT converter →</a>
+      <a href="odt-to-pdf.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to PDF converter →</a>
+      <a href="../guides/generate-odt-nodejs.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Generate ODT files in Node.js →</a>
+      <a href="../guides/fill-odt-template-javascript.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Fill ODT templates in JavaScript →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and TypeScript ·
+      <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+      <a href="https://www.npmjs.com/package/odf-kit">npm</a> ·
+      Apache 2.0
+    </p>
+  </div>
+</footer>
+
+<script type="module">
+  import { htmlToOdt } from 'https://esm.sh/odf-kit@0.9.9';
+
+  const htmlInput  = document.getElementById('htmlInput');
+  const previewFrame = document.getElementById('previewFrame');
+  const convertBtn = document.getElementById('convertBtn');
+  const clearBtn   = document.getElementById('clearBtn');
+  const statusMsg  = document.getElementById('statusMsg');
+  const pageFormat = document.getElementById('pageFormat');
+  const orientation = document.getElementById('orientation');
+
+  // Base styles injected into preview iframe
+  const previewStyles = `
+    body { font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.7; padding: 1rem 1.25rem; color: #1a1a1a; }
+    h1,h2,h3,h4,h5,h6 { margin: 0.75em 0 0.35em; font-weight: 600; }
+    h1 { font-size: 1.4em; } h2 { font-size: 1.2em; } h3 { font-size: 1.05em; }
+    p { margin: 0 0 0.6em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.75em 0; font-size: 0.9em; }
+    td, th { border: 1px solid #e5e5e0; padding: 0.35em 0.65em; }
+    th { background: #f5f5f0; font-weight: 600; }
+    ul, ol { margin: 0.5em 0 0.5em 1.5em; }
+    li { margin: 0.2em 0; }
+    blockquote { border-left: 3px solid #2563eb; padding: 0.1em 1em; margin: 0.75em 0; color: #5a5a5a; }
+    code { font-family: monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.3em; border-radius: 3px; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 0.75rem 1rem; border-radius: 6px; overflow-x: auto; margin: 0.75em 0; }
+    pre code { background: none; padding: 0; }
+    hr { border: none; border-top: 1px solid #e5e5e0; margin: 1em 0; }
+    a { color: #2563eb; }
+  `;
+
+  function updatePreview() {
+    const html = htmlInput.value.trim();
+    const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><style>${previewStyles}</style></head><body>${html || '<p style="color:#5a5a5a;font-style:italic;">Start typing to see a preview…</p>'}</body></html>`);
+    doc.close();
+  }
+
+  // Init preview
+  updatePreview();
+  htmlInput.addEventListener('input', updatePreview);
+
+  function showStatus(type, msg) {
+    statusMsg.className = 'status ' + type;
+    if (type === 'loading') {
+      statusMsg.style.display = 'flex';
+      statusMsg.innerHTML = '<div class="spinner"></div><span>' + msg + '</span>';
+    } else if (type === 'success') {
+      statusMsg.style.display = 'flex';
+      statusMsg.innerHTML = '<span>✓</span><span>' + msg + '</span>';
+    } else if (type === 'error') {
+      statusMsg.style.display = 'block';
+      statusMsg.textContent = msg;
+    } else {
+      statusMsg.style.display = 'none';
+    }
+  }
+
+  convertBtn.addEventListener('click', async () => {
+    const html = htmlInput.value.trim();
+    if (!html) {
+      showStatus('error', 'Please enter some HTML first.');
+      return;
+    }
+    showStatus('loading', 'Converting…');
+    convertBtn.disabled = true;
+    try {
+      const bytes = await htmlToOdt(html, {
+        pageFormat: pageFormat.value,
+        orientation: orientation.value,
+      });
+      const blob = new Blob([bytes], { type: 'application/vnd.oasis.opendocument.text' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.odt';
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('success', 'Downloaded successfully!');
+      setTimeout(() => showStatus('', ''), 3000);
+    } catch (err) {
+      showStatus('error', 'Conversion failed: ' + (err.message || 'unknown error.'));
+    } finally {
+      convertBtn.disabled = false;
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    htmlInput.value = '';
+    updatePreview();
+    showStatus('', '');
+  });
+</script>
+
+</body>
+</html>
