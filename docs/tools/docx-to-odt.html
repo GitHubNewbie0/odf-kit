@@ -228,7 +228,7 @@
       </div>
       <div class="info-card">
         <h3>📋 What is preserved</h3>
-        <p>Headings, paragraphs, bold, italic, underline, lists, tables, hyperlinks, bookmarks, and images. Font sizes and colors are not preserved — mammoth.js focuses on structure, not visual styling.</p>
+        <p>Headings, paragraphs, bold, italic, underline, strikethrough, font sizes, colors, lists, tables, hyperlinks, bookmarks, images (with actual dimensions), page layout, and tracked changes.</p>
       </div>
       <div class="info-card">
         <h3>🆓 Free, always</h3>
@@ -243,20 +243,21 @@
     <div class="dev-cta-inner">
       <div class="dev-cta-text">
         <h2>Need DOCX → ODT conversion in your app?</h2>
-        <p><strong>@odf-kit/docx-to-odt</strong> is a free, open source JavaScript package that converts DOCX to ODT with no server dependencies. Works in Node.js 22+. No LibreOffice, no cloud APIs.</p>
+        <p><strong>odf-kit/docx</strong> is a free, open source JavaScript package built into odf-kit that converts DOCX to ODT with no server dependencies. Works in Node.js 22+ and browsers. No LibreOffice, no cloud APIs, no extra install.</p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <a href="../" class="btn btn-primary btn-sm">View documentation</a>
-          <a href="https://www.npmjs.com/package/@odf-kit/docx-to-odt" class="btn btn-secondary btn-sm">npm install @odf-kit/docx-to-odt</a>
+          <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
         </div>
       </div>
       <div style="flex:1;min-width:280px;">
         <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
-<span class="kw">import</span> { <span class="typ">docxToOdt</span> } <span class="kw">from</span> <span class="str">"@odf-kit/docx-to-odt"</span>;
+<span class="kw">import</span> { <span class="typ">docxToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/docx"</span>;
 
-<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());
-<span class="kw">const</span> odt = <span class="kw">await</span> <span class="fn">docxToOdt</span>(bytes);
+<span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(
+  <span class="kw">await</span> file.<span class="fn">arrayBuffer</span>()
+);
 
-<span class="cmt">// odt → Uint8Array, save as .odt file</span></div>
+<span class="cmt">// bytes → Uint8Array, save as .odt file</span></div>
       </div>
     </div>
   </div>
@@ -288,8 +289,8 @@
 </footer>
 
 <script type="module">
-  import { docxToOdt } from 'https://esm.sh/@odf-kit/docx-to-odt@0.1.0?deps=odf-kit@0.9.9';
-  import { odtToHtml } from 'https://esm.sh/odf-kit@0.9.9/reader';
+  import { docxToOdt } from 'https://esm.sh/odf-kit@0.10.0/docx';
+  import { odtToHtml } from 'https://esm.sh/odf-kit@0.10.0/reader';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
@@ -339,7 +340,8 @@
     showLoading();
     try {
       const buffer = await file.arrayBuffer();
-      const bytes = await docxToOdt(buffer);
+      const { bytes, warnings } = await docxToOdt(buffer);
+      if (warnings.length > 0) console.warn('odf-kit/docx warnings:', warnings);
       showResult(bytes, file.name);
     } catch (err) {
       showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .docx file.'));
