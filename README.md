@@ -973,14 +973,20 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 - [Generate ODT files in the browser](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html)
 - [Fill ODT templates in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html)
 - [Convert ODT to HTML in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html)
+- [Convert DOCX to ODT in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html)
 - [ODT to PDF via Typst](https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html)
 - [Generate ODT without LibreOffice](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html)
 - [ODF government compliance](https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html)
 - [simple-odf alternative](https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html)
 - [docxtemplater alternative for ODF](https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html)
 - [ODT JavaScript ecosystem](https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html)
+- [Free DOCX to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/docx-to-odt.html)
 - [Free ODT to HTML converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/odt-to-html.html)
 - [Free ODT to PDF converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/odt-to-pdf.html)
+- [Free XLSX to ODS converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html)
+- [Free Markdown to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/markdown-to-odt.html)
+- [Free HTML to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html)
+- [Free ODS to HTML converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html)
 
 ---
 

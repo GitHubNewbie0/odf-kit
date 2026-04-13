@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOCX to ODT JavaScript — Convert Word to OpenDocument in Node.js and Browsers — odf-kit</title>
+  <meta name="description" content="Convert .docx Word files to .odt OpenDocument format in JavaScript and TypeScript. Pure ESM, no LibreOffice, works in Node.js 22+ and browsers. npm install odf-kit.">
+  <meta name="keywords" content="docx to odt javascript, convert word to openDocument, docx odt node.js, word to libreoffice javascript, docx odt converter npm, odf-kit docx, convert docx odt browser, word openDocument typescript, docx to odt no libreoffice">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="DOCX to ODT in JavaScript — odf-kit">
+  <meta property="og:description" content="Convert Word .docx files to OpenDocument .odt format in Node.js and browsers. Pure JavaScript, no LibreOffice required.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e5e0;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-type: #89b4fa;
+      --code-fn: #f9e2af;
+      --code-num: #fab387;
+      --tag-bg: #f0fdf4;
+      --tag-text: #166534;
+      --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .comparison-table th { text-align: left; padding: 0.65rem 1rem; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .comparison-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .comparison-table tr td:first-child { color: var(--text); font-weight: 500; }
+    .check { color: #16a34a; }
+    .cross { color: #dc2626; }
+    .partial { color: #d97706; }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is there an npm package to convert DOCX to ODT in Node.js?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit includes a native DOCX-to-ODT converter as part of the main package: npm install odf-kit. Import docxToOdt from 'odf-kit/docx' and pass a Uint8Array or ArrayBuffer of the .docx file. It returns { bytes, warnings } where bytes is a valid .odt file. No LibreOffice required, works in Node.js 22+ and browsers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I convert DOCX to ODT in the browser without a server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. odf-kit/docx is pure ESM with zero new dependencies — it works in any modern browser. Pass the ArrayBuffer from a File object's arrayBuffer() method directly to docxToOdt(). The conversion runs entirely client-side; the file never leaves the user's device."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What content is preserved when converting DOCX to ODT?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "odf-kit/docx preserves: headings, paragraphs, bold, italic, underline, strikethrough, font sizes, text colors, highlight colors, text alignment, paragraph spacing, line height, indentation, bullet lists, numbered lists (decimal, roman, alpha), nested lists, tables (column widths, merged cells, cell backgrounds), hyperlinks (external and internal anchors), bookmarks, images (with actual dimensions from EMU values), page layout (size, margins, orientation), headers and footers, footnotes and endnotes, page breaks, tabs, and tracked changes (final text mode)."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container">
+    <a href="../">odf-kit</a>
+    <span class="sep">/</span>
+    <a href="../">Guides</a>
+    <span class="sep">/</span>
+    <span>DOCX to ODT</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Guide · odf-kit/docx</div>
+    <h1>Convert DOCX to ODT in JavaScript</h1>
+    <p>Convert Microsoft Word <code>.docx</code> files to OpenDocument <code>.odt</code> format in Node.js and browsers — pure ESM, zero new dependencies, no LibreOffice required. Spec-validated against ECMA-376 5th edition.</p>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container">
+
+    <h2>Install</h2>
+    <p><code>docxToOdt()</code> is built into odf-kit — no separate package needed:</p>
+    <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+    <h2>Basic usage</h2>
+    <p>Import <code>docxToOdt</code> from <code>odf-kit/docx</code> and pass raw bytes. The function returns <code>{ bytes, warnings }</code> — <code>bytes</code> is the complete <code>.odt</code> file, <code>warnings</code> reports any content that could not be fully converted.</p>
+    <div class="code-block">
+      <pre><span class="kw">import</span> { <span class="fn">docxToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/docx"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="fn">readFileSync</span>(<span class="str">"report.docx"</span>));
+<span class="fn">writeFileSync</span>(<span class="str">"report.odt"</span>, bytes);
+
+<span class="kw">if</span> (warnings.length > <span class="num">0</span>) {
+  console.<span class="fn">warn</span>(<span class="str">"Conversion warnings:"</span>, warnings);
+}
+<span class="cmt">// → Valid .odt file, opens in LibreOffice, Google Docs, Word</span></pre>
+    </div>
+
+    <h2>Browser usage</h2>
+    <p><code>odf-kit/docx</code> is pure ESM with zero new dependencies — it works in any modern browser. The conversion runs entirely client-side; the file never leaves the user's device.</p>
+    <div class="code-block">
+      <pre><span class="kw">import</span> { <span class="fn">docxToOdt</span> } <span class="kw">from</span> <span class="str">"https://esm.sh/odf-kit@0.10.0/docx"</span>;
+
+<span class="cmt">// From a file input</span>
+<span class="kw">const</span> file = event.target.files[<span class="num">0</span>];
+<span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());
+
+<span class="cmt">// Trigger download</span>
+<span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+  <span class="typ">type</span>: <span class="str">"application/vnd.oasis.opendocument.text"</span>
+});
+<span class="kw">const</span> url = <span class="typ">URL</span>.<span class="fn">createObjectURL</span>(blob);
+<span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+a.href = url;
+a.download = file.name.<span class="fn">replace</span>(<span class="str">/\.docx$/i</span>, <span class="str">".odt"</span>);
+a.<span class="fn">click</span>();
+<span class="typ">URL</span>.<span class="fn">revokeObjectURL</span>(url);</pre>
+    </div>
+
+    <h2>Options</h2>
+    <p>Pass a <code>DocxToOdtOptions</code> object as the second argument to control the output:</p>
+    <div class="code-block">
+      <pre><span class="kw">const</span> { bytes } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="fn">readFileSync</span>(<span class="str">"report.docx"</span>), {
+  <span class="cmt">// Override or fallback page format (default: read from DOCX)</span>
+  <span class="typ">pageFormat</span>: <span class="str">"letter"</span>,        <span class="cmt">// "A4" | "letter" | "legal" | "A3" | "A5"</span>
+
+  <span class="cmt">// Override page orientation (default: read from DOCX)</span>
+  <span class="typ">orientation</span>: <span class="str">"portrait"</span>,     <span class="cmt">// "portrait" | "landscape"</span>
+
+  <span class="cmt">// Read page size and margins from DOCX (default: true)</span>
+  <span class="typ">preservePageLayout</span>: <span class="num">true</span>,
+
+  <span class="cmt">// Map custom Word style names to ODT heading levels</span>
+  <span class="typ">styleMap</span>: {
+    <span class="str">"Section Title"</span>: <span class="num">1</span>,
+    <span class="str">"Sub Title"</span>: <span class="num">2</span>,
+    <span class="str">"Article Heading"</span>: <span class="num">3</span>,
+  },
+
+  <span class="cmt">// Override metadata (default: read from docProps/core.xml)</span>
+  <span class="typ">metadata</span>: {
+    <span class="typ">title</span>: <span class="str">"My Report"</span>,
+    <span class="typ">creator</span>: <span class="str">"Alice"</span>,
+    <span class="typ">description</span>: <span class="str">"Q4 results"</span>,
+  },
+});</pre>
+    </div>
+
+    <h2>What is preserved</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Content</th><th>Preserved</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Paragraphs and headings</td><td><span class="check">✓</span> Style name and outlineLvl detection</td></tr>
+        <tr><td>Bold, italic, underline, strikethrough</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Superscript / subscript</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Small caps, all caps</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Font size</td><td><span class="check">✓</span> Actual point values from w:sz</td></tr>
+        <tr><td>Text color</td><td><span class="check">✓</span> Hex values from w:color</td></tr>
+        <tr><td>Highlight color</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Font family</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Text alignment</td><td><span class="check">✓</span> left, center, right, justify</td></tr>
+        <tr><td>Paragraph spacing (before/after)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Line height</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Indentation (left, right, first-line, hanging)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Bullet lists</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Numbered lists (decimal, roman, alpha)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Nested lists</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Tables</td><td><span class="check">✓</span> Column widths, cell backgrounds, vertical alignment</td></tr>
+        <tr><td>Merged cells (colspan and rowspan)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Hyperlinks (external and internal anchors)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Bookmarks</td><td><span class="check">✓</span> Two-pass cross-paragraph resolution</td></tr>
+        <tr><td>Images</td><td><span class="check">✓</span> Actual EMU dimensions, not defaulted to 10cm</td></tr>
+        <tr><td>Page layout (size, margins, orientation)</td><td><span class="check">✓</span> From w:sectPr</td></tr>
+        <tr><td>Headers and footers</td><td><span class="check">✓</span> Default type</td></tr>
+        <tr><td>Footnotes and endnotes</td><td><span class="check">✓</span> Appended as end section</td></tr>
+        <tr><td>Page breaks</td><td><span class="check">✓</span> Including mid-paragraph breaks</td></tr>
+        <tr><td>Tabs</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Tracked changes</td><td><span class="check">✓</span> Final text — insertions included, deletions skipped</td></tr>
+        <tr><td>Document metadata</td><td><span class="check">✓</span> From docProps/core.xml</td></tr>
+        <tr><td>Style inheritance (w:basedOn)</td><td><span class="check">✓</span> Full chain resolution</td></tr>
+        <tr><td>Complex fields (HYPERLINK)</td><td><span class="check">✓</span> w:fldChar and w:fldSimple both handled</td></tr>
+        <tr><td>Legacy VML images (w:pict)</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Structured document tags (w:sdt)</td><td><span class="check">✓</span> Unwrapped; checkboxes as ☐/☑</td></tr>
+        <tr><td>Text boxes, charts, SmartArt</td><td><span class="cross">✗</span> Warned and skipped</td></tr>
+        <tr><td>Math (OMML)</td><td><span class="cross">✗</span> Out of scope</td></tr>
+        <tr><td>Macros, OLE objects</td><td><span class="cross">✗</span> Out of scope</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Why not use mammoth.js?</h2>
+    <p><a href="https://www.npmjs.com/package/mammoth" rel="noopener">mammoth.js</a> is a well-known DOCX reader, but it has important limitations for a DOCX→ODT use case:</p>
+    <ul>
+      <li><strong>CommonJS only</strong> — mammoth.js does not work in browsers via ESM, which blocks client-side use</li>
+      <li><strong>Intentionally drops formatting</strong> — font sizes, text colors, paragraph spacing, and line height are not preserved by design</li>
+      <li><strong>No page layout</strong> — page size, margins, and orientation are not read from the DOCX</li>
+      <li><strong>No headers or footers</strong> — these are silently ignored</li>
+      <li><strong>Image dimensions defaulted</strong> — all images are set to 10cm × 7.5cm regardless of the actual size in the document</li>
+      <li><strong>HTML intermediate step</strong> — mammoth converts to HTML first, losing structural information that ODT can represent directly</li>
+    </ul>
+    <p><code>odf-kit/docx</code> is a native DOCX→ODT converter — pure ESM, browser-safe, validated against the ECMA-376 5th edition spec.</p>
+
+    <h2>Why not shell out to LibreOffice?</h2>
+    <p>LibreOffice headless (<code>libreoffice --headless --convert-to odt</code>) produces high-fidelity output but comes with real costs:</p>
+    <ul>
+      <li><strong>Startup time</strong> — 2–5 seconds even for small documents</li>
+      <li><strong>Deployment complexity</strong> — must be installed on every server, container, and CI runner</li>
+      <li><strong>Serverless incompatibility</strong> — doesn't run on AWS Lambda, Vercel, or Cloudflare Workers</li>
+      <li><strong>Size</strong> — several hundred megabytes; dominates Docker image size</li>
+      <li><strong>Browser impossible</strong> — cannot run client-side under any circumstances</li>
+    </ul>
+    <p><code>odf-kit/docx</code> parses DOCX files directly in JavaScript. No subprocess, no installed software, no startup penalty. Works anywhere JavaScript runs — including browsers.</p>
+
+    <h2>Comparison</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Option</th><th>ESM / Browser</th><th>Font sizes &amp; colors</th><th>Page layout</th><th>Images (actual size)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>odf-kit/docx</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>mammoth.js</td><td><span class="cross">✗</span> CommonJS</td><td><span class="cross">✗</span> Intentional</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span> 10cm default</td></tr>
+        <tr><td>LibreOffice headless</td><td><span class="cross">✗</span> Subprocess</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>officeParser</td><td><span class="cross">✗</span> CommonJS</td><td><span class="partial">Partial</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Handling warnings</h2>
+    <p>The <code>warnings</code> array in the result reports content that could not be fully converted — unrecognised field instructions, missing image data, or mid-document section breaks. These are informational and do not cause the conversion to fail. Log them during development to understand what a specific document contains that is out of scope.</p>
+    <div class="code-block">
+      <pre><span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(input);
+
+<span class="kw">for</span> (<span class="kw">const</span> w <span class="kw">of</span> warnings) {
+  console.<span class="fn">warn</span>(<span class="str">"[odf-kit/docx]"</span>, w);
+}
+
+<span class="cmt">// Example warnings:</span>
+<span class="cmt">// "Image rId5 references media/image1.wmf which is not in the ZIP"</span>
+<span class="cmt">// "Unrecognized field instruction: \" MERGEFIELD CustomerName\""</span>
+<span class="cmt">// "w:altChunk (imported external content) is not supported and was skipped"</span></pre>
+    </div>
+
+    <h2>Custom style mapping</h2>
+    <p>Word documents sometimes use custom style names for headings — for example "Section Title" instead of "Heading 1". Use <code>styleMap</code> to tell odf-kit how to map them to ODT heading levels:</p>
+    <div class="code-block">
+      <pre><span class="kw">const</span> { bytes } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(input, {
+  <span class="typ">styleMap</span>: {
+    <span class="str">"Section Title"</span>: <span class="num">1</span>,   <span class="cmt">// maps to text:h level="1"</span>
+    <span class="str">"Sub Title"</span>:     <span class="num">2</span>,   <span class="cmt">// maps to text:h level="2"</span>
+    <span class="str">"Clause"</span>:        <span class="num">3</span>,
+  },
+});
+
+<span class="cmt">// Built-in heading detection (always applied):</span>
+<span class="cmt">// "heading 1"–"heading 6" → levels 1–6 (Word canonical names)</span>
+<span class="cmt">// "title" → level 1, "subtitle" → level 2</span>
+<span class="cmt">// w:outlineLvl in pPr → fallback for custom styles</span>
+<span class="cmt">// styleMap overrides all of the above</span></pre>
+    </div>
+
+    <h2>Related guides and tools</h2>
+    <ul>
+      <li><a href="../tools/docx-to-odt.html">Free DOCX to ODT converter (online tool)</a> — powered by this same library, runs in your browser</li>
+      <li><a href="generate-odt-nodejs.html">Generate .odt files in Node.js</a> — build documents from scratch</li>
+      <li><a href="odt-to-html-javascript.html">ODT to HTML in JavaScript</a> — read and convert .odt files</li>
+      <li><a href="odt-to-typst-pdf.html">Convert ODT to PDF with Typst</a> — zero-dependency PDF generation</li>
+    </ul>
+
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Convert your first .docx file</h2>
+    <p>One package, one install — DOCX to ODT in Node.js and browsers.</p>
+    <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+    <div class="cta-buttons">
+      <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+      <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      <a href="../tools/docx-to-odt.html" class="btn btn-secondary">Try the online tool</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

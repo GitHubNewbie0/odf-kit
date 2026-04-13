@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Deprecates** `@odf-kit/docx-to-odt` (CommonJS, browser-incompatible) — use `odf-kit/docx` instead.
 - Spec-validated against ECMA-376 5th edition Part 1 (WordprocessingML). Every XSD schema element verified against the authoritative spec PDF.
 - 117 new tests (1053 total, 23 test suites).
+- Landing page updated: eleven modes, all 11 code examples, updated stats.
+- New guide: [Convert DOCX to ODT in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html).
+- All 7 tool pages now linked from README and landing page footer.
 
 ## [0.9.9] - 2026-04-11
 
