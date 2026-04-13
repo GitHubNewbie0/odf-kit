@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>odf-kit — OpenDocument Format (.odt) Library for Node.js and Browsers</title>
-  <meta name="description" content="Generate, fill, read, and convert OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers. Build documents from scratch, fill existing templates with data, convert .odt files to HTML, or export to Typst for PDF generation. Create reports, invoices, contracts, and letters. The modern simple-odf alternative. Apache 2.0 open source.">
-  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, client-side, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, Mustache template, placeholder replacement, odt to pdf, odt to typst, typst pdf">
+  <meta name="description" content="Generate, fill, read, and convert OpenDocument Format (.odt) files in JavaScript and TypeScript. Convert DOCX to ODT, HTML to ODT, Markdown to ODT, and more. Works in Node.js and browsers. No LibreOffice dependency. Apache 2.0 open source.">
+  <meta name="keywords" content="ODF, OpenDocument Format, TypeScript, JavaScript, Node.js, browser, document generation, LibreOffice, .odt, open source, Apache 2.0, odf-kit, npm package, generate odt, create odt file, simple-odf alternative, docx to odt, convert docx to odt, word to openDocument, document automation, report generation, invoice generation, government document format, ODF compliance, server-side document creation, client-side document creation, open standards, template engine, odt template, fill odt template, document template, odt to pdf, odt to typst, typst pdf">
   <meta name="author" content="GitHubNewbie0">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/">
@@ -636,11 +636,10 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.8.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <div class="hero-badge">v0.10.0 · Apache 2.0 · TypeScript + JavaScript</div>
       <h1>Generate, fill, read, and convert<br>OpenDocument files with <span>odf-kit</span></h1>
       <p class="hero-tagline">
-        Create .odt documents from scratch, fill existing templates with data, convert .odt files to HTML, or export to Typst for PDF generation — all in pure JavaScript.
-        Build reports, invoices, letters, and contracts with tables, formatting, images, loops, and conditionals — in Node.js or directly in the browser.
+        Create .odt documents from scratch, fill existing templates with data, convert DOCX to ODT, HTML to ODT, Markdown to ODT, read .odt files, or export to Typst for PDF — all in pure JavaScript. Works in Node.js and the browser. No LibreOffice required.
       </p>
       <div class="hero-actions">
         <a href="https://github.com/GitHubNewbie0/odf-kit" class="btn btn-primary" rel="noopener">
@@ -701,13 +700,20 @@
   <section class="code-section" id="example">
     <div class="container">
       <div class="section-label">Quick start</div>
-      <h2 class="section-title">Four ways to work with .odt files</h2>
-      <p class="section-desc">Build documents from scratch, fill existing templates, read and convert .odt files to HTML, or export to Typst for PDF generation — all in pure JavaScript.</p>
+      <h2 class="section-title">Eleven ways to work with ODF files</h2>
+      <p class="section-desc">Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, or export to Typst for PDF — all in pure JavaScript.</p>
       <div class="code-tabs">
-        <button class="code-tab active" onclick="switchTab('build', event)">Build from scratch</button>
-        <button class="code-tab" onclick="switchTab('template', event)">Fill a template</button>
-        <button class="code-tab" onclick="switchTab('read', event)">Read &amp; convert</button>
-        <button class="code-tab" onclick="switchTab('typst', event)">Export to Typst</button>
+        <button class="code-tab active" onclick="switchTab('build', event)">Build ODT</button>
+        <button class="code-tab" onclick="switchTab('template', event)">Fill template</button>
+        <button class="code-tab" onclick="switchTab('html', event)">HTML → ODT</button>
+        <button class="code-tab" onclick="switchTab('markdown', event)">Markdown → ODT</button>
+        <button class="code-tab" onclick="switchTab('tiptap', event)">TipTap → ODT</button>
+        <button class="code-tab" onclick="switchTab('ods', event)">Build ODS</button>
+        <button class="code-tab" onclick="switchTab('read', event)">Read ODT</button>
+        <button class="code-tab" onclick="switchTab('readods', event)">Read ODS</button>
+        <button class="code-tab" onclick="switchTab('xlsx', event)">XLSX → ODS</button>
+        <button class="code-tab" onclick="switchTab('docx', event)">DOCX → ODT</button>
+        <button class="code-tab" onclick="switchTab('typst', event)">ODT → PDF</button>
       </div>
       <div class="code-block has-tabs">
         <div id="tab-build" class="code-panel active">
@@ -739,32 +745,109 @@ doc.<span class="fn">addParagraph</span>((<span class="typ">p</span>) <span clas
 <span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
 
 <span class="cmt">// Load a .odt template created in LibreOffice</span>
-<span class="kw">const</span> template = readFileSync(<span class="str">"invoice-template.odt"</span>);
+<span class="kw">const</span> template = <span class="fn">readFileSync</span>(<span class="str">"invoice-template.odt"</span>);
 
 <span class="kw">const</span> result = <span class="fn">fillTemplate</span>(template, {
   <span class="typ">customer</span>: <span class="str">"Acme Corp"</span>,
-  <span class="typ">date</span>: <span class="str">"2026-02-23"</span>,
-
-  <span class="cmt">// Loops — repeats content for each item</span>
+  <span class="typ">date</span>: <span class="str">"2026-04-12"</span>,
   <span class="typ">items</span>: [
     { <span class="typ">product</span>: <span class="str">"Widget"</span>, <span class="typ">qty</span>: <span class="num">5</span>, <span class="typ">price</span>: <span class="str">"$125"</span> },
     { <span class="typ">product</span>: <span class="str">"Gadget"</span>, <span class="typ">qty</span>: <span class="num">3</span>, <span class="typ">price</span>: <span class="str">"$120"</span> },
   ],
-
-  <span class="cmt">// Conditionals — include or remove sections</span>
-  <span class="typ">showNotes</span>: <span class="num">true</span>,
-  <span class="typ">notes</span>: <span class="str">"Net 30"</span>,
-
-  <span class="cmt">// Dot notation — nested data access</span>
+  <span class="typ">showNotes</span>: <span class="num">true</span>, <span class="typ">notes</span>: <span class="str">"Net 30"</span>,
   <span class="typ">company</span>: { <span class="typ">name</span>: <span class="str">"Acme Corp"</span>, <span class="typ">address</span>: <span class="str">"123 Main St"</span> },
 });
 
-writeFileSync(<span class="str">"invoice.odt"</span>, result);
-<span class="cmt">// → Valid .odt with all {placeholders} replaced</span></pre>
+<span class="fn">writeFileSync</span>(<span class="str">"invoice.odt"</span>, result);
+<span class="cmt">// {placeholders}, {#loops}, conditionals, dot.notation</span></pre>
+        </div>
+        <div id="tab-html" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="fn">htmlToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> html = <span class="str">`
+  &lt;h1&gt;Meeting Notes&lt;/h1&gt;
+  &lt;p&gt;Attendees: &lt;strong&gt;Alice&lt;/strong&gt;, Bob, Carol&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Project status — on track&lt;/li&gt;
+    &lt;li&gt;Budget review — approved&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;table&gt;
+    &lt;tr&gt;&lt;th&gt;Action&lt;/th&gt;&lt;th&gt;Owner&lt;/th&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Send report&lt;/td&gt;&lt;td&gt;Alice&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+`</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">htmlToOdt</span>(html, { <span class="typ">pageFormat</span>: <span class="str">"A4"</span> });
+<span class="fn">writeFileSync</span>(<span class="str">"notes.odt"</span>, bytes);
+<span class="cmt">// → Headings, bold, lists, tables, inline CSS all preserved</span></pre>
+        </div>
+        <div id="tab-markdown" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="fn">markdownToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> markdown = <span class="str">`
+# Quarterly Report
+
+Revenue **exceeded expectations** across all regions.
+
+## Action Items
+
+- Send report by Friday
+- Review budget on Monday
+
+| Region | Revenue |
+|--------|---------|
+| North  | $2.1M   |
+| South  | $1.8M   |
+`</span>;
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">markdownToOdt</span>(markdown, { <span class="typ">pageFormat</span>: <span class="str">"A4"</span> });
+<span class="fn">writeFileSync</span>(<span class="str">"report.odt"</span>, bytes);
+<span class="cmt">// → Full CommonMark — headings, bold, lists, tables</span></pre>
+        </div>
+        <div id="tab-tiptap" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="fn">tiptapToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+
+<span class="cmt">// editor.getJSON() returns TipTap/ProseMirror JSONContent</span>
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">tiptapToOdt</span>(editor.<span class="fn">getJSON</span>(), { <span class="typ">pageFormat</span>: <span class="str">"A4"</span> });
+
+<span class="cmt">// With pre-fetched images (IPFS, S3, etc.)</span>
+<span class="kw">const</span> images = { [imageUrl]: <span class="kw">await</span> <span class="fn">fetchImageBytes</span>(imageUrl) };
+<span class="kw">const</span> bytes2 = <span class="kw">await</span> <span class="fn">tiptapToOdt</span>(editor.<span class="fn">getJSON</span>(), { images });
+
+<span class="cmt">// Custom handler for app-specific TipTap extensions</span>
+<span class="kw">const</span> bytes3 = <span class="kw">await</span> <span class="fn">tiptapToOdt</span>(editor.<span class="fn">getJSON</span>(), {
+  <span class="fn">unknownNodeHandler</span>: (node, doc) <span class="kw">=></span> {
+    <span class="kw">if</span> (node.type === <span class="str">"callout"</span>) doc.<span class="fn">addParagraph</span>(<span class="str">`⚠️ ${node.text}`</span>);
+  },
+});
+<span class="cmt">// → No @tiptap/core dependency — walks JSON directly</span></pre>
+        </div>
+        <div id="tab-ods" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="typ">OdsDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdsDocument</span>();
+<span class="kw">const</span> sheet = doc.<span class="fn">addSheet</span>(<span class="str">"Sales"</span>);
+
+sheet.<span class="fn">addRow</span>(
+  [<span class="str">"Month"</span>, <span class="str">"Revenue"</span>, <span class="str">"Growth"</span>],
+  { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">backgroundColor</span>: <span class="str">"#DDDDDD"</span> }
+);
+sheet.<span class="fn">addRow</span>([<span class="str">"January"</span>,  <span class="num">12500</span>, <span class="num">0.08</span>]);
+sheet.<span class="fn">addRow</span>([<span class="str">"February"</span>, <span class="num">14200</span>, <span class="num">0.136</span>]);
+sheet.<span class="fn">addRow</span>([<span class="str">"Total"</span>, { <span class="typ">value</span>: <span class="str">"=SUM(B2:B3)"</span>, <span class="typ">type</span>: <span class="str">"formula"</span> }]);
+sheet.<span class="fn">setColumnWidth</span>(<span class="num">0</span>, <span class="str">"4cm"</span>);
+sheet.<span class="fn">freezeRows</span>(<span class="num">1</span>);
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="fn">writeFileSync</span>(<span class="str">"sales.ods"</span>, bytes);
+<span class="cmt">// → Valid .ods — opens in LibreOffice Calc</span></pre>
         </div>
         <div id="tab-read" class="code-panel">
           <pre><span class="kw">import</span> { <span class="typ">readOdt</span>, <span class="typ">odtToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
-<span class="kw">import</span> { <span class="typ">readFileSync</span> } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
 
 <span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
 
@@ -773,14 +856,66 @@ writeFileSync(<span class="str">"invoice.odt"</span>, result);
 
 <span class="cmt">// Or parse to a structured document model</span>
 <span class="kw">const</span> doc = <span class="fn">readOdt</span>(bytes);
-console.<span class="fn">log</span>(doc.metadata.title);    <span class="cmt">// title from meta.xml</span>
-console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">// paragraphs, headings, tables...</span>
+console.<span class="fn">log</span>(doc.metadata.title);
 
-<span class="cmt">// Walk the document model</span>
 <span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> doc.body) {
-  <span class="kw">if</span> (node.kind === <span class="str">"heading"</span>) console.<span class="fn">log</span>(<span class="str">`h${node.level}:`</span>, node.spans[<span class="num">0</span>].text);
-  <span class="kw">if</span> (node.kind === <span class="str">"paragraph"</span>) console.<span class="fn">log</span>(node.spans.<span class="fn">map</span>(<span class="typ">s</span> <span class="kw">=></span> s.text).<span class="fn">join</span>(<span class="str">""</span>));
-}</pre>
+  <span class="kw">if</span> (node.kind === <span class="str">"heading"</span>)
+    console.<span class="fn">log</span>(<span class="str">`h${node.level}:`</span>, node.spans[<span class="num">0</span>].text);
+}
+<span class="cmt">// → Paragraphs, headings, tables, lists, formatting</span></pre>
+        </div>
+        <div id="tab-readods" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="typ">readOds</span>, <span class="typ">odsToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/ods-reader"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"node:fs"</span>;
+
+<span class="kw">const</span> bytes = <span class="fn">readFileSync</span>(<span class="str">"data.ods"</span>);
+
+<span class="cmt">// Parse to a structured model — typed JavaScript values</span>
+<span class="kw">const</span> model = <span class="fn">readOds</span>(bytes);
+<span class="kw">for</span> (<span class="kw">const</span> row <span class="kw">of</span> model.sheets[<span class="num">0</span>].rows) {
+  <span class="kw">for</span> (<span class="kw">const</span> cell <span class="kw">of</span> row.cells) {
+    console.<span class="fn">log</span>(cell.type, cell.value);
+    <span class="cmt">// string | float | boolean | date — never display strings</span>
+  }
+}
+
+<span class="cmt">// Or convert directly to an HTML table</span>
+<span class="kw">const</span> html = <span class="fn">odsToHtml</span>(bytes);
+<span class="cmt">// → &lt;table&gt; with merged cells, inline styles</span></pre>
+        </div>
+        <div id="tab-xlsx" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="fn">xlsxToOds</span> } <span class="kw">from</span> <span class="str">"odf-kit/xlsx"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="cmt">// Convert .xlsx to .ods — zero new dependencies</span>
+<span class="kw">const</span> xlsx = <span class="fn">readFileSync</span>(<span class="str">"report.xlsx"</span>);
+<span class="kw">const</span> ods = <span class="kw">await</span> <span class="fn">xlsxToOds</span>(xlsx);
+<span class="fn">writeFileSync</span>(<span class="str">"report.ods"</span>, ods);
+
+<span class="cmt">// Preserves strings, numbers, booleans, dates,</span>
+<span class="cmt">// formulas, merged cells, freeze panes, multi-sheet</span>
+<span class="cmt">// No SheetJS — own parser built on fflate</span>
+
+<span class="cmt">// Also works in the browser</span>
+<span class="kw">const</span> ods2 = <span class="kw">await</span> <span class="fn">xlsxToOds</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());</pre>
+        </div>
+        <div id="tab-docx" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="fn">docxToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/docx"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="cmt">// Simple conversion</span>
+<span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="fn">readFileSync</span>(<span class="str">"report.docx"</span>));
+<span class="fn">writeFileSync</span>(<span class="str">"report.odt"</span>, bytes);
+<span class="kw">if</span> (warnings.length) console.<span class="fn">warn</span>(warnings);
+
+<span class="cmt">// With options — page format, custom style mapping</span>
+<span class="kw">const</span> { bytes: bytes2 } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="fn">readFileSync</span>(<span class="str">"report.docx"</span>), {
+  <span class="typ">pageFormat</span>: <span class="str">"letter"</span>,
+  <span class="typ">styleMap</span>: { <span class="str">"Section Title"</span>: <span class="num">1</span> },
+});
+
+<span class="cmt">// Also works in the browser — pure ESM, zero new dependencies</span>
+<span class="kw">const</span> { bytes: odt } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());</pre>
         </div>
         <div id="tab-typst" class="code-panel">
           <pre><span class="kw">import</span> { <span class="typ">odtToTypst</span>, <span class="typ">modelToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
@@ -790,21 +925,14 @@ console.<span class="fn">log</span>(doc.body.length);        <span class="cmt">/
 
 <span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
 
-<span class="cmt">// One-call convenience wrapper</span>
 <span class="kw">const</span> typ = <span class="fn">odtToTypst</span>(bytes);
-writeFileSync(<span class="str">"document.typ"</span>, typ);
+<span class="fn">writeFileSync</span>(<span class="str">"document.typ"</span>, typ);
+<span class="fn">execSync</span>(<span class="str">"typst compile document.typ document.pdf"</span>);
 
-<span class="cmt">// Compile to PDF with the Typst CLI (installed separately)</span>
-execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
-
-<span class="cmt">// Or use modelToTypst() when you already have a parsed model —</span>
-<span class="cmt">// parse once, emit to multiple formats</span>
+<span class="cmt">// Parse once, emit to multiple formats</span>
 <span class="kw">const</span> model = <span class="fn">readOdt</span>(bytes);
-<span class="kw">const</span> html  = model.<span class="fn">toHtml</span>({ fragment: <span class="num">true</span> });
 <span class="kw">const</span> typst = <span class="fn">modelToTypst</span>(model);
-
-<span class="cmt">// odf-kit/typst is zero-dependency and browser-safe —</span>
-<span class="cmt">// the Typst CLI is only needed when you compile to PDF</span></pre>
+<span class="cmt">// odf-kit/typst is zero-dependency and browser-safe</span></pre>
         </div>
       </div>
     </div>
@@ -864,8 +992,8 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <h3>Zero Transitive Dependencies</h3>
-          <p>Single runtime dependency (fflate). No XML parsers, no heavy frameworks. Lightweight and audit-friendly.</p>
+          <h3>Minimal Dependencies</h3>
+          <p>Two runtime dependencies: fflate (ZIP) and marked (Markdown parsing). Zero transitive dependencies from either. Lightweight and audit-friendly for enterprise and government projects.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🌐</div>
@@ -884,12 +1012,12 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
       <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>Four modes, one library, every platform</h3>
-          <p>Build documents from scratch, fill existing .odt templates with data, read and convert .odt files to HTML, or export to Typst for PDF generation. Same API in Node.js and browsers — no LibreOffice, no server dependencies required.</p>
+          <h3>Eleven modes, one library, every platform</h3>
+          <p>Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, read ODT files, or export to Typst for PDF. Same API in Node.js and browsers — no LibreOffice required.</p>
         </div>
         <div class="why-item">
-          <h3>Zero transitive dependencies</h3>
-          <p>Only fflate at runtime — zero transitive dependencies. Lightweight and audit-friendly for enterprise and government projects. Every sub-export (<code>odf-kit/reader</code>, <code>odf-kit/typst</code>) maintains this guarantee.</p>
+          <h3>Minimal dependencies</h3>
+          <p>Two runtime dependencies: fflate (ZIP) and marked (Markdown parsing) — zero transitive dependencies from either. Lightweight and audit-friendly for enterprise and government projects. Every sub-export maintains this guarantee.</p>
         </div>
         <div class="why-item">
           <h3>ODF 1.2+ and ISO/IEC 26300</h3>
@@ -967,6 +1095,11 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
             <td>Partial</td>
           </tr>
           <tr>
+            <td>Convert DOCX → ODT</td>
+            <td><span class="check">✓</span> Native, browser-safe, zero extra deps</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
             <td>Read &amp; convert to HTML</td>
             <td><span class="check">✓</span> Full reader with document model</td>
             <td><span class="cross">✗</span> Not supported</td>
@@ -996,7 +1129,7 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
     <div class="container">
       <div class="stats-grid">
         <div>
-          <div class="stat-value">650</div>
+          <div class="stat-value">1053</div>
           <div class="stat-label">Tests passing</div>
         </div>
         <div>
@@ -1004,7 +1137,7 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
           <div class="stat-label">Transitive dependencies</div>
         </div>
         <div>
-          <div class="stat-value">4</div>
+          <div class="stat-value">11</div>
           <div class="stat-label">Document modes</div>
         </div>
         <div>
@@ -1050,7 +1183,7 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
       </div>
       <div class="faq-item">
         <h3>What's the difference between .odt and .docx?</h3>
-        <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. .docx is Microsoft's Office Open XML format. ODF is required by many governments and organizations that need vendor independence. odf-kit generates .odt files; if you need .docx, look at the <a href="https://www.npmjs.com/package/docx">docx</a> package.</p>
+        <p>.odt is the OpenDocument Format — an ISO international standard (ISO/IEC 26300) that's vendor-independent and open. .docx is Microsoft's Office Open XML format. ODF is required by many governments and organizations that need vendor independence. odf-kit generates .odt files, and can also convert .docx files to .odt using <code>docxToOdt()</code> from <code>odf-kit/docx</code> — pure ESM, browser-safe, zero extra dependencies.</p>
       </div>
       <div class="faq-item">
         <h3>Where can I find step-by-step tutorials?</h3>
@@ -1074,7 +1207,7 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
   <section class="cta">
     <div class="container">
       <h2>Start working with ODF documents</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, read existing .odt files, or export to Typst for PDF.</p>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, convert DOCX to ODT, read existing .odt files, or export to Typst for PDF.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
@@ -1100,7 +1233,12 @@ execSync(<span class="str">"typst compile document.typ document.pdf"</span>);
         <a href="guides/odt-javascript-ecosystem.html">ODT Ecosystem</a> · 
         <a href="guides/odt-to-html-javascript.html">ODT to HTML</a> · 
         <a href="tools/odt-to-html.html">Free ODT → HTML Tool</a> · 
-        <a href="tools/odt-to-pdf.html">Free ODT → PDF Tool</a>
+        <a href="tools/odt-to-pdf.html">Free ODT → PDF Tool</a> ·
+        <a href="tools/docx-to-odt.html">Free DOCX → ODT Tool</a> ·
+        <a href="tools/xlsx-to-ods.html">Free XLSX → ODS Tool</a> ·
+        <a href="tools/markdown-to-odt.html">Free Markdown → ODT Tool</a> ·
+        <a href="tools/html-to-odt.html">Free HTML → ODT Tool</a> ·
+        <a href="tools/ods-to-html.html">Free ODS → HTML Tool</a>
       </p>
       <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
     </div>
