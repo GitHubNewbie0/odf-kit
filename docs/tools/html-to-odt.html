@@ -343,6 +343,22 @@
     }
   }
 
+  function reportError(tool, err) {
+    try {
+      fetch('https://odf-kit-error-reporter.scott-39c.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool,
+          version: '0.10.0',
+          error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
+          stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
+          engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   convertBtn.addEventListener('click', async () => {
     const html = htmlInput.value.trim();
     if (!html) {
@@ -366,6 +382,7 @@
       showStatus('success', 'Downloaded successfully!');
       setTimeout(() => showStatus('', ''), 3000);
     } catch (err) {
+      reportError('html-to-odt', err);
       showStatus('error', 'Conversion failed: ' + (err.message || 'unknown error.'));
     } finally {
       convertBtn.disabled = false;

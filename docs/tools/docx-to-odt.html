@@ -317,6 +317,22 @@
     statusError.textContent = msg;
   }
 
+  function reportError(tool, err) {
+    try {
+      fetch('https://odf-kit-error-reporter.scott-39c.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool,
+          version: '0.10.0',
+          error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
+          stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
+          engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   function showResult(bytes, filename) {
     statusLoad.style.display = 'none';
     odtBytes = bytes;
@@ -344,6 +360,7 @@
       if (warnings.length > 0) console.warn('odf-kit/docx warnings:', warnings);
       showResult(bytes, file.name);
     } catch (err) {
+      reportError('docx-to-odt', err);
       showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .docx file.'));
     }
   }

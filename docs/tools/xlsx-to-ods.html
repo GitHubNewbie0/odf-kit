@@ -680,6 +680,22 @@
     statusError.textContent = msg;
   }
 
+  function reportError(tool, err) {
+    try {
+      fetch('https://odf-kit-error-reporter.scott-39c.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool,
+          version: '0.10.0',
+          error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
+          stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
+          engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   function showResult(bytes, model, filename) {
     statusLoad.style.display = 'none';
     odsBytes = bytes;
@@ -704,6 +720,7 @@
       const model = readOds(ods);
       showResult(ods, model, file.name);
     } catch (err) {
+      reportError('xlsx-to-ods', err);
       showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .xlsx file.'));
     }
   }

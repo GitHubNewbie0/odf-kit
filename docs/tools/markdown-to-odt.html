@@ -516,6 +516,22 @@ Paste or type your **Markdown** here.
     }
   }
 
+  function reportError(tool, err) {
+    try {
+      fetch('https://odf-kit-error-reporter.scott-39c.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool,
+          version: '0.10.0',
+          error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
+          stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
+          engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   convertBtn.addEventListener('click', async () => {
     const md = mdInput.value.trim();
     if (!md) {
@@ -540,6 +556,7 @@ Paste or type your **Markdown** here.
       showStatus('success', 'Downloaded successfully!');
       setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
     } catch (err) {
+      reportError('markdown-to-odt', err);
       showStatus('error', 'Conversion failed: ' + (err.message || 'unknown error.'));
     } finally {
       convertBtn.disabled = false;

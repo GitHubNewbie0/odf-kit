@@ -595,7 +595,7 @@
 </footer>
 
 <script type="module">
-  import { odtToTypst } from 'https://esm.sh/odf-kit@0.8.1/typst';
+  import { odtToTypst } from 'https://esm.sh/odf-kit@0.10.0/typst';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
@@ -634,6 +634,22 @@
     statusError.textContent   = msg;
   }
 
+  function reportError(tool, err) {
+    try {
+      fetch('https://odf-kit-error-reporter.scott-39c.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool,
+          version: '0.10.0',
+          error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
+          stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
+          engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   function showResult(typst, filename) {
     statusLoad.style.display = 'none';
     currentTypst    = typst;
@@ -656,6 +672,7 @@
       const typst  = odtToTypst(bytes);
       showResult(typst, file.name);
     } catch (err) {
+      reportError('odt-to-pdf', err);
       showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .odt file.'));
     }
   }
