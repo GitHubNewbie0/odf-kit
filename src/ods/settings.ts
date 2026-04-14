@@ -39,47 +39,63 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
     const freezeRows = sheet.freezeRows ?? 0;
     const freezeCols = sheet.freezeColumns ?? 0;
 
-    if (freezeRows > 0) {
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "VerticalSplitMode")
-          .attr("config:type", "short")
-          .text("2"),
-      );
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "VerticalSplitPosition")
-          .attr("config:type", "int")
-          .text(String(freezeRows)),
-      );
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "PositionBottom")
-          .attr("config:type", "int")
-          .text(String(freezeRows)),
-      );
-    }
-
-    if (freezeCols > 0) {
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "HorizontalSplitMode")
-          .attr("config:type", "short")
-          .text("2"),
-      );
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "HorizontalSplitPosition")
-          .attr("config:type", "int")
-          .text(String(freezeCols)),
-      );
-      sheetEntry.appendChild(
-        el("config:config-item")
-          .attr("config:name", "PositionRight")
-          .attr("config:type", "int")
-          .text(String(freezeCols)),
-      );
-    }
+    // VerticalSplitMode — row freeze (split line is horizontal)
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "HorizontalSplitMode")
+        .attr("config:type", "short")
+        .text(freezeCols > 0 ? "2" : "0"),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "VerticalSplitMode")
+        .attr("config:type", "short")
+        .text(freezeRows > 0 ? "2" : "0"),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "HorizontalSplitPosition")
+        .attr("config:type", "int")
+        .text(String(freezeCols)),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "VerticalSplitPosition")
+        .attr("config:type", "int")
+        .text(String(freezeRows)),
+    );
+    // ActiveSplitRange: 2 = bottom pane (rows frozen), 3 = right pane (cols frozen)
+    const activeSplitRange = freezeCols > 0 ? 3 : 2;
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "ActiveSplitRange")
+        .attr("config:type", "short")
+        .text(String(activeSplitRange)),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "PositionLeft")
+        .attr("config:type", "int")
+        .text("0"),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "PositionRight")
+        .attr("config:type", "int")
+        .text(String(freezeCols)),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "PositionTop")
+        .attr("config:type", "int")
+        .text("0"),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "PositionBottom")
+        .attr("config:type", "int")
+        .text(String(freezeRows)),
+    );
 
     tablesNamed.appendChild(sheetEntry);
   }
