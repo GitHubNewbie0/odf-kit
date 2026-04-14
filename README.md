@@ -935,6 +935,10 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Version history
 
+**v0.10.3** — `module-sync` exports condition for bundler compatibility. `typesVersions` field for TypeScript `moduleResolution: node` compatibility.
+
+**v0.10.2** — ODS freeze rows/columns fix — `ActiveSplitRange` and all split axis items now correctly emitted in `settings.xml`.
+
 **v0.10.0** — `docxToOdt()` via `odf-kit/docx`. Native DOCX→ODT converter — pure ESM, zero new dependencies, browser-safe. Preserves text, headings, formatting, tables, lists, images (actual dimensions), hyperlinks, bookmarks, footnotes, page layout, headers/footers, and tracked changes. Spec-validated against ECMA-376 5th edition. 1053 tests passing.
 
 **v0.9.9** — `xlsxToOds()` via `odf-kit/xlsx`. XLSX→ODS conversion with zero new dependencies. 936 tests passing.

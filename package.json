@@ -1,6 +1,6 @@
 {
   "name": "odf-kit",
-  "version": "0.10.2",
+  "version": "0.10.0",
   "description": "Generate, fill, read, and convert OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers.",
   "type": "module",
   "main": "./dist/index.js",
@@ -8,74 +8,53 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "module-sync": "./dist/index.js"
     },
     "./odt": {
       "types": "./dist/odt/index.d.ts",
-      "import": "./dist/odt/index.js"
+      "import": "./dist/odt/index.js",
+      "module-sync": "./dist/odt/index.js"
     },
     "./odt-reader": {
       "types": "./dist/reader/index.d.ts",
-      "import": "./dist/reader/index.js"
+      "import": "./dist/reader/index.js",
+      "module-sync": "./dist/reader/index.js"
     },
     "./ods": {
       "types": "./dist/ods/index.d.ts",
-      "import": "./dist/ods/index.js"
+      "import": "./dist/ods/index.js",
+      "module-sync": "./dist/ods/index.js"
     },
     "./ods-reader": {
       "types": "./dist/ods-reader/index.d.ts",
-      "import": "./dist/ods-reader/index.js"
+      "import": "./dist/ods-reader/index.js",
+      "module-sync": "./dist/ods-reader/index.js"
     },
     "./xlsx": {
       "types": "./dist/xlsx/index.d.ts",
-      "import": "./dist/xlsx/index.js"
+      "import": "./dist/xlsx/index.js",
+      "module-sync": "./dist/xlsx/index.js"
     },
     "./template": {
       "types": "./dist/template/index.d.ts",
-      "import": "./dist/template/index.js"
+      "import": "./dist/template/index.js",
+      "module-sync": "./dist/template/index.js"
     },
     "./reader": {
       "types": "./dist/reader/index.d.ts",
-      "import": "./dist/reader/index.js"
+      "import": "./dist/reader/index.js",
+      "module-sync": "./dist/reader/index.js"
     },
     "./typst": {
       "types": "./dist/typst/index.d.ts",
-      "import": "./dist/typst/index.js"
+      "import": "./dist/typst/index.js",
+      "module-sync": "./dist/typst/index.js"
     },
     "./docx": {
       "types": "./dist/docx/index.d.ts",
-      "import": "./dist/docx/index.js"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "odt": [
-        "./dist/odt/index.d.ts"
-      ],
-      "odt-reader": [
-        "./dist/reader/index.d.ts"
-      ],
-      "ods": [
-        "./dist/ods/index.d.ts"
-      ],
-      "ods-reader": [
-        "./dist/ods-reader/index.d.ts"
-      ],
-      "xlsx": [
-        "./dist/xlsx/index.d.ts"
-      ],
-      "template": [
-        "./dist/template/index.d.ts"
-      ],
-      "reader": [
-        "./dist/reader/index.d.ts"
-      ],
-      "typst": [
-        "./dist/typst/index.d.ts"
-      ],
-      "docx": [
-        "./dist/docx/index.d.ts"
-      ]
+      "import": "./dist/docx/index.js",
+      "module-sync": "./dist/docx/index.js"
     }
   },
   "files": [

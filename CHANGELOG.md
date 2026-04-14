@@ -5,6 +5,19 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2026-04-14
+
+### Changed
+
+- **`module-sync` exports condition added** — All sub-exports now include a `module-sync` condition alongside `import`. This improves compatibility with bundlers (webpack 5, rollup, vite) that need to load ESM packages synchronously in a CJS module graph. The underlying file is unchanged — both `import` and `module-sync` point to the same ESM output. Note: `require()` from a pure CJS Node.js runtime is still not supported; use dynamic `import()` instead.
+- **`typesVersions` field added** — Fixes TypeScript sub-export resolution when `moduleResolution` is set to `"node"` (the legacy resolver). Previously, TypeScript could not find type declarations for `odf-kit/ods-reader` and other sub-exports in projects using older `tsconfig.json` settings. All ten sub-exports are now covered.
+
+## [0.10.2] - 2026-04-13
+
+### Fixed
+
+- **ODS freeze rows/columns** — `freezeRows()` and `freezeColumns()` now work correctly in LibreOffice and other ODF-compliant spreadsheet applications. The root cause was a missing `ActiveSplitRange` config item in `settings.xml` — without it, LibreOffice silently ignores the freeze pane entirely. Additionally, both split axes (`HorizontalSplitMode` and `VerticalSplitMode`) and all four position items (`PositionLeft`, `PositionRight`, `PositionTop`, `PositionBottom`) are now always emitted with correct values, matching what LibreOffice itself writes when freezing panes.
+
 ## [0.10.0] - 2026-04-12
 
 ### Added
@@ -241,6 +254,8 @@ Initial release. Complete ODT generation support.
 [0.8.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.7.0
+[0.10.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.3
+[0.10.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.2
 [0.4.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0
