@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Eleven ways to work with ODF files
+## Twelve ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -160,6 +160,17 @@ const { bytes: bytes2 } = await docxToOdt(readFileSync("report.docx"), {
 });
 ```
 
+```typescript
+// 12. Convert .odt to Markdown
+import { odtToMarkdown } from "odf-kit/markdown";
+
+const md = odtToMarkdown(readFileSync("document.odt"));
+writeFileSync("document.md", md);
+
+// CommonMark flavor (no pipe tables)
+const mdCompat = odtToMarkdown(readFileSync("document.odt"), { flavor: "commonmark" });
+```
+
 ---
 
 ## Installation
@@ -176,6 +187,7 @@ import { readOdt, odtToHtml } from "odf-kit/odt-reader";
 import { readOds, odsToHtml } from "odf-kit/ods-reader";
 import { odtToTypst, modelToTypst }          from "odf-kit/typst";
 import { docxToOdt }                         from "odf-kit/docx";
+import { odtToMarkdown, modelToMarkdown }    from "odf-kit/markdown";
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. Runtime dependencies: [fflate](https://github.com/101arrowz/fflate) for ZIP, [marked](https://marked.js.org/) for Markdown parsing.
@@ -935,7 +947,11 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Version history
 
-**v0.10.3** — `module-sync` exports condition for bundler compatibility. `typesVersions` field for TypeScript `moduleResolution: node` compatibility.
+**v0.11.0** — `odtToMarkdown()` and `modelToMarkdown()` via `odf-kit/markdown`. GFM and CommonMark flavors. 1078 tests passing.
+
+**v0.10.4** — ODS freeze fix: `ViewId` and `ActiveTable` added to `settings.xml`. `typesVersions` restored (dropped in v0.10.3). 1059 tests passing.
+
+**v0.10.3** — `module-sync` exports condition for bundler compatibility. `typesVersions` for TypeScript `moduleResolution: node` compatibility.
 
 **v0.10.2** — ODS freeze rows/columns fix — `ActiveSplitRange` and all split axis items now correctly emitted in `settings.xml`.
 

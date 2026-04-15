@@ -5,6 +5,28 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-04-15
+
+### Added
+
+- **`odtToMarkdown()`** — Convert `.odt` files directly to Markdown. Returns a Markdown string. Available via `odf-kit/markdown`.
+- **`modelToMarkdown()`** — Convert a pre-parsed `OdtDocumentModel` to Markdown. Use when you already have a model from `readOdt()` or want to share a single parse across multiple emitters.
+- **`odf-kit/markdown`** sub-export added.
+- **`MarkdownEmitOptions`** — `flavor: "gfm" | "commonmark"` (default: `"gfm"`) and `trackedChanges: "final" | "original" | "changes"` (default: `"final"`).
+- **GFM flavor** — pipe tables with `---` separator row, `~~strikethrough~~`. Compatible with GitHub, GitLab, and most modern Markdown renderers.
+- **CommonMark flavor** — tables emitted as plain text rows (no pipe syntax), strikethrough falls back to plain text.
+- **Inline coverage:** bold (`**text**`), italic (`_text_`), bold+italic (`**_text_**`), strikethrough (`~~text~~`), underline (`<u>text</u>`), superscript (`<sup>text</sup>`), subscript (`<sub>text</sub>`), hyperlinks (`[text](url)`), hard line breaks (two trailing spaces + newline), images (`![alt](name)` placeholder).
+- **Block coverage:** headings (levels 1–6), paragraphs (blank-line separated), unordered lists (`- `), ordered lists (`1. `), nested lists (2-space indent per level), tables (GFM pipe format), sections (body emitted directly), tracked changes.
+- 19 new tests (1078 total, 24 test suites).
+
+## [0.10.4] - 2026-04-14
+
+### Fixed
+
+- **ODS freeze rows/columns — `ViewId` and `ActiveTable` missing** — LibreOffice requires a `ViewId` item (`"view1"`) in the view entry and an `ActiveTable` item naming the active sheet. Without both, the entire view configuration is silently ignored and freeze panes have no effect. Both items are now emitted correctly.
+- **`typesVersions` dropped in v0.10.3** — The `typesVersions` field added in v0.10.1 was accidentally omitted from the v0.10.3 `package.json`. Restored.
+- 6 new freeze pane tests (1059 total).
+
 ## [0.10.3] - 2026-04-14
 
 ### Changed
@@ -254,6 +276,8 @@ Initial release. Complete ODT generation support.
 [0.8.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.7.0
+[0.11.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.11.0
+[0.10.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.4
 [0.10.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.3
 [0.10.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.2
 [0.4.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.4.0

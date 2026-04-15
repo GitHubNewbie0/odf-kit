@@ -55,6 +55,11 @@
       "types": "./dist/docx/index.d.ts",
       "import": "./dist/docx/index.js",
       "module-sync": "./dist/docx/index.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown/index.d.ts",
+      "import": "./dist/markdown/index.js",
+      "module-sync": "./dist/markdown/index.js"
     }
   },
   "typesVersions": {
@@ -85,8 +90,11 @@
       ],
       "docx": [
         "./dist/docx/index.d.ts"
-      ]
-    }
+      ],
+      "markdown": [
+	    "./dist/markdown/index.d.ts"
+	  ]
+	}
   },
   "files": [
     "dist",
