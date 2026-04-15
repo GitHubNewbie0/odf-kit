@@ -25,13 +25,22 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
     .attr("office:version", "1.2");
 
   const settings = el("office:settings");
-
   const viewSettingsSet = el("config:config-item-set").attr("config:name", "ooo:view-settings");
-
   const viewsIndexed = el("config:config-item-map-indexed").attr("config:name", "Views");
   const viewEntry = el("config:config-item-map-entry");
 
+  // ViewId is required for LibreOffice to recognise this as a valid view entry
+  viewEntry.appendChild(
+    el("config:config-item")
+      .attr("config:name", "ViewId")
+      .attr("config:type", "string")
+      .text("view1"),
+  );
+
   const tablesNamed = el("config:config-item-map-named").attr("config:name", "Tables");
+
+  // Track the first sheet name to use as ActiveTable
+  const activeTable = sheetsWithFreeze[0].name;
 
   for (const sheet of sheetsWithFreeze) {
     const sheetEntry = el("config:config-item-map-entry").attr("config:name", sheet.name);
@@ -39,7 +48,6 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
     const freezeRows = sheet.freezeRows ?? 0;
     const freezeCols = sheet.freezeColumns ?? 0;
 
-    // VerticalSplitMode — row freeze (split line is horizontal)
     sheetEntry.appendChild(
       el("config:config-item")
         .attr("config:name", "HorizontalSplitMode")
@@ -101,6 +109,15 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
   }
 
   viewEntry.appendChild(tablesNamed);
+
+  // ActiveTable tells LibreOffice which sheet tab is active
+  viewEntry.appendChild(
+    el("config:config-item")
+      .attr("config:name", "ActiveTable")
+      .attr("config:type", "string")
+      .text(activeTable),
+  );
+
   viewsIndexed.appendChild(viewEntry);
   viewSettingsSet.appendChild(viewsIndexed);
   settings.appendChild(viewSettingsSet);

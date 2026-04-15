@@ -57,6 +57,19 @@
       "module-sync": "./dist/docx/index.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "odt":        ["./dist/odt/index.d.ts"],
+      "odt-reader": ["./dist/reader/index.d.ts"],
+      "ods":        ["./dist/ods/index.d.ts"],
+      "ods-reader": ["./dist/ods-reader/index.d.ts"],
+      "xlsx":       ["./dist/xlsx/index.d.ts"],
+      "template":   ["./dist/template/index.d.ts"],
+      "reader":     ["./dist/reader/index.d.ts"],
+      "typst":      ["./dist/typst/index.d.ts"],
+      "docx":       ["./dist/docx/index.d.ts"]
+    }
+  },
   "files": [
     "dist",
     "LICENSE",

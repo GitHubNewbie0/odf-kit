@@ -686,6 +686,60 @@ describe("OdsDocument — freeze rows/columns", () => {
     expect(settings).toContain("Frozen");
     expect(settings).not.toContain("NotFrozen");
   });
+  test("freezeRows(1) includes ViewId=view1 in settings.xml", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="ViewId"');
+    expect(settings).toContain(">view1<");
+  });
+
+  test("freezeRows(1) includes ActiveTable matching sheet name", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("MySales");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="ActiveTable"');
+    expect(settings).toContain(">MySales<");
+  });
+
+  test("freezeRows(1) sets ActiveSplitRange=2", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="ActiveSplitRange"');
+    expect(settings).toContain(">2<");
+  });
+
+  test("freezeColumns(1) sets ActiveSplitRange=3", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeColumns(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="ActiveSplitRange"');
+    expect(settings).toContain(">3<");
+  });
+
+  test("freezeRows(1) sets PositionBottom=1 and PositionRight=0", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeRows(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="PositionBottom"');
+    expect(settings).toContain('config:name="PositionRight"');
+  });
+
+  test("freezeColumns(1) sets HorizontalSplitMode=2 and VerticalSplitMode=0", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.freezeColumns(1);
+    const { "settings.xml": settings } = await extractFiles(doc);
+    expect(settings).toContain('config:name="HorizontalSplitMode"');
+    // VerticalSplitMode must be 0 (not frozen) when only columns are frozen
+    expect(settings).toContain(">0<");
+  });
 });
 
 // ─── Hyperlinks ───────────────────────────────────────────────────────
