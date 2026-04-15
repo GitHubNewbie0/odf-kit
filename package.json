@@ -1,6 +1,6 @@
 {
   "name": "odf-kit",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "description": "Generate, fill, read, and convert OpenDocument Format (.odt) files in JavaScript and TypeScript. Works in Node.js and browsers.",
   "type": "module",
   "main": "./dist/index.js",
@@ -92,9 +92,9 @@
         "./dist/docx/index.d.ts"
       ],
       "markdown": [
-	    "./dist/markdown/index.d.ts"
-	  ]
-	}
+        "./dist/markdown/index.d.ts"
+      ]
+    }
   },
   "files": [
     "dist",
