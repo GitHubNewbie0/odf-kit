@@ -469,7 +469,7 @@ Paste or type your **Markdown** here.
 </footer>
 
 <script type="module">
-  import { markdownToOdt } from 'https://esm.sh/odf-kit@0.9.9';
+  import { markdownToOdt } from 'https://esm.sh/odf-kit@0.11.0';
 
   // Live preview using marked (same library odf-kit uses internally)
   const markedScript = document.createElement('script');
@@ -523,7 +523,7 @@ Paste or type your **Markdown** here.
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool,
-          version: '0.10.0',
+          version: '0.11.0',
           error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
           stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
           engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],

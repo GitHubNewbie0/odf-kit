@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SheetJS Alternative for ODF — odf-kit ODS Generation and XLSX Conversion</title>
+  <meta name="description" content="odf-kit is a free, open source SheetJS alternative for ODF spreadsheets. Generate .ods files, convert .xlsx to .ods, and read .ods files in Node.js and browsers. No license fees, Apache 2.0.">
+  <meta name="keywords" content="SheetJS alternative, xlsx to ods javascript, ods generator npm, sheetjs ods, free sheetjs alternative, openDocument spreadsheet javascript, ods npm package, sheetjs open source alternative">
+  <meta name="author" content="GitHubNewbie0">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/guides/sheetjs-alternative.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="SheetJS Alternative for ODF — odf-kit">
+  <meta property="og:description" content="Free, open source SheetJS alternative for ODF spreadsheets. Generate .ods files and convert .xlsx to .ods in Node.js and browsers. Apache 2.0.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/guides/sheetjs-alternative.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fafaf8; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #5a5a5a;
+      --accent: #2563eb; --accent-hover: #1d4ed8; --border: #e5e5e0;
+      --code-bg: #1e1e2e; --code-text: #cdd6f4; --code-keyword: #cba6f7;
+      --code-string: #a6e3a1; --code-comment: #6c7086; --code-type: #89b4fa;
+      --code-fn: #f9e2af; --code-num: #fab387;
+      --tag-bg: #f0fdf4; --tag-text: #166634; --tag-border: #bbf7d0;
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 740px; margin: 0 auto; padding: 0 1.5rem; }
+    .nav { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: var(--text-secondary); }
+    .hero { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--border); }
+    .hero-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; color: var(--tag-text); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1rem; }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.75rem; }
+    .hero p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+    .content { padding: 2.5rem 0; }
+    .content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin: 2.5rem 0 0.75rem; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.65; }
+    .content p a { color: var(--accent); text-decoration: none; }
+    .content p a:hover { text-decoration: underline; }
+    .content ul { color: var(--text-secondary); margin: 0 0 1.25rem 1.5rem; line-height: 1.65; }
+    .content li { margin-bottom: 0.4rem; }
+    .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f0f0ec; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .code-block { background: var(--code-bg); border-radius: 10px; padding: 1.5rem; overflow-x: auto; box-shadow: var(--shadow-lg); margin-bottom: 1.5rem; position: relative; }
+    .code-block::before { content: ''; position: absolute; top: 12px; left: 14px; width: 9px; height: 9px; border-radius: 50%; background: #f38ba8; box-shadow: 14px 0 0 #f9e2af, 28px 0 0 #a6e3a1; }
+    .code-block pre { padding-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; color: var(--code-text); }
+    .kw { color: var(--code-keyword); } .str { color: var(--code-string); } .cmt { color: var(--code-comment); } .typ { color: var(--code-type); } .fn { color: var(--code-fn); } .num { color: var(--code-num); }
+    .install-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; background: var(--code-bg); color: var(--code-text); padding: 0.55rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    .install-cmd .prompt { color: var(--code-comment); user-select: none; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .comparison-table th { text-align: left; padding: 0.65rem 1rem; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .comparison-table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    .comparison-table tr td:first-child { color: var(--text); font-weight: 500; }
+    .check { color: #16a34a; } .cross { color: #dc2626; } .partial { color: #d97706; }
+    .cta { padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); }
+    .cta h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .cta p { color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 0.65rem 1.4rem; border-radius: 8px; transition: all 0.15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #ccc; }
+    .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    footer { padding: 2rem 0; text-align: center; border-top: 1px solid var(--border); }
+    footer p { font-size: 0.8rem; color: var(--text-secondary); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7rem; }
+      .code-block pre { font-size: 0.73rem; }
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.4rem 0.5rem; }
+    }
+  </style>
+
+  <script data-goatcounter="https://odf-kit.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container">
+    <a href="../">odf-kit</a>
+    <span class="sep">/</span>
+    <a href="../">Guides</a>
+    <span class="sep">/</span>
+    <span>SheetJS Alternative</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Guide · odf-kit/ods · odf-kit/xlsx</div>
+    <h1>SheetJS alternative for ODF spreadsheets</h1>
+    <p>odf-kit is a free, open source alternative to SheetJS for working with ODF spreadsheet files (.ods). Generate .ods files from scratch, convert .xlsx to .ods, and read .ods files — in Node.js and browsers. Apache 2.0, no license fees.</p>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container">
+
+    <h2>Why look for a SheetJS alternative?</h2>
+    <p>SheetJS (xlsx) is the most widely used JavaScript spreadsheet library. It supports many formats and is well-maintained. However, several factors lead developers to look for alternatives:</p>
+    <ul>
+      <li><strong>Licensing</strong> — SheetJS Pro features require a paid license. The free Community Edition has restrictions on commercial use for some features.</li>
+      <li><strong>ODF focus</strong> — If your target format is .ods (OpenDocument Spreadsheet), odf-kit is purpose-built for ODF and produces spec-compliant output validated on every CI run.</li>
+      <li><strong>Bundle size</strong> — SheetJS includes support for many legacy formats. odf-kit/ods is focused on ODF only, with zero transitive dependencies.</li>
+      <li><strong>Government and public sector</strong> — Many governments mandate ODF (ISO/IEC 26300). odf-kit targets this use case directly.</li>
+    </ul>
+
+    <h2>Install</h2>
+    <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+    <h2>Generate ODS spreadsheets</h2>
+    <p>Use <code>OdsDocument</code> from <code>odf-kit</code> to create .ods files from scratch — the equivalent of SheetJS's <code>XLSX.utils.book_new()</code> workflow, but for ODF:</p>
+    <div class="code-block">
+      <pre><span class="kw">import</span> { <span class="typ">OdsDocument</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> doc = <span class="kw">new</span> <span class="typ">OdsDocument</span>();
+<span class="kw">const</span> sheet = doc.<span class="fn">addSheet</span>(<span class="str">"Sales"</span>);
+
+<span class="cmt">// Auto-typed cells: number, Date, boolean, string, null</span>
+sheet.<span class="fn">addRow</span>([<span class="str">"Month"</span>, <span class="str">"Revenue"</span>, <span class="str">"Growth"</span>], { <span class="typ">bold</span>: <span class="num">true</span>, <span class="typ">backgroundColor</span>: <span class="str">"#DDDDDD"</span> });
+sheet.<span class="fn">addRow</span>([<span class="str">"January"</span>,  <span class="num">12500</span>, <span class="num">0.08</span>]);
+sheet.<span class="fn">addRow</span>([<span class="str">"February"</span>, <span class="num">14200</span>, <span class="num">0.136</span>]);
+sheet.<span class="fn">addRow</span>([<span class="str">"Total"</span>, { <span class="typ">value</span>: <span class="str">"=SUM(B2:B3)"</span>, <span class="typ">type</span>: <span class="str">"formula"</span> }]);
+
+<span class="cmt">// Number formats</span>
+sheet.<span class="fn">addRow</span>([{ <span class="typ">value</span>: <span class="num">1234.56</span>, <span class="typ">type</span>: <span class="str">"currency"</span>, <span class="typ">numberFormat</span>: <span class="str">"currency:EUR"</span> }]);
+sheet.<span class="fn">addRow</span>([{ <span class="typ">value</span>: <span class="num">0.1234</span>, <span class="typ">type</span>: <span class="str">"percentage"</span>, <span class="typ">numberFormat</span>: <span class="str">"percentage:1"</span> }]);
+
+<span class="cmt">// Merged cells, freeze, column width, tab color</span>
+sheet.<span class="fn">addRow</span>([{ <span class="typ">value</span>: <span class="str">"Q1 Summary"</span>, <span class="typ">type</span>: <span class="str">"string"</span>, <span class="typ">colSpan</span>: <span class="num">3</span>, <span class="typ">bold</span>: <span class="num">true</span> }]);
+sheet.<span class="fn">setColumnWidth</span>(<span class="num">0</span>, <span class="str">"4cm"</span>);
+sheet.<span class="fn">freezeRows</span>(<span class="num">1</span>);
+sheet.<span class="fn">setTabColor</span>(<span class="str">"#4CAF50"</span>);
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> doc.<span class="fn">save</span>();
+<span class="fn">writeFileSync</span>(<span class="str">"sales.ods"</span>, bytes);</pre>
+    </div>
+
+    <h2>Convert XLSX to ODS</h2>
+    <p>Use <code>xlsxToOds</code> from <code>odf-kit/xlsx</code> to convert .xlsx files to .ods — no SheetJS dependency, no extra install:</p>
+    <div class="code-block">
+      <pre><span class="kw">import</span> { <span class="fn">xlsxToOds</span> } <span class="kw">from</span> <span class="str">"odf-kit/xlsx"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> ods = <span class="kw">await</span> <span class="fn">xlsxToOds</span>(<span class="fn">readFileSync</span>(<span class="str">"report.xlsx"</span>));
+<span class="fn">writeFileSync</span>(<span class="str">"report.ods"</span>, ods);
+
+<span class="cmt">// Also works in the browser</span>
+<span class="kw">const</span> ods2 = <span class="kw">await</span> <span class="fn">xlsxToOds</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());</pre>
+    </div>
+    <p>Preserves: strings, numbers, booleans, dates (Excel serial → Date), formulas (cached result), merged cells (colSpan/rowSpan), freeze panes, multiple sheets. Own XLSX parser — no SheetJS, no transitive dependencies.</p>
+
+    <h2>Read ODS files</h2>
+    <p>Use <code>readOds</code> from <code>odf-kit/ods-reader</code> to parse .ods files into typed JavaScript values — the equivalent of SheetJS's <code>XLSX.read()</code> + <code>utils.sheet_to_json()</code>:</p>
+    <div class="code-block">
+      <pre><span class="kw">import</span> { <span class="fn">readOds</span>, <span class="fn">odsToHtml</span> } <span class="kw">from</span> <span class="str">"odf-kit/ods-reader"</span>;
+<span class="kw">import</span> { readFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="kw">const</span> model = <span class="fn">readOds</span>(<span class="fn">readFileSync</span>(<span class="str">"data.ods"</span>));
+
+<span class="kw">for</span> (<span class="kw">const</span> row <span class="kw">of</span> model.sheets[<span class="num">0</span>].rows) {
+  <span class="kw">for</span> (<span class="kw">const</span> cell <span class="kw">of</span> row.cells) {
+    console.<span class="fn">log</span>(cell.type, cell.value);
+    <span class="cmt">// type: "string"|"float"|"boolean"|"date"|"formula"|"empty"|"covered"</span>
+    <span class="cmt">// value: string|number|boolean|Date|null — never a display string</span>
+  }
+}
+
+<span class="cmt">// Or convert to an HTML table directly</span>
+<span class="kw">const</span> html = <span class="fn">odsToHtml</span>(<span class="fn">readFileSync</span>(<span class="str">"data.ods"</span>));</pre>
+    </div>
+
+    <h2>Comparison</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Feature</th><th>odf-kit</th><th>SheetJS Community</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Generate .ods from scratch</td><td><span class="check">✓</span> Full support</td><td><span class="partial">Partial</span></td></tr>
+        <tr><td>Convert .xlsx → .ods</td><td><span class="check">✓</span> Own parser, zero deps</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Read .ods files</td><td><span class="check">✓</span> Typed values</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Merged cells</td><td><span class="check">✓</span> colSpan + rowSpan</td><td><span class="check">✓</span></td></tr>
+        <tr><td>Freeze panes</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Number formats (currency, %)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Browser support</td><td><span class="check">✓</span> Pure ESM</td><td><span class="check">✓</span></td></tr>
+        <tr><td>License</td><td><span class="check">✓</span> Apache 2.0</td><td><span class="partial">Apache 2.0 (Community)</span></td></tr>
+        <tr><td>Transitive dependencies</td><td><span class="check">✓</span> Zero</td><td><span class="partial">Some</span></td></tr>
+        <tr><td>ODF validator compliance</td><td><span class="check">✓</span> CI-enforced</td><td>Not tested against OASIS validator</td></tr>
+        <tr><td>Legacy formats (.xls, .xlsb)</td><td><span class="cross">✗</span> .xlsx/.xlsm only</td><td><span class="check">✓</span></td></tr>
+        <tr><td>ODT document support</td><td><span class="check">✓</span> Full suite</td><td><span class="cross">✗</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>When to use odf-kit vs SheetJS</h2>
+    <p>Use <strong>odf-kit</strong> when:</p>
+    <ul>
+      <li>Your target format is .ods (OpenDocument Spreadsheet)</li>
+      <li>You need ODF compliance for government or public sector requirements</li>
+      <li>You want zero transitive dependencies and Apache 2.0 licensing with no ambiguity</li>
+      <li>You also need ODT document generation in the same project</li>
+    </ul>
+    <p>Use <strong>SheetJS</strong> when:</p>
+    <ul>
+      <li>You need to read or write legacy formats (.xls, .xlsb, .xlsm with macros)</li>
+      <li>You need to write .xlsx output specifically</li>
+      <li>You need advanced Excel-specific features (pivot tables, charts, conditional formatting)</li>
+    </ul>
+
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Generate your first .ods file</h2>
+    <p>One install, zero extra dependencies.</p>
+    <div class="install-cmd" style="margin-bottom: 1.25rem;"><span class="prompt">$ </span>npm install odf-kit</div>
+    <div class="cta-buttons">
+      <a href="https://github.com/GitHubNewbie0/odf-kit#readme" class="btn btn-primary">Full documentation</a>
+      <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary">npm</a>
+      <a href="../tools/xlsx-to-ods.html" class="btn btn-secondary">Try XLSX → ODS tool</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p><strong>odf-kit</strong> · Apache 2.0 · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> · <a href="https://www.npmjs.com/package/odf-kit">npm</a> · <a href="../">Home</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOCX to ODT Converter — Free, Private, Browser-Based | odf-kit</title>
-  <meta name="description" content="Convert Word DOCX files to OpenDocument ODT format instantly in your browser. Free, private — your file never leaves your device. Powered by odf-kit.">
-  <meta name="keywords" content="docx to odt, convert docx to odt, word to openDocument, word to libreoffice, docx odt converter, odf-kit, free docx converter, browser docx converter">
+  <title>ODT to Markdown Converter — Free, Private, Browser-Based | odf-kit</title>
+  <meta name="description" content="Convert ODT files to Markdown instantly in your browser. Free, private — your file never leaves your device. Powered by odf-kit, the open source JavaScript ODT library.">
+  <meta name="keywords" content="ODT to Markdown, convert ODT to Markdown, ODT converter, OpenDocument Markdown, odt2md, odf-kit, free ODT converter, browser ODT converter">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/docx-to-odt.html">
+  <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/odt-to-markdown.html">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="DOCX to ODT Converter — Free, Private, Browser-Based">
-  <meta property="og:description" content="Convert Word DOCX files to ODT format instantly in your browser. Free and private — your file never leaves your device. Powered by odf-kit.">
-  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/docx-to-odt.html">
+  <meta property="og:title" content="ODT to Markdown Converter — Free, Private, Browser-Based">
+  <meta property="og:description" content="Convert ODT files to Markdown instantly in your browser. Free and private — your file never leaves your device. Powered by odf-kit.">
+  <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/odt-to-markdown.html">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "DOCX to ODT Converter",
-    "description": "Free browser-based tool to convert Microsoft Word (.docx) files to OpenDocument Text (.odt) format. No upload, no server — conversion runs entirely in your browser using odf-kit.",
-    "url": "https://githubnewbie0.github.io/odf-kit/tools/docx-to-odt.html",
+    "name": "ODT to Markdown Converter",
+    "description": "Free browser-based tool to convert OpenDocument Text (.odt) files to Markdown. No upload, no server — conversion runs entirely in your browser using odf-kit.",
+    "url": "https://githubnewbie0.github.io/odf-kit/tools/odt-to-markdown.html",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
     "isAccessibleForFree": true,
@@ -38,6 +38,8 @@
       --accent: #2563eb; --accent-hover: #1d4ed8; --accent-light: #dbeafe;
       --border: #e5e5e0; --code-bg: #1e1e2e; --code-text: #cdd6f4;
       --tag-bg: #f0fdf4; --tag-text: #166534; --tag-border: #bbf7d0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
       --success-bg: #f0fdf4; --success-border: #86efac; --success-text: #166534;
       --error-bg: #fef2f2; --error-border: #fca5a5; --error-text: #991b1b;
     }
@@ -78,7 +80,6 @@
 
     .result { display: none; margin-top: 2rem; }
     .result.visible { display: block; }
-
     .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
     .result-title { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
     .result-filename { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); }
@@ -93,23 +94,12 @@
 
     .output-tabs { display: flex; gap: 0; margin-bottom: 0; }
     .output-tab { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500; padding: 0.5rem 1rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; transition: all 0.15s; }
-    .output-tab.active { background: var(--surface); color: var(--text); border-color: var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; }
+    .output-tab.active { background: var(--code-bg); color: var(--code-text); border-color: var(--code-bg); }
     .output-tab:not(.active):hover { color: var(--text); }
     .output-panel { display: none; }
     .output-panel.active { display: block; }
 
-    .html-preview { border: 1px solid var(--border); border-radius: 0 8px 8px 8px; background: var(--surface); padding: 1.5rem 2rem; min-height: 200px; max-height: 500px; overflow-y: auto; font-size: 0.9rem; line-height: 1.7; }
-    .html-preview h1, .html-preview h2, .html-preview h3, .html-preview h4 { margin: 0.75em 0 0.35em; font-weight: 600; }
-    .html-preview h1 { font-size: 1.4em; }
-    .html-preview h2 { font-size: 1.2em; }
-    .html-preview h3 { font-size: 1.05em; }
-    .html-preview p { margin: 0 0 0.6em; }
-    .html-preview table { border-collapse: collapse; width: 100%; margin: 0.75em 0; font-size: 0.9em; }
-    .html-preview td, .html-preview th { border: 1px solid var(--border); padding: 0.4em 0.7em; }
-    .html-preview th { background: #f5f5f0; font-weight: 600; }
-    .html-preview ul, .html-preview ol { margin: 0.5em 0 0.5em 1.5em; }
-    .html-preview li { margin: 0.2em 0; }
-    .html-preview a { color: var(--accent); }
+    .code-output { background: var(--code-bg); border-radius: 0 8px 8px 8px; padding: 1.25rem 1.5rem; overflow: auto; max-height: 500px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.65; color: var(--code-text); white-space: pre-wrap; word-break: break-all; }
 
     .convert-another { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
     .convert-another p { font-size: 0.85rem; color: var(--text-secondary); }
@@ -159,8 +149,8 @@
 <section class="hero">
   <div class="container">
     <div class="hero-badge">Free online tool</div>
-    <h1>DOCX to ODT converter</h1>
-    <p class="hero-sub">Convert Word documents to OpenDocument format instantly — right in your browser. No upload, no account, no limits.</p>
+    <h1>ODT to Markdown converter</h1>
+    <p class="hero-sub">Convert OpenDocument Text files to Markdown instantly — right in your browser. No upload, no account, no limits.</p>
     <div class="privacy-note">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       Your file never leaves your device
@@ -171,14 +161,24 @@
 <section class="tool-section">
   <div class="container">
 
-    <div class="drop-zone" id="dropZone">
-      <input type="file" id="fileInput" accept=".docx">
-      <span class="drop-icon">📄</span>
-      <p class="drop-title">Drop your .docx file here</p>
-      <p class="drop-sub">or click to browse &nbsp;·&nbsp; <strong>.docx</strong> files only</p>
+    <div style="margin-bottom:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <label style="font-size:0.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.4rem;">
+        <span>Flavor:</span>
+        <select id="flavorSelect" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;">
+          <option value="gfm" selected>GFM (GitHub Flavored)</option>
+          <option value="commonmark">CommonMark</option>
+        </select>
+      </label>
     </div>
 
-    <div class="status loading" id="statusLoading" style="display:none">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".odt">
+      <span class="drop-icon">📄</span>
+      <p class="drop-title">Drop your .odt file here</p>
+      <p class="drop-sub">or click to browse &nbsp;·&nbsp; <strong>.odt</strong> files only</p>
+    </div>
+
+    <div class="status loading" id="statusLoading">
       <div class="spinner"></div>
       <span>Converting…</span>
     </div>
@@ -191,16 +191,17 @@
           <span class="result-filename" id="resultFilename"></span>
         </div>
         <div class="result-actions">
-          <button class="btn btn-primary btn-sm" id="downloadBtn">⬇ Download .odt</button>
+          <button class="btn btn-secondary btn-sm" id="copyBtn">Copy Markdown</button>
+          <button class="btn btn-primary btn-sm" id="downloadBtn">Download .md</button>
         </div>
       </div>
 
       <div class="output-tabs">
-        <button class="output-tab active" data-tab="preview">Preview</button>
+        <button class="output-tab active" data-tab="source">Markdown</button>
       </div>
 
-      <div class="output-panel active" id="tab-preview">
-        <div class="html-preview" id="htmlPreview"></div>
+      <div class="output-panel active" id="tab-source">
+        <div class="code-output" id="mdOutput"></div>
       </div>
 
       <div class="convert-another">
@@ -216,23 +217,23 @@
   <div class="container">
     <p style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">How it works</p>
     <h2 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.4rem;">Private, fast, free</h2>
-    <p style="color:var(--text-secondary);font-size:0.9rem;">Unlike other converters, your document never leaves your computer.</p>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">No uploads, no accounts, no limits. Conversion runs entirely in your browser.</p>
     <div class="info-grid">
       <div class="info-card">
         <h3>🔒 Fully private</h3>
-        <p>Your DOCX file is read and converted locally by your browser. No data is sent to any server. Works offline after the page loads.</p>
+        <p>Your ODT file is read locally by your browser. No data is sent to any server. Works offline after the page loads.</p>
       </div>
       <div class="info-card">
         <h3>⚡ Instant conversion</h3>
-        <p>Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting for uploads or server processing.</p>
+        <p>Conversion runs in milliseconds using odf-kit's pure JavaScript reader. No waiting for upload or server processing.</p>
       </div>
       <div class="info-card">
         <h3>📋 What is preserved</h3>
-        <p>Headings, paragraphs, bold, italic, underline, strikethrough, font sizes, colors, lists, tables, hyperlinks, bookmarks, images (with actual dimensions), page layout, and tracked changes.</p>
+        <p>Headings (# through ######), paragraphs, bold, italic, strikethrough, lists (bullet and numbered, nested), tables (GFM pipe format), hyperlinks, and line breaks.</p>
       </div>
       <div class="info-card">
         <h3>🆓 Free, always</h3>
-        <p>No file size limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+        <p>No file size limits, no conversions per day limit, no sign-up required. Powered by open source odf-kit.</p>
       </div>
     </div>
   </div>
@@ -242,8 +243,8 @@
   <div class="container">
     <div class="dev-cta-inner">
       <div class="dev-cta-text">
-        <h2>Need DOCX → ODT conversion in your app?</h2>
-        <p><strong>odf-kit/docx</strong> is a free, open source JavaScript package built into odf-kit that converts DOCX to ODT with no server dependencies. Works in Node.js 22+ and browsers. No LibreOffice, no cloud APIs, no extra install.</p>
+        <h2>Need ODT → Markdown conversion in your app?</h2>
+        <p><strong>odf-kit/markdown</strong> is a free, open source JavaScript package built into odf-kit. Works in Node.js 22+ and browsers. No LibreOffice, no cloud APIs, no extra install.</p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <a href="../" class="btn btn-primary btn-sm">View documentation</a>
           <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
@@ -251,13 +252,12 @@
       </div>
       <div style="flex:1;min-width:280px;">
         <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
-<span class="kw">import</span> { <span class="typ">docxToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/docx"</span>;
+<span class="kw">import</span> { <span class="typ">odtToMarkdown</span> } <span class="kw">from</span> <span class="str">"odf-kit/markdown"</span>;
 
-<span class="kw">const</span> { bytes, warnings } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(
-  <span class="kw">await</span> file.<span class="fn">arrayBuffer</span>()
-);
+<span class="kw">const</span> bytes = <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());
+<span class="kw">const</span> md = <span class="fn">odtToMarkdown</span>(bytes, { <span class="typ">flavor</span>: <span class="str">"gfm"</span> });
 
-<span class="cmt">// bytes → Uint8Array, save as .odt file</span></div>
+<span class="cmt">// md → Markdown string, ready to use</span></div>
       </div>
     </div>
   </div>
@@ -269,6 +269,7 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;font-size:0.88rem;">
       <a href="odt-to-html.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to HTML converter →</a>
       <a href="odt-to-pdf.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free ODT to PDF converter →</a>
+      <a href="docx-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free DOCX to ODT converter →</a>
       <a href="xlsx-to-ods.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free XLSX to ODS converter →</a>
       <a href="markdown-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free Markdown to ODT converter →</a>
       <a href="html-to-odt.html" style="color:var(--accent);text-decoration:none;padding:0.6rem 0;border-bottom:1px solid var(--border);">Free HTML to ODT converter →</a>
@@ -289,20 +290,21 @@
 </footer>
 
 <script type="module">
-  import { docxToOdt } from 'https://esm.sh/odf-kit@0.11.0/docx';
-  import { odtToHtml } from 'https://esm.sh/odf-kit@0.11.0/reader';
+  import { odtToMarkdown } from 'https://esm.sh/odf-kit@0.11.0/markdown';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
+  const flavorSelect = document.getElementById('flavorSelect');
   const statusLoad  = document.getElementById('statusLoading');
   const statusError = document.getElementById('statusError');
   const result      = document.getElementById('result');
   const resultFile  = document.getElementById('resultFilename');
+  const mdOutput    = document.getElementById('mdOutput');
+  const copyBtn     = document.getElementById('copyBtn');
   const downloadBtn = document.getElementById('downloadBtn');
   const resetBtn    = document.getElementById('resetBtn');
-  const htmlPreview = document.getElementById('htmlPreview');
 
-  let odtBytes = null;
+  let currentMd = '';
   let currentFilename = '';
 
   function showLoading() {
@@ -333,35 +335,30 @@
     } catch (_) {}
   }
 
-  function showResult(bytes, filename) {
+  function showResult(md, filename) {
     statusLoad.style.display = 'none';
-    odtBytes = bytes;
-    currentFilename = filename.replace(/\.docx$/i, '.odt');
+    currentMd = md;
+    currentFilename = filename.replace(/\.odt$/i, '.md');
     resultFile.textContent = filename;
-    // Generate HTML preview from the ODT
-    try {
-      const html = odtToHtml(bytes);
-      htmlPreview.innerHTML = html;
-    } catch {
-      htmlPreview.innerHTML = '<p style="color:var(--text-secondary);font-style:italic;">Preview unavailable — download to open in LibreOffice.</p>';
-    }
+    mdOutput.textContent = md;
     result.classList.add('visible');
   }
 
   async function convertFile(file) {
-    if (!file || !file.name.toLowerCase().endsWith('.docx')) {
-      showError('Please select a .docx file.');
+    if (!file || !file.name.toLowerCase().endsWith('.odt')) {
+      showError('Please select an .odt file.');
       return;
     }
     showLoading();
     try {
       const buffer = await file.arrayBuffer();
-      const { bytes, warnings } = await docxToOdt(buffer);
-      if (warnings.length > 0) console.warn('odf-kit/docx warnings:', warnings);
-      showResult(bytes, file.name);
+      const bytes = new Uint8Array(buffer);
+      const flavor = flavorSelect.value;
+      const md = odtToMarkdown(bytes, { flavor });
+      showResult(md, file.name);
     } catch (err) {
-      reportError('docx-to-odt', err);
-      showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .docx file.'));
+      reportError('odt-to-markdown', err);
+      showError('Conversion failed: ' + (err.message || 'unknown error. Make sure this is a valid .odt file.'));
     }
   }
 
@@ -375,9 +372,15 @@
     if (e.dataTransfer.files[0]) convertFile(e.dataTransfer.files[0]);
   });
 
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(currentMd).then(() => {
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy Markdown'; }, 2000);
+    });
+  });
+
   downloadBtn.addEventListener('click', () => {
-    if (!odtBytes) return;
-    const blob = new Blob([odtBytes], { type: 'application/vnd.oasis.opendocument.text' });
+    const blob = new Blob([currentMd], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -390,9 +393,9 @@
     result.classList.remove('visible');
     statusError.style.display = 'none';
     fileInput.value = '';
-    odtBytes = null;
+    currentMd = '';
     currentFilename = '';
-    htmlPreview.innerHTML = '';
+    mdOutput.textContent = '';
   });
 </script>
 

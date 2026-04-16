@@ -293,7 +293,7 @@
 </footer>
 
 <script type="module">
-  import { odsToHtml } from 'https://esm.sh/odf-kit@0.9.9/ods-reader';
+  import { odsToHtml } from 'https://esm.sh/odf-kit@0.11.0/ods-reader';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
@@ -329,7 +329,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool,
-          version: '0.10.0',
+          version: '0.11.0',
           error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
           stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
           engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],

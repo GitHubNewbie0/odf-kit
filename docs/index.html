@@ -636,7 +636,7 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge">v0.10.0 · Apache 2.0 · TypeScript + JavaScript</div>
+      <div class="hero-badge">v0.11.0 · Apache 2.0 · TypeScript + JavaScript</div>
       <h1>Generate, fill, read, and convert<br>OpenDocument files with <span>odf-kit</span></h1>
       <p class="hero-tagline">
         Create .odt documents from scratch, fill existing templates with data, convert DOCX to ODT, HTML to ODT, Markdown to ODT, read .odt files, or export to Typst for PDF — all in pure JavaScript. Works in Node.js and the browser. No LibreOffice required.
@@ -700,8 +700,8 @@
   <section class="code-section" id="example">
     <div class="container">
       <div class="section-label">Quick start</div>
-      <h2 class="section-title">Eleven ways to work with ODF files</h2>
-      <p class="section-desc">Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, or export to Typst for PDF — all in pure JavaScript.</p>
+      <h2 class="section-title">Twelve ways to work with ODF files</h2>
+      <p class="section-desc">Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, convert ODT→Markdown, or export to Typst for PDF — all in pure JavaScript.</p>
       <div class="code-tabs">
         <button class="code-tab active" onclick="switchTab('build', event)">Build ODT</button>
         <button class="code-tab" onclick="switchTab('template', event)">Fill template</button>
@@ -713,6 +713,7 @@
         <button class="code-tab" onclick="switchTab('readods', event)">Read ODS</button>
         <button class="code-tab" onclick="switchTab('xlsx', event)">XLSX → ODS</button>
         <button class="code-tab" onclick="switchTab('docx', event)">DOCX → ODT</button>
+        <button class="code-tab" onclick="switchTab('odtmd', event)">ODT → Markdown</button>
         <button class="code-tab" onclick="switchTab('typst', event)">ODT → PDF</button>
       </div>
       <div class="code-block has-tabs">
@@ -917,6 +918,22 @@ console.<span class="fn">log</span>(doc.metadata.title);
 <span class="cmt">// Also works in the browser — pure ESM, zero new dependencies</span>
 <span class="kw">const</span> { bytes: odt } = <span class="kw">await</span> <span class="fn">docxToOdt</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>());</pre>
         </div>
+        <div id="tab-odtmd" class="code-panel">
+          <pre><span class="kw">import</span> { <span class="typ">odtToMarkdown</span> } <span class="kw">from</span> <span class="str">"odf-kit/markdown"</span>;
+<span class="kw">import</span> { readFileSync, writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="cmt">// GFM (default) — pipe tables, ~~strikethrough~~</span>
+<span class="kw">const</span> md = <span class="fn">odtToMarkdown</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>));
+<span class="fn">writeFileSync</span>(<span class="str">"document.md"</span>, md);
+
+<span class="cmt">// CommonMark flavor</span>
+<span class="kw">const</span> md2 = <span class="fn">odtToMarkdown</span>(<span class="fn">readFileSync</span>(<span class="str">"document.odt"</span>), {
+  <span class="typ">flavor</span>: <span class="str">"commonmark"</span>,
+});
+
+<span class="cmt">// Also works in the browser — pure ESM, zero dependencies</span>
+<span class="kw">const</span> md3 = <span class="fn">odtToMarkdown</span>(<span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> file.<span class="fn">arrayBuffer</span>()));</pre>
+        </div>
         <div id="tab-typst" class="code-panel">
           <pre><span class="kw">import</span> { <span class="typ">odtToTypst</span>, <span class="typ">modelToTypst</span> } <span class="kw">from</span> <span class="str">"odf-kit/typst"</span>;
 <span class="kw">import</span> { <span class="typ">readOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/reader"</span>;
@@ -1012,8 +1029,8 @@ console.<span class="fn">log</span>(doc.metadata.title);
       <p class="section-desc">The JS/TS ecosystem had no maintained, full-featured library for OpenDocument Format generation. odf-kit fills that gap.</p>
       <div class="why-grid">
         <div class="why-item">
-          <h3>Eleven modes, one library, every platform</h3>
-          <p>Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, read ODT files, or export to Typst for PDF. Same API in Node.js and browsers — no LibreOffice required.</p>
+          <h3>Twelve modes, one library, every platform</h3>
+          <p>Build ODT from scratch, fill templates, convert DOCX→ODT, HTML→ODT, Markdown→ODT, TipTap JSON→ODT, build ODS spreadsheets, read ODT and ODS files, convert XLSX→ODS, convert ODT→Markdown, or export to Typst for PDF. Same API in Node.js and browsers — no LibreOffice required.</p>
         </div>
         <div class="why-item">
           <h3>Minimal dependencies</h3>
@@ -1043,8 +1060,8 @@ console.<span class="fn">log</span>(doc.metadata.title);
   <section class="comparison" id="comparison">
     <div class="container">
       <div class="section-label">Comparison</div>
-      <h2 class="section-title">odf-kit vs. simple-odf</h2>
-      <p class="section-desc">If you've been searching for a simple-odf alternative or replacement, here's what odf-kit does differently.</p>
+      <h2 class="section-title">odf-kit vs. the alternatives</h2>
+      <p class="section-desc">odf-kit is the ODF replacement for LibreOffice headless, the SheetJS alternative for .ods files, and the free open source alternative to docxtemplater for ODF templates.</p>
       <table class="comparison-table">
         <thead>
           <tr>
@@ -1100,12 +1117,22 @@ console.<span class="fn">log</span>(doc.metadata.title);
             <td><span class="cross">✗</span> Not supported</td>
           </tr>
           <tr>
+            <td>Convert XLSX → ODS <small style="color:var(--text-secondary)">(SheetJS alternative for ODF)</small></td>
+            <td><span class="check">✓</span> Zero deps, own parser</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
             <td>Read &amp; convert to HTML</td>
             <td><span class="check">✓</span> Full reader with document model</td>
             <td><span class="cross">✗</span> Not supported</td>
           </tr>
           <tr>
-            <td>Export to Typst / PDF</td>
+            <td>Convert ODT → Markdown</td>
+            <td><span class="check">✓</span> GFM and CommonMark</td>
+            <td><span class="cross">✗</span> Not supported</td>
+          </tr>
+          <tr>
+            <td>Export to Typst / PDF <small style="color:var(--text-secondary)">(LibreOffice headless alternative)</small></td>
             <td><span class="check">✓</span> Built-in Typst emitter</td>
             <td><span class="cross">✗</span> Not supported</td>
           </tr>
@@ -1129,7 +1156,7 @@ console.<span class="fn">log</span>(doc.metadata.title);
     <div class="container">
       <div class="stats-grid">
         <div>
-          <div class="stat-value">1053</div>
+          <div class="stat-value">1078</div>
           <div class="stat-label">Tests passing</div>
         </div>
         <div>
@@ -1137,7 +1164,7 @@ console.<span class="fn">log</span>(doc.metadata.title);
           <div class="stat-label">Transitive dependencies</div>
         </div>
         <div>
-          <div class="stat-value">11</div>
+          <div class="stat-value">12</div>
           <div class="stat-label">Document modes</div>
         </div>
         <div>
@@ -1193,6 +1220,8 @@ console.<span class="fn">log</span>(doc.metadata.title);
           <li><a href="guides/generate-odt-browser.html">Generate .odt files in the browser</a> — client-side generation, no server needed</li>
           <li><a href="guides/fill-odt-template-javascript.html">Fill .odt templates with JavaScript</a> — template engine walkthrough</li>
           <li><a href="guides/docx-to-odt.html">Convert DOCX to ODT in JavaScript</a> — native converter, browser-safe, no LibreOffice</li>
+          <li><a href="guides/libreoffice-headless-alternative.html">LibreOffice headless alternative</a> — pure JS replacement, works on Lambda and Vercel</li>
+          <li><a href="guides/sheetjs-alternative.html">SheetJS alternative for ODF</a> — generate and read .ods files, convert .xlsx to .ods</li>
           <li><a href="guides/odf-government-compliance.html">ODF for government compliance</a> — ISO 26300 mandates and implementation</li>
           <li><a href="guides/generate-odt-without-libreoffice.html">Generate .odt without LibreOffice</a> — lightweight alternative to headless LibreOffice</li>
           <li><a href="guides/odt-to-typst-pdf.html">Convert ODT to PDF with Typst</a> — zero-dependency PDF generation without LibreOffice</li>
@@ -1208,7 +1237,7 @@ console.<span class="fn">log</span>(doc.metadata.title);
   <section class="cta">
     <div class="container">
       <h2>Start working with ODF documents</h2>
-      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, convert DOCX to ODT, read existing .odt files, or export to Typst for PDF.</p>
+      <p>Install odf-kit and create your first .odt file in under a minute. Works in Node.js and browsers. Build from scratch, fill templates, convert DOCX to ODT, read existing .odt files, convert to Markdown, or export to Typst for PDF.</p>
       <div class="install-cmd" style="margin-bottom: 1.5rem;"><span class="prompt">$ </span>npm install odf-kit</div>
       <br>
       <div class="hero-actions">
@@ -1227,6 +1256,8 @@ console.<span class="fn">log</span>(doc.metadata.title);
         <a href="guides/generate-odt-browser.html">Browser Guide</a> · 
         <a href="guides/fill-odt-template-javascript.html">Template Guide</a> · 
         <a href="guides/docx-to-odt.html">DOCX → ODT Guide</a> · 
+        <a href="guides/libreoffice-headless-alternative.html">LibreOffice Alternative</a> · 
+        <a href="guides/sheetjs-alternative.html">SheetJS Alternative</a> · 
         <a href="guides/odf-government-compliance.html">Government Guide</a> · 
         <a href="guides/generate-odt-without-libreoffice.html">No-LibreOffice Guide</a> · 
         <a href="guides/odt-to-typst-pdf.html">ODT to PDF</a> · 
@@ -1240,7 +1271,8 @@ console.<span class="fn">log</span>(doc.metadata.title);
         <a href="tools/xlsx-to-ods.html">Free XLSX → ODS Tool</a> ·
         <a href="tools/markdown-to-odt.html">Free Markdown → ODT Tool</a> ·
         <a href="tools/html-to-odt.html">Free HTML → ODT Tool</a> ·
-        <a href="tools/ods-to-html.html">Free ODS → HTML Tool</a>
+        <a href="tools/ods-to-html.html">Free ODS → HTML Tool</a> ·
+        <a href="tools/odt-to-markdown.html">Free ODT → Markdown Tool</a>
       </p>
       <p style="margin-top: 0.4rem;">Open-source document generation for developers at nonprofits, governments, schools, and community organizations.</p>
     </div>
