@@ -1,6 +1,6 @@
 # odf-kit
 
-Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Convert HTML, Markdown, TipTap JSON, and DOCX to ODT. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
+Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in TypeScript and JavaScript. Convert HTML, Markdown, TipTap JSON, Lexical JSON, and DOCX to ODT. Works in Node.js and browsers. No LibreOffice dependency — pure spec-compliant ODF.
 
 **[Documentation & examples →](https://githubnewbie0.github.io/odf-kit/)**
 
@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Twelve ways to work with ODF files
+## Thirteen ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -171,6 +171,21 @@ writeFileSync("document.md", md);
 const mdCompat = odtToMarkdown(readFileSync("document.odt"), { flavor: "commonmark" });
 ```
 
+```typescript
+// 13. Convert Lexical editor state to ODT
+import { lexicalToOdt } from "odf-kit/lexical";
+// editor.getEditorState().toJSON() returns SerializedEditorState
+const bytes = await lexicalToOdt(editor.getEditorState().toJSON(), { pageFormat: "A4" });
+// With image resolution (e.g. for Proton Docs integration)
+const bytes2 = await lexicalToOdt(editor.getEditorState().toJSON(), {
+  pageFormat: "A4",
+  fetchImage: async (src) => {
+    const response = await fetch(src);
+    return new Uint8Array(await response.arrayBuffer());
+  },
+});
+```
+
 ---
 
 ## Installation
@@ -188,6 +203,7 @@ import { readOds, odsToHtml } from "odf-kit/ods-reader";
 import { odtToTypst, modelToTypst }          from "odf-kit/typst";
 import { docxToOdt }                         from "odf-kit/docx";
 import { odtToMarkdown, modelToMarkdown }    from "odf-kit/markdown";
+import { lexicalToOdt }                      from "odf-kit/lexical";
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. Runtime dependencies: [fflate](https://github.com/101arrowz/fflate) for ZIP, [marked](https://marked.js.org/) for Markdown parsing.

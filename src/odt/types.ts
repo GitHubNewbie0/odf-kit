@@ -252,11 +252,17 @@ export interface ParagraphOptions {
  * { width: "4in", height: "3in", mimeType: "image/jpeg", anchor: "paragraph" }
  */
 export interface ImageOptions {
-  /** Image width with units (e.g. `"10cm"`, `"4in"`). Required. */
-  width: string;
+  /**
+   * Image width with units (e.g. `"10cm"`, `"4in"`).
+   * If omitted, no explicit width is set on the image frame.
+   */
+  width?: string;
 
-  /** Image height with units (e.g. `"6cm"`, `"3in"`). Required. */
-  height: string;
+  /**
+   * Image height with units (e.g. `"6cm"`, `"3in"`).
+   * If omitted, no explicit height is set on the image frame.
+   */
+  height?: string;
 
   /**
    * MIME type of the image data (e.g. `"image/png"`, `"image/jpeg"`, `"image/svg+xml"`).
@@ -362,11 +368,11 @@ export interface ImageData {
   /** The raw image bytes. */
   data: Uint8Array;
 
-  /** Image width with units. */
-  width: string;
+  /** Image width with units. Undefined when dimensions are unknown. */
+  width?: string;
 
-  /** Image height with units. */
-  height: string;
+  /** Image height with units. Undefined when dimensions are unknown. */
+  height?: string;
 
   /** MIME type (e.g. `"image/png"`). */
   mimeType: string;

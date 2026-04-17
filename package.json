@@ -60,8 +60,13 @@
       "types": "./dist/markdown/index.d.ts",
       "import": "./dist/markdown/index.js",
       "module-sync": "./dist/markdown/index.js"
+    },
+    "./lexical": {
+      "types": "./dist/lexical/index.d.ts",
+      "import": "./dist/lexical/index.js",
+      "module-sync": "./dist/lexical/index.js"
     }
-  },
+},
   "typesVersions": {
     "*": {
       "odt": [
@@ -93,7 +98,10 @@
       ],
       "markdown": [
         "./dist/markdown/index.d.ts"
-      ]
+      ],
+      "lexical": [
+	  "dist/lexical/index.d.ts"
+	  ]
     }
   },
   "files": [

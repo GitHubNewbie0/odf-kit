@@ -5,6 +5,18 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-04-17
+
+### Added
+
+- **`lexicalToOdt()`** — Convert a Lexical `SerializedEditorState` to a valid `.odt` file. Available via `odf-kit/lexical`. Supports all Lexical node types used by Proton Docs: paragraphs, headings (h1–h6), blockquotes, code blocks, bullet/numbered/check lists, custom-list numbering styles (lower-alpha, upper-alpha, upper-roman), tables (with colSpan/rowSpan), links, autolinks, inline code, images (with async `fetchImage` callback and caption support), horizontal rules, hashtags, and line breaks.
+- **`odf-kit/lexical`** sub-export added.
+- **`ImageOptions.width` and `ImageOptions.height` made optional** — Previously required strings. Now optional to support images whose natural dimensions are unknown at generation time (e.g. Lexical images with `width: 0` / `height: 0` meaning 'inherit'). Existing callers passing explicit values are unaffected — non-breaking change.
+- **`CellBuilder.addLink()`** — Add hyperlink runs inside table cells.
+- **`CellBuilder.addLineBreak()`** — Insert line breaks inside table cells.
+- **`CellBuilder.addImage()`** — Insert inline images inside table cells.
+- **`console` and `atob` declared in `env.d.ts`** — Available in all supported environments (Node.js 22+, browsers, Deno, Bun, Cloudflare Workers).
+
 ## [0.11.0] - 2026-04-15
 
 ### Added

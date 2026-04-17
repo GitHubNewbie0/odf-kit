@@ -1,6 +1,8 @@
 import type {
   TextFormatting,
   TextRun,
+  ImageOptions,
+  ImageData,
   CellOptions,
   TableCellData,
   TableRowData,
@@ -32,6 +34,59 @@ export class CellBuilder {
    */
   addText(text: string, formatting?: TextFormatting): this {
     this.runs.push({ text, formatting });
+    return this;
+  }
+
+  /**
+   * Add a hyperlink run to this cell.
+   *
+   * @param text - The visible link text.
+   * @param url - The URL. Use `"#bookmarkName"` for internal links.
+   * @param formatting - Optional text formatting for the link.
+   * @returns This builder, for chaining.
+   */
+  addLink(text: string, url: string, formatting?: TextFormatting): this {
+    this.runs.push({ text, formatting, link: url });
+    return this;
+  }
+
+  /**
+   * Insert a line break at the current position in the cell.
+   *
+   * @returns This builder, for chaining.
+   */
+  addLineBreak(): this {
+    this.runs.push({ text: "", lineBreak: true });
+    return this;
+  }
+
+  /**
+   * Insert an inline image at the current position in the cell.
+   *
+   * @param data - The raw image bytes as a Uint8Array.
+   * @param options - Image options (mimeType required; width and height optional).
+   * @returns This builder, for chaining.
+   */
+  addImage(data: Uint8Array, options: ImageOptions): this {
+    const imageData: ImageData = {
+      data,
+      width: options.width,
+      height: options.height,
+      mimeType: options.mimeType,
+      anchor: options.anchor ?? "as-character",
+      alt: options.alt,
+      description: options.description,
+      name: options.name,
+      wrapMode: options.wrapMode,
+      margin: options.margin,
+      marginTop: options.marginTop,
+      marginBottom: options.marginBottom,
+      marginLeft: options.marginLeft,
+      marginRight: options.marginRight,
+      border: options.border,
+      opacity: options.opacity,
+    };
+    this.runs.push({ text: "", image: imageData });
     return this;
   }
 }

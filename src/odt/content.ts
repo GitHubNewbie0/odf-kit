@@ -1389,9 +1389,9 @@ function buildImageFrame(
 
   const frame = el("draw:frame")
     .attr("draw:name", image.name ?? `Image${imageCounter}`)
-    .attr("text:anchor-type", image.anchor)
-    .attr("svg:width", image.width)
-    .attr("svg:height", image.height);
+    .attr("text:anchor-type", image.anchor);
+  if (image.width) frame.attr("svg:width", image.width);
+  if (image.height) frame.attr("svg:height", image.height);
 
   // Resolve graphic style name if any graphic properties are set
   const gsKey = graphicStyleKey(normalizeGraphicStyle(image));
