@@ -5,6 +5,24 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.3] - 2026-04-18
+
+### Added
+
+- **ODT `settings.xml`** — `OdtDocument.save()` now generates `settings.xml` with sensible default view settings (zoom 100%, single-column layout, print view). LibreOffice requires the `xmlns:ooo` namespace on this file to recognise it as originating from an ODF-aware application.
+
+### Fixed
+
+- **ODT `settings.xml` missing `xmlns:ooo` namespace** — consistent with the ODS fix in v0.12.1.
+- 6 new tests (1113 total, 25 test suites).
+
+## [0.12.1] - 2026-04-18
+
+### Fixed
+
+- **ODS freeze rows/columns not working in LibreOffice** — `settings.xml` was missing the `xmlns:ooo="http://openoffice.org/2004/office"` namespace declaration on the root element. LibreOffice uses its presence to recognise the settings file as originating from an ODF-aware application; without it, all view settings including freeze panes are silently ignored. Adding this single declaration resolves freeze rows and columns in LibreOffice 26.2 and earlier.
+- 29 new tests (1107 total, 25 test suites).
+
 ## [0.12.0] - 2026-04-17
 
 ### Added
@@ -16,13 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`CellBuilder.addLineBreak()`** — Insert line breaks inside table cells.
 - **`CellBuilder.addImage()`** — Insert inline images inside table cells.
 - **`console` and `atob` declared in `env.d.ts`** — Available in all supported environments (Node.js 22+, browsers, Deno, Bun, Cloudflare Workers).
-
-## [0.12.1] - 2026-04-18
-
-### Fixed
-
-- **ODS freeze rows/columns not working in LibreOffice** — `settings.xml` was missing the `xmlns:ooo="http://openoffice.org/2004/office"` namespace declaration on the root element. LibreOffice uses its presence to recognise the settings file as originating from an ODF-aware application; without it, all view settings including freeze panes are silently ignored. Adding this single declaration resolves freeze rows and columns in LibreOffice 26.2 and earlier.
-- 29 new tests (1107 total, 25 test suites).
 
 ## [0.11.0] - 2026-04-15
 

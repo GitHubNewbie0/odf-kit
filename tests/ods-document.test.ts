@@ -820,4 +820,28 @@ describe("OdsDocument — sheet tab color", () => {
     const { "content.xml": content } = await extractFiles(doc);
     expect(content).not.toContain("table:tab-color");
   });
+  describe("OdsDocument — settings.xml", () => {
+    test("settings.xml is present when freeze rows are set", async () => {
+      const doc = new OdsDocument();
+      const sheet = doc.addSheet("Sheet1");
+      sheet.freezeRows(1);
+      const files = await extractFiles(doc);
+      expect(files["settings.xml"]).toBeDefined();
+    });
+
+    test("settings.xml includes xmlns:ooo namespace", async () => {
+      const doc = new OdsDocument();
+      const sheet = doc.addSheet("Sheet1");
+      sheet.freezeRows(1);
+      const files = await extractFiles(doc);
+      expect(files["settings.xml"]).toContain("http://openoffice.org/2004/office");
+    });
+
+    test("settings.xml is absent when no freeze settings exist", async () => {
+      const doc = new OdsDocument();
+      doc.addSheet("Sheet1");
+      const files = await extractFiles(doc);
+      expect(files["settings.xml"]).toBeUndefined();
+    });
+  });
 });

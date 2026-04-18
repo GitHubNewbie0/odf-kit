@@ -2642,4 +2642,30 @@ describe("OdtDocument", () => {
       expect(content).toContain("PageBreak");
     });
   });
+  describe("settings.xml", () => {
+    it("should include settings.xml in the package", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("Hello");
+      const entries = await unpackOdt(doc);
+      expect(entries["settings.xml"]).toBeDefined();
+    });
+
+    it("should include xmlns:ooo namespace in settings.xml", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("Hello");
+      const entries = await unpackOdt(doc);
+      const settings = decode.decode(entries["settings.xml"]);
+      expect(settings).toContain("http://openoffice.org/2004/office");
+    });
+
+    it("should include view settings with correct ViewId and ZoomFactor", async () => {
+      const doc = new OdtDocument();
+      doc.addParagraph("Hello");
+      const entries = await unpackOdt(doc);
+      const settings = decode.decode(entries["settings.xml"]);
+      expect(settings).toContain("view2");
+      expect(settings).toContain("ZoomFactor");
+      expect(settings).toContain("100");
+    });
+  });
 });

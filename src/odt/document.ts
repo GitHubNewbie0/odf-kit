@@ -10,6 +10,7 @@ import { ParagraphBuilder } from "./paragraph-builder.js";
 import { HeaderFooterBuilder } from "./header-footer-builder.js";
 import { TableBuilder } from "./table-builder.js";
 import { ListBuilder } from "./list-builder.js";
+import { generateOdtSettings } from "./settings.js";
 import type {
   TableOptions,
   TableData,
@@ -418,6 +419,7 @@ export class OdtDocument {
       { path: "content.xml", content: contentXml },
       { path: "styles.xml", content: stylesXml },
       { path: "meta.xml", content: metaXml },
+      { path: "settings.xml", content: generateOdtSettings() },
       ...imageFiles,
     ];
 
