@@ -47,7 +47,7 @@ export class XmlElement {
   }
 
   /** Serialize this element and its children to an XML string. */
-  serialize(indent: number = 0): string {
+  serialize(indent: number = 0, compact: boolean = false): string {
     const attrs = this.attributes.map(([k, v]) => ` ${k}="${escapeAttr(v)}"`).join("");
 
     if (this.children.length === 0) {
@@ -57,6 +57,19 @@ export class XmlElement {
     // If the only child is text, keep it on one line
     if (this.children.length === 1 && typeof this.children[0] === "string") {
       return `<${this.tagName}${attrs}>${escapeXml(this.children[0])}</${this.tagName}>`;
+    }
+
+    // Compact mode: no whitespace between tags
+    if (compact) {
+      const childStr = this.children
+        .map((child) => {
+          if (typeof child === "string") {
+            return escapeXml(child);
+          }
+          return child.serialize(0, true);
+        })
+        .join("");
+      return `<${this.tagName}${attrs}>${childStr}</${this.tagName}>`;
     }
 
     // Otherwise, serialize children on separate lines
@@ -85,4 +98,17 @@ export function el(tagName: string): XmlElement {
  */
 export function xmlDocument(root: XmlElement): string {
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + root.serialize();
+}
+
+/**
+ * Wrap an XmlElement as a complete XML document with declaration,
+ * serialized without whitespace between tags.
+ *
+ * Required for LibreOffice settings.xml compatibility — LibreOffice's
+ * settings parser is sensitive to whitespace text nodes between config
+ * elements and silently ignores view settings (including freeze panes)
+ * when they are present.
+ */
+export function xmlDocumentCompact(root: XmlElement): string {
+  return '<?xml version="1.0" encoding="UTF-8"?>' + root.serialize(0, true);
 }

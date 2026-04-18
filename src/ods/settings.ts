@@ -1,5 +1,5 @@
-import { ODF_NS } from "../core/namespaces.js";
-import { el, xmlDocument } from "../core/xml.js";
+import { ODF_NS, ODF_VERSION } from "../core/namespaces.js";
+import { el, xmlDocumentCompact } from "../core/xml.js";
 import type { OdsSheetData } from "./types.js";
 
 /**
@@ -8,6 +8,10 @@ import type { OdsSheetData } from "./types.js";
  * settings.xml is required to configure freeze rows/columns (the
  * VerticalSplitMode / HorizontalSplitMode approach used by LibreOffice).
  * Only emitted when at least one sheet has freeze settings.
+ *
+ * Serialized without whitespace between tags — LibreOffice's settings
+ * parser silently ignores view settings (including freeze panes) when
+ * whitespace text nodes are present between config elements.
  *
  * @param sheets - Sheet data array in tab order.
  * @returns Serialized settings.xml string, or null if no freeze settings exist.
@@ -22,7 +26,8 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
   const root = el("office:document-settings")
     .attr("xmlns:office", ODF_NS.office)
     .attr("xmlns:config", "urn:oasis:names:tc:opendocument:xmlns:config:1.0")
-    .attr("office:version", "1.2");
+    .attr("xmlns:ooo", "http://openoffice.org/2004/office")
+    .attr("office:version", ODF_VERSION);
 
   const settings = el("office:settings");
   const viewSettingsSet = el("config:config-item-set").attr("config:name", "ooo:view-settings");
@@ -48,6 +53,18 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
     const freezeRows = sheet.freezeRows ?? 0;
     const freezeCols = sheet.freezeColumns ?? 0;
 
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "CursorPositionX")
+        .attr("config:type", "int")
+        .text(String(freezeCols)),
+    );
+    sheetEntry.appendChild(
+      el("config:config-item")
+        .attr("config:name", "CursorPositionY")
+        .attr("config:type", "int")
+        .text(String(freezeRows)),
+    );
     sheetEntry.appendChild(
       el("config:config-item")
         .attr("config:name", "HorizontalSplitMode")
@@ -123,5 +140,5 @@ export function generateOdsSettings(sheets: OdsSheetData[]): string | null {
   settings.appendChild(viewSettingsSet);
   root.appendChild(settings);
 
-  return xmlDocument(root);
+  return xmlDocumentCompact(root);
 }
