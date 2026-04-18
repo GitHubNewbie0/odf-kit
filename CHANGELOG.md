@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **ODS freeze rows/columns not working in LibreOffice** — `settings.xml` was missing the `xmlns:ooo="http://openoffice.org/2004/office"` namespace declaration on the root element. LibreOffice uses its presence to recognise the settings file as originating from an ODF-aware application; without it, all view settings including freeze panes are silently ignored. Adding this single declaration resolves freeze rows and columns in LibreOffice 26.2 and earlier.
+- 29 new tests (1107 total, 25 test suites).
 
 ## [0.11.0] - 2026-04-15
 

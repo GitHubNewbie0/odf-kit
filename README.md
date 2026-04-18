@@ -962,6 +962,7 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+**v0.12.0** — `lexicalToOdt()` via `odf-kit/lexical`. Converts Lexical `SerializedEditorState` to ODT. `CellBuilder.addLink()`, `addLineBreak()`, `addImage()`. ODS freeze panes fixed. 1107 tests passing.
 
 **v0.11.0** — `odtToMarkdown()` and `modelToMarkdown()` via `odf-kit/markdown`. GFM and CommonMark flavors. 1078 tests passing.
 
