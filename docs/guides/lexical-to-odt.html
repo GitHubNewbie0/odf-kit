@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lexical JSON to ODT — Convert Lexical Editor State to OpenDocument | odf-kit</title>
+    <meta
+      name="description"
+      content="Convert Lexical SerializedEditorState to ODT (OpenDocument Text) in JavaScript and TypeScript. Pure ESM, no LibreOffice, works in Node.js 22+ and browsers. Proton Docs ODT export integration included."
+    />
+    <meta
+      name="keywords"
+      content="lexical to odt javascript, lexical editor export odt, lexical json openDocument, lexical odt node.js, proton docs odt export, lexical typescript odt, odf-kit lexical, lexical to libreoffice, lexical serialized editor state odt"
+    />
+    <meta name="author" content="GitHubNewbie0" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://githubnewbie0.github.io/odf-kit/guides/lexical-to-odt.html"
+    />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Lexical JSON to ODT in JavaScript — odf-kit" />
+    <meta
+      property="og:description"
+      content="Convert Lexical SerializedEditorState to OpenDocument .odt format in Node.js and browsers. Pure JavaScript, no LibreOffice required. Includes Proton Docs integration."
+    />
+    <meta
+      property="og:url"
+      content="https://githubnewbie0.github.io/odf-kit/guides/lexical-to-odt.html"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #fafaf8;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-secondary: #5a5a5a;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --border: #e5e5e0;
+        --code-bg: #1e1e2e;
+        --code-text: #cdd6f4;
+        --code-keyword: #cba6f7;
+        --code-string: #a6e3a1;
+        --code-comment: #6c7086;
+        --code-type: #89b4fa;
+        --code-fn: #f9e2af;
+        --code-num: #fab387;
+        --tag-bg: #f0fdf4;
+        --tag-text: #166534;
+        --tag-border: #bbf7d0;
+        --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        font-size: 16px;
+      }
+      body {
+        font-family:
+          "DM Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 740px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .nav {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav .container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.88rem;
+      }
+      .nav a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .nav a:hover {
+        text-decoration: underline;
+      }
+      .nav .sep {
+        color: var(--text-secondary);
+      }
+      .hero {
+        padding: 3.5rem 0 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--tag-text);
+        background: var(--tag-bg);
+        border: 1px solid var(--tag-border);
+        padding: 0.25rem 0.75rem;
+        border-radius: 100px;
+        margin-bottom: 1rem;
+      }
+      .hero h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.75rem;
+      }
+      .hero p {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        max-width: 620px;
+      }
+      .content {
+        padding: 2.5rem 0;
+      }
+      .content h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 2.5rem 0 0.75rem;
+      }
+      .content h2:first-child {
+        margin-top: 0;
+      }
+      .content p {
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+        line-height: 1.65;
+      }
+      .content p a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .content p a:hover {
+        text-decoration: underline;
+      }
+      .content ul {
+        color: var(--text-secondary);
+        margin: 0 0 1.25rem 1.5rem;
+        line-height: 1.65;
+      }
+      .content li {
+        margin-bottom: 0.4rem;
+      }
+      .content code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85em;
+        background: #f0f0ec;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+      }
+      .code-block {
+        background: var(--code-bg);
+        border-radius: 10px;
+        padding: 1.5rem;
+        overflow-x: auto;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+      .code-block::before {
+        content: "";
+        position: absolute;
+        top: 12px;
+        left: 14px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #f38ba8;
+        box-shadow:
+          14px 0 0 #f9e2af,
+          28px 0 0 #a6e3a1;
+      }
+      .code-block pre {
+        padding-top: 0.75rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: var(--code-text);
+      }
+      .kw {
+        color: var(--code-keyword);
+      }
+      .str {
+        color: var(--code-string);
+      }
+      .cmt {
+        color: var(--code-comment);
+      }
+      .typ {
+        color: var(--code-type);
+      }
+      .fn {
+        color: var(--code-fn);
+      }
+      .num {
+        color: var(--code-num);
+      }
+      .install-cmd {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.88rem;
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 0.55rem 1.2rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+      }
+      .install-cmd .prompt {
+        color: var(--code-comment);
+        user-select: none;
+      }
+      .node-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        margin-bottom: 1.5rem;
+      }
+      .node-table th {
+        text-align: left;
+        padding: 0.65rem 1rem;
+        border-bottom: 2px solid var(--border);
+        font-weight: 600;
+      }
+      .node-table td {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.82rem;
+      }
+      .node-table tr td:first-child {
+        color: var(--text);
+      }
+      .check {
+        color: #16a34a;
+        font-family: "DM Sans", sans-serif;
+      }
+      .cta {
+        padding: 3rem 0;
+        text-align: center;
+        border-top: 1px solid var(--border);
+      }
+      .cta h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .cta p {
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.65rem 1.4rem;
+        border-radius: 8px;
+        transition: all 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        border-color: #ccc;
+      }
+      .cta-buttons {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      footer {
+        padding: 2rem 0;
+        text-align: center;
+        border-top: 1px solid var(--border);
+      }
+      footer p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+      @media (max-width: 640px) {
+        .hero h1 {
+          font-size: 1.7rem;
+        }
+        .code-block pre {
+          font-size: 0.73rem;
+        }
+      }
+    </style>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is there a JavaScript library to convert Lexical editor state to ODT?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. odf-kit includes lexicalToOdt() via the odf-kit/lexical sub-export. Install with npm install odf-kit, then import lexicalToOdt from 'odf-kit/lexical' and pass a Lexical SerializedEditorState. It returns a Uint8Array containing a valid .odt file. No LibreOffice required, works in Node.js 22+ and browsers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I export Lexical editor content to ODT in the browser?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. odf-kit/lexical is pure ESM with zero runtime dependencies beyond fflate for ZIP packaging. It works in any modern browser. Call editor.getEditorState().toJSON() to get the SerializedEditorState, pass it to lexicalToOdt(), and trigger a download with the resulting Uint8Array."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I add ODT export to a Proton Docs integration?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Proton Docs uses Lexical as its editor. Adding ODT export requires three changes: create EditorOdtExporter.ts using lexicalToOdt(), add a case for 'odt' in ExportDataFromEditorState.ts, and add 'odt' to DataTypesThatDocumentCanBeExportedAs. See the full integration example in this guide."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <script
+      data-goatcounter="https://odf-kit.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container">
+        <a href="../">odf-kit</a>
+        <span class="sep">/</span>
+        <a href="../">Guides</a>
+        <span class="sep">/</span>
+        <span>Lexical to ODT</span>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">Guide · odf-kit/lexical</div>
+        <h1>Lexical JSON to ODT in JavaScript</h1>
+        <p>
+          Convert a Lexical <code>SerializedEditorState</code> to a valid
+          <code>.odt</code> OpenDocument file in Node.js and browsers — pure ESM, no LibreOffice
+          required. Includes Proton Docs integration example.
+        </p>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="container">
+        <h2>Install</h2>
+        <p>
+          <code>lexicalToOdt()</code> is available via the <code>odf-kit/lexical</code> sub-export —
+          no separate package needed:
+        </p>
+        <div class="install-cmd"><span class="prompt">$ </span>npm install odf-kit</div>
+
+        <h2>Basic usage</h2>
+        <p>
+          Call <code>editor.getEditorState().toJSON()</code> to get the
+          <code>SerializedEditorState</code>, then pass it to <code>lexicalToOdt()</code>. The
+          function returns a <code>Uint8Array</code> containing a complete, valid
+          <code>.odt</code> file.
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">import</span> { <span class="fn">lexicalToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
+<span class="kw">import</span> { writeFileSync } <span class="kw">from</span> <span class="str">"fs"</span>;
+
+<span class="cmt">// Get serialized state from your Lexical editor</span>
+<span class="kw">const</span> editorState = editor.<span class="fn">getEditorState</span>().<span class="fn">toJSON</span>();
+
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">lexicalToOdt</span>(editorState, {
+  pageFormat: <span class="str">"A4"</span>,
+});
+
+<span class="fn">writeFileSync</span>(<span class="str">"document.odt"</span>, bytes);
+<span class="cmt">// → Valid .odt file, opens in LibreOffice, Google Docs, Word</span></pre>
+        </div>
+
+        <h2>Browser usage</h2>
+        <p>
+          <code>odf-kit/lexical</code> is pure ESM — it works in any modern browser. Call
+          <code>lexicalToOdt()</code> and trigger a download with the resulting bytes.
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">import</span> { <span class="fn">lexicalToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
+
+<span class="kw">const</span> editorState = editor.<span class="fn">getEditorState</span>().<span class="fn">toJSON</span>();
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">lexicalToOdt</span>(editorState, { pageFormat: <span class="str">"A4"</span> });
+
+<span class="kw">const</span> blob = <span class="kw">new</span> <span class="typ">Blob</span>([bytes], {
+  type: <span class="str">"application/vnd.oasis.opendocument.text"</span>
+});
+<span class="kw">const</span> url = <span class="typ">URL</span>.<span class="fn">createObjectURL</span>(blob);
+<span class="kw">const</span> a = document.<span class="fn">createElement</span>(<span class="str">"a"</span>);
+a.href = url;
+a.download = <span class="str">"document.odt"</span>;
+a.<span class="fn">click</span>();
+<span class="typ">URL</span>.<span class="fn">revokeObjectURL</span>(url);</pre>
+        </div>
+
+        <h2>Images</h2>
+        <p>
+          Base64 data URL images are embedded automatically. For remote image URLs (e.g. images
+          stored on a CDN or IPFS), provide a <code>fetchImage</code> callback that resolves the URL
+          to raw bytes:
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">lexicalToOdt</span>(editorState, {
+  pageFormat: <span class="str">"A4"</span>,
+  fetchImage: <span class="kw">async</span> (src) => {
+    <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(src);
+    <span class="kw">return</span> <span class="kw">new</span> <span class="typ">Uint8Array</span>(<span class="kw">await</span> response.<span class="fn">arrayBuffer</span>());
+  },
+});</pre>
+        </div>
+
+        <h2>Page format options</h2>
+        <p>Pass a <code>LexicalToOdtOptions</code> object as the second argument:</p>
+        <div class="code-block">
+          <pre><span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">lexicalToOdt</span>(editorState, {
+  pageFormat: <span class="str">"letter"</span>,   <span class="cmt">// "A4" | "letter" | "legal" | "A3" | "A5"</span>
+  marginTop:  <span class="str">"2.5cm"</span>,
+  marginBottom: <span class="str">"2.5cm"</span>,
+  marginLeft: <span class="str">"2.5cm"</span>,
+  marginRight: <span class="str">"2.5cm"</span>,
+});</pre>
+        </div>
+
+        <h2>Supported Lexical node types</h2>
+        <p>All standard Lexical node types are supported:</p>
+        <table class="node-table">
+          <thead>
+            <tr>
+              <th>Node type</th>
+              <th>ODT output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>paragraph</td>
+              <td>text:p — with alignment support</td>
+            </tr>
+            <tr>
+              <td>heading (h1–h6)</td>
+              <td>text:h with Heading 1–6 styles</td>
+            </tr>
+            <tr>
+              <td>quote</td>
+              <td>Indented paragraph (1cm left margin)</td>
+            </tr>
+            <tr>
+              <td>code</td>
+              <td>Monospace paragraph (Courier New)</td>
+            </tr>
+            <tr>
+              <td>list (bullet)</td>
+              <td>Unordered text:list</td>
+            </tr>
+            <tr>
+              <td>list (number)</td>
+              <td>Ordered text:list with numFormat</td>
+            </tr>
+            <tr>
+              <td>custom-list</td>
+              <td>Ordered with lower-alpha / upper-alpha / upper-roman</td>
+            </tr>
+            <tr>
+              <td>table</td>
+              <td>table:table with colSpan / rowSpan</td>
+            </tr>
+            <tr>
+              <td>image (decorator)</td>
+              <td>draw:frame with embedded image</td>
+            </tr>
+            <tr>
+              <td>horizontalrule</td>
+              <td>Paragraph with bottom border</td>
+            </tr>
+            <tr>
+              <td>text</td>
+              <td>
+                text:span with bold, italic, underline, strikethrough, code, subscript, superscript,
+                color
+              </td>
+            </tr>
+            <tr>
+              <td>link / autolink</td>
+              <td>text:a hyperlink</td>
+            </tr>
+            <tr>
+              <td>linebreak</td>
+              <td>text:line-break</td>
+            </tr>
+            <tr>
+              <td>code-highlight</td>
+              <td>Monospace text run</td>
+            </tr>
+            <tr>
+              <td>hashtag</td>
+              <td>Plain text run</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Proton Docs integration</h2>
+        <p>
+          Proton Docs uses Lexical as its editor engine. Adding ODT export requires changes to three
+          files in <code>applications/docs-editor/src/app/Conversion/Exporter/</code>:
+        </p>
+
+        <p>
+          <strong>Step 1 — Create <code>EditorOdtExporter.ts</code>:</strong>
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">import</span> { <span class="fn">lexicalToOdt</span> } <span class="kw">from</span> <span class="str">'odf-kit/lexical'</span>
+<span class="kw">import</span> { <span class="typ">EditorExporter</span> } <span class="kw">from</span> <span class="str">'./EditorExporter'</span>
+
+<span class="kw">export class</span> <span class="typ">EditorOdtExporter</span> <span class="kw">extends</span> <span class="typ">EditorExporter</span> {
+  <span class="kw">async</span> <span class="fn">export</span>(): <span class="typ">Promise</span>&lt;<span class="typ">Uint8Array</span>&lt;<span class="typ">ArrayBuffer</span>&gt;&gt; {
+    <span class="kw">return</span> <span class="fn">lexicalToOdt</span>(<span class="kw">this</span>.editor.<span class="fn">getEditorState</span>().<span class="fn">toJSON</span>(), {
+      pageFormat: <span class="str">'A4'</span>,
+      fetchImage: <span class="kw">async</span> (src) => {
+        <span class="kw">const</span> b64 = <span class="kw">await</span> <span class="kw">this</span>.callbacks.<span class="fn">fetchExternalImageAsBase64</span>(src)
+        <span class="kw">if</span> (!b64) <span class="kw">return</span> <span class="kw">undefined</span>
+        <span class="kw">const</span> binary = <span class="fn">atob</span>(b64.split(<span class="str">','</span>)[<span class="num">1</span>] ?? b64)
+        <span class="kw">return</span> <span class="typ">Uint8Array</span>.<span class="fn">from</span>(binary, c => c.<span class="fn">charCodeAt</span>(<span class="num">0</span>))
+      },
+    })
+  }
+}</pre>
+        </div>
+
+        <p>
+          <strong>Step 2 — Add one case to <code>ExportDataFromEditorState.ts</code>:</strong>
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">case</span> <span class="str">'odt'</span>:
+  <span class="kw">return new</span> <span class="typ">EditorOdtExporter</span>(editorState, callbacks).<span class="fn">export</span>()</pre>
+        </div>
+
+        <p>
+          <strong>Step 3 — Add <code>'odt'</code> to the export type union</strong> in
+          <code>DataTypesThatDocumentCanBeExportedAs</code> in <code>@proton/docs-shared</code>.
+        </p>
+
+        <p>That's the complete integration — three files, one new case statement.</p>
+
+        <h2>TypeScript types</h2>
+        <p>
+          The <code>odf-kit/lexical</code> sub-export includes full TypeScript types. The input type
+          is loosely typed to accept any valid Lexical <code>SerializedEditorState</code> without
+          requiring a Lexical dependency in your project:
+        </p>
+        <div class="code-block">
+          <pre><span class="kw">import</span> { <span class="fn">lexicalToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
+<span class="kw">import type</span> {
+  <span class="typ">LexicalToOdtOptions</span>,
+  <span class="typ">LexicalSerializedEditorState</span>,
+} <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;</pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="cta">
+      <div class="container">
+        <h2>Try it in your browser</h2>
+        <p>
+          Paste a Lexical editor state and download an ODT file instantly — no install required.
+        </p>
+        <div class="cta-buttons">
+          <a href="../tools/lexical-to-odt.html" class="btn btn-primary"
+            >Open free converter tool</a
+          >
+          <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary"
+            >npm install odf-kit</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <p>
+          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and
+          TypeScript · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a> · Apache 2.0
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

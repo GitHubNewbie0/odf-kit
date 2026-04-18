@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lexical JSON to ODT Converter — Free, Private, Browser-Based | odf-kit</title>
+    <meta
+      name="description"
+      content="Convert Lexical SerializedEditorState JSON to ODT (OpenDocument Text) instantly in your browser. Free, private — nothing is sent to any server. Powered by odf-kit."
+    />
+    <meta
+      name="keywords"
+      content="lexical to odt, lexical json odt, lexical editor export odt, lexical serialized editor state odt, proton docs odt export, odf-kit lexical, lexical openDocument, lexical odt converter"
+    />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://githubnewbie0.github.io/odf-kit/tools/lexical-to-odt.html"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Lexical JSON to ODT Converter — Free, Private, Browser-Based"
+    />
+    <meta
+      property="og:description"
+      content="Convert Lexical SerializedEditorState JSON to OpenDocument Text (.odt) instantly in your browser. Free and private — nothing is sent to any server. Powered by odf-kit."
+    />
+    <meta
+      property="og:url"
+      content="https://githubnewbie0.github.io/odf-kit/tools/lexical-to-odt.html"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Lexical JSON to ODT Converter",
+        "description": "Free browser-based tool to convert Lexical SerializedEditorState JSON to OpenDocument Text (.odt). No upload, no server — conversion runs entirely in your browser using odf-kit.",
+        "url": "https://githubnewbie0.github.io/odf-kit/tools/lexical-to-odt.html",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0" }
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #fafaf8;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-secondary: #5a5a5a;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-light: #dbeafe;
+        --border: #e5e5e0;
+        --code-bg: #1e1e2e;
+        --code-text: #cdd6f4;
+        --tag-bg: #f0fdf4;
+        --tag-text: #166534;
+        --tag-border: #bbf7d0;
+        --success-bg: #f0fdf4;
+        --success-border: #86efac;
+        --success-text: #166534;
+        --error-bg: #fef2f2;
+        --error-border: #fca5a5;
+        --error-text: #991b1b;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        font-size: 16px;
+      }
+      body {
+        font-family:
+          "DM Sans",
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      nav {
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+        background: var(--surface);
+      }
+      nav .inner {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-brand {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text);
+        text-decoration: none;
+      }
+      .nav-brand span {
+        color: var(--accent);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+      }
+      .nav-links a {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+      }
+
+      .hero {
+        padding: 4rem 0 3rem;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: var(--tag-text);
+        background: var(--tag-bg);
+        border: 1px solid var(--tag-border);
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+        margin-bottom: 1.25rem;
+      }
+      .hero h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.75rem;
+      }
+      .hero-sub {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        max-width: 540px;
+        margin: 0 auto 1rem;
+      }
+      .privacy-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        color: var(--success-text);
+        background: var(--success-bg);
+        border: 1px solid var(--success-border);
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+      }
+
+      .tool-section {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .editor-pane label {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+      }
+
+      .json-input {
+        width: 100%;
+        min-height: 320px;
+        padding: 1rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border: 1px solid transparent;
+        border-radius: 8px;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .json-input:focus {
+        border-color: var(--accent);
+      }
+      .json-input::placeholder {
+        color: #585b70;
+      }
+
+      .options-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+      }
+      .option-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .option-group label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
+      .option-group select {
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.82rem;
+        padding: 0.35rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        outline: none;
+      }
+      .option-group select:focus {
+        border-color: var(--accent);
+      }
+
+      .convert-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .status {
+        display: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+      }
+      .status.loading {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--accent-light);
+        color: var(--accent);
+        border: 1px solid #bfdbfe;
+      }
+      .status.error {
+        display: block;
+        background: var(--error-bg);
+        color: var(--error-text);
+        border: 1px solid var(--error-border);
+      }
+      .status.success {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--success-bg);
+        color: var(--success-text);
+        border: 1px solid var(--success-border);
+      }
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #bfdbfe;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.5rem 1.1rem;
+        border-radius: 7px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        border-color: #ccc;
+      }
+      .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .info-section {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
+      }
+      .info-card h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+      .info-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+      }
+
+      .dev-cta {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .dev-cta-inner {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .dev-cta-text {
+        flex: 1;
+        min-width: 240px;
+      }
+      .dev-cta-text h2 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
+      .dev-cta-text p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+      }
+      .code-snippet {
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--code-text);
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .kw {
+        color: #cba6f7;
+      }
+      .str {
+        color: #a6e3a1;
+      }
+      .fn {
+        color: #f9e2af;
+      }
+      .cmt {
+        color: #6c7086;
+      }
+      .typ {
+        color: #89b4fa;
+      }
+
+      footer {
+        padding: 2.5rem 0;
+        text-align: center;
+      }
+      footer p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .sample-btn {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--accent);
+        background: none;
+        border: 1px solid var(--accent);
+        border-radius: 5px;
+        padding: 0.2rem 0.6rem;
+        cursor: pointer;
+        margin-left: 0.75rem;
+      }
+      .sample-btn:hover {
+        background: var(--accent-light);
+      }
+    </style>
+
+    <script
+      data-goatcounter="https://odf-kit.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+  </head>
+  <body>
+    <nav>
+      <div class="inner">
+        <a href="../" class="nav-brand"><span>odf-kit</span></a>
+        <div class="nav-links">
+          <a href="../">Docs</a>
+          <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">Free online tool</div>
+        <h1>Lexical JSON to ODT converter</h1>
+        <p class="hero-sub">
+          Paste a Lexical
+          <code
+            style="
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 0.9em;
+              background: #f0f0ec;
+              padding: 0.1em 0.35em;
+              border-radius: 3px;
+            "
+            >SerializedEditorState</code
+          >
+          and download a ready-to-open LibreOffice document — instantly, in your browser.
+        </p>
+        <div class="privacy-note">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          Nothing is sent to any server
+        </div>
+      </div>
+    </section>
+
+    <section class="tool-section">
+      <div class="container">
+        <div class="editor-pane">
+          <label for="jsonInput">
+            Lexical SerializedEditorState JSON
+            <button class="sample-btn" id="sampleBtn">load sample</button>
+          </label>
+          <textarea
+            class="json-input"
+            id="jsonInput"
+            spellcheck="false"
+            placeholder="Paste your Lexical editor state JSON here.
+
+Get it from your editor with:
+  editor.getEditorState().toJSON()"
+          ></textarea>
+        </div>
+
+        <div class="options-row">
+          <div class="option-group">
+            <label for="pageFormat">Page format</label>
+            <select id="pageFormat">
+              <option value="A4" selected>A4</option>
+              <option value="letter">US Letter</option>
+              <option value="legal">Legal</option>
+              <option value="A3">A3</option>
+              <option value="A5">A5</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="convert-row">
+          <div id="statusMsg" class="status"></div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto">
+            <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
+            <button class="btn btn-primary" id="convertBtn">⬇ Download .odt</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <div class="container">
+        <p
+          style="
+            font-family: &quot;JetBrains Mono&quot;, monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+          "
+        >
+          How it works
+        </p>
+        <h2
+          style="
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+          "
+        >
+          Private, fast, free
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem">
+          Conversion runs entirely in your browser — no server, no account, no file size limits.
+        </p>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>🔒 Fully private</h3>
+            <p>
+              Your JSON never leaves your browser. No network requests are made during conversion.
+              Works offline after the page loads.
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>⚡ Instant conversion</h3>
+            <p>
+              Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting
+              for upload or server processing.
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>📋 What is supported</h3>
+            <p>
+              Paragraphs, headings h1–h6, bold, italic, underline, strikethrough, inline code,
+              links, bullet and numbered lists, nested lists, tables, blockquotes, code blocks, and
+              horizontal rules.
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>🆓 Free, always</h3>
+            <p>
+              No character limits, no conversions per day, no sign-up required. Powered by open
+              source odf-kit.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dev-cta">
+      <div class="container">
+        <div class="dev-cta-inner">
+          <div class="dev-cta-text">
+            <h2>Need Lexical → ODT in your app?</h2>
+            <p>
+              <strong>odf-kit</strong> is a free, open source JavaScript library.
+              <code
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 0.88em;
+                  background: #f5f5f0;
+                  padding: 0.1em 0.35em;
+                  border-radius: 3px;
+                "
+                >lexicalToOdt()</code
+              >
+              converts any Lexical
+              <code
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 0.88em;
+                  background: #f5f5f0;
+                  padding: 0.1em 0.35em;
+                  border-radius: 3px;
+                "
+                >SerializedEditorState</code
+              >
+              to a valid
+              <code
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 0.88em;
+                  background: #f5f5f0;
+                  padding: 0.1em 0.35em;
+                  border-radius: 3px;
+                "
+                >.odt</code
+              >
+              file in Node.js or the browser. No server, no LibreOffice.
+            </p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+              <a href="../guides/lexical-to-odt.html" class="btn btn-primary btn-sm"
+                >Read the guide</a
+              >
+              <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm"
+                >npm install odf-kit</a
+              >
+            </div>
+          </div>
+          <div style="flex: 1; min-width: 280px">
+            <div class="code-snippet">
+              <span class="cmt">// The same code powering this tool</span>
+              <span class="kw">import</span> { <span class="typ">lexicalToOdt</span> }
+              <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
+
+              <span class="cmt">// editor.getEditorState().toJSON()</span>
+              <span class="kw">const</span> bytes = <span class="kw">await</span>
+              <span class="fn">lexicalToOdt</span>(editorState, { pageFormat:
+              <span class="str">"A4"</span>, });
+
+              <span class="cmt">// bytes → Uint8Array, save as .odt file</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border)">
+      <div class="container">
+        <h2
+          style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em"
+        >
+          More odf-kit tools &amp; guides
+        </h2>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            font-size: 0.88rem;
+          "
+        >
+          <a
+            href="html-to-odt.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Free HTML to ODT converter →</a
+          >
+          <a
+            href="markdown-to-odt.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Free Markdown to ODT converter →</a
+          >
+          <a
+            href="odt-to-html.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Free ODT to HTML converter →</a
+          >
+          <a
+            href="odt-to-markdown.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Free ODT to Markdown converter →</a
+          >
+          <a
+            href="xlsx-to-ods.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Free XLSX to ODS converter →</a
+          >
+          <a
+            href="../guides/lexical-to-odt.html"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              padding: 0.6rem 0;
+              border-bottom: 1px solid var(--border);
+            "
+            >Lexical to ODT developer guide →</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <p>
+          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and
+          TypeScript · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a> · Apache 2.0
+        </p>
+      </div>
+    </footer>
+
+    <script type="module">
+      import { lexicalToOdt } from "https://esm.sh/odf-kit@0.12.3/lexical";
+
+      const jsonInput = document.getElementById("jsonInput");
+      const convertBtn = document.getElementById("convertBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const sampleBtn = document.getElementById("sampleBtn");
+      const statusMsg = document.getElementById("statusMsg");
+      const pageFormat = document.getElementById("pageFormat");
+
+      const SAMPLE = JSON.stringify(
+        {
+          root: {
+            children: [
+              {
+                type: "heading",
+                tag: "h1",
+                format: "",
+                indent: 0,
+                direction: "ltr",
+                version: 1,
+                children: [
+                  {
+                    type: "text",
+                    text: "Meeting Notes",
+                    format: 0,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                ],
+              },
+              {
+                type: "paragraph",
+                format: "",
+                indent: 0,
+                direction: "ltr",
+                version: 1,
+                children: [
+                  {
+                    type: "text",
+                    text: "Date: ",
+                    format: 0,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                  {
+                    type: "text",
+                    text: "April 18, 2026",
+                    format: 1,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                ],
+              },
+              {
+                type: "heading",
+                tag: "h2",
+                format: "",
+                indent: 0,
+                direction: "ltr",
+                version: 1,
+                children: [
+                  {
+                    type: "text",
+                    text: "Action Items",
+                    format: 0,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                ],
+              },
+              {
+                type: "list",
+                listType: "bullet",
+                start: 1,
+                direction: "ltr",
+                version: 1,
+                children: [
+                  {
+                    type: "listitem",
+                    value: 1,
+                    indent: 0,
+                    direction: "ltr",
+                    version: 1,
+                    children: [
+                      {
+                        type: "text",
+                        text: "Send report by Friday",
+                        format: 0,
+                        style: "",
+                        mode: "normal",
+                        detail: 0,
+                        version: 1,
+                      },
+                    ],
+                  },
+                  {
+                    type: "listitem",
+                    value: 2,
+                    indent: 0,
+                    direction: "ltr",
+                    version: 1,
+                    children: [
+                      {
+                        type: "text",
+                        text: "Review budget on Monday",
+                        format: 0,
+                        style: "",
+                        mode: "normal",
+                        detail: 0,
+                        version: 1,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "paragraph",
+                format: "",
+                indent: 0,
+                direction: "ltr",
+                version: 1,
+                children: [
+                  {
+                    type: "text",
+                    text: "See ",
+                    format: 0,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                  {
+                    type: "link",
+                    url: "https://github.com/GitHubNewbie0/odf-kit",
+                    direction: "ltr",
+                    format: "",
+                    indent: 0,
+                    version: 1,
+                    children: [
+                      {
+                        type: "text",
+                        text: "odf-kit on GitHub",
+                        format: 0,
+                        style: "",
+                        mode: "normal",
+                        detail: 0,
+                        version: 1,
+                      },
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: " for more.",
+                    format: 0,
+                    style: "",
+                    mode: "normal",
+                    detail: 0,
+                    version: 1,
+                  },
+                ],
+              },
+            ],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        },
+        null,
+        2,
+      );
+
+      sampleBtn.addEventListener("click", () => {
+        jsonInput.value = SAMPLE;
+        showStatus("", "");
+      });
+
+      function showStatus(type, msg) {
+        statusMsg.className = "status " + type;
+        if (type === "loading") {
+          statusMsg.style.display = "flex";
+          statusMsg.innerHTML = '<div class="spinner"></div><span>' + msg + "</span>";
+        } else if (type === "success") {
+          statusMsg.style.display = "flex";
+          statusMsg.innerHTML = "<span>✓</span><span>" + msg + "</span>";
+        } else if (type === "error") {
+          statusMsg.style.display = "block";
+          statusMsg.textContent = msg;
+        } else {
+          statusMsg.style.display = "none";
+        }
+      }
+
+      function reportError(tool, err) {
+        try {
+          fetch("https://odf-kit-error-reporter.scott-39c.workers.dev", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tool,
+              version: "0.12.3",
+              error: err && err.message ? err.message.slice(0, 500) : String(err).slice(0, 500),
+              stack: err && err.stack ? err.stack.slice(0, 800) : "",
+              engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || [
+                "unknown",
+              ])[0],
+            }),
+          }).catch(() => {});
+        } catch (_) {}
+      }
+
+      convertBtn.addEventListener("click", async () => {
+        const raw = jsonInput.value.trim();
+        if (!raw) {
+          showStatus("error", "Please paste a Lexical editor state JSON first.");
+          return;
+        }
+        let editorState;
+        try {
+          editorState = JSON.parse(raw);
+        } catch (e) {
+          showStatus("error", "Invalid JSON — please check your input and try again.");
+          return;
+        }
+        if (!editorState.root) {
+          showStatus(
+            "error",
+            'JSON must have a "root" property — paste the full SerializedEditorState.',
+          );
+          return;
+        }
+        showStatus("loading", "Converting…");
+        convertBtn.disabled = true;
+        try {
+          const bytes = await lexicalToOdt(editorState, {
+            pageFormat: pageFormat.value,
+          });
+          const blob = new Blob([bytes], { type: "application/vnd.oasis.opendocument.text" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "document.odt";
+          a.click();
+          URL.revokeObjectURL(url);
+          showStatus("success", "Downloaded successfully!");
+          setTimeout(() => showStatus("", ""), 3000);
+        } catch (err) {
+          reportError("lexical-to-odt", err);
+          showStatus("error", "Conversion failed: " + (err.message || "unknown error."));
+        } finally {
+          convertBtn.disabled = false;
+        }
+      });
+
+      clearBtn.addEventListener("click", () => {
+        jsonInput.value = "";
+        showStatus("", "");
+      });
+    </script>
+  </body>
+</html>
