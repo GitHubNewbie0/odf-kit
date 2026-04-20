@@ -2,15 +2,15 @@ publiccodeYmlVersion: 0.5.0
 name: odf-kit
 url: https://github.com/GitHubNewbie0/odf-kit
 landingURL: https://githubnewbie0.github.io/odf-kit
-softwareVersion: 0.5.0
-releaseDate: 2026-03-05
+softwareVersion: 0.12.3
+releaseDate: 2026-04-20
 platforms:
   - web
 categories:
   - document-management
   - office
   - it-development
-developmentStatus: beta
+developmentStatus: stable
 softwareType: library
 intendedAudience:
   scope:
@@ -21,46 +21,63 @@ intendedAudience:
 description:
   en:
     localisedName: odf-kit
-    shortDescription: TypeScript library for generating, filling, and reading
-      OpenDocument Format (.odt) files in Node.js and browsers.
+    shortDescription: TypeScript library for generating, filling, reading, and
+      converting OpenDocument Format (.odt, .ods) files in Node.js and browsers.
     longDescription: >-
-      odf-kit is an open-source TypeScript library for generating, filling, and
-      reading OpenDocument Format (ODF) documents programmatically. Build
-      documents from scratch with a fluent API, or fill existing .odt templates
-      created in LibreOffice with data using placeholders, loops, conditionals,
-      and dot notation. It produces valid .odt files that open in LibreOffice,
-      Apache OpenOffice, and any ODF-compliant application.
+      odf-kit is an open-source TypeScript library for working with OpenDocument
+      Format (ODF) documents programmatically. It provides thirteen distinct
+      document modes in a single package: build ODT documents from scratch,
+      fill existing .odt templates with data, convert DOCX to ODT, HTML to ODT,
+      Markdown to ODT, TipTap JSON to ODT, Lexical editor state to ODT, build
+      ODS spreadsheets, read ODT and ODS files, convert XLSX to ODS, convert
+      ODT to Markdown, and export ODT to Typst for PDF generation. All modes
+      work in Node.js 22+ and modern browsers — documents can be generated
+      entirely client-side with no server required.
 
-      Designed for developers building tools for governments, nonprofits,
-      schools, and organisations that use open document standards, odf-kit
-      provides rich formatting, tables, lists, images, hyperlinks, bookmarks,
-      headers and footers, and page layout control.
+      The template engine fills existing .odt files created in LibreOffice with
+      data using {placeholders}, loops for repeating content, conditionals for
+      optional sections, and dot notation for nested data. It automatically
+      handles LibreOffice's XML fragmentation of placeholder text.
 
-      The template engine automatically handles LibreOffice's XML fragmentation
-      of placeholder text, supports loops for repeating content, conditionals
-      for optional sections, and nested data access via dot notation. Headers
-      and footers with placeholders are processed alongside the document body.
+      The ODT builder produces documents with rich text formatting, tables with
+      cell merging and formatting, bullet and numbered lists with up to 6 levels
+      of nesting, embedded images, hyperlinks, internal bookmarks, headers and
+      footers with page numbers, and full page layout control. Generated files
+      open in LibreOffice, Google Docs, Microsoft Word, and any ODF-compliant
+      application.
 
-      odf-kit also reads existing .odt files, parsing them into a structured
-      document model and converting to clean HTML. It is the only actively
-      maintained pure-JavaScript ODT reader, supporting rich text with styling,
-      tables, images with accessibility metadata, nested lists with correct
-      numbering, footnotes and endnotes, bookmarks, text fields, and correct
-      tracked-changes flattening.
+      The DOCX-to-ODT converter handles headings, paragraphs, text formatting,
+      tables with merged cells, nested lists, images with actual dimensions,
+      hyperlinks, bookmarks, footnotes and endnotes, headers and footers, page
+      layout, and tracked changes. The HTML-to-ODT and Markdown-to-ODT
+      converters support all common elements including tables, lists, inline
+      styles, and code blocks. The Lexical-to-ODT converter translates Lexical
+      editor state (SerializedEditorState) directly to ODT, making it suitable
+      for integration with Lexical-based editors such as Proton Docs.
 
-      Unlike abandoned alternatives such as simple-odf, odf-kit generates proper
-      ZIP-packaged ODF files (not flat XML), supports tables with cell merging
-      and formatting, embeds images, and is actively maintained. It has zero
-      transitive runtime dependencies (fflate only) and works in Node.js 18+
-      and modern browsers — documents can be generated entirely client-side
-      with no server required.
+      The ODS spreadsheet builder supports multiple sheets, auto-typed cells
+      (string, number, date, boolean, formula), number formats (currency,
+      percentage, decimal, integer), cell and row formatting, column widths, row
+      heights, freeze rows and columns, merged cells, tab colors, and hyperlinks.
+      The XLSX-to-ODS converter preserves strings, numbers, booleans, dates,
+      formulas, merged cells, freeze panes, and multiple sheets with no
+      additional dependencies.
 
-      odf-kit supports ODF 1.2+ (ISO/IEC 26300), the international standard for
-      open document formats used by governments worldwide for interoperability
-      and vendor independence.
+      The ODT and ODS readers parse existing files into structured document
+      models and can convert directly to HTML. The ODT-to-Markdown converter
+      supports GFM and CommonMark output. The ODT-to-Typst emitter converts any
+      ODT file to Typst markup for compilation to PDF — making it a
+      zero-dependency alternative to LibreOffice headless for PDF generation.
+
+      odf-kit generates ODF 1.2+ compliant files per ISO/IEC 26300, the
+      international standard mandated by the European Union, many national
+      governments, and public sector organisations for vendor independence and
+      long-term document accessibility. Every generated file is validated against
+      the official OASIS ODF validator in CI. The library has zero transitive
+      runtime dependencies beyond fflate for ZIP packaging.
     documentation: https://github.com/GitHubNewbie0/odf-kit#readme
     features:
-      - Generate valid .odt files for LibreOffice and OpenOffice
+      - Generate valid .odt files for LibreOffice, Google Docs, and Word
       - Fill existing .odt templates with data using {placeholders}
       - Template loops for repeating content ({#items}...{/items})
       - Template conditionals for optional sections
@@ -69,17 +86,30 @@ description:
       - Rich text formatting with bold, italic, underline, color, and fonts
       - Tables with column widths, borders, backgrounds, and cell merging
       - Bullet and numbered lists with nesting up to 6 levels
-      - Embedded images (PNG, JPEG, GIF, SVG, WebP)
+      - Embedded images (PNG, JPEG, GIF, SVG, WebP, BMP, TIFF)
       - Hyperlinks and internal bookmarks
       - Headers and footers with page numbers
       - Page layout with size, margins, orientation, and page breaks
+      - Convert DOCX to ODT (pure ESM, browser-safe, zero extra dependencies)
+      - Convert HTML to ODT with inline CSS support
+      - Convert Markdown to ODT (CommonMark + GFM tables)
+      - Convert Lexical editor state (SerializedEditorState) to ODT
+      - Convert TipTap/ProseMirror JSON to ODT
+      - Generate ODS spreadsheets with multiple sheets and typed cells
+      - ODS number formats: currency, percentage, decimal, integer
+      - ODS freeze rows and columns, merged cells, tab colors
+      - Convert XLSX to ODS (own parser, zero extra dependencies)
       - Read existing .odt files into a structured document model
       - Convert .odt to HTML with full rich text styling
-      - Parse tables, nested lists, images, footnotes, and bookmarks
-      - Correct tracked-changes flattening (accepted state only)
-      - ODF 1.2+ compliant (ISO/IEC 26300)
+      - Convert .odt to Markdown (GFM or CommonMark)
+      - Read existing .ods files into a typed structured model
+      - Convert .ods to HTML table
+      - Export .odt to Typst markup for PDF generation without LibreOffice
+      - ODF 1.2+ compliant (ISO/IEC 26300) — validated in CI
+      - 1113 tests passing across 25 test suites
       - Zero transitive runtime dependencies
-      - Works in Node.js and browsers (client-side generation, no server required)
+      - Works in Node.js 22+ and browsers (client-side generation, no server required)
+      - Apache 2.0 license
 legal:
   license: Apache-2.0
 maintenance:
