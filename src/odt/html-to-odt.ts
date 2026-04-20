@@ -42,6 +42,23 @@ const PAGE_FORMATS: Record<string, PageFormatSpec> = {
  *   marginTop: "1.5cm",
  *   marginBottom: "1.5cm",
  * });
+ *
+ * @example
+ * // Pre-fetched images (e.g. from odf-kit-service via WebDAV)
+ * await htmlToOdt(html, {
+ *   images: {
+ *     "https://example.com/logo.png": pngBytes,
+ *   },
+ * });
+ *
+ * @example
+ * // Fetch images on demand (Node.js or browser)
+ * await htmlToOdt(html, {
+ *   fetchImage: async (src) => {
+ *     const res = await fetch(src);
+ *     return new Uint8Array(await res.arrayBuffer());
+ *   },
+ * });
  */
 export interface HtmlToOdtOptions {
   /**
@@ -83,6 +100,51 @@ export interface HtmlToOdtOptions {
     /** Description or subject. */
     description?: string;
   };
+
+  /**
+   * Pre-fetched image bytes keyed by `src` URL.
+   *
+   * Use this when you have already fetched image bytes before calling
+   * `htmlToOdt` — for example, in odf-kit-service where images can be
+   * retrieved from WebDAV before conversion.
+   *
+   * Base64 data URLs embedded directly in `src` attributes are always
+   * decoded automatically and do not need to appear in this map.
+   *
+   * If both `images` and `fetchImage` are provided, `images` is checked
+   * first. If the src is not found in the map, `fetchImage` is called.
+   *
+   * @example
+   * await htmlToOdt(html, {
+   *   images: {
+   *     "https://example.com/logo.png": pngBytes,
+   *     "https://example.com/photo.jpg": jpegBytes,
+   *   },
+   * });
+   */
+  images?: Record<string, Uint8Array>;
+
+  /**
+   * Async callback to fetch image bytes for a given `src` URL.
+   *
+   * Called for each `<img>` element whose src is not a base64 data URL
+   * and is not found in the `images` map. Return `undefined` to skip the
+   * image silently.
+   *
+   * Works in Node.js and browsers. For Node.js, use the `node-fetch`
+   * package or the built-in `fetch` available in Node.js 18+.
+   *
+   * @example
+   * // Browser or Node.js 18+
+   * await htmlToOdt(html, {
+   *   fetchImage: async (src) => {
+   *     const res = await fetch(src);
+   *     if (!res.ok) return undefined;
+   *     return new Uint8Array(await res.arrayBuffer());
+   *   },
+   * });
+   */
+  fetchImage?: (src: string) => Promise<Uint8Array | undefined>;
 }
 
 // ─── Public API ───────────────────────────────────────────────────────
@@ -103,14 +165,15 @@ export interface HtmlToOdtOptions {
  * dominant format for European governments and organizations. Pass
  * `{ pageFormat: "letter" }` for US/Canadian users.
  *
- * **Images (v1):** `<img>` elements are skipped. v2 will add an `images`
- * option accepting a `Record<src, Uint8Array>` map for pre-fetched image
- * bytes, which odf-kit-service can populate from WebDAV before calling
- * `htmlToOdt`.
+ * **Images:** Base64 data URLs embedded in `src` attributes are decoded and
+ * embedded automatically. For remote URLs, provide pre-fetched bytes via the
+ * `images` map, or an async `fetchImage` callback. If neither is provided,
+ * `<img>` elements with remote URLs are skipped silently.
  *
  * @param html    - HTML string to convert. May be a full document
  *                  (`<html><body>...</body></html>`) or a fragment.
- * @param options - Optional page format, margins, orientation, and metadata.
+ * @param options - Optional page format, margins, orientation, metadata,
+ *                  and image resolution.
  * @returns Promise resolving to a valid `.odt` file as a `Uint8Array`.
  *
  * @example
@@ -121,6 +184,15 @@ export interface HtmlToOdtOptions {
  * @example
  * // US letter
  * const bytes = await htmlToOdt(html, { pageFormat: "letter" });
+ *
+ * @example
+ * // With image fetching
+ * const bytes = await htmlToOdt(html, {
+ *   fetchImage: async (src) => {
+ *     const res = await fetch(src);
+ *     return new Uint8Array(await res.arrayBuffer());
+ *   },
+ * });
  *
  * @example
  * // Custom margins and metadata
@@ -156,7 +228,7 @@ export async function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promi
   doc.setPageLayout(layout);
 
   // Parse HTML and populate document
-  parseHtml(html, doc);
+  await parseHtml(html, doc, options?.images, options?.fetchImage);
 
   return doc.save();
 }

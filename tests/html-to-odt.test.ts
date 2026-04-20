@@ -19,6 +19,19 @@ async function getStyles(html: string, options?: Parameters<typeof htmlToOdt>[1]
   return strFromU8(files["styles.xml"]);
 }
 
+// ─── Test Image Data ──────────────────────────────────────────────────
+
+// Minimal valid 1×1 PNG (67 bytes)
+const TINY_PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+  0x00, 0x00, 0x02, 0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+  0x44, 0xae, 0x42, 0x60, 0x82,
+]);
+
+const TINY_PNG_BASE64 = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQI12P4z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==`;
+
 // ─── Basic Output ─────────────────────────────────────────────────────
 
 describe("htmlToOdt — basic output", () => {
@@ -354,9 +367,9 @@ describe("htmlToOdt — hr", () => {
   });
 });
 
-// ─── Figure ───────────────────────────────────────────────────────────
+// ─── Images ───────────────────────────────────────────────────────────
 
-describe("htmlToOdt — figure", () => {
+describe("htmlToOdt — images", () => {
   test("figcaption is emitted as a paragraph", async () => {
     const content = await getContent(
       '<figure><img src="photo.jpg"/><figcaption>Photo caption</figcaption></figure>',
@@ -364,17 +377,79 @@ describe("htmlToOdt — figure", () => {
     expect(content).toContain("Photo caption");
   });
 
-  test("img inside figure is skipped (v1)", async () => {
-    const content = await getContent('<figure><img src="photo.jpg"/></figure>');
-    // No draw:frame or draw:image should appear
-    expect(content).not.toContain("draw:frame");
+  test("base64 data URL img is embedded automatically", async () => {
+    const content = await getContent(`<img src="${TINY_PNG_BASE64}"/>`);
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("draw:image");
   });
 
-  test("standalone img is skipped (v1)", async () => {
+  test("base64 data URL img inside figure is embedded", async () => {
+    const content = await getContent(
+      `<figure><img src="${TINY_PNG_BASE64}"/><figcaption>Caption</figcaption></figure>`,
+    );
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("Caption");
+  });
+
+  test("inline img inside paragraph embedded via images map", async () => {
+    const content = await getContent('<p>Before <img src="photo.png"/> after</p>', {
+      images: { "photo.png": TINY_PNG },
+    });
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("Before");
+    expect(content).toContain("after");
+  });
+
+  test("standalone img resolved via images map", async () => {
+    const content = await getContent('<img src="photo.png"/>', {
+      images: { "photo.png": TINY_PNG },
+    });
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("draw:image");
+  });
+
+  test("img resolved via fetchImage callback", async () => {
+    const content = await getContent('<img src="https://example.com/photo.png"/>', {
+      fetchImage: async () => TINY_PNG,
+    });
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("draw:image");
+  });
+
+  test("img with width and height attrs uses those dimensions", async () => {
+    const content = await getContent(`<img src="${TINY_PNG_BASE64}" width="200" height="100"/>`);
+    // 200px → 5.29cm, 100px → 2.65cm
+    expect(content).toContain("5.29cm");
+    expect(content).toContain("2.65cm");
+  });
+
+  test("img without resolution is skipped silently", async () => {
     const content = await getContent('<p>Before</p><img src="photo.jpg"/><p>After</p>');
     expect(content).not.toContain("draw:frame");
     expect(content).toContain("Before");
     expect(content).toContain("After");
+  });
+
+  test("images map takes priority over fetchImage", async () => {
+    let fetchCalled = false;
+    const content = await getContent('<img src="photo.png"/>', {
+      images: { "photo.png": TINY_PNG },
+      fetchImage: async () => {
+        fetchCalled = true;
+        return TINY_PNG;
+      },
+    });
+    expect(content).toContain("draw:frame");
+    expect(fetchCalled).toBe(false);
+  });
+
+  test("img in figure with images map is embedded", async () => {
+    const content = await getContent(
+      '<figure><img src="photo.png"/><figcaption>A photo</figcaption></figure>',
+      { images: { "photo.png": TINY_PNG } },
+    );
+    expect(content).toContain("draw:frame");
+    expect(content).toContain("A photo");
   });
 });
 

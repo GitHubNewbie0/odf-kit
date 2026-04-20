@@ -5,6 +5,13 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-04-20
+
+### Added
+
+- **`htmlToOdt()` image support** — `<img>` elements are now embedded in the output `.odt` file. Base64 data URLs are decoded and embedded automatically. Remote URLs are resolved via the new `images` option (`Record<string, Uint8Array>`) or the new async `fetchImage` callback. Images without a resolution method are skipped silently. Inline images inside paragraphs and standalone block images are both supported. `<figure><img></figure>` is also handled.
+- 7 new tests (1120 total, 25 test suites).
+
 ## [0.12.3] - 2026-04-18
 
 ### Added

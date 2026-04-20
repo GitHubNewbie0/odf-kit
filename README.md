@@ -548,6 +548,30 @@ const bytes = await htmlToOdt(html, { pageFormat: "letter" }); // US letter
 | `"A3"` | 29.7 × 42 cm | 2.5 cm | Large format |
 | `"A5"` | 14.8 × 21 cm | 2 cm | Small booklets |
 
+  ### Images
+
+  Base64 data URLs embedded in `src` attributes are decoded and embedded automatically. For remote URLs, provide pre-fetched bytes via the `images` map or an async `fetchImage` callback. Images without a resolution method are skipped silently.
+
+```typescript
+  // Base64 data URL — embedded automatically
+  const bytes = await htmlToOdt('<img src="data:image/png;base64,..."/>');
+
+  // Pre-fetched image map (e.g. from WebDAV in odf-kit-service)
+  const bytes = await htmlToOdt(html, {
+    images: {
+      "https://example.com/logo.png": pngBytes,
+    },
+  });
+
+  // Async fetch callback (Node.js or browser)
+  const bytes = await htmlToOdt(html, {
+    fetchImage: async (src) => {
+      const res = await fetch(src);
+      return new Uint8Array(await res.arrayBuffer());
+    },
+  });
+```
+
 ### Supported HTML elements
 
 **Block:** `<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>` (nested), `<table>` / `<tr>` / `<td>` / `<th>`, `<blockquote>`, `<pre>`, `<hr>`, `<figure>` / `<figcaption>`, `<div>` / `<section>` (transparent).
