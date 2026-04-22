@@ -169,6 +169,8 @@ writeFileSync("document.md", md);
 
 // CommonMark flavor (no pipe tables)
 const mdCompat = odtToMarkdown(readFileSync("document.odt"), { flavor: "commonmark" });
+// Embed images as base64 data URLs (fully self-contained output)
+const mdEmbedded = odtToMarkdown(readFileSync("document.odt"), { embedImages: true });
 ```
 
 ```typescript

@@ -241,3 +241,99 @@ describe("odtToMarkdown — options", () => {
     expect(odtToMarkdown(odt)).toBe("");
   });
 });
+// ─── images ───────────────────────────────────────────────────────────
+
+/** Build an ODT ZIP that contains an embedded image. */
+function buildOdtWithImage(name: string, mediaType: string, data: Uint8Array): Uint8Array {
+  const picturePath = `Pictures/${name}`;
+  const bodyXml = `
+    <text:p>
+      <draw:frame xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+                  xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+                  draw:name="${name}" svg:width="5cm" svg:height="3cm">
+        <draw:image xlink:href="${picturePath}"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+      </draw:frame>
+    </text:p>`;
+  const contentXml = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content
+  xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+  xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  office:version="1.2">
+  <office:automatic-styles/>
+  <office:body>
+    <office:text>${bodyXml}</office:text>
+  </office:body>
+</office:document-content>`;
+  const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
+  <manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.text"/>
+  <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="${picturePath}" manifest:media-type="${mediaType}"/>
+</manifest:manifest>`;
+  const defaultStyles = `<?xml version="1.0" encoding="UTF-8"?>
+<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2">
+  <office:styles/>
+</office:document-styles>`;
+  return zipSync({
+    mimetype: encoder.encode("application/vnd.oasis.opendocument.text"),
+    "content.xml": encoder.encode(contentXml),
+    "styles.xml": encoder.encode(defaultStyles),
+    "META-INF/manifest.xml": encoder.encode(manifest),
+    [picturePath]: data,
+  });
+}
+
+// Minimal 1×1 PNG
+const TINY_PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+  0x00, 0x00, 0x02, 0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+  0x44, 0xae, 0x42, 0x60, 0x82,
+]);
+
+describe("odtToMarkdown — images", () => {
+  it("default: image emitted as placeholder", () => {
+    const odt = buildOdtWithImage("photo.png", "image/png", TINY_PNG);
+    const md = odtToMarkdown(odt);
+    expect(md).toContain("![");
+    expect(md).toContain("photo.png");
+    expect(md).not.toContain("data:image/png;base64,");
+  });
+
+  it("embedImages: true embeds image as base64 data URL", () => {
+    const odt = buildOdtWithImage("photo.png", "image/png", TINY_PNG);
+    const md = odtToMarkdown(odt, { embedImages: true });
+    expect(md).toContain("data:image/png;base64,");
+    expect(md).toMatch(/!\[.*\]\(data:image\/png;base64,/);
+  });
+
+  it("embedImages: false is same as default", () => {
+    const odt = buildOdtWithImage("photo.png", "image/png", TINY_PNG);
+    const md1 = odtToMarkdown(odt);
+    const md2 = odtToMarkdown(odt, { embedImages: false });
+    expect(md1).toBe(md2);
+  });
+
+  it("image with no data falls back to placeholder even with embedImages: true", () => {
+    // Build ODT with draw:frame but no matching Pictures/ entry
+    const odt = buildOdt(`
+      <text:p>
+        <draw:frame xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+                    xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+                    draw:name="missing.png" svg:width="5cm" svg:height="3cm">
+          <draw:image xlink:href="Pictures/missing.png"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+        </draw:frame>
+      </text:p>`);
+    const md = odtToMarkdown(odt, { embedImages: true });
+    expect(md).toContain("![");
+    expect(md).not.toContain("data:image/png;base64,");
+  });
+});

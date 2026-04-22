@@ -5,6 +5,12 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.1] - 2026-04-22
+
+### Added
+
+- **`odtToMarkdown()` `embedImages` option** — pass `{ embedImages: true }` to embed images as base64 data URLs (`![alt](data:image/png;base64,...)`) instead of placeholder paths. Produces a fully self-contained Markdown file. Default behaviour unchanged. 4 new tests (1124 total).
+
 ## [0.13.0] - 2026-04-20
 
 ### Added

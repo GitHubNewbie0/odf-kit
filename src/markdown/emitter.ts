@@ -66,6 +66,12 @@ export interface MarkdownEmitOptions {
    * "changes": insertions → <ins>body</ins>, deletions → <del>body</del>.
    */
   trackedChanges?: "final" | "original" | "changes";
+  /**
+   * If true, images are embedded as base64 data URLs (`![alt](data:image/png;base64,...)`).
+   * Produces a fully self-contained Markdown file at the cost of larger file size.
+   * Defaults to false — images are emitted as `![alt](name)` placeholders.
+   */
+  embedImages?: boolean;
 }
 
 // ============================================================
@@ -126,11 +132,15 @@ function emitTextSpan(span: TextSpan, options?: MarkdownEmitOptions): string {
 /**
  * Emit an ImageNode as a Markdown image placeholder.
  *
- * Base64 image data is not inlined. The alt text and name are preserved
- * so consumers can substitute with real paths if needed.
+ * By default, base64 image data is not inlined — the alt text and name are
+ * preserved as a placeholder so consumers can substitute with real paths.
+ * Pass `{ embedImages: true }` to embed images as base64 data URLs instead.
  */
-function emitImage(node: ImageNode): string {
+function emitImage(node: ImageNode, options?: MarkdownEmitOptions): string {
   const alt = node.title ?? node.name ?? "image";
+  if (options?.embedImages && node.data && node.mediaType) {
+    return `![${alt}](data:${node.mediaType};base64,${node.data})`;
+  }
   const src = node.name ?? "image";
   return `![${alt}](${src})`;
 }
@@ -160,7 +170,7 @@ function emitInlineNode(node: InlineNode, options?: MarkdownEmitOptions): string
   if ("kind" in node) {
     switch (node.kind) {
       case "image":
-        return emitImage(node);
+        return emitImage(node, options);
       case "note":
         return emitNote(node, options);
       case "bookmark":
