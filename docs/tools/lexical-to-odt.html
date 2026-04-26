@@ -490,7 +490,7 @@
             "
             >SerializedEditorState</code
           >
-          and download a ready-to-open LibreOffice document — instantly, in your browser.
+          and download a valid OpenDocument Text file — instantly, in your browser.
         </p>
         <div class="privacy-note">
           <svg
@@ -595,9 +595,10 @@ Get it from your editor with:
           <div class="info-card">
             <h3>📋 What is supported</h3>
             <p>
-              Paragraphs, headings h1–h6, bold, italic, underline, strikethrough, inline code,
-              links, bullet and numbered lists, nested lists, tables, blockquotes, code blocks, and
-              horizontal rules.
+              Paragraphs with alignment, headings h1–h6, bold, italic, underline, strikethrough,
+              subscript, superscript, inline code, text color, highlight color, links, bullet and
+              numbered lists with nesting, tables with colspan and rowspan, blockquotes, code
+              blocks, images with captions and alt text, and horizontal rules.
             </p>
           </div>
           <div class="info-card">
@@ -605,6 +606,14 @@ Get it from your editor with:
             <p>
               No character limits, no conversions per day, no sign-up required. Powered by open
               source odf-kit.
+            </p>
+          </div>
+          <div class="info-card">
+            <h3>🛡️ Spec-compliant</h3>
+            <p>
+              Output passes the OASIS ODF validator without errors or warnings — enforced on every
+              commit by CI. Round-trips cleanly through LibreOffice, OnlyOffice, Collabora, and MS
+              Word.
             </p>
           </div>
         </div>
@@ -769,7 +778,7 @@ Get it from your editor with:
     </footer>
 
     <script type="module">
-      import { lexicalToOdt } from "https://esm.sh/odf-kit@0.13.0/lexical";
+      import { lexicalToOdt } from "https://esm.sh/odf-kit@0.13.1/lexical";
 
       const jsonInput = document.getElementById("jsonInput");
       const convertBtn = document.getElementById("convertBtn");
@@ -978,7 +987,7 @@ Get it from your editor with:
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               tool,
-              version: "0.13.0",
+              version: "0.13.1",
               error: err && err.message ? err.message.slice(0, 500) : String(err).slice(0, 500),
               stack: err && err.stack ? err.stack.slice(0, 800) : "",
               engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || [
