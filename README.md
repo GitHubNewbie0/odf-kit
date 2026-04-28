@@ -1038,6 +1038,7 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 - [Generate ODT files in the browser](https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html)
 - [Fill ODT templates in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html)
 - [Convert ODT to HTML in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html)
+- [Lexical to ODT developer guide](https://githubnewbie0.github.io/odf-kit/guides/lexical-to-odt.html)
 - [Convert DOCX to ODT in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html)
 - [LibreOffice headless alternative](https://githubnewbie0.github.io/odf-kit/guides/libreoffice-headless-alternative.html)
 - [SheetJS alternative for ODF](https://githubnewbie0.github.io/odf-kit/guides/sheetjs-alternative.html)
@@ -1053,6 +1054,7 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 - [Free ODT to PDF converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/odt-to-pdf.html)
 - [Free XLSX to ODS converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html)
 - [Free Markdown to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/markdown-to-odt.html)
+- [Free Lexical JSON to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/lexical-to-odt.html)
 - [Free HTML to ODT converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html)
 - [Free ODS to HTML converter (online tool)](https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html)
 
