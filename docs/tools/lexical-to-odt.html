@@ -75,120 +75,155 @@
         --error-border: #fca5a5;
         --error-text: #991b1b;
       }
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html {
-        scroll-behavior: smooth;
-        font-size: 16px;
-      }
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html { scroll-behavior: smooth; font-size: 16px; }
       body {
-        font-family:
-          "DM Sans",
-          -apple-system,
-          sans-serif;
+        font-family: "DM Sans", -apple-system, sans-serif;
         background: var(--bg);
         color: var(--text);
         line-height: 1.7;
         -webkit-font-smoothing: antialiased;
       }
-      .container {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-      }
+      .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+      .container-narrow { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
 
-      nav {
-        border-bottom: 1px solid var(--border);
-        padding: 1rem 0;
-        background: var(--surface);
-      }
+      nav { border-bottom: 1px solid var(--border); padding: 1rem 0; background: var(--surface); }
       nav .inner {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
+        display: flex; align-items: center; justify-content: space-between;
       }
       .nav-brand {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--text);
-        text-decoration: none;
+        font-family: "JetBrains Mono", monospace; font-size: 0.95rem; font-weight: 500;
+        color: var(--text); text-decoration: none;
       }
-      .nav-brand span {
-        color: var(--accent);
-      }
-      .nav-links {
-        display: flex;
-        gap: 1.5rem;
-      }
+      .nav-brand span { color: var(--accent); }
+      .nav-links { display: flex; gap: 1.5rem; }
       .nav-links a {
-        font-size: 0.88rem;
-        color: var(--text-secondary);
-        text-decoration: none;
+        font-size: 0.88rem; color: var(--text-secondary); text-decoration: none;
         transition: color 0.15s;
       }
-      .nav-links a:hover {
-        color: var(--text);
-      }
+      .nav-links a:hover { color: var(--text); }
 
-      .hero {
-        padding: 4rem 0 3rem;
-        text-align: center;
-        border-bottom: 1px solid var(--border);
-      }
+      .hero { padding: 4rem 0 3rem; text-align: center; border-bottom: 1px solid var(--border); }
       .hero-badge {
-        display: inline-block;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        color: var(--tag-text);
-        background: var(--tag-bg);
+        display: inline-block; font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em;
+        color: var(--tag-text); background: var(--tag-bg);
         border: 1px solid var(--tag-border);
-        padding: 0.25rem 0.8rem;
-        border-radius: 100px;
-        margin-bottom: 1.25rem;
+        padding: 0.25rem 0.8rem; border-radius: 100px; margin-bottom: 1.25rem;
       }
       .hero h1 {
-        font-size: 2.4rem;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-        margin-bottom: 0.75rem;
+        font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em;
+        line-height: 1.15; margin-bottom: 0.75rem;
       }
-      .hero-sub {
-        font-size: 1.05rem;
-        color: var(--text-secondary);
-        max-width: 540px;
-        margin: 0 auto 1rem;
-      }
+      .hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 540px; margin: 0 auto 1rem; }
       .privacy-note {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.82rem;
-        color: var(--success-text);
-        background: var(--success-bg);
-        border: 1px solid var(--success-border);
-        padding: 0.3rem 0.9rem;
-        border-radius: 100px;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 0.82rem; color: var(--success-text);
+        background: var(--success-bg); border: 1px solid var(--success-border);
+        padding: 0.3rem 0.9rem; border-radius: 100px;
       }
 
-      .tool-section {
-        padding: 3rem 0;
-        border-bottom: 1px solid var(--border);
-      }
+      .tool-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
 
+      .editor-layout {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start;
+      }
       .editor-pane label {
-        display: block;
+        display: block; font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;
+      }
+
+      .json-input {
+        width: 100%; min-height: 320px; padding: 1rem;
+        font-family: "JetBrains Mono", monospace; font-size: 0.78rem; line-height: 1.65;
+        background: var(--code-bg); color: var(--code-text);
+        border: 2px solid transparent; border-radius: 8px;
+        resize: vertical; outline: none;
+        transition: border-color 0.15s;
+      }
+      .json-input:focus { border-color: var(--accent); }
+      .json-input::placeholder { color: #585b70; }
+
+      .preview-frame {
+        width: 100%; min-height: 320px; max-height: 540px;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--surface);
+      }
+      .preview-disclaimer {
+        font-size: 0.78rem; color: var(--text-secondary);
+        font-style: italic; margin-top: 0.5rem; line-height: 1.45;
+      }
+
+      .options-row {
+        display: flex; align-items: center; gap: 1rem;
+        margin-top: 1.25rem; flex-wrap: wrap;
+      }
+      .option-group { display: flex; align-items: center; gap: 0.5rem; }
+      .option-group label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+      .option-group select {
+        font-family: "DM Sans", sans-serif; font-size: 0.82rem;
+        padding: 0.35rem 0.65rem; border: 1px solid var(--border);
+        border-radius: 6px; background: var(--surface); color: var(--text);
+        cursor: pointer; outline: none;
+      }
+      .option-group select:focus { border-color: var(--accent); }
+
+      .convert-row {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 1rem; flex-wrap: wrap; gap: 0.75rem;
+      }
+      .button-cluster { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+      .status { display: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.88rem; }
+      .status.loading {
+        display: flex; align-items: center; gap: 0.6rem;
+        background: var(--accent-light); color: var(--accent);
+        border: 1px solid #bfdbfe;
+      }
+      .status.error {
+        display: block; background: var(--error-bg); color: var(--error-text);
+        border: 1px solid var(--error-border);
+      }
+      .status.success {
+        display: flex; align-items: center; gap: 0.5rem;
+        background: var(--success-bg); color: var(--success-text);
+        border: 1px solid var(--success-border);
+      }
+      .status.info {
+        display: block; background: #fffbeb; color: #92400e;
+        border: 1px solid #fde68a;
+      }
+      .spinner {
+        width: 14px; height: 14px;
+        border: 2px solid #bfdbfe; border-top-color: var(--accent);
+        border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-family: "DM Sans", sans-serif; font-size: 0.85rem; font-weight: 500;
+        text-decoration: none; padding: 0.5rem 1.1rem; border-radius: 7px;
+        border: none; cursor: pointer; transition: all 0.15s ease;
+      }
+      .btn-primary { background: var(--accent); color: #fff; }
+      .btn-primary:hover { background: var(--accent-hover); }
+      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+      .btn-secondary:hover { border-color: #ccc; }
+      .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+      .btn-sm { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+
+      .saved-list-section {
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        display: none;
+      }
+      .saved-list-section.show { display: block; }
+      .saved-list-section h4 {
         font-family: "JetBrains Mono", monospace;
         font-size: 0.72rem;
         font-weight: 500;
@@ -197,248 +232,70 @@
         color: var(--text-secondary);
         margin-bottom: 0.5rem;
       }
-
-      .json-input {
-        width: 100%;
-        min-height: 320px;
-        padding: 1rem;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.78rem;
-        line-height: 1.65;
-        background: var(--code-bg);
-        color: var(--code-text);
-        border: 1px solid transparent;
-        border-radius: 8px;
-        resize: vertical;
-        outline: none;
-        transition: border-color 0.15s;
-      }
-      .json-input:focus {
-        border-color: var(--accent);
-      }
-      .json-input::placeholder {
-        color: #585b70;
-      }
-
-      .options-row {
+      .saved-list { list-style: none; margin: 0; padding: 0; }
+      .saved-list li {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-      }
-      .option-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .option-group label {
+        gap: 1.5rem;
+        padding: 0.4rem 0;
         font-size: 0.85rem;
-        color: var(--text-secondary);
-        white-space: nowrap;
+        border-bottom: 1px solid var(--border);
       }
-      .option-group select {
-        font-family: "DM Sans", sans-serif;
+      .saved-list li:last-child { border-bottom: none; }
+      .saved-list .filename {
+        font-family: "JetBrains Mono", monospace;
         font-size: 0.82rem;
-        padding: 0.35rem 0.65rem;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--surface);
         color: var(--text);
-        cursor: pointer;
-        outline: none;
-      }
-      .option-group select:focus {
-        border-color: var(--accent);
-      }
-
-      .convert-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-      }
-
-      .status {
-        display: none;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        font-size: 0.88rem;
-      }
-      .status.loading {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        background: var(--accent-light);
-        color: var(--accent);
-        border: 1px solid #bfdbfe;
-      }
-      .status.error {
-        display: block;
-        background: var(--error-bg);
-        color: var(--error-text);
-        border: 1px solid var(--error-border);
-      }
-      .status.success {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: var(--success-bg);
-        color: var(--success-text);
-        border: 1px solid var(--success-border);
-      }
-      .spinner {
-        width: 14px;
-        height: 14px;
-        border: 2px solid #bfdbfe;
-        border-top-color: var(--accent);
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        flex-shrink: 0;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .btn {
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        font-family: "DM Sans", sans-serif;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-decoration: none;
-        padding: 0.5rem 1.1rem;
-        border-radius: 7px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.15s ease;
+        flex-shrink: 1;
+        min-width: 0;
       }
-      .btn-primary {
-        background: var(--accent);
-        color: #fff;
-      }
-      .btn-primary:hover {
-        background: var(--accent-hover);
-      }
-      .btn-primary:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .btn-secondary {
-        background: var(--surface);
-        color: var(--text);
-        border: 1px solid var(--border);
-      }
-      .btn-secondary:hover {
-        border-color: #ccc;
-      }
-      .btn-sm {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
+      .saved-list .check { color: var(--success-text); }
+      .saved-list .timestamp { font-size: 0.78rem; color: var(--text-secondary); }
+      .saved-list-note {
+        font-size: 0.76rem; color: var(--text-secondary);
+        font-style: italic; margin-top: 0.6rem; line-height: 1.45;
       }
 
-      .info-section {
-        padding: 3rem 0;
-        border-bottom: 1px solid var(--border);
-      }
+      .info-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
       .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-        margin-top: 1.5rem;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem; margin-top: 1.5rem;
       }
       .info-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 1.25rem;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 10px; padding: 1.25rem;
       }
-      .info-card h3 {
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-bottom: 0.3rem;
-      }
-      .info-card p {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.55;
-      }
+      .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+      .info-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
 
-      .dev-cta {
-        padding: 3rem 0;
-        border-bottom: 1px solid var(--border);
-      }
+      .dev-cta { padding: 3rem 0; border-bottom: 1px solid var(--border); }
       .dev-cta-inner {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 2rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 1.5rem;
-        flex-wrap: wrap;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 2rem;
+        display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;
       }
-      .dev-cta-text {
-        flex: 1;
-        min-width: 240px;
-      }
-      .dev-cta-text h2 {
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin-bottom: 0.4rem;
-      }
+      .dev-cta-text { flex: 1; min-width: 240px; }
+      .dev-cta-text h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
       .dev-cta-text p {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        margin-bottom: 0.75rem;
-        line-height: 1.6;
+        font-size: 0.9rem; color: var(--text-secondary);
+        margin-bottom: 0.75rem; line-height: 1.6;
       }
       .code-snippet {
-        background: var(--code-bg);
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.78rem;
-        color: var(--code-text);
-        white-space: pre;
-        overflow-x: auto;
+        background: var(--code-bg); border-radius: 8px;
+        padding: 0.75rem 1rem; font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem; color: var(--code-text);
+        white-space: pre; overflow-x: auto;
       }
-      .kw {
-        color: #cba6f7;
-      }
-      .str {
-        color: #a6e3a1;
-      }
-      .fn {
-        color: #f9e2af;
-      }
-      .cmt {
-        color: #6c7086;
-      }
-      .typ {
-        color: #89b4fa;
-      }
+      .kw { color: #cba6f7; } .str { color: #a6e3a1; } .fn { color: #f9e2af; }
+      .cmt { color: #6c7086; } .typ { color: #89b4fa; }
 
-      footer {
-        padding: 2.5rem 0;
-        text-align: center;
-      }
-      footer p {
-        font-size: 0.82rem;
-        color: var(--text-secondary);
-      }
-      footer a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
+      footer { padding: 2.5rem 0; text-align: center; }
+      footer p { font-size: 0.82rem; color: var(--text-secondary); }
+      footer a { color: var(--accent); text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
 
       .sample-btn {
         font-family: "JetBrains Mono", monospace;
@@ -451,15 +308,33 @@
         cursor: pointer;
         margin-left: 0.75rem;
       }
-      .sample-btn:hover {
-        background: var(--accent-light);
+      .sample-btn:hover { background: var(--accent-light); }
+
+      /* Mobile / narrow viewport — replace tool with a friendly notice */
+      .mobile-notice {
+        display: none;
+        padding: 2.5rem 0;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
+      .mobile-notice .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+      .mobile-notice h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+      .mobile-notice p {
+        font-size: 0.9rem; color: var(--text-secondary);
+        max-width: 420px; margin: 0 auto;
+      }
+
+      @media (max-width: 768px) {
+        .tool-section { display: none; }
+        .mobile-notice { display: block; }
+        .hero h1 { font-size: 1.8rem; }
+        .hero { padding: 2.5rem 0 2rem; }
       }
     </style>
 
     <script
       data-goatcounter="https://odf-kit.goatcounter.com/count"
-      async
-      src="//gc.zgo.at/count.js"
+      async src="//gc.zgo.at/count.js"
     ></script>
   </head>
   <body>
@@ -475,32 +350,16 @@
     </nav>
 
     <section class="hero">
-      <div class="container">
+      <div class="container-narrow">
         <div class="hero-badge">Free online tool</div>
         <h1>Lexical JSON to ODT converter</h1>
         <p class="hero-sub">
           Paste a Lexical
-          <code
-            style="
-              font-family: &quot;JetBrains Mono&quot;, monospace;
-              font-size: 0.9em;
-              background: #f0f0ec;
-              padding: 0.1em 0.35em;
-              border-radius: 3px;
-            "
-            >SerializedEditorState</code
-          >
-          and download a ready-to-open LibreOffice document — instantly, in your browser.
+          <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: #f0f0ec; padding: 0.1em 0.35em; border-radius: 3px;">SerializedEditorState</code>
+          and generate a valid OpenDocument Text file — instantly, in your browser.
         </p>
         <div class="privacy-note">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           Nothing is sent to any server
@@ -508,22 +367,51 @@
       </div>
     </section>
 
+    <!-- Mobile: friendly redirect notice -->
+    <section class="mobile-notice">
+      <div class="container-narrow">
+        <div class="icon">🖥️</div>
+        <h2>Best on a larger screen</h2>
+        <p>
+          This tool needs a wider display for the side-by-side input and preview panes.
+          Please come back on a desktop or laptop browser to use it.
+        </p>
+      </div>
+    </section>
+
+    <!-- Desktop: the tool itself -->
     <section class="tool-section">
       <div class="container">
-        <div class="editor-pane">
-          <label for="jsonInput">
-            Lexical SerializedEditorState JSON
-            <button class="sample-btn" id="sampleBtn">load sample</button>
-          </label>
-          <textarea
-            class="json-input"
-            id="jsonInput"
-            spellcheck="false"
-            placeholder="Paste your Lexical editor state JSON here.
+        <div class="editor-layout">
+          <div class="editor-pane">
+            <label for="jsonInput">
+              Lexical SerializedEditorState JSON
+              <button class="sample-btn" id="sampleBtn">load sample</button>
+            </label>
+            <textarea
+              class="json-input"
+              id="jsonInput"
+              spellcheck="false"
+              autofocus
+              placeholder="Paste your Lexical editor state JSON here.
 
 Get it from your editor with:
   editor.getEditorState().toJSON()"
-          ></textarea>
+            ></textarea>
+          </div>
+          <div class="editor-pane">
+            <label for="previewFrame">ODT preview</label>
+            <iframe
+              class="preview-frame"
+              id="previewFrame"
+              title="ODT preview"
+            ></iframe>
+            <p class="preview-disclaimer">
+              The generated <code>.odt</code> file displays correctly in LibreOffice, OnlyOffice,
+              Collabora, MS Word, and other ODF applications. The preview shown here is a
+              simplified rendering that may not match those applications exactly.
+            </p>
+          </div>
         </div>
 
         <div class="options-row">
@@ -541,228 +429,249 @@ Get it from your editor with:
 
         <div class="convert-row">
           <div id="statusMsg" class="status"></div>
-          <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto">
+          <div class="button-cluster" style="margin-left: auto;">
             <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
-            <button class="btn btn-primary" id="convertBtn">⬇ Download .odt</button>
+            <button class="btn btn-primary" id="generateBtn">Generate file</button>
+            <button class="btn btn-primary" id="saveBtn" disabled>Save</button>
           </div>
+        </div>
+
+        <div class="saved-list-section" id="savedListSection">
+          <h4>Saved files this session</h4>
+          <ul class="saved-list" id="savedList"></ul>
+          <p class="saved-list-note">
+            Filenames are as requested — your browser may add (1), (2), etc. to avoid overwriting
+            existing files in your downloads folder.
+          </p>
         </div>
       </div>
     </section>
 
     <section class="info-section">
-      <div class="container">
-        <p
-          style="
-            font-family: &quot;JetBrains Mono&quot;, monospace;
-            font-size: 0.72rem;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 0.4rem;
-          "
-        >
+      <div class="container-narrow">
+        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem;">
           How it works
         </p>
-        <h2
-          style="
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.4rem;
-          "
-        >
+        <h2 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.4rem;">
           Private, fast, free
         </h2>
-        <p style="color: var(--text-secondary); font-size: 0.9rem">
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
           Conversion runs entirely in your browser — no server, no account, no file size limits.
         </p>
         <div class="info-grid">
           <div class="info-card">
             <h3>🔒 Fully private</h3>
-            <p>
-              Your JSON never leaves your browser. No network requests are made during conversion.
-              Works offline after the page loads.
-            </p>
+            <p>Your JSON never leaves your browser. No network requests are made during conversion. Works offline after the page loads.</p>
           </div>
           <div class="info-card">
             <h3>⚡ Instant conversion</h3>
-            <p>
-              Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting
-              for upload or server processing.
-            </p>
+            <p>Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting for upload or server processing.</p>
           </div>
           <div class="info-card">
             <h3>📋 What is supported</h3>
-            <p>
-              Paragraphs, headings h1–h6, bold, italic, underline, strikethrough, inline code,
-              links, bullet and numbered lists, nested lists, tables, blockquotes, code blocks, and
-              horizontal rules.
-            </p>
+            <p>Paragraphs with alignment, headings h1–h6, bold, italic, underline, strikethrough, subscript, superscript, inline code, text color, highlight color, links, bullet and numbered lists with nesting, tables with colspan and rowspan, blockquotes, code blocks, images with captions and alt text, and horizontal rules.</p>
           </div>
           <div class="info-card">
             <h3>🆓 Free, always</h3>
-            <p>
-              No character limits, no conversions per day, no sign-up required. Powered by open
-              source odf-kit.
-            </p>
+            <p>No character limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+          </div>
+          <div class="info-card">
+            <h3>🛡️ Spec-compliant</h3>
+            <p>Output passes the OASIS ODF validator without errors or warnings — enforced on every commit by CI. Round-trips cleanly through LibreOffice, OnlyOffice, Collabora, and MS Word.</p>
           </div>
         </div>
       </div>
     </section>
 
     <section class="dev-cta">
-      <div class="container">
+      <div class="container-narrow">
         <div class="dev-cta-inner">
           <div class="dev-cta-text">
             <h2>Need Lexical → ODT in your app?</h2>
             <p>
               <strong>odf-kit</strong> is a free, open source JavaScript library.
-              <code
-                style="
-                  font-family: &quot;JetBrains Mono&quot;, monospace;
-                  font-size: 0.88em;
-                  background: #f5f5f0;
-                  padding: 0.1em 0.35em;
-                  border-radius: 3px;
-                "
-                >lexicalToOdt()</code
-              >
+              <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.35em; border-radius: 3px;">lexicalToOdt()</code>
               converts any Lexical
-              <code
-                style="
-                  font-family: &quot;JetBrains Mono&quot;, monospace;
-                  font-size: 0.88em;
-                  background: #f5f5f0;
-                  padding: 0.1em 0.35em;
-                  border-radius: 3px;
-                "
-                >SerializedEditorState</code
-              >
+              <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.35em; border-radius: 3px;">SerializedEditorState</code>
               to a valid
-              <code
-                style="
-                  font-family: &quot;JetBrains Mono&quot;, monospace;
-                  font-size: 0.88em;
-                  background: #f5f5f0;
-                  padding: 0.1em 0.35em;
-                  border-radius: 3px;
-                "
-                >.odt</code
-              >
+              <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.35em; border-radius: 3px;">.odt</code>
               file in Node.js or the browser. No server, no LibreOffice.
             </p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-              <a href="../guides/lexical-to-odt.html" class="btn btn-primary btn-sm"
-                >Read the guide</a
-              >
-              <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm"
-                >npm install odf-kit</a
-              >
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <a href="../guides/lexical-to-odt.html" class="btn btn-primary btn-sm">Read the guide</a>
+              <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
             </div>
           </div>
-          <div style="flex: 1; min-width: 280px">
-            <div class="code-snippet">
-              <span class="cmt">// The same code powering this tool</span>
-              <span class="kw">import</span> { <span class="typ">lexicalToOdt</span> }
-              <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
+          <div style="flex: 1; min-width: 280px;">
+            <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
+<span class="kw">import</span> { <span class="typ">lexicalToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit/lexical"</span>;
 
-              <span class="cmt">// editor.getEditorState().toJSON()</span>
-              <span class="kw">const</span> bytes = <span class="kw">await</span>
-              <span class="fn">lexicalToOdt</span>(editorState, { pageFormat:
-              <span class="str">"A4"</span>, });
+<span class="cmt">// editor.getEditorState().toJSON()</span>
+<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">lexicalToOdt</span>(editorState, {
+  pageFormat: <span class="str">"A4"</span>,
+});
 
-              <span class="cmt">// bytes → Uint8Array, save as .odt file</span>
-            </div>
+<span class="cmt">// bytes → Uint8Array, save as .odt file</span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border)">
+    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border);">
       <div class="container">
-        <h2
-          style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em"
-        >
+        <div style="margin-bottom: 1.5rem;">
+          <a href="../" style="color: var(--accent); text-decoration: none; font-size: 0.95rem; font-weight: 500;">← landing page</a>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem;">/odf-kit/</div>
+        </div>
+
+        <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
           More odf-kit tools &amp; guides
         </h2>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-            font-size: 0.88rem;
-          "
-        >
-          <a
-            href="html-to-odt.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Free HTML to ODT converter →</a
-          >
-          <a
-            href="markdown-to-odt.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Free Markdown to ODT converter →</a
-          >
-          <a
-            href="odt-to-html.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Free ODT to HTML converter →</a
-          >
-          <a
-            href="odt-to-markdown.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Free ODT to Markdown converter →</a
-          >
-          <a
-            href="xlsx-to-ods.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Free XLSX to ODS converter →</a
-          >
-          <a
-            href="../guides/lexical-to-odt.html"
-            style="
-              color: var(--accent);
-              text-decoration: none;
-              padding: 0.6rem 0;
-              border-bottom: 1px solid var(--border);
-            "
-            >Lexical to ODT developer guide →</a
-          >
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; font-size: 0.88rem;">
+
+          <!-- Tools column -->
+          <div>
+            <h3 style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.9rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);">Tools</h3>
+
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Generate</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="html-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">HTML to ODT</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">html-to-odt.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="markdown-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Markdown to ODT</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">markdown-to-odt.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="docx-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">DOCX to ODT</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docx-to-odt.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="xlsx-to-ods.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">XLSX to ODS</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">xlsx-to-ods.html</div>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Read</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="odt-to-html.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to HTML</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-html.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="odt-to-markdown.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to Markdown</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-markdown.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="odt-to-pdf.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to PDF (via Typst)</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-pdf.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="ods-to-html.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODS to HTML</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">ods-to-html.html</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Guides column -->
+          <div>
+            <h3 style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.9rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);">Guides</h3>
+
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Generation</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/generate-odt-nodejs.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt files in Node.js</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-nodejs.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/generate-odt-browser.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt files in the browser</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-browser.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/generate-odt-without-libreoffice.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt without LibreOffice</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-without-libreoffice.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/libreoffice-headless-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">LibreOffice headless alternative</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">libreoffice-headless-alternative.html</div>
+                </li>
+              </ul>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Templates</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/fill-odt-template-javascript.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Fill .odt templates with JavaScript</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">fill-odt-template-javascript.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/docxtemplater-odf-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">docxtemplater alternative for ODF</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docxtemplater-odf-alternative.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/simple-odf-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">simple-odf migration guide</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">simple-odf-alternative.html</div>
+                </li>
+              </ul>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Conversion</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/docx-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">DOCX to ODT in JavaScript</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docx-to-odt.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/lexical-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Lexical to ODT developer guide</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">lexical-to-odt.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/odt-to-html-javascript.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to HTML in JavaScript</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-html-javascript.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/odt-to-typst-pdf.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to PDF via Typst</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-typst-pdf.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/sheetjs-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">SheetJS alternative for ODS</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">sheetjs-alternative.html</div>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Reference</h4>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/odt-javascript-ecosystem.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT JavaScript ecosystem overview</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-javascript-ecosystem.html</div>
+                </li>
+                <li style="margin-bottom: 0.65rem;">
+                  <a href="../guides/odf-government-compliance.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODF for government compliance</a>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odf-government-compliance.html</div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <footer>
-      <div class="container">
+      <div class="container-narrow">
         <p>
-          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and
-          TypeScript · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and TypeScript ·
+          <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
           <a href="https://www.npmjs.com/package/odf-kit">npm</a> · Apache 2.0
         </p>
       </div>
@@ -770,190 +679,102 @@ Get it from your editor with:
 
     <script type="module">
       import { lexicalToOdt } from "https://esm.run/odf-kit@0.13.1/lexical";
+      import { odtToHtml } from "https://esm.run/odf-kit@0.13.1/reader";
 
       const jsonInput = document.getElementById("jsonInput");
-      const convertBtn = document.getElementById("convertBtn");
-      const clearBtn = document.getElementById("clearBtn");
+      const previewFrame = document.getElementById("previewFrame");
       const sampleBtn = document.getElementById("sampleBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const generateBtn = document.getElementById("generateBtn");
+      const saveBtn = document.getElementById("saveBtn");
       const statusMsg = document.getElementById("statusMsg");
       const pageFormat = document.getElementById("pageFormat");
+      const savedListSection = document.getElementById("savedListSection");
+      const savedList = document.getElementById("savedList");
+
+      // Holds the most recently generated ODT bytes (until input changes)
+      let generatedBytes = null;
+      // Tracks whether the input has changed since the last successful Generate
+      let inputDirty = true;
+      // Tracks the source of the current input — controls output filename
+      // "typed"          — user typed/pasted (output: document.odt)
+      // "example"        — Load sample was clicked, untouched (output: sample.odt)
+      // "edited-example" — sample was loaded then edited (output: edited-sample.odt)
+      let inputSource = "typed";
+
+      // Saved files this session, for the user-visible list
+      const savedFiles = [];
+      const SAVED_FILES_LIMIT = 10;
 
       const SAMPLE = JSON.stringify(
         {
           root: {
             children: [
-              {
-                type: "heading",
-                tag: "h1",
-                format: "",
-                indent: 0,
-                direction: "ltr",
-                version: 1,
+              { type: "heading", tag: "h1", format: "", indent: 0, direction: "ltr", version: 1,
+                children: [{ type: "text", text: "Meeting Notes", format: 0, style: "", mode: "normal", detail: 0, version: 1 }] },
+              { type: "paragraph", format: "", indent: 0, direction: "ltr", version: 1,
                 children: [
-                  {
-                    type: "text",
-                    text: "Meeting Notes",
-                    format: 0,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                ],
-              },
-              {
-                type: "paragraph",
-                format: "",
-                indent: 0,
-                direction: "ltr",
-                version: 1,
+                  { type: "text", text: "Date: ", format: 0, style: "", mode: "normal", detail: 0, version: 1 },
+                  { type: "text", text: "April 18, 2026", format: 1, style: "", mode: "normal", detail: 0, version: 1 }
+                ] },
+              { type: "heading", tag: "h2", format: "", indent: 0, direction: "ltr", version: 1,
+                children: [{ type: "text", text: "Action Items", format: 0, style: "", mode: "normal", detail: 0, version: 1 }] },
+              { type: "list", listType: "bullet", start: 1, direction: "ltr", version: 1,
                 children: [
-                  {
-                    type: "text",
-                    text: "Date: ",
-                    format: 0,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                  {
-                    type: "text",
-                    text: "April 18, 2026",
-                    format: 1,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                ],
-              },
-              {
-                type: "heading",
-                tag: "h2",
-                format: "",
-                indent: 0,
-                direction: "ltr",
-                version: 1,
+                  { type: "listitem", value: 1, indent: 0, direction: "ltr", version: 1,
+                    children: [{ type: "text", text: "Send report by Friday", format: 0, style: "", mode: "normal", detail: 0, version: 1 }] },
+                  { type: "listitem", value: 2, indent: 0, direction: "ltr", version: 1,
+                    children: [{ type: "text", text: "Review budget on Monday", format: 0, style: "", mode: "normal", detail: 0, version: 1 }] }
+                ] },
+              { type: "paragraph", format: "", indent: 0, direction: "ltr", version: 1,
                 children: [
-                  {
-                    type: "text",
-                    text: "Action Items",
-                    format: 0,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                ],
-              },
-              {
-                type: "list",
-                listType: "bullet",
-                start: 1,
-                direction: "ltr",
-                version: 1,
-                children: [
-                  {
-                    type: "listitem",
-                    value: 1,
-                    indent: 0,
-                    direction: "ltr",
-                    version: 1,
-                    children: [
-                      {
-                        type: "text",
-                        text: "Send report by Friday",
-                        format: 0,
-                        style: "",
-                        mode: "normal",
-                        detail: 0,
-                        version: 1,
-                      },
-                    ],
-                  },
-                  {
-                    type: "listitem",
-                    value: 2,
-                    indent: 0,
-                    direction: "ltr",
-                    version: 1,
-                    children: [
-                      {
-                        type: "text",
-                        text: "Review budget on Monday",
-                        format: 0,
-                        style: "",
-                        mode: "normal",
-                        detail: 0,
-                        version: 1,
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                type: "paragraph",
-                format: "",
-                indent: 0,
-                direction: "ltr",
-                version: 1,
-                children: [
-                  {
-                    type: "text",
-                    text: "See ",
-                    format: 0,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                  {
-                    type: "link",
-                    url: "https://github.com/GitHubNewbie0/odf-kit",
-                    direction: "ltr",
-                    format: "",
-                    indent: 0,
-                    version: 1,
-                    children: [
-                      {
-                        type: "text",
-                        text: "odf-kit on GitHub",
-                        format: 0,
-                        style: "",
-                        mode: "normal",
-                        detail: 0,
-                        version: 1,
-                      },
-                    ],
-                  },
-                  {
-                    type: "text",
-                    text: " for more.",
-                    format: 0,
-                    style: "",
-                    mode: "normal",
-                    detail: 0,
-                    version: 1,
-                  },
-                ],
-              },
+                  { type: "text", text: "See ", format: 0, style: "", mode: "normal", detail: 0, version: 1 },
+                  { type: "link", url: "https://github.com/GitHubNewbie0/odf-kit", direction: "ltr", format: "", indent: 0, version: 1,
+                    children: [{ type: "text", text: "odf-kit on GitHub", format: 0, style: "", mode: "normal", detail: 0, version: 1 }] },
+                  { type: "text", text: " for more.", format: 0, style: "", mode: "normal", detail: 0, version: 1 }
+                ] }
             ],
-            direction: "ltr",
-            format: "",
-            indent: 0,
-            type: "root",
-            version: 1,
-          },
+            direction: "ltr", format: "", indent: 0, type: "root", version: 1
+          }
         },
         null,
         2,
       );
 
-      sampleBtn.addEventListener("click", () => {
-        jsonInput.value = SAMPLE;
-        showStatus("", "");
-      });
+      // Preview iframe styling — applied to the rendered HTML output
+      const previewStyles = `
+        body { font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.7; padding: 1rem 1.25rem; color: #1a1a1a; }
+        h1, h2, h3, h4, h5, h6 { margin: 0.75em 0 0.35em; font-weight: 600; }
+        h1 { font-size: 1.4em; } h2 { font-size: 1.2em; } h3 { font-size: 1.05em; }
+        p { margin: 0 0 0.6em; }
+        table { border-collapse: collapse; width: 100%; margin: 0.75em 0; font-size: 0.9em; }
+        td, th { border: 1px solid #e5e5e0; padding: 0.35em 0.65em; }
+        th { background: #f5f5f0; font-weight: 600; }
+        ul, ol { margin: 0.5em 0 0.5em 1.5em; }
+        li { margin: 0.2em 0; }
+        blockquote { border-left: 3px solid #2563eb; padding: 0.1em 1em; margin: 0.75em 0; color: #5a5a5a; }
+        code { font-family: monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.3em; border-radius: 3px; }
+        pre { background: #1e1e2e; color: #cdd6f4; padding: 0.75rem 1rem; border-radius: 6px; overflow-x: auto; margin: 0.75em 0; }
+        pre code { background: none; padding: 0; }
+        hr { border: none; border-top: 1px solid #e5e5e0; margin: 1em 0; }
+        a { color: #2563eb; }
+        .empty-hint { color: #9ca3af; font-style: italic; text-align: center; margin-top: 3rem; }
+      `;
+
+      function renderPreview(htmlContent) {
+        const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+        doc.open();
+        doc.write(
+          `<!DOCTYPE html><html><head><style>${previewStyles}</style></head><body>${htmlContent}</body></html>`
+        );
+        doc.close();
+      }
+
+      function renderEmptyPreview() {
+        renderPreview('<p class="empty-hint">Click "Generate file" to see the ODT preview here.</p>');
+      }
+
+      renderEmptyPreview();
 
       function showStatus(type, msg) {
         statusMsg.className = "status " + type;
@@ -963,7 +784,7 @@ Get it from your editor with:
         } else if (type === "success") {
           statusMsg.style.display = "flex";
           statusMsg.innerHTML = "<span>✓</span><span>" + msg + "</span>";
-        } else if (type === "error") {
+        } else if (type === "error" || type === "info") {
           statusMsg.style.display = "block";
           statusMsg.textContent = msg;
         } else {
@@ -978,18 +799,46 @@ Get it from your editor with:
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               tool,
-              version: "0.13.0",
+              version: "0.13.1",
               error: err && err.message ? err.message.slice(0, 500) : String(err).slice(0, 500),
               stack: err && err.stack ? err.stack.slice(0, 800) : "",
-              engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || [
-                "unknown",
-              ])[0],
+              engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ["unknown"])[0],
             }),
           }).catch(() => {});
         } catch (_) {}
       }
 
-      convertBtn.addEventListener("click", async () => {
+      // Track input changes so we can warn if Save is clicked after edits
+      jsonInput.addEventListener("input", () => {
+        if (inputSource === "example") {
+          inputSource = "edited-example";
+        }
+        if (generatedBytes && !inputDirty) {
+          inputDirty = true;
+          showStatus("info", "Input changed — click \"Generate file\" to refresh the preview.");
+        }
+      });
+
+      sampleBtn.addEventListener("click", () => {
+        jsonInput.value = SAMPLE;
+        inputSource = "example";
+        inputDirty = true;
+        showStatus("", "");
+        jsonInput.focus();
+      });
+
+      clearBtn.addEventListener("click", () => {
+        jsonInput.value = "";
+        generatedBytes = null;
+        inputDirty = true;
+        inputSource = "typed";
+        saveBtn.disabled = true;
+        renderEmptyPreview();
+        showStatus("", "");
+        jsonInput.focus();
+      });
+
+      generateBtn.addEventListener("click", async () => {
         const raw = jsonInput.value.trim();
         if (!raw) {
           showStatus("error", "Please paste a Lexical editor state JSON first.");
@@ -1009,32 +858,107 @@ Get it from your editor with:
           );
           return;
         }
-        showStatus("loading", "Converting…");
-        convertBtn.disabled = true;
+        showStatus("loading", "Generating…");
+        generateBtn.disabled = true;
+        saveBtn.disabled = true;
         try {
+          // Convert Lexical state to ODT bytes
           const bytes = await lexicalToOdt(editorState, {
             pageFormat: pageFormat.value,
           });
-          const blob = new Blob([bytes], { type: "application/vnd.oasis.opendocument.text" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "document.odt";
-          a.click();
-          URL.revokeObjectURL(url);
-          showStatus("success", "Downloaded successfully!");
-          setTimeout(() => showStatus("", ""), 3000);
+          // Convert ODT bytes back to HTML for preview
+          const previewHtml = await odtToHtml(bytes);
+          renderPreview(previewHtml);
+          generatedBytes = bytes;
+          inputDirty = false;
+          saveBtn.disabled = false;
+          showStatus("success", "Preview ready. Click \"Save\" to download the file.");
         } catch (err) {
           reportError("lexical-to-odt", err);
-          showStatus("error", "Conversion failed: " + (err.message || "unknown error."));
+          renderEmptyPreview();
+          generatedBytes = null;
+          saveBtn.disabled = true;
+          showStatus("error", "Generation failed: " + (err.message || "unknown error."));
         } finally {
-          convertBtn.disabled = false;
+          generateBtn.disabled = false;
         }
       });
 
-      clearBtn.addEventListener("click", () => {
-        jsonInput.value = "";
-        showStatus("", "");
+      function getOutputFilename() {
+        switch (inputSource) {
+          case "example":
+            return "sample.odt";
+          case "edited-example":
+            return "edited-sample.odt";
+          case "typed":
+          default:
+            return "document.odt";
+        }
+      }
+
+      function formatRelativeTime(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 5) return "just now";
+        if (seconds < 60) return seconds + " seconds ago";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + (minutes === 1 ? " minute ago" : " minutes ago");
+        const hours = Math.floor(minutes / 60);
+        return hours + (hours === 1 ? " hour ago" : " hours ago");
+      }
+
+      function renderSavedList() {
+        if (savedFiles.length === 0) {
+          savedListSection.classList.remove("show");
+          return;
+        }
+        savedListSection.classList.add("show");
+        savedList.innerHTML = "";
+        for (let i = savedFiles.length - 1; i >= 0; i--) {
+          const entry = savedFiles[i];
+          const li = document.createElement("li");
+          const filenameSpan = document.createElement("span");
+          filenameSpan.className = "filename";
+          filenameSpan.innerHTML = '<span class="check">✓</span><span></span>';
+          filenameSpan.querySelector("span:last-child").textContent = entry.filename;
+          const timestampSpan = document.createElement("span");
+          timestampSpan.className = "timestamp";
+          timestampSpan.textContent = formatRelativeTime(entry.timestamp);
+          li.appendChild(filenameSpan);
+          li.appendChild(timestampSpan);
+          savedList.appendChild(li);
+        }
+      }
+
+      // Refresh relative timestamps every 30 seconds
+      setInterval(() => {
+        if (savedFiles.length > 0) renderSavedList();
+      }, 30000);
+
+      saveBtn.addEventListener("click", () => {
+        if (!generatedBytes) {
+          showStatus("error", "No file to save — click \"Generate file\" first.");
+          return;
+        }
+        const filename = getOutputFilename();
+        const blob = new Blob([generatedBytes], { type: "application/vnd.oasis.opendocument.text" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        savedFiles.push({ filename, timestamp: Date.now() });
+        while (savedFiles.length > SAVED_FILES_LIMIT) savedFiles.shift();
+        renderSavedList();
+        showStatus("success", "File saved — your browser will show where it landed.");
+        // Brief disable to allow browser download UI to clear before next save
+        const originalText = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving…";
+        setTimeout(() => {
+          saveBtn.disabled = false;
+          saveBtn.textContent = originalText;
+        }, 4000);
       });
     </script>
   </body>
