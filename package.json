@@ -65,6 +65,11 @@
       "types": "./dist/lexical/index.d.ts",
       "import": "./dist/lexical/index.js",
       "module-sync": "./dist/lexical/index.js"
+    },
+    "./html-normalizer": {
+      "types": "./dist/html-normalizer/index.d.ts",
+      "import": "./dist/html-normalizer/index.js",
+      "module-sync": "./dist/html-normalizer/index.js"
     }
   },
   "typesVersions": {
@@ -100,7 +105,10 @@
         "./dist/markdown/index.d.ts"
       ],
       "lexical": [
-        "dist/lexical/index.d.ts"
+        "./dist/lexical/index.d.ts"
+      ],
+      "html-normalizer": [
+        "./dist/html-normalizer/index.d.ts"
       ]
     }
   },
