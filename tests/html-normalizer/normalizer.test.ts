@@ -13,6 +13,9 @@ import {
   decodeNamedEntities,
   emptyRawTextElements,
   lowercaseDoctype,
+  quoteUnquotedBooleanAttributes,
+  quoteUnquotedAttributeValues,
+  escapeAttributeValueAmpersands,
 } from "../../src/html-normalizer/index.js";
 
 describe("selfCloseVoidElements (Rule 1)", () => {
@@ -299,5 +302,245 @@ describe("odfKitNormalizer (composite)", () => {
     const input = '<!DOCTYPE html><img src="x" alt="&copy;"><script>code</script>';
     const expected = '<!doctype html><img src="x" alt="©" /><script></script>';
     expect(odfKitNormalizer(input)).toBe(expected);
+  });
+});
+
+describe("quoteUnquotedBooleanAttributes (Rule 5)", () => {
+  test("quotes a single bare boolean attribute", () => {
+    expect(quoteUnquotedBooleanAttributes("<input checked>")).toBe('<input checked="">');
+  });
+
+  test("quotes multiple bare boolean attributes", () => {
+    expect(quoteUnquotedBooleanAttributes("<script async defer>")).toBe(
+      '<script async="" defer="">',
+    );
+  });
+
+  test("quotes crossorigin in link tag", () => {
+    expect(
+      quoteUnquotedBooleanAttributes(
+        '<link rel="preconnect" href="https://example.com" crossorigin>',
+      ),
+    ).toBe('<link rel="preconnect" href="https://example.com" crossorigin="">');
+  });
+
+  test("preserves quoted attributes", () => {
+    expect(quoteUnquotedBooleanAttributes('<a href="x.html" target="_blank">')).toBe(
+      '<a href="x.html" target="_blank">',
+    );
+  });
+
+  test("preserves single-quoted attributes", () => {
+    expect(quoteUnquotedBooleanAttributes("<a href='x.html'>")).toBe("<a href='x.html'>");
+  });
+
+  test("handles mix of quoted and bare attributes", () => {
+    expect(quoteUnquotedBooleanAttributes('<input type="text" required disabled value="x">')).toBe(
+      '<input type="text" required="" disabled="" value="x">',
+    );
+  });
+
+  test("does not touch already-empty-string attributes", () => {
+    expect(quoteUnquotedBooleanAttributes('<input checked="">')).toBe('<input checked="">');
+  });
+
+  test("preserves self-closing tags", () => {
+    expect(quoteUnquotedBooleanAttributes("<br/>")).toBe("<br/>");
+    expect(quoteUnquotedBooleanAttributes("<br />")).toBe("<br />");
+    expect(quoteUnquotedBooleanAttributes("<input checked />")).toBe('<input checked="" />');
+  });
+
+  test("does not touch non-tag content", () => {
+    expect(quoteUnquotedBooleanAttributes("<p>hello world</p>")).toBe("<p>hello world</p>");
+  });
+
+  test("does not touch text outside tags", () => {
+    expect(quoteUnquotedBooleanAttributes("text only, no tags")).toBe("text only, no tags");
+  });
+
+  test("handles closing tags (no rewriting)", () => {
+    expect(quoteUnquotedBooleanAttributes("</input>")).toBe("</input>");
+  });
+
+  test("handles tags with no attributes", () => {
+    expect(quoteUnquotedBooleanAttributes("<p>")).toBe("<p>");
+    expect(quoteUnquotedBooleanAttributes("<div>")).toBe("<div>");
+  });
+
+  test("real-world example: docs-site link with crossorigin", () => {
+    const input = '<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>';
+    const expected = '<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="">';
+    expect(quoteUnquotedBooleanAttributes(input)).toBe(expected);
+  });
+
+  test("is idempotent", () => {
+    const input = '<input type="text" required disabled value="x">';
+    const once = quoteUnquotedBooleanAttributes(input);
+    const twice = quoteUnquotedBooleanAttributes(once);
+    expect(twice).toBe(once);
+  });
+});
+
+describe("escapeAttributeValueAmpersands (Rule 7)", () => {
+  test("escapes a lone & in href", () => {
+    expect(escapeAttributeValueAmpersands('<a href="page.html?a=1&b=2">')).toBe(
+      '<a href="page.html?a=1&amp;b=2">',
+    );
+  });
+
+  test("escapes a lone & in single-quoted attribute", () => {
+    expect(escapeAttributeValueAmpersands("<a href='page.html?a=1&b=2'>")).toBe(
+      "<a href='page.html?a=1&amp;b=2'>",
+    );
+  });
+
+  test("preserves &amp; (already escaped)", () => {
+    expect(escapeAttributeValueAmpersands('<a href="page.html?a=1&amp;b=2">')).toBe(
+      '<a href="page.html?a=1&amp;b=2">',
+    );
+  });
+
+  test("preserves all five XML predefined entities", () => {
+    expect(escapeAttributeValueAmpersands('<a title="&amp;&lt;&gt;&quot;&apos;">')).toBe(
+      '<a title="&amp;&lt;&gt;&quot;&apos;">',
+    );
+  });
+
+  test("preserves numeric character references", () => {
+    expect(escapeAttributeValueAmpersands('<a title="&#160;&#xA0;">')).toBe(
+      '<a title="&#160;&#xA0;">',
+    );
+  });
+
+  test("escapes named-entity-shaped strings (only XML predefined are valid)", () => {
+    // &copy; is HTML5 named, but Rule 7 only treats the five XML predefined
+    // entities and numeric refs as already-valid. Named entities like &copy;
+    // get escaped here. Rule 2 (decodeNamedEntities) runs AFTER Rule 7 in
+    // the composite, so the user-facing result still works correctly:
+    // Rule 7 → "&amp;copy;" then Rule 2 sees no entities to decode.
+    // This test documents the intentional behavior.
+    expect(escapeAttributeValueAmpersands('<a title="&copy;">')).toBe('<a title="&amp;copy;">');
+  });
+
+  test("escapes multiple unescaped & characters", () => {
+    expect(escapeAttributeValueAmpersands('<a href="?a=1&b=2&c=3">')).toBe(
+      '<a href="?a=1&amp;b=2&amp;c=3">',
+    );
+  });
+
+  test("preserves attribute values without &", () => {
+    expect(escapeAttributeValueAmpersands('<a href="page.html">')).toBe('<a href="page.html">');
+  });
+
+  test("does not touch text content & characters", () => {
+    expect(escapeAttributeValueAmpersands("<p>A & B & C</p>")).toBe("<p>A & B & C</p>");
+  });
+
+  test("processes multiple tags in one input", () => {
+    expect(escapeAttributeValueAmpersands('<a href="?a=1&b=2"><img src="?x=1&y=2"></a>')).toBe(
+      '<a href="?a=1&amp;b=2"><img src="?x=1&amp;y=2"></a>',
+    );
+  });
+
+  test("preserves attributes with no value", () => {
+    expect(escapeAttributeValueAmpersands("<input checked>")).toBe("<input checked>");
+  });
+
+  test("handles mix of escaped and unescaped & in same value", () => {
+    expect(escapeAttributeValueAmpersands('<a href="?a=1&amp;b=2&c=3">')).toBe(
+      '<a href="?a=1&amp;b=2&amp;c=3">',
+    );
+  });
+
+  test("real-world example: docs-site link with query string", () => {
+    const input = '<a href="https://example.com/search?q=odf&type=tools">link</a>';
+    const expected = '<a href="https://example.com/search?q=odf&amp;type=tools">link</a>';
+    expect(escapeAttributeValueAmpersands(input)).toBe(expected);
+  });
+
+  test("is idempotent", () => {
+    const input = '<a href="?a=1&b=2&amp;c=3">';
+    const once = escapeAttributeValueAmpersands(input);
+    const twice = escapeAttributeValueAmpersands(once);
+    expect(twice).toBe(once);
+  });
+});
+
+describe("quoteUnquotedAttributeValues (Rule 6)", () => {
+  test("quotes a single unquoted value", () => {
+    expect(quoteUnquotedAttributeValues("<a href=page.html>")).toBe('<a href="page.html">');
+  });
+
+  test("quotes multiple unquoted values", () => {
+    expect(quoteUnquotedAttributeValues("<input type=text class=primary>")).toBe(
+      '<input type="text" class="primary">',
+    );
+  });
+
+  test("preserves double-quoted values", () => {
+    expect(quoteUnquotedAttributeValues('<a href="page.html" target="_blank">')).toBe(
+      '<a href="page.html" target="_blank">',
+    );
+  });
+
+  test("preserves single-quoted values", () => {
+    expect(quoteUnquotedAttributeValues("<a href='page.html'>")).toBe("<a href='page.html'>");
+  });
+
+  test("handles mix of quoted and unquoted values", () => {
+    expect(quoteUnquotedAttributeValues('<input type=text class="primary" id=main>')).toBe(
+      '<input type="text" class="primary" id="main">',
+    );
+  });
+
+  test("does not touch boolean attributes (no =)", () => {
+    expect(quoteUnquotedAttributeValues("<input checked>")).toBe("<input checked>");
+  });
+
+  test("handles unquoted values mixed with boolean attributes", () => {
+    expect(quoteUnquotedAttributeValues("<input type=text required>")).toBe(
+      '<input type="text" required>',
+    );
+  });
+
+  test("handles numeric unquoted values", () => {
+    expect(quoteUnquotedAttributeValues("<div data-id=42>")).toBe('<div data-id="42">');
+  });
+
+  test("handles unquoted values with hyphens and dots", () => {
+    expect(quoteUnquotedAttributeValues("<a href=https://example.com/x.html>")).toBe(
+      '<a href="https://example.com/x.html">',
+    );
+  });
+
+  test("preserves self-closing tags", () => {
+    expect(quoteUnquotedAttributeValues("<br/>")).toBe("<br/>");
+    expect(quoteUnquotedAttributeValues("<img src=x.png />")).toBe('<img src="x.png" />');
+  });
+
+  test("does not touch tags with no attributes", () => {
+    expect(quoteUnquotedAttributeValues("<p>")).toBe("<p>");
+    expect(quoteUnquotedAttributeValues("<div>")).toBe("<div>");
+  });
+
+  test("does not touch closing tags", () => {
+    expect(quoteUnquotedAttributeValues("</p>")).toBe("</p>");
+  });
+
+  test("does not touch text outside tags", () => {
+    expect(quoteUnquotedAttributeValues("text only")).toBe("text only");
+  });
+
+  test("real-world example: legacy form input", () => {
+    const input = "<input type=text name=email maxlength=255 required>";
+    const expected = '<input type="text" name="email" maxlength="255" required>';
+    expect(quoteUnquotedAttributeValues(input)).toBe(expected);
+  });
+
+  test("is idempotent", () => {
+    const input = "<input type=text class=primary id=main>";
+    const once = quoteUnquotedAttributeValues(input);
+    const twice = quoteUnquotedAttributeValues(once);
+    expect(twice).toBe(once);
   });
 });

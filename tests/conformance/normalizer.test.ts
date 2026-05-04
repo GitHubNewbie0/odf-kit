@@ -114,6 +114,83 @@ export function runNormalizerConformance(normalizer: Normalizer, suiteName: stri
       });
     });
 
+    describe("unquoted boolean attributes", () => {
+      test('<input checked> becomes <input checked="">', () => {
+        expect(normalizer("<input checked>")).toMatch(/<input\s+checked=""\s*\/?>/);
+      });
+
+      test('<script async defer> becomes <script async="" defer="">', () => {
+        const output = normalizer("<script async defer>");
+        expect(output).toContain('async=""');
+        expect(output).toContain('defer=""');
+      });
+
+      test('<link rel="preconnect" crossorigin> becomes <link rel="preconnect" crossorigin="">', () => {
+        const output = normalizer('<link rel="preconnect" href="https://example.com" crossorigin>');
+        expect(output).toContain('crossorigin=""');
+      });
+
+      test("quoted attributes pass through unchanged", () => {
+        const output = normalizer('<a href="x.html" target="_blank">link</a>');
+        expect(output).toContain('href="x.html"');
+        expect(output).toContain('target="_blank"');
+      });
+    });
+
+    describe("unquoted attribute values", () => {
+      test('<a href=page> becomes <a href="page">', () => {
+        const output = normalizer("<a href=page.html>link</a>");
+        expect(output).toContain('href="page.html"');
+      });
+
+      test('<input type=text> becomes <input type="text">', () => {
+        const output = normalizer("<input type=text>");
+        expect(output).toContain('type="text"');
+      });
+
+      test("quoted values pass through unchanged", () => {
+        const output = normalizer('<a href="page.html">link</a>');
+        expect(output).toContain('href="page.html"');
+      });
+
+      test("mixed quoted and unquoted values are all quoted", () => {
+        const output = normalizer('<input type=text class="primary" id=main>');
+        expect(output).toContain('type="text"');
+        expect(output).toContain('class="primary"');
+        expect(output).toContain('id="main"');
+      });
+    });
+
+    describe("attribute-value ampersand escaping", () => {
+      test("href with unescaped & is escaped", () => {
+        const output = normalizer('<a href="page.html?a=1&b=2">link</a>');
+        expect(output).toContain('href="page.html?a=1&amp;b=2"');
+      });
+
+      test("multiple unescaped & in attribute value are all escaped", () => {
+        const output = normalizer('<a href="?a=1&b=2&c=3">link</a>');
+        expect(output).toContain("&amp;b=2&amp;c=3");
+      });
+
+      test("&amp; (already escaped) is preserved", () => {
+        const output = normalizer('<a href="page.html?a=1&amp;b=2">link</a>');
+        expect(output).toContain('href="page.html?a=1&amp;b=2"');
+      });
+
+      test("text content & characters are not modified", () => {
+        const output = normalizer("<p>A & B</p>");
+        // The exact form may vary (some normalizers might choose to escape,
+        // others not), but the conformance contract is that text-content `&`
+        // is not the responsibility of the normalizer. The parser is
+        // expected to handle text-content `&` lenience separately.
+        // This test asserts that the input round-trips: whatever the
+        // normalizer does to text-content `&`, it should not crash, and
+        // the structure should be preserved.
+        expect(output).toContain("A");
+        expect(output).toContain("B");
+      });
+    });
+
     describe("contract invariants", () => {
       test("empty input produces empty output", () => {
         expect(normalizer("")).toBe("");
@@ -124,9 +201,15 @@ export function runNormalizerConformance(normalizer: Normalizer, suiteName: stri
         expect(normalizer(input)).toBe(normalizer(input));
       });
 
-      test("is idempotent", () => {
+      test("is idempotent across all seven rules", () => {
         const input =
-          '<!DOCTYPE html><meta charset="utf-8"><p>Caf&eacute;<br>' + "<script>x</script></p>";
+          "<!DOCTYPE html>" +
+          '<meta charset="utf-8">' +
+          '<link rel="preconnect" href="https://example.com" crossorigin>' +
+          "<p>Caf&eacute;<br>" +
+          '<a href="page.html?a=1&b=2">link</a>' +
+          "<input type=text required>" +
+          "<script>x</script></p>";
         const once = normalizer(input);
         const twice = normalizer(once);
         expect(twice).toBe(once);

@@ -22,46 +22,6 @@ const PAGE_FORMATS: Record<string, PageFormatSpec> = {
 // ─── Options ──────────────────────────────────────────────────────────
 
 /**
- * Options for {@link htmlToOdt}.
- *
- * All fields are optional. Defaults: A4 page format, portrait orientation,
- * 2.5cm margins.
- *
- * @example
- * // European government default
- * await htmlToOdt(html);
- *
- * @example
- * // US letter with 1-inch margins
- * await htmlToOdt(html, { pageFormat: "letter" });
- *
- * @example
- * // Landscape A4 with custom top/bottom margins
- * await htmlToOdt(html, {
- *   pageFormat: "A4",
- *   orientation: "landscape",
- *   marginTop: "1.5cm",
- *   marginBottom: "1.5cm",
- * });
- *
- * @example
- * // Pre-fetched images (e.g. from odf-kit-service via WebDAV)
- * await htmlToOdt(html, {
- *   images: {
- *     "https://example.com/logo.png": pngBytes,
- *   },
- * });
- *
- * @example
- * // Fetch images on demand (Node.js or browser)
- * await htmlToOdt(html, {
- *   fetchImage: async (src) => {
- *     const res = await fetch(src);
- *     return new Uint8Array(await res.arrayBuffer());
- *   },
- * });
- */
-/**
  * Base options shared across ODT-producing functions.
  *
  * `OdtBaseOptions` covers concerns that apply to every ODT output
@@ -216,12 +176,15 @@ export interface HtmlToOdtOptions extends OdtBaseOptions {
    * - `false`: skips normalization. Use when input is already polyglot/XHTML.
    * - A custom function: substitute your own normalizer.
    *
-   * The default normalizer applies four spec-grounded transformations to
+   * The default normalizer applies seven spec-grounded transformations to
    * convert good HTML5 into polyglot markup:
-   *   1. Self-close 14 HTML5 void elements
-   *   2. Decode HTML5 named entities to Unicode
-   *   3. Empty <script> and <style> content
-   *   4. Lowercase the doctype declaration
+   *   1. Empty <script> and <style> content
+   *   2. Lowercase the doctype declaration
+   *   3. Quote unquoted boolean attributes (`<input checked>` → `<input checked="">`)
+   *   4. Quote unquoted attribute values (`<a href=foo>` → `<a href="foo">`)
+   *   5. Self-close 14 HTML5 void elements
+   *   6. Decode HTML5 named entities to Unicode
+   *   7. Escape lone `&` in attribute values (`href="?a=1&b=2"` → `href="?a=1&amp;b=2"`)
    *
    * See ADAPTERS.md ("Skip Semantics") for why normalization can be
    * skipped but parsing cannot.
@@ -266,8 +229,9 @@ export interface HtmlToOdtOptions extends OdtBaseOptions {
  * for the substitution architecture.
  *
  * The underlying parser fails loudly on malformed input — unclosed tags,
- * mismatched tags, unescaped `&` in attribute values. This is the intended
- * fix for inputs that previously produced silent wrong output.
+ * mismatched tags, and any malformed-attribute patterns the normalizer
+ * didn't cover. This is the intended fix for inputs that previously
+ * produced silent wrong output.
  *
  * This is the missing conversion direction: the entire industry converts
  * ODT→HTML for web display. `htmlToOdt` brings content back into the open

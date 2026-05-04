@@ -577,13 +577,23 @@ const bytes = await htmlToOdt(html, { pageFormat: "letter" }); // US letter
 
 ### Supported HTML elements
 
-**Block:** `<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>` (nested), `<table>` / `<tr>` / `<td>` / `<th>`, `<blockquote>`, `<pre>`, `<hr>`, `<figure>` / `<figcaption>`, `<div>` / `<section>` (transparent).
+**Block:** `<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>` (nested), `<table>` / `<tr>` / `<td>` / `<th>`, `<blockquote>`, `<pre>`, `<hr>`, `<figure>` / `<figcaption>` (transparent), `<div>` / `<section>` (transparent).
 
 **Inline:** `<strong>`, `<em>`, `<u>`, `<s>`, `<sup>`, `<sub>`, `<a href>`, `<code>`, `<mark>`, `<span style="">`, `<br>`.
 
 ### Input contract
 
-`htmlToOdt()` accepts good HTML5 — the kind produced by Markdown renderers, rich-text editors, templating engines, and modern content management systems. Input is normalized to polyglot markup before parsing. The default normalizer applies four spec-grounded text transformations: self-closes 14 HTML5 void elements, decodes HTML5 named entities to Unicode, empties `<script>` and `<style>` content, and lowercases the doctype declaration. After normalization, the input is valid XHTML and parses correctly.
+`htmlToOdt()` accepts good HTML5 — the kind produced by Markdown renderers, rich-text editors, templating engines, and modern content management systems. Input is normalized to polyglot markup before parsing. The default normalizer applies seven spec-grounded text transformations:
+
+1. Empties `<script>` and `<style>` content
+2. Lowercases the doctype declaration
+3. Quotes unquoted boolean attributes (`<input checked>` → `<input checked="">`)
+4. Quotes unquoted attribute values (`<a href=foo>` → `<a href="foo">`)
+5. Self-closes 14 HTML5 void elements
+6. Decodes ~2,120 HTML5 named entities to Unicode
+7. Escapes lone `&` in attribute values (`href="?a=1&b=2"` → `href="?a=1&amp;b=2"`)
+
+After normalization, the input is valid XHTML and parses correctly.
 
 If your input is already polyglot or XHTML, you can skip normalization:
 
@@ -591,7 +601,7 @@ If your input is already polyglot or XHTML, you can skip normalization:
 const bytes = await htmlToOdt(html, { normalizer: false });
 ```
 
-The underlying parser fails loudly on malformed input — unclosed tags, mismatched tags, unescaped `&` in attribute values. Code that worked before continues to work; inputs that were silently producing wrong output now raise explicit errors.
+The underlying parser fails loudly on malformed input — unclosed tags, mismatched tags, and any malformed-attribute patterns the normalizer didn't cover. Code that worked before continues to work; inputs that were silently producing wrong output now raise explicit errors.
 
 ### Substitution architecture
 
@@ -1030,7 +1040,7 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Version history
 
-**v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture for normalizer and parser. Default Tier 1 normalization (self-close void elements, decode HTML5 named entities, empty raw text, lowercase doctype). `parseXml` now fails loudly on malformed input. New `odfKitNormalizer`, `odfKitParser`, and public types `ParsedHtmlTree`, `Parser`, `Normalizer`. Substitution hooks propagate to `markdownToOdt()`. New sub-export `odf-kit/html-normalizer`. See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md). 1252 tests passing.
+**v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture for normalizer and parser. Default Tier 1 normalization applies seven spec-grounded transformations: empties script/style content, lowercases doctype, quotes unquoted boolean attributes, quotes unquoted attribute values, self-closes void elements, decodes named entities, escapes `&` in attribute values. `parseXml` now fails loudly on malformed input. New `odfKitNormalizer`, `odfKitParser`, and public types `ParsedHtmlTree`, `Parser`, `Normalizer`. Substitution hooks propagate to `markdownToOdt()`. New sub-export `odf-kit/html-normalizer`. See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md). 1307 tests passing.
 
 **v0.13.1** — `odtToMarkdown()` `embedImages` option for self-contained Markdown output. 1124 tests passing.
 

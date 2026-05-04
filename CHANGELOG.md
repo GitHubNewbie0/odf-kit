@@ -9,27 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **HTML5 normalizer for `htmlToOdt()`** — `htmlToOdt()`, `markdownToOdt()`, and the underlying `parseHtml()` now run input through a Tier 1 normalizer before parsing. The normalizer applies four spec-grounded text transformations: self-closes 14 HTML5 void elements, decodes ~2,120 HTML5 named entities to Unicode, empties `<script>` and `<style>` content, and lowercases the doctype declaration. Good HTML5 input that previously produced silent empty output now converts correctly. Default behaviour for editor-generated polyglot HTML is unchanged — the normalizer is idempotent on already-polyglot input.
+- **HTML5 normalizer for `htmlToOdt()`** — `htmlToOdt()`, `markdownToOdt()`, and the underlying `parseHtml()` now run input through a Tier 1 normalizer before parsing. The normalizer applies seven spec-grounded text transformations: empties `<script>` and `<style>` content; lowercases the doctype declaration; quotes unquoted boolean attributes (e.g. `<input checked>` → `<input checked="">`); quotes unquoted attribute values (e.g. `<a href=foo>` → `<a href="foo">`); self-closes 14 HTML5 void elements; decodes ~2,120 HTML5 named entities to Unicode; and escapes lone `&` in attribute values (e.g. `href="?a=1&b=2"` → `href="?a=1&amp;b=2"`). Good HTML5 input that previously produced silent empty output now converts correctly. Default behaviour for editor-generated polyglot HTML is unchanged — the normalizer is idempotent on already-polyglot input.
 - **Substitution architecture** — `htmlToOdt()` and `markdownToOdt()` accept new `normalizer` and `parser` options. Pass `false` to skip normalization (when input is known polyglot/XHTML), or pass a custom function to substitute either stage. `tiptapToOdt()` does not expose these hooks because TipTap input is a JSON tree, not an HTML string. See `ADAPTERS.md` at the repo root for the architecture, naming conventions, and a worked parse5 adapter example.
-- **`odfKitNormalizer`** — the default normalizer, exported from the root and from the new `odf-kit/html-normalizer` sub-export. The four individual rules are also exported: `selfCloseVoidElements`, `decodeNamedEntities`, `emptyRawTextElements`, `lowercaseDoctype`.
+- **`odfKitNormalizer`** — the default normalizer, exported from the root and from the new `odf-kit/html-normalizer` sub-export. The seven individual rules are also exported: `selfCloseVoidElements`, `decodeNamedEntities`, `emptyRawTextElements`, `lowercaseDoctype`, `quoteUnquotedBooleanAttributes`, `quoteUnquotedAttributeValues`, `escapeAttributeValueAmpersands`.
 - **`odfKitParser`** — the default parser (a `Parser`-conforming wrapper around the existing `parseXml`), exported from the root.
 - **Public types** — `ParsedHtmlTree`, `Parser`, `Normalizer` exported from the root for adapter authors. `NormalizerOption` and `ParserOption` are available via the `odf-kit/types` path for symmetric architectural use.
 - **`OdtBaseOptions`** — base interface with shared fields (page format, orientation, margins, metadata, image resolution). `HtmlToOdtOptions` extends it and adds `normalizer` and `parser`. `TiptapToOdtOptions` extends `OdtBaseOptions` directly. No user-facing API change for code using the existing options.
 - **`odf-kit/html-normalizer`** sub-export added.
 - **`ADAPTERS.md`** at the repo root — documents the substitution architecture: philosophy, six naming conventions, the two-direction adapter principle, skip semantics, contract specifications, versioning promise, sibling-package design, and a complete worked parse5 adapter example.
-- 128 new tests (1252 total, 28 test suites).
+- 183 new tests (1307 total, 28 test suites).
 
 ### Changed
 
-- **`parseXml` now fails loudly on malformed input** — five tightenings: detects unclosed elements at end-of-input; rejects malformed attribute syntax (e.g. `<input checked>`, `<a href=foo>`); rejects unescaped `&` in attribute values not followed by a valid XML entity or numeric reference; rejects `]]>` in text content outside CDATA sections; rejects mismatched closing tags. Previous behaviour was silent wrong output. Code that worked in v0.13.1 continues to work in v0.13.2 — the new errors surface latent bugs in inputs that were producing incorrect output. Treat the new errors as bugs in your input that v0.13.2 makes visible.
+- **`parseXml` now fails loudly on malformed input** — five tightenings: detects unclosed elements at end-of-input; rejects malformed attribute syntax that the normalizer didn't cover; rejects unescaped `&` in attribute values not followed by a valid XML entity or numeric reference; rejects `]]>` in text content outside CDATA sections; rejects mismatched closing tags. Previous behaviour was silent wrong output. Code that worked in v0.13.1 continues to work in v0.13.2 — the new errors surface latent bugs in inputs that were producing incorrect output. Treat the new errors as bugs in your input that v0.13.2 makes visible.
 - **`package.json`** — `lexical` entry in `typesVersions` had a missing leading `./`; corrected.
 
 ### Migration
 
 No code changes required for typical users. Default behaviour is preserved for editor-generated and polyglot input, and existing options work unchanged. Three situations may warrant attention:
 
-- If your `htmlToOdt()` calls were silently producing empty or wrong output on hand-written HTML5, v0.13.2 fixes that automatically — the new normalizer handles void elements, named entities, and other HTML5-vs-XHTML differences before parsing.
-- If your input was triggering one of the five malformed-input cases above, you'll now see an explicit error. This is the intended behavior — the previous silent corruption is the bug being fixed.
+- If your `htmlToOdt()` calls were silently producing empty or wrong output on hand-written HTML5, v0.13.2 fixes that automatically — the seven-rule normalizer handles void elements, named entities, boolean attributes, unquoted attribute values, ampersands in URLs, and other HTML5-vs-XHTML differences before parsing.
+- If your input was triggering one of the malformed-input cases above, you'll now see an explicit error. This is the intended behavior — the previous silent corruption is the bug being fixed.
 - If you were calling `tiptapToOdt()` with `normalizer` or `parser` in the options object, those properties were always ignored at runtime and are now compile-time errors. Remove them.
 
 ## [0.13.1] - 2026-04-22
@@ -355,4 +355,3 @@ Initial release. Complete ODT generation support.
 [0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.1.0
-

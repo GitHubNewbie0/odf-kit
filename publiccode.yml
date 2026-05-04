@@ -114,7 +114,7 @@ description:
       - Convert .ods to HTML table
       - Export .odt to Typst markup for PDF generation without LibreOffice
       - ODF 1.2+ compliant (ISO/IEC 26300) — validated in CI
-      - 1252 tests passing across 28 test suites
+      - 1307 tests passing across 28 test suites
       - Zero transitive runtime dependencies
       - Works in Node.js 22+ and browsers (client-side generation, no server required)
       - Apache 2.0 license
