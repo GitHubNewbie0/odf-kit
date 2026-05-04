@@ -15,6 +15,8 @@
  * Exported for unit testing and for use by the ODT parser.
  */
 
+import type { Parser } from "../types/public.js";
+
 /** An element node in the XML tree. */
 export interface XmlElementNode {
   type: "element";
@@ -75,14 +77,54 @@ function decodeEntities(raw: string): string {
  * @param raw - The portion of the tag string after the tag name.
  * @returns Map of attribute name to decoded value.
  */
-function parseAttributes(raw: string): Record<string, string> {
-  const attrs: Record<string, string> = {};
-  // Match both double-quoted (attr="val") and single-quoted (attr='val') values
-  const re = /([a-zA-Z_:][a-zA-Z0-9_:.-]*)=(?:"([^"]*)"|'([^']*)')/g;
-  let m;
-  while ((m = re.exec(raw)) !== null) {
-    attrs[m[1]] = decodeEntities(m[2] ?? m[3]);
+
+/**
+ * Tightening 3: scan an attribute value for unescaped `&`.
+ *
+ * XML §3.1 requires `&` in attribute values to introduce an entity
+ * reference. Unescaped `&` is invalid XML. Throws if a `&` is found that
+ * is not the start of one of the five XML predefined entities or a
+ * numeric character reference.
+ */
+function validateAttributeValueEntities(value: string, attrName: string, parentTag: string): void {
+  const validEntity = /&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9a-fA-F]+);/y;
+  let i = 0;
+  while ((i = value.indexOf("&", i)) !== -1) {
+    validEntity.lastIndex = i;
+    if (!validEntity.test(value)) {
+      throw new Error(
+        `parseXml: unescaped '&' in attribute value of <${parentTag} ${attrName}="${value}">`,
+      );
+    }
+    i = validEntity.lastIndex;
   }
+}
+
+function parseAttributes(raw: string, parentTag: string): Record<string, string> {
+  const attrs: Record<string, string> = {};
+  const re = /([a-zA-Z_:][a-zA-Z0-9_:.-]*)=(?:"([^"]*)"|'([^']*)')/y;
+  let i = 0;
+
+  while (i < raw.length) {
+    // Skip whitespace between attributes
+    while (i < raw.length && /\s/.test(raw[i])) i++;
+    if (i >= raw.length) break;
+
+    // Try to match an attribute at the current position
+    re.lastIndex = i;
+    const m = re.exec(raw);
+    if (m === null || m.index !== i) {
+      // Tightening 2: anything that isn't an attribute or whitespace is malformed.
+      const offending = raw.slice(i).trimEnd();
+      throw new Error(`parseXml: malformed attribute syntax in <${parentTag}>: '${offending}'`);
+    }
+    const attrName = m[1];
+    const attrValue = m[2] ?? m[3];
+    validateAttributeValueEntities(attrValue, attrName, parentTag);
+    attrs[attrName] = decodeEntities(attrValue);
+    i += m[0].length;
+  }
+
   return attrs;
 }
 
@@ -111,8 +153,16 @@ export function parseXml(xml: string): XmlElementNode {
       const end = src.indexOf("<", i);
       const raw = end === -1 ? src.slice(i) : src.slice(i, end);
       i = end === -1 ? src.length : end;
+      // Tightening 4: ']]>' is the CDATA terminator and is invalid in
+      // text content outside CDATA sections.
+      if (raw.includes("]]>")) {
+        throw new Error("parseXml: ']]>' outside CDATA section");
+      }
       if (raw.length > 0 && stack.length > 0) {
-        stack[stack.length - 1].children.push({ type: "text", text: decodeEntities(raw) });
+        stack[stack.length - 1].children.push({
+          type: "text",
+          text: decodeEntities(raw),
+        });
       }
       continue;
     }
@@ -165,6 +215,16 @@ export function parseXml(xml: string): XmlElementNode {
 
     // Close tag: </tag>
     if (inner.startsWith("/")) {
+      const closeTag = inner.slice(1).trim();
+      // Tightening 5a: closing tag with no open elements.
+      if (stack.length === 0) {
+        throw new Error(`parseXml: closing tag </${closeTag}> with no matching open tag`);
+      }
+      // Tightening 5b: closing tag must match top of stack.
+      const top = stack[stack.length - 1];
+      if (top.tag !== closeTag) {
+        throw new Error(`parseXml: mismatched closing tag </${closeTag}>; expected </${top.tag}>`);
+      }
       stack.pop();
       continue;
     }
@@ -174,7 +234,7 @@ export function parseXml(xml: string): XmlElementNode {
       const body = inner.slice(0, -1).trimEnd();
       const space = body.search(/\s/);
       const tag = space === -1 ? body : body.slice(0, space);
-      const attrs = space === -1 ? {} : parseAttributes(body.slice(space + 1));
+      const attrs = space === -1 ? {} : parseAttributes(body.slice(space + 1), tag);
       const node: XmlElementNode = { type: "element", tag, attrs, children: [] };
       if (stack.length > 0) {
         stack[stack.length - 1].children.push(node);
@@ -187,7 +247,7 @@ export function parseXml(xml: string): XmlElementNode {
     // Open tag: <tag attrs>
     const space = inner.search(/\s/);
     const tag = space === -1 ? inner : inner.slice(0, space);
-    const attrs = space === -1 ? {} : parseAttributes(inner.slice(space + 1));
+    const attrs = space === -1 ? {} : parseAttributes(inner.slice(space + 1), tag);
     const node: XmlElementNode = { type: "element", tag, attrs, children: [] };
 
     if (stack.length > 0) {
@@ -200,5 +260,23 @@ export function parseXml(xml: string): XmlElementNode {
   }
 
   if (!root) throw new Error("parseXml: no root element found");
+
+  // Tightening 1: detect unclosed elements at end-of-input.
+  // Well-formed input has an empty stack at this point. Anything left
+  // means an opening tag was never closed.
+  if (stack.length > 0) {
+    const tags = stack.map((n) => `<${n.tag}>`).join(", ");
+    throw new Error(`parseXml: unclosed elements: ${tags}`);
+  }
+
   return root;
 }
+
+/**
+ * The odf-kit default parser. Exposes parseXml as a function conforming to
+ * the public Parser contract type, suitable for use as the default value
+ * of the `parser` option in htmlToOdt and related APIs.
+ *
+ * For substituting alternative parsers (e.g. parse5), see ADAPTERS.md.
+ */
+export const odfKitParser: Parser = (xml) => parseXml(xml);

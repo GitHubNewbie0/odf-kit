@@ -346,3 +346,125 @@ describe("parseXml — > in attribute values", () => {
     expect(node.attrs["fo:condition"]).toBe("x>0");
   });
 });
+
+describe("Tightening 1: unclosed elements", () => {
+  test("throws on a single unclosed element", () => {
+    expect(() => parseXml("<a>")).toThrow(/unclosed elements: <a>/);
+  });
+
+  test("throws on multiple unclosed elements", () => {
+    expect(() => parseXml("<a><b><c>")).toThrow(/unclosed elements: <a>, <b>, <c>/);
+  });
+
+  test("accepts properly-closed elements", () => {
+    expect(() => parseXml("<a></a>")).not.toThrow();
+    expect(() => parseXml("<a><b></b></a>")).not.toThrow();
+  });
+
+  test("accepts self-closing elements", () => {
+    expect(() => parseXml("<a/>")).not.toThrow();
+    expect(() => parseXml("<a><b/></a>")).not.toThrow();
+  });
+});
+
+describe("Tightening 2: malformed attribute syntax", () => {
+  test("throws on unquoted boolean attribute", () => {
+    expect(() => parseXml("<input checked />")).toThrow(/malformed attribute syntax in <input>/);
+  });
+
+  test("throws on unquoted attribute value", () => {
+    expect(() => parseXml("<a href=foo></a>")).toThrow(/malformed attribute syntax in <a>/);
+  });
+
+  test("throws on illegal character in attribute name", () => {
+    expect(() => parseXml('<x on*click="foo"></x>')).toThrow(/malformed attribute syntax in <x>/);
+  });
+
+  test("accepts properly-formed double-quoted attributes", () => {
+    expect(() => parseXml('<a href="x.html" target="_blank"></a>')).not.toThrow();
+  });
+
+  test("accepts properly-formed single-quoted attributes", () => {
+    expect(() => parseXml("<a href='x.html'></a>")).not.toThrow();
+  });
+
+  test("accepts namespaced attribute names", () => {
+    expect(() => parseXml('<text:p text:style-name="P1"></text:p>')).not.toThrow();
+  });
+
+  test("accepts attributes with extra whitespace", () => {
+    expect(() => parseXml('<a   href="x"   target="y"  ></a>')).not.toThrow();
+  });
+});
+
+describe("Tightening 3: unescaped & in attribute values", () => {
+  test("throws on unescaped & in attribute value", () => {
+    expect(() => parseXml('<a href="x?a=1&b=2"></a>')).toThrow(
+      /unescaped '&' in attribute value of <a href="x\?a=1&b=2">/,
+    );
+  });
+
+  test("accepts &amp; in attribute value", () => {
+    expect(() => parseXml('<a href="x?a=1&amp;b=2"></a>')).not.toThrow();
+  });
+
+  test("accepts &lt; and &gt; in attribute value", () => {
+    expect(() => parseXml('<a title="&lt;tag&gt;"></a>')).not.toThrow();
+  });
+
+  test("accepts numeric character references", () => {
+    expect(() => parseXml('<a title="&#160;"></a>')).not.toThrow();
+    expect(() => parseXml('<a title="&#xA0;"></a>')).not.toThrow();
+  });
+
+  test("accepts attribute values with no &", () => {
+    expect(() => parseXml('<a href="x.html"></a>')).not.toThrow();
+  });
+
+  test("throws on & followed by invalid entity name", () => {
+    expect(() => parseXml('<a href="&copy;"></a>')).toThrow(/unescaped '&'/);
+  });
+});
+
+describe("Tightening 4: ']]>' outside CDATA", () => {
+  test("throws on ]]> in text content", () => {
+    expect(() => parseXml("<a>text]]>more</a>")).toThrow(/'\]\]>' outside CDATA section/);
+  });
+
+  test("accepts ]]> inside CDATA section", () => {
+    // The ]]> here is the CDATA terminator, not a literal ]]>.
+    expect(() => parseXml("<a><![CDATA[contents]]></a>")).not.toThrow();
+  });
+
+  test("accepts ]] (without >) in text content", () => {
+    expect(() => parseXml("<a>text]]more</a>")).not.toThrow();
+  });
+
+  test("accepts ]> in text content", () => {
+    expect(() => parseXml("<a>text]>more</a>")).not.toThrow();
+  });
+});
+
+describe("Tightening 5: mismatched closing tags", () => {
+  test("throws on closing tag that doesn't match top of stack", () => {
+    expect(() => parseXml("<a><b></a></b>")).toThrow(
+      /mismatched closing tag <\/a>; expected <\/b>/,
+    );
+  });
+
+  test("throws on closing tag with no matching open", () => {
+    expect(() => parseXml("<a></a></b>")).toThrow(/closing tag <\/b> with no matching open tag/);
+  });
+
+  test("throws on closing tag at start of input", () => {
+    expect(() => parseXml("</a>")).toThrow(/closing tag <\/a> with no matching open tag/);
+  });
+
+  test("accepts properly-nested elements", () => {
+    expect(() => parseXml("<a><b><c></c></b></a>")).not.toThrow();
+  });
+
+  test("accepts whitespace in closing tag", () => {
+    expect(() => parseXml("<a></a >")).not.toThrow();
+  });
+});
