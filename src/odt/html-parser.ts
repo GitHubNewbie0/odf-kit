@@ -21,8 +21,10 @@
  * if no resolution method is available or returns undefined.
  */
 
-import { parseXml } from "../reader/xml-parser.js";
+import { odfKitParser } from "../reader/xml-parser.js";
 import type { XmlElementNode, XmlNode } from "../reader/xml-parser.js";
+import { odfKitNormalizer } from "../html-normalizer/index.js";
+import type { Normalizer, Parser } from "../types/public.js";
 import type { OdtDocument } from "./document.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 import { ListBuilder } from "./list-builder.js";
@@ -113,16 +115,45 @@ interface ImageContext {
  * @param images     - Pre-fetched image bytes keyed by src URL.
  * @param fetchImage - Async callback to fetch image bytes on demand.
  */
+/**
+ * Substitution hooks for the normalize → parse → walk pipeline.
+ *
+ * Used by parseHtml internally and threaded from htmlToOdt's options. See
+ * ADAPTERS.md for the substitution architecture and skip semantics.
+ */
+export interface ParseHooks {
+  /**
+   * Normalizer to apply before parsing. Defaults to odfKitNormalizer.
+   * Pass `false` to skip normalization (input must already be polyglot).
+   */
+  normalizer?: Normalizer | false;
+  /**
+   * Parser to use. Defaults to odfKitParser. Cannot be skipped — the
+   * walker requires a tree, not a string.
+   */
+  parser?: Parser;
+}
+
 export async function parseHtml(
   html: string,
   doc: OdtDocument,
   images?: Record<string, Uint8Array>,
   fetchImage?: (src: string) => Promise<Uint8Array | undefined>,
+  hooks?: ParseHooks,
 ): Promise<void> {
   const ctx: ImageContext = { images, fetchImage };
+
+  // Resolve substitution hooks. Defaults: odf-kit's built-in normalizer
+  // and parser. See ADAPTERS.md for the architecture rationale.
+  const normalizer = hooks?.normalizer === false ? null : (hooks?.normalizer ?? odfKitNormalizer);
+  const parser = hooks?.parser ?? odfKitParser;
+
   // Wrap in a div to guarantee a single XML root for fragment HTML.
   // Full-document HTML is handled transparently since <html>/<body> recurse.
-  const root = parseXml(`<div>${html}</div>`);
+  const wrapped = `<div>${html}</div>`;
+  const normalized = normalizer ? normalizer(wrapped) : wrapped;
+  const root = parser(normalized);
+
   await walkBlockChildren(root.children, doc, ctx);
 }
 

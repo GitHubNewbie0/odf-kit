@@ -29,6 +29,33 @@ configuration as a one-install replacement for `odf-kit`.
 Future stages will be added to this table as substitution hooks are
 introduced. The naming and structural conventions below apply uniformly.
 
+## Skip Semantics
+
+Some stages can be skipped entirely (passing `false` as the option value).
+Others can be substituted but not skipped. The rule is straightforward: a
+stage can be skipped if and only if its output shape matches the next
+stage's expected input shape.
+
+| Stage | Input | Output | Skippable? |
+|-------|-------|--------|-----------|
+| Normalizer | string | string | ✅ Yes — pass `normalizer: false` |
+| Parser | string | tree | ❌ No — the walker needs a tree, not a string |
+
+Skipping the normalizer is meaningful when the user knows their input is
+already polyglot/XHTML and Tier 1 normalization would be a no-op. The
+next stage (the parser) still gets a string, so the chain proceeds.
+
+Skipping the parser would leave the next stage (the walker) with a string
+instead of a tree — there is no coherent way to proceed. Users substituting
+a parser must always supply one; the type system enforces this by declaring
+`parser?: Parser` (without `| false`) on `HtmlToOdtOptions`.
+
+**General rule for future stages:** when adding a substitutable stage,
+decide whether `false` is a valid option by asking — *does the next stage's
+expected input shape match this stage's expected output shape if the stage
+is skipped?* If yes, allow `false`. If no, the option type omits `false`
+and the type system enforces the requirement.
+
 ## Naming Conventions
 
 Six categories of names need consistent rules. Future substitutable stages

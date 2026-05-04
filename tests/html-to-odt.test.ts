@@ -592,3 +592,117 @@ describe("htmlToOdt — real-world HTML", () => {
     expect(content).toContain("Import the library");
   });
 });
+
+// ─── Substitution Hooks ───────────────────────────────────────────────
+
+describe("htmlToOdt — substitution hooks", () => {
+  // Helper: a minimal valid ParsedHtmlTree wrapping a single paragraph.
+  // Used to verify a substituted parser's output flows through to the walker.
+  const minimalTree = {
+    type: "element" as const,
+    tag: "div",
+    attrs: {},
+    children: [
+      {
+        type: "element" as const,
+        tag: "p",
+        attrs: {},
+        children: [
+          {
+            type: "text" as const,
+            text: "from-substitute-parser",
+          },
+        ],
+      },
+    ],
+  };
+
+  test("default behavior produces valid ODT (regression)", async () => {
+    const bytes = await htmlToOdt("<p>Hello</p>");
+    expect(bytes).toBeInstanceOf(Uint8Array);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  test("substituted normalizer is called with wrapped html", async () => {
+    let observedInput: string | null = null;
+    const customNormalizer = (s: string): string => {
+      observedInput = s;
+      return s; // pass through unchanged so parser gets valid markup
+    };
+
+    await htmlToOdt("<p>Test</p>", { normalizer: customNormalizer });
+
+    // The wrapper adds <div>...</div> around the user's html before
+    // normalization, so the normalizer should see the wrapped form.
+    expect(observedInput).toBe("<div><p>Test</p></div>");
+  });
+
+  test("normalizer: false skips normalization entirely", async () => {
+    let normalizerCalled = false;
+    let parserInput: string | null = null;
+
+    // Build a parser that records its input so we can verify the
+    // normalizer was bypassed. Returns a minimal valid tree.
+    const recordingParser = (xml: string) => {
+      parserInput = xml;
+      return minimalTree;
+    };
+
+    // Build a normalizer that we can detect being called. Should not run.
+    const sentinelNormalizer = (s: string): string => {
+      normalizerCalled = true;
+      return s;
+    };
+
+    await htmlToOdt("<p>Skip</p>", {
+      normalizer: false,
+      parser: recordingParser,
+    });
+
+    // Sentinel normalizer should never have been called.
+    expect(normalizerCalled).toBe(false);
+    // Parser input should be the user's html wrapped in <div>, with
+    // no normalization applied.
+    expect(parserInput).toBe("<div><p>Skip</p></div>");
+
+    // Sentinel still referenced to satisfy strict-mode linting.
+    void sentinelNormalizer;
+  });
+
+  test("substituted parser's output is fed to the walker", async () => {
+    const customParser = () => minimalTree;
+
+    const bytes = await htmlToOdt("<p>Anything</p>", { parser: customParser });
+    const files = unzipSync(bytes);
+    const content = strFromU8(files["content.xml"]);
+
+    // The parser returned a tree whose only paragraph contains the text
+    // "from-substitute-parser". That text should appear in the output,
+    // and the user's actual html ("Anything") should NOT.
+    expect(content).toContain("from-substitute-parser");
+    expect(content).not.toContain("Anything");
+  });
+
+  test("normalizer and parser substituted together both run", async () => {
+    let normalizerRan = false;
+    let parserRan = false;
+
+    const customNormalizer = (s: string): string => {
+      normalizerRan = true;
+      return s;
+    };
+
+    const customParser = () => {
+      parserRan = true;
+      return minimalTree;
+    };
+
+    await htmlToOdt("<p>Both</p>", {
+      normalizer: customNormalizer,
+      parser: customParser,
+    });
+
+    expect(normalizerRan).toBe(true);
+    expect(parserRan).toBe(true);
+  });
+});

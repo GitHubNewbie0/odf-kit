@@ -1,6 +1,7 @@
 import { OdtDocument } from "./document.js";
 import { parseHtml } from "./html-parser.js";
 import type { PageLayout } from "./types.js";
+import type { Normalizer, Parser } from "../types/public.js";
 
 // ─── Page Format Presets ──────────────────────────────────────────────
 
@@ -145,6 +146,49 @@ export interface HtmlToOdtOptions {
    * });
    */
   fetchImage?: (src: string) => Promise<Uint8Array | undefined>;
+
+  /**
+   * Normalizer function applied to the HTML input before parsing.
+   *
+   * - Omitted or `undefined`: uses odfKitNormalizer (Tier 1 normalization).
+   *   This is what most users want.
+   * - `false`: skips normalization. Use when input is already polyglot/XHTML.
+   * - A custom function: substitute your own normalizer.
+   *
+   * The default normalizer applies four spec-grounded transformations to
+   * convert good HTML5 into polyglot markup:
+   *   1. Self-close 14 HTML5 void elements
+   *   2. Decode HTML5 named entities to Unicode
+   *   3. Empty <script> and <style> content
+   *   4. Lowercase the doctype declaration
+   *
+   * See ADAPTERS.md ("Skip Semantics") for why normalization can be
+   * skipped but parsing cannot.
+   */
+  normalizer?: Normalizer | false;
+
+  /**
+   * Parser function applied to the (optionally normalized) input.
+   *
+   * - Omitted or `undefined`: uses odfKitParser (the tightened built-in
+   *   XML parser). This is what most users want.
+   * - A custom function: substitute your own parser.
+   *
+   * Unlike `normalizer`, `parser` cannot be skipped. The next stage (the
+   * walker) requires a tree, not a string — there's no coherent meaning
+   * for "skip parsing." Always supply either the default or a substitute.
+   *
+   * Common substitution case: use parse5 for full HTML5 spec compliance.
+   * The fromParse5 adapter is not shipped in v0.13.2; users who need it
+   * can write a small adapter following the conventions in ADAPTERS.md:
+   *
+   *   import { fromParse5 } from "./from-parse5"; // user-written
+   *   import * as parse5 from "parse5";
+   *   await htmlToOdt(html, { parser: fromParse5(parse5.parse) });
+   *
+   * See ADAPTERS.md ("Skip Semantics") for the architectural rationale.
+   */
+  parser?: Parser;
 }
 
 // ─── Public API ───────────────────────────────────────────────────────
@@ -227,8 +271,12 @@ export async function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promi
 
   doc.setPageLayout(layout);
 
-  // Parse HTML and populate document
-  await parseHtml(html, doc, options?.images, options?.fetchImage);
+  // Parse HTML and populate document. Threads substitution hooks through
+  // to parseHtml so users can replace the normalizer or parser.
+  await parseHtml(html, doc, options?.images, options?.fetchImage, {
+    normalizer: options?.normalizer,
+    parser: options?.parser,
+  });
 
   return doc.save();
 }
