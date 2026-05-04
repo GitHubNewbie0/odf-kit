@@ -427,3 +427,48 @@ describe("tiptapToOdt", () => {
     expect(content).toContain("https://github.com/GitHubNewbie0/odf-kit");
   });
 });
+
+// ─── Substitution Hooks (Type-Level Enforcement) ──────────────────────
+
+describe("tiptapToOdt — substitution hooks not exposed", () => {
+  // The TipTap pathway walks a JSON tree directly. There is no HTML stage,
+  // so normalizer and parser substitution hooks do not apply. The type
+  // system enforces this by having TiptapToOdtOptions extend OdtBaseOptions
+  // (which lacks those hooks) rather than HtmlToOdtOptions (which has them).
+  //
+  // This test is informational: it confirms the runtime behavior is consistent
+  // with the type-level intent. A user who somehow bypassed the type checker
+  // (e.g. by using `as any`) would find the options ignored.
+
+  test("tiptapToOdt produces valid ODT regardless of substitution-shaped inputs", async () => {
+    const json = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Hello" }],
+        },
+      ],
+    };
+
+    // Force-cast to test that even if these options were somehow passed,
+    // they don't break tiptap's processing — the JSON walker ignores them.
+    const optionsWithBypassedTypes = {
+      normalizer: () => "should-not-be-called",
+      parser: () => ({ type: "element", tag: "p", attrs: {}, children: [] }),
+    } as Record<string, unknown>;
+
+    const bytes = await tiptapToOdt(
+      json as Parameters<typeof tiptapToOdt>[0],
+      optionsWithBypassedTypes as Parameters<typeof tiptapToOdt>[1],
+    );
+
+    expect(bytes).toBeInstanceOf(Uint8Array);
+    expect(bytes.length).toBeGreaterThan(0);
+
+    // The actual output should reflect the JSON input, not the (bypassed) parser.
+    const files = unzipSync(bytes);
+    const content = strFromU8(files["content.xml"]);
+    expect(content).toContain("Hello");
+  });
+});

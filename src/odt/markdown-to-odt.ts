@@ -7,7 +7,8 @@ import type { HtmlToOdtOptions } from "./html-to-odt.js";
  *
  * Internally converts Markdown → HTML via `marked`, then HTML → ODT
  * via {@link htmlToOdt}. All {@link HtmlToOdtOptions} apply — page format,
- * orientation, margins, and metadata.
+ * orientation, margins, metadata, and the substitution hooks (`normalizer`
+ * and `parser`) for users with custom HTML processing requirements.
  *
  * **Supported Markdown:** CommonMark spec — headings, paragraphs, bold,
  * italic, strikethrough, unordered and ordered lists, nested lists, tables,

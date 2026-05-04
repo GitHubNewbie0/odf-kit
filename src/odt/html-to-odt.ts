@@ -61,7 +61,21 @@ const PAGE_FORMATS: Record<string, PageFormatSpec> = {
  *   },
  * });
  */
-export interface HtmlToOdtOptions {
+/**
+ * Base options shared across ODT-producing functions.
+ *
+ * `OdtBaseOptions` covers concerns that apply to every ODT output
+ * pathway — page format, orientation, margins, metadata, and image
+ * resolution. It does not include input-specific concerns: HTML-stage
+ * substitution hooks (normalizer, parser) live on {@link HtmlToOdtOptions}
+ * because they only make sense when the input arrives as HTML and goes
+ * through the parse stage. Pathways that walk a structured tree
+ * directly — like `tiptapToOdt` over a TipTap JSON tree — do not have
+ * an HTML-stage and therefore do not expose those hooks.
+ *
+ * Extended by `HtmlToOdtOptions` and `TiptapToOdtOptions`.
+ */
+export interface OdtBaseOptions {
   /**
    * Page format preset. Determines page dimensions and default margins.
    * Individual margin overrides apply on top of the preset.
@@ -106,8 +120,8 @@ export interface HtmlToOdtOptions {
    * Pre-fetched image bytes keyed by `src` URL.
    *
    * Use this when you have already fetched image bytes before calling
-   * `htmlToOdt` — for example, in odf-kit-service where images can be
-   * retrieved from WebDAV before conversion.
+   * the conversion function — for example, in odf-kit-service where
+   * images can be retrieved from WebDAV before conversion.
    *
    * Base64 data URLs embedded directly in `src` attributes are always
    * decoded automatically and do not need to appear in this map.
@@ -146,7 +160,54 @@ export interface HtmlToOdtOptions {
    * });
    */
   fetchImage?: (src: string) => Promise<Uint8Array | undefined>;
+}
 
+/**
+ * Options for {@link htmlToOdt}.
+ *
+ * Extends {@link OdtBaseOptions} with HTML-stage substitution hooks
+ * (`normalizer`, `parser`) that apply when the input arrives as an HTML
+ * string and goes through the normalize → parse → walk pipeline.
+ *
+ * All `OdtBaseOptions` fields apply: page format, orientation, margins,
+ * metadata, image resolution. Defaults: A4 page format, portrait
+ * orientation, 2.5cm margins.
+ *
+ * @example
+ * // European government default
+ * await htmlToOdt(html);
+ *
+ * @example
+ * // US letter with 1-inch margins
+ * await htmlToOdt(html, { pageFormat: "letter" });
+ *
+ * @example
+ * // Landscape A4 with custom top/bottom margins
+ * await htmlToOdt(html, {
+ *   pageFormat: "A4",
+ *   orientation: "landscape",
+ *   marginTop: "1.5cm",
+ *   marginBottom: "1.5cm",
+ * });
+ *
+ * @example
+ * // Pre-fetched images (e.g. from odf-kit-service via WebDAV)
+ * await htmlToOdt(html, {
+ *   images: {
+ *     "https://example.com/logo.png": pngBytes,
+ *   },
+ * });
+ *
+ * @example
+ * // Fetch images on demand (Node.js or browser)
+ * await htmlToOdt(html, {
+ *   fetchImage: async (src) => {
+ *     const res = await fetch(src);
+ *     return new Uint8Array(await res.arrayBuffer());
+ *   },
+ * });
+ */
+export interface HtmlToOdtOptions extends OdtBaseOptions {
   /**
    * Normalizer function applied to the HTML input before parsing.
    *

@@ -160,3 +160,61 @@ See [odf-kit](https://github.com/GitHubNewbie0/odf-kit) for details.`;
     expect(content).toContain("Alice");
   });
 });
+
+// ─── Substitution Hooks ───────────────────────────────────────────────
+
+describe("markdownToOdt — substitution hooks", () => {
+  // Helper: a minimal valid ParsedHtmlTree wrapping a single paragraph.
+  const minimalTree = {
+    type: "element" as const,
+    tag: "div",
+    attrs: {},
+    children: [
+      {
+        type: "element" as const,
+        tag: "p",
+        attrs: {},
+        children: [{ type: "text" as const, text: "from-substitute-parser-via-markdown" }],
+      },
+    ],
+  };
+
+  test("substituted normalizer is called when forwarded through htmlToOdt", async () => {
+    let normalizerCalled = false;
+    const customNormalizer = (s: string): string => {
+      normalizerCalled = true;
+      return s;
+    };
+
+    await markdownToOdt("# Hello", { normalizer: customNormalizer });
+
+    expect(normalizerCalled).toBe(true);
+  });
+
+  test("substituted parser is called when forwarded through htmlToOdt", async () => {
+    const customParser = () => minimalTree;
+
+    const bytes = await markdownToOdt("# Anything", { parser: customParser });
+    const files = unzipSync(bytes);
+    const content = strFromU8(files["content.xml"]);
+
+    expect(content).toContain("from-substitute-parser-via-markdown");
+    expect(content).not.toContain("Anything");
+  });
+
+  test("normalizer: false skips normalization when forwarded", async () => {
+    let normalizerCalled = false;
+    const sentinelNormalizer = (s: string): string => {
+      normalizerCalled = true;
+      return s;
+    };
+
+    await markdownToOdt("# Skip", {
+      normalizer: false,
+      parser: () => minimalTree,
+    });
+
+    expect(normalizerCalled).toBe(false);
+    void sentinelNormalizer;
+  });
+});

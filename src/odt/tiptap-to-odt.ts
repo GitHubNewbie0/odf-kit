@@ -19,7 +19,7 @@
 import type { OdtDocument } from "./document.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 import { ListBuilder } from "./list-builder.js";
-import type { HtmlToOdtOptions } from "./html-to-odt.js";
+import type { OdtBaseOptions } from "./html-to-odt.js";
 import type { TextFormatting, TextRun, ParagraphOptions } from "./types.js";
 
 // ─── Public Types ─────────────────────────────────────────────────────
@@ -49,10 +49,18 @@ export interface TiptapMark {
 /**
  * Options for {@link tiptapToOdt}.
  *
- * Extends {@link HtmlToOdtOptions} — all page format, margin, orientation,
- * and metadata options apply.
+ * Extends {@link OdtBaseOptions} — page format, orientation, margins,
+ * metadata, and image resolution all apply.
+ *
+ * Note: `tiptapToOdt` does NOT accept the `normalizer` or `parser`
+ * substitution hooks from `HtmlToOdtOptions`. TipTap input is a JSON
+ * tree, not an HTML string, so there is no parse stage and no string
+ * to normalize. The TypeScript type system enforces this — attempting
+ * to pass `normalizer` or `parser` is a compile-time error.
+ *
+ * See ADAPTERS.md for the substitution architecture.
  */
-export interface TiptapToOdtOptions extends HtmlToOdtOptions {
+export interface TiptapToOdtOptions extends OdtBaseOptions {
   /**
    * Pre-fetched image bytes keyed by src URL.
    *
