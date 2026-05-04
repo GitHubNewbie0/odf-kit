@@ -8,6 +8,8 @@ export { ListBuilder } from "./odt/index.js";
 export { htmlToOdt } from "./odt/index.js";
 export { markdownToOdt } from "./odt/index.js";
 export { tiptapToOdt } from "./odt/index.js";
+export { odfKitNormalizer } from "./html-normalizer/index.js";
+export { odfKitParser } from "./reader/xml-parser.js";
 export type {
   ContentElement,
   TextFormatting,
@@ -25,6 +27,7 @@ export type {
   TiptapMark,
   TiptapToOdtOptions,
 } from "./odt/index.js";
+export type { ParsedHtmlTree, Parser, Normalizer } from "./types/public.js";
 export type { MetadataOptions } from "./core/index.js";
 export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
 export type { TemplateData } from "./template/index.js";

@@ -257,10 +257,17 @@ export interface HtmlToOdtOptions extends OdtBaseOptions {
 /**
  * Convert an HTML string to an ODT file.
  *
- * Parses the HTML using the odf-kit XML parser (editor-generated HTML from
- * Nextcloud Text, TipTap, ProseMirror, CKEditor, and Quill is well-formed
- * XHTML), maps elements to OdtDocument API calls, and returns the resulting
- * `.odt` file as a `Uint8Array`.
+ * Accepts good HTML5 — the kind produced by Markdown renderers, rich-text
+ * editors (Nextcloud Text, TipTap, ProseMirror, CKEditor, Quill), templating
+ * engines, and modern content management systems. Input is normalized to
+ * polyglot markup (Tier 1 normalization) before parsing. The default chain
+ * runs `odfKitNormalizer → odfKitParser → walker`; either stage can be
+ * substituted via the `normalizer` and `parser` options. See ADAPTERS.md
+ * for the substitution architecture.
+ *
+ * The underlying parser fails loudly on malformed input — unclosed tags,
+ * mismatched tags, unescaped `&` in attribute values. This is the intended
+ * fix for inputs that previously produced silent wrong output.
  *
  * This is the missing conversion direction: the entire industry converts
  * ODT→HTML for web display. `htmlToOdt` brings content back into the open
@@ -278,7 +285,8 @@ export interface HtmlToOdtOptions extends OdtBaseOptions {
  * @param html    - HTML string to convert. May be a full document
  *                  (`<html><body>...</body></html>`) or a fragment.
  * @param options - Optional page format, margins, orientation, metadata,
- *                  and image resolution.
+ *                  image resolution, and substitution hooks for normalizer
+ *                  and parser.
  * @returns Promise resolving to a valid `.odt` file as a `Uint8Array`.
  *
  * @example

@@ -206,6 +206,7 @@ import { odtToTypst, modelToTypst }          from "odf-kit/typst";
 import { docxToOdt }                         from "odf-kit/docx";
 import { odtToMarkdown, modelToMarkdown }    from "odf-kit/markdown";
 import { lexicalToOdt }                      from "odf-kit/lexical";
+import { odfKitNormalizer }                  from "odf-kit/html-normalizer";
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. Runtime dependencies: [fflate](https://github.com/101arrowz/fflate) for ZIP, [marked](https://marked.js.org/) for Markdown parsing.
@@ -580,6 +581,40 @@ const bytes = await htmlToOdt(html, { pageFormat: "letter" }); // US letter
 
 **Inline:** `<strong>`, `<em>`, `<u>`, `<s>`, `<sup>`, `<sub>`, `<a href>`, `<code>`, `<mark>`, `<span style="">`, `<br>`.
 
+### Input contract
+
+`htmlToOdt()` accepts good HTML5 — the kind produced by Markdown renderers, rich-text editors, templating engines, and modern content management systems. Input is normalized to polyglot markup before parsing. The default normalizer applies four spec-grounded text transformations: self-closes 14 HTML5 void elements, decodes HTML5 named entities to Unicode, empties `<script>` and `<style>` content, and lowercases the doctype declaration. After normalization, the input is valid XHTML and parses correctly.
+
+If your input is already polyglot or XHTML, you can skip normalization:
+
+```typescript
+const bytes = await htmlToOdt(html, { normalizer: false });
+```
+
+The underlying parser fails loudly on malformed input — unclosed tags, mismatched tags, unescaped `&` in attribute values. Code that worked before continues to work; inputs that were silently producing wrong output now raise explicit errors.
+
+### Substitution architecture
+
+For users with specific compliance or compatibility requirements, the normalizer and parser are individually substitutable:
+
+```typescript
+import { htmlToOdt } from "odf-kit";
+
+// Use parse5 for full HTML5 spec compliance — write a small adapter
+// (see ADAPTERS.md for conventions)
+htmlToOdt(html, { parser: fromParse5(parse5.parse) });
+
+// Skip normalization (input is already polyglot)
+htmlToOdt(html, { normalizer: false });
+
+// Substitute both
+htmlToOdt(html, { normalizer: myNormalizer, parser: myParser });
+```
+
+The substitution hooks also propagate to `markdownToOdt()`. They do not apply to `tiptapToOdt()` because TipTap input is a JSON tree, not an HTML string.
+
+See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md) for the substitution architecture, naming conventions, and a worked adapter example.
+
 ---
 
 ## Convert: Markdown to ODT
@@ -844,6 +879,12 @@ interface HtmlToOdtOptions {
   marginLeft?: string;
   marginRight?: string;
   metadata?: { title?: string; creator?: string; description?: string };
+  images?: Record<string, Uint8Array>;
+  fetchImage?: (src: string) => Promise<Uint8Array | undefined>;
+  normalizer?: Normalizer | false;  // omit for default (Tier 1 normalization);
+                                     // false to skip; or supply a custom function
+  parser?: Parser;                   // omit for default (odfKitParser);
+                                     // or supply a custom function
 }
 ```
 
@@ -988,6 +1029,13 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 ---
 
 ## Version history
+
+**v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture for normalizer and parser. Default Tier 1 normalization (self-close void elements, decode HTML5 named entities, empty raw text, lowercase doctype). `parseXml` now fails loudly on malformed input. New `odfKitNormalizer`, `odfKitParser`, and public types `ParsedHtmlTree`, `Parser`, `Normalizer`. Substitution hooks propagate to `markdownToOdt()`. New sub-export `odf-kit/html-normalizer`. See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md). 1252 tests passing.
+
+**v0.13.1** — `odtToMarkdown()` `embedImages` option for self-contained Markdown output. 1124 tests passing.
+
+**v0.13.0** — `htmlToOdt()` image support: base64 data URLs, `images` map, async `fetchImage` callback. 1120 tests passing.
+
 **v0.12.3** — ODT `settings.xml` added. 1113 tests passing.
 
 **v0.12.0** — `lexicalToOdt()` via `odf-kit/lexical`. Converts Lexical `SerializedEditorState` to ODT. `CellBuilder.addLink()`, `addLineBreak()`, `addImage()`. ODS freeze panes fixed. 1107 tests passing.

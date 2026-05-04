@@ -2,8 +2,8 @@ publiccodeYmlVersion: 0.5.0
 name: odf-kit
 url: https://github.com/GitHubNewbie0/odf-kit
 landingURL: https://githubnewbie0.github.io/odf-kit
-softwareVersion: 0.13.0
-releaseDate: 2026-04-20
+softwareVersion: 0.13.2
+releaseDate: 2026-MM-DD
 platforms:
   - web
 categories:
@@ -51,9 +51,14 @@ description:
       hyperlinks, bookmarks, footnotes and endnotes, headers and footers, page
       layout, and tracked changes. The HTML-to-ODT and Markdown-to-ODT
       converters support all common elements including tables, lists, inline
-      styles, and code blocks. The Lexical-to-ODT converter translates Lexical
-      editor state (SerializedEditorState) directly to ODT, making it suitable
-      for integration with Lexical-based editors such as Proton Docs.
+      styles, and code blocks. HTML input is automatically normalized to
+      polyglot markup before parsing, so good HTML5 from Markdown renderers,
+      rich-text editors, and templating engines converts correctly without
+      manual preprocessing. Compliance-sensitive users can substitute their
+      own normalizer or parser implementations through documented hooks. The
+      Lexical-to-ODT converter translates Lexical editor state
+      (SerializedEditorState) directly to ODT, making it suitable for
+      integration with Lexical-based editors such as Proton Docs.
 
       The ODS spreadsheet builder supports multiple sheets, auto-typed cells
       (string, number, date, boolean, formula), number formats (currency,
@@ -92,9 +97,12 @@ description:
       - Page layout with size, margins, orientation, and page breaks
       - Convert DOCX to ODT (pure ESM, browser-safe, zero extra dependencies)
       - Convert HTML to ODT with inline CSS support
+      - HTML5 normalizer for hand-written and editor-generated HTML
       - Convert Markdown to ODT (CommonMark + GFM tables)
       - Convert Lexical editor state (SerializedEditorState) to ODT
       - Convert TipTap/ProseMirror JSON to ODT
+      - Substitution architecture for custom normalizer and parser
+      - Public types and adapter conventions for third-party parsers (parse5, jsdom)
       - Generate ODS spreadsheets with multiple sheets and typed cells
       - ODS number formats: currency, percentage, decimal, integer
       - ODS freeze rows and columns, merged cells, tab colors
@@ -106,7 +114,7 @@ description:
       - Convert .ods to HTML table
       - Export .odt to Typst markup for PDF generation without LibreOffice
       - ODF 1.2+ compliant (ISO/IEC 26300) — validated in CI
-      - 1113 tests passing across 25 test suites
+      - 1252 tests passing across 28 test suites
       - Zero transitive runtime dependencies
       - Works in Node.js 22+ and browsers (client-side generation, no server required)
       - Apache 2.0 license
