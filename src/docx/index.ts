@@ -25,6 +25,7 @@
  *
  * @module
  */
+export { VERSION } from "../version.js";
 
 import { readDocx } from "./reader.js";
 import { convertDocxToOdt } from "./converter.js";

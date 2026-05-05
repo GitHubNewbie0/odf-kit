@@ -678,8 +678,8 @@ Get it from your editor with:
     </footer>
 
     <script type="module">
-      import { lexicalToOdt } from "https://esm.run/odf-kit@0.13.2/lexical";
-      import { odtToHtml } from "https://esm.run/odf-kit@0.13.2/reader";
+      import { lexicalToOdt, VERSION } from "https://esm.run/odf-kit@0.13.4/lexical";
+      import { odtToHtml } from "https://esm.run/odf-kit@0.13.4/reader";
 
       const jsonInput = document.getElementById("jsonInput");
       const previewFrame = document.getElementById("previewFrame");
@@ -799,7 +799,7 @@ Get it from your editor with:
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               tool,
-              version: "0.13.1",
+              version: VERSION,
               error: err && err.message ? err.message.slice(0, 500) : String(err).slice(0, 500),
               stack: err && err.stack ? err.stack.slice(0, 800) : "",
               engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ["unknown"])[0],

@@ -1,3 +1,4 @@
+export { VERSION } from "../version.js";
 export { OdsDocument } from "./document.js";
 export { OdsSheet } from "./sheet-builder.js";
 export type {

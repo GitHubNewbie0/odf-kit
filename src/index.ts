@@ -10,6 +10,7 @@ export { markdownToOdt } from "./odt/index.js";
 export { tiptapToOdt } from "./odt/index.js";
 export { odfKitNormalizer } from "./html-normalizer/index.js";
 export { odfKitParser } from "./reader/xml-parser.js";
+export { VERSION } from "./version.js";
 export type {
   ContentElement,
   TextFormatting,

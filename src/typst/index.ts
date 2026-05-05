@@ -21,6 +21,7 @@
  * no child process spawning, no Typst installation required at import time.
  * The consumer decides how to use the returned .typ string.
  */
+export { VERSION } from "../version.js";
 
 export { modelToTypst, odtToTypst } from "./emitter.js";
 export type { TypstEmitOptions } from "./emitter.js";

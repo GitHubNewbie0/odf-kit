@@ -1,3 +1,4 @@
+export { VERSION } from "../version.js";
 import { readOds } from "./parser.js";
 import { renderOdsHtml } from "./html-renderer.js";
 import type { ReadOdsOptions, OdsHtmlOptions } from "./types.js";

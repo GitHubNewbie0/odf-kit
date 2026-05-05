@@ -542,8 +542,8 @@
 </footer>
 
 <script type="module">
-  import { xlsxToOds } from 'https://esm.run/odf-kit@0.13.2/xlsx';
-  import { readOds }   from 'https://esm.run/odf-kit@0.13.2/ods-reader';
+  import { xlsxToOds, VERSION } from 'https://esm.run/odf-kit@0.13.4/xlsx';
+  import { readOds }   from 'https://esm.run/odf-kit@0.13.4/ods-reader';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
@@ -687,7 +687,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool,
-          version: '0.13.0',
+          version: VERSION,
           error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
           stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
           engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],

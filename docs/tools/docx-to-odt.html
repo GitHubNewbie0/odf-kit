@@ -289,8 +289,8 @@
 </footer>
 
 <script type="module">
-  import { docxToOdt } from 'https://esm.run/odf-kit@0.13.2/docx';
-  import { odtToHtml } from 'https://esm.run/odf-kit@0.13.2/reader';
+  import { docxToOdt, VERSION } from 'https://esm.run/odf-kit@0.13.4/docx';
+  import { odtToHtml } from 'https://esm.run/odf-kit@0.13.4/reader';
 
   const dropZone    = document.getElementById('dropZone');
   const fileInput   = document.getElementById('fileInput');
@@ -324,7 +324,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool,
-          version: '0.13.0',
+          version: VERSION,
           error: (err && err.message) ? err.message.slice(0, 500) : String(err).slice(0, 500),
           stack: (err && err.stack) ? err.stack.slice(0, 800) : '',
           engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ['unknown'])[0],

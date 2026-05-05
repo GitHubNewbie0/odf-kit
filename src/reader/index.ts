@@ -12,6 +12,7 @@
  * method. odtToHtml() is a convenience wrapper that calls readOdt().toHtml()
  * in a single step.
  */
+export { VERSION } from "../version.js";
 
 export { readOdt } from "./parser.js";
 export type {

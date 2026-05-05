@@ -16,6 +16,7 @@
  *
  * @module
  */
+export { VERSION } from "../version.js";
 
 import { selfCloseVoidElements } from "./rules/void-elements.js";
 import { decodeNamedEntities } from "./rules/entities.js";

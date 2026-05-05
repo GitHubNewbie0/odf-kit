@@ -1,3 +1,4 @@
+export { VERSION } from "../version.js";
 export { OdtDocument } from "./document.js";
 export { ParagraphBuilder } from "./paragraph-builder.js";
 export { HeaderFooterBuilder } from "./header-footer-builder.js";

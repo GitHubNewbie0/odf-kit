@@ -1,3 +1,4 @@
+export { VERSION } from "../version.js";
 import { readXlsx } from "./reader.js";
 import { convertXlsxToOds } from "./converter.js";
 import type { XlsxToOdsOptions } from "./converter.js";

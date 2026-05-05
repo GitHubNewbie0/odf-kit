@@ -5,6 +5,21 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.4] - 2026-05-05
+
+### Added
+
+- **`VERSION` runtime export** — odf-kit now exports a `VERSION` constant from the root entry point and from all 11 published sub-paths (`/odt`, `/reader`, `/ods`, `/ods-reader`, `/xlsx`, `/template`, `/typst`, `/docx`, `/markdown`, `/lexical`, `/html-normalizer`). Allows runtime consumers to determine which version of odf-kit they have loaded — useful for error reporting, telemetry, and feature detection. The constant's value is automatically derived from `package.json` at build time, so it stays in lockstep with the package version with no manual sync. Importing example: `import { VERSION } from "odf-kit"` (or from any sub-path).
+
+### Changed
+
+- **Tool page error reports now include the actual loaded version** — the live tool pages on githubnewbie0.github.io/odf-kit/tools/ no longer ship a hardcoded version string in their error-reporting code. Each page now imports `VERSION` from the same odf-kit module it uses for conversion, ensuring error reports always reflect the version of the code that ran. Previously, the displayed "Version: x.y.z" in auto-generated GitHub issues could lag behind the actual loaded code by several patch versions (see issue #10).
+- **Landing page hero badge** is also now derived from `package.json` at build time and stays in sync with each release. No more stale badge versions on the landing page.
+
+### Internal
+
+- **`scripts/sync-version.js`** — new pre-build/prepare hook script. Reads `package.json` and writes `src/version.ts` (gitignored, regenerated on every build) plus updates the hero badge in `docs/index.html`. Wired into `npm run build` (so the generated TS file is up-to-date before `tsc` runs) and into `npm run prepare` (so fresh clones have the generated file before running `tsc` directly). Single source of truth for the version string going forward.
+
 ## [0.13.3] - 2026-05-04
 
 ### Fixed
