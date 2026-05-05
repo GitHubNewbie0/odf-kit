@@ -1,0 +1,22 @@
+/*
+ * Common styles shared across odf-kit docs pages.
+ *
+ * Used by index.html, tools/*.html, and guides/*.html as needed.
+ * Link with: <link rel="stylesheet" href="...path-to.../shared/common.css" />
+ */
+
+/* Hide an element visually while keeping it readable by screen readers.
+ * Used for headings that satisfy semantic structure (e.g., section labels)
+ * without disrupting visual design.
+ * Recipe: https://webaim.org/techniques/css/invisiblecontent/ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

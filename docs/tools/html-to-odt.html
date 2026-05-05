@@ -21,7 +21,10 @@
       property="og:description"
       content="Convert HTML to OpenDocument Text (.odt) instantly in your browser. Free and private — nothing is sent to any server. Powered by odf-kit."
     />
-    <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html" />
+    <meta
+      property="og:url"
+      content="https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html"
+    />
 
     <script type="application/ld+json">
       {
@@ -66,156 +69,338 @@
         --error-border: #fca5a5;
         --error-text: #991b1b;
       }
-      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-      html { scroll-behavior: smooth; font-size: 16px; }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        font-size: 16px;
+      }
       body {
-        font-family: "DM Sans", -apple-system, sans-serif;
+        font-family:
+          "DM Sans",
+          -apple-system,
+          sans-serif;
         background: var(--bg);
         color: var(--text);
         line-height: 1.7;
         -webkit-font-smoothing: antialiased;
       }
-      .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
-      .container-narrow { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .container-narrow {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
 
-      nav { border-bottom: 1px solid var(--border); padding: 1rem 0; background: var(--surface); }
+      nav {
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+        background: var(--surface);
+      }
       nav .inner {
-        max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
-        display: flex; align-items: center; justify-content: space-between;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
       .nav-brand {
-        font-family: "JetBrains Mono", monospace; font-size: 0.95rem; font-weight: 500;
-        color: var(--text); text-decoration: none;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text);
+        text-decoration: none;
       }
-      .nav-brand span { color: var(--accent); }
-      .nav-links { display: flex; gap: 1.5rem; }
+      .nav-brand span {
+        color: var(--accent);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+      }
       .nav-links a {
-        font-size: 0.88rem; color: var(--text-secondary); text-decoration: none;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        text-decoration: none;
         transition: color 0.15s;
       }
-      .nav-links a:hover { color: var(--text); }
+      .nav-links a:hover {
+        color: var(--text);
+      }
 
-      .hero { padding: 4rem 0 3rem; text-align: center; border-bottom: 1px solid var(--border); }
+      .hero {
+        padding: 4rem 0 3rem;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
       .hero-badge {
-        display: inline-block; font-family: "JetBrains Mono", monospace;
-        font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em;
-        color: var(--tag-text); background: var(--tag-bg);
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: var(--tag-text);
+        background: var(--tag-bg);
         border: 1px solid var(--tag-border);
-        padding: 0.25rem 0.8rem; border-radius: 100px; margin-bottom: 1.25rem;
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+        margin-bottom: 1.25rem;
       }
       .hero h1 {
-        font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em;
-        line-height: 1.15; margin-bottom: 0.75rem;
+        font-size: 2.4rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.75rem;
       }
-      .hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 540px; margin: 0 auto 1rem; }
+      .hero-sub {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        max-width: 540px;
+        margin: 0 auto 1rem;
+      }
       .privacy-note {
-        display: inline-flex; align-items: center; gap: 0.4rem;
-        font-size: 0.82rem; color: var(--success-text);
-        background: var(--success-bg); border: 1px solid var(--success-border);
-        padding: 0.3rem 0.9rem; border-radius: 100px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        color: var(--success-text);
+        background: var(--success-bg);
+        border: 1px solid var(--success-border);
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
       }
 
-      .tool-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+      .tool-section {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
 
       .editor-layout {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
       }
       .editor-pane label {
-        display: block; font-family: "JetBrains Mono", monospace;
-        font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
-        text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
       }
 
-      .input-wrapper { position: relative; }
+      .input-wrapper {
+        position: relative;
+      }
       .html-input {
-        width: 100%; min-height: 420px; padding: 1rem;
-        font-family: "JetBrains Mono", monospace; font-size: 0.78rem; line-height: 1.65;
-        background: var(--code-bg); color: var(--code-text);
-        border: 2px solid transparent; border-radius: 8px;
-        resize: vertical; outline: none;
+        width: 100%;
+        min-height: 420px;
+        padding: 1rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        background: var(--code-bg);
+        color: var(--code-text);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        resize: vertical;
+        outline: none;
         transition: border-color 0.15s;
       }
-      .html-input:focus { border-color: var(--accent); }
-      .html-input.drag-active { border-color: var(--accent); border-style: dashed; }
-      .drop-overlay {
-        position: absolute; inset: 0; pointer-events: none;
-        display: flex; align-items: center; justify-content: center;
-        background: rgba(37, 99, 235, 0.08); border-radius: 8px;
-        font-family: "JetBrains Mono", monospace; font-size: 0.85rem;
-        color: var(--accent); font-weight: 500;
-        opacity: 0; transition: opacity 0.15s;
+      .html-input:focus {
+        border-color: var(--accent);
       }
-      .drop-overlay.show { opacity: 1; }
+      .html-input.drag-active {
+        border-color: var(--accent);
+        border-style: dashed;
+      }
+      .drop-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(37, 99, 235, 0.08);
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 500;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .drop-overlay.show {
+        opacity: 1;
+      }
 
       .preview-frame {
-        width: 100%; min-height: 420px; max-height: 540px;
-        border: 1px solid var(--border); border-radius: 8px;
+        width: 100%;
+        min-height: 420px;
+        max-height: 540px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
         background: var(--surface);
       }
       .preview-disclaimer {
-        font-size: 0.78rem; color: var(--text-secondary);
-        font-style: italic; margin-top: 0.5rem; line-height: 1.45;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-top: 0.5rem;
+        line-height: 1.45;
       }
 
       .options-row {
-        display: flex; align-items: center; gap: 1rem;
-        margin-top: 1.25rem; flex-wrap: wrap;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.25rem;
+        flex-wrap: wrap;
       }
-      .option-group { display: flex; align-items: center; gap: 0.5rem; }
-      .option-group label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+      .option-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .option-group label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
       .option-group select {
-        font-family: "DM Sans", sans-serif; font-size: 0.82rem;
-        padding: 0.35rem 0.65rem; border: 1px solid var(--border);
-        border-radius: 6px; background: var(--surface); color: var(--text);
-        cursor: pointer; outline: none;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.82rem;
+        padding: 0.35rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        outline: none;
       }
-      .option-group select:focus { border-color: var(--accent); }
+      .option-group select:focus {
+        border-color: var(--accent);
+      }
 
       .convert-row {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-top: 1rem; flex-wrap: wrap; gap: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
       }
-      .button-cluster { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+      .button-cluster {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
 
-      .status { display: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.88rem; }
+      .status {
+        display: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+      }
       .status.loading {
-        display: flex; align-items: center; gap: 0.6rem;
-        background: var(--accent-light); color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--accent-light);
+        color: var(--accent);
         border: 1px solid #bfdbfe;
       }
       .status.error {
-        display: block; background: var(--error-bg); color: var(--error-text);
+        display: block;
+        background: var(--error-bg);
+        color: var(--error-text);
         border: 1px solid var(--error-border);
       }
       .status.success {
-        display: flex; align-items: center; gap: 0.5rem;
-        background: var(--success-bg); color: var(--success-text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--success-bg);
+        color: var(--success-text);
         border: 1px solid var(--success-border);
       }
       .status.info {
-        display: block; background: #fffbeb; color: #92400e;
+        display: block;
+        background: #fffbeb;
+        color: #92400e;
         border: 1px solid #fde68a;
       }
       .spinner {
-        width: 14px; height: 14px;
-        border: 2px solid #bfdbfe; border-top-color: var(--accent);
-        border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #bfdbfe;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
       .btn {
-        display: inline-flex; align-items: center; gap: 0.4rem;
-        font-family: "DM Sans", sans-serif; font-size: 0.85rem; font-weight: 500;
-        text-decoration: none; padding: 0.5rem 1.1rem; border-radius: 7px;
-        border: none; cursor: pointer; transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.5rem 1.1rem;
+        border-radius: 7px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
       }
-      .btn-primary { background: var(--accent); color: #fff; }
-      .btn-primary:hover { background: var(--accent-hover); }
-      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-      .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-      .btn-secondary:hover { border-color: #ccc; }
-      .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
-      .btn-sm { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        border-color: #ccc;
+      }
+      .btn-secondary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
 
       .saved-list-section {
         margin-top: 1.25rem;
@@ -223,8 +408,10 @@
         border-top: 1px solid var(--border);
         display: none;
       }
-      .saved-list-section.show { display: block; }
-      .saved-list-section h4 {
+      .saved-list-section.show {
+        display: block;
+      }
+      .saved-list-section h3 {
         font-family: "JetBrains Mono", monospace;
         font-size: 0.72rem;
         font-weight: 500;
@@ -246,7 +433,9 @@
         font-size: 0.85rem;
         border-bottom: 1px solid var(--border);
       }
-      .saved-list li:last-child { border-bottom: none; }
+      .saved-list li:last-child {
+        border-bottom: none;
+      }
       .saved-list .filename {
         font-family: "JetBrains Mono", monospace;
         font-size: 0.82rem;
@@ -257,7 +446,9 @@
         flex-shrink: 1;
         min-width: 0;
       }
-      .saved-list .check { color: var(--success-text); }
+      .saved-list .check {
+        color: var(--success-text);
+      }
       .saved-list .timestamp {
         font-size: 0.78rem;
         color: var(--text-secondary);
@@ -270,43 +461,103 @@
         line-height: 1.45;
       }
 
-      .info-section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+      .info-section {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+      }
       .info-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem; margin-top: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
       }
       .info-card {
-        background: var(--surface); border: 1px solid var(--border);
-        border-radius: 10px; padding: 1.25rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
       }
-      .info-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
-      .info-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+      .info-card h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+      .info-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+      }
 
-      .dev-cta { padding: 3rem 0; border-bottom: 1px solid var(--border); }
-      .dev-cta-inner {
-        background: var(--surface); border: 1px solid var(--border);
-        border-radius: 12px; padding: 2rem;
-        display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;
+      .dev-cta {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
       }
-      .dev-cta-text { flex: 1; min-width: 240px; }
-      .dev-cta-text h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+      .dev-cta-inner {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .dev-cta-text {
+        flex: 1;
+        min-width: 240px;
+      }
+      .dev-cta-text h2 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
       .dev-cta-text p {
-        font-size: 0.9rem; color: var(--text-secondary);
-        margin-bottom: 0.75rem; line-height: 1.6;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
       }
       .code-snippet {
-        background: var(--code-bg); border-radius: 8px;
-        padding: 0.75rem 1rem; font-family: "JetBrains Mono", monospace;
-        font-size: 0.78rem; color: var(--code-text);
-        white-space: pre; overflow-x: auto;
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--code-text);
+        white-space: pre;
+        overflow-x: auto;
       }
-      .kw { color: #cba6f7; } .str { color: #a6e3a1; } .fn { color: #f9e2af; }
-      .cmt { color: #6c7086; } .typ { color: #89b4fa; }
+      .kw {
+        color: #cba6f7;
+      }
+      .str {
+        color: #a6e3a1;
+      }
+      .fn {
+        color: #f9e2af;
+      }
+      .cmt {
+        color: #6c7086;
+      }
+      .typ {
+        color: #89b4fa;
+      }
 
-      footer { padding: 2.5rem 0; text-align: center; }
-      footer p { font-size: 0.82rem; color: var(--text-secondary); }
-      footer a { color: var(--accent); text-decoration: none; }
-      footer a:hover { text-decoration: underline; }
+      footer {
+        padding: 2.5rem 0;
+        text-align: center;
+      }
+      footer p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
 
       /* Mobile / narrow viewport — replace tool with a friendly notice */
       .mobile-notice {
@@ -316,27 +567,41 @@
         border-bottom: 1px solid var(--border);
       }
       .mobile-notice .icon {
-        font-size: 2rem; margin-bottom: 0.75rem;
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
       }
       .mobile-notice h2 {
-        font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
       }
       .mobile-notice p {
-        font-size: 0.9rem; color: var(--text-secondary);
-        max-width: 420px; margin: 0 auto;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        max-width: 420px;
+        margin: 0 auto;
       }
 
       @media (max-width: 768px) {
-        .tool-section { display: none; }
-        .mobile-notice { display: block; }
-        .hero h1 { font-size: 1.8rem; }
-        .hero { padding: 2.5rem 0 2rem; }
+        .tool-section {
+          display: none;
+        }
+        .mobile-notice {
+          display: block;
+        }
+        .hero h1 {
+          font-size: 1.8rem;
+        }
+        .hero {
+          padding: 2.5rem 0 2rem;
+        }
       }
     </style>
 
     <script
       data-goatcounter="https://odf-kit.goatcounter.com/count"
-      async src="//gc.zgo.at/count.js"
+      async
+      src="//gc.zgo.at/count.js"
     ></script>
   </head>
   <body>
@@ -356,10 +621,18 @@
         <div class="hero-badge">Free online tool</div>
         <h1>HTML to ODT converter</h1>
         <p class="hero-sub">
-          Type, paste, or drop HTML and generate a valid OpenDocument Text file — instantly, in your browser.
+          Type, paste, or drop HTML and generate a valid OpenDocument Text file — instantly, in your
+          browser.
         </p>
         <div class="privacy-note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           Nothing is sent to any server
@@ -373,8 +646,8 @@
         <div class="icon">🖥️</div>
         <h2>Best on a larger screen</h2>
         <p>
-          This tool needs a wider display for the side-by-side input and preview panes.
-          Please come back on a desktop or laptop browser to use it.
+          This tool needs a wider display for the side-by-side input and preview panes. Please come
+          back on a desktop or laptop browser to use it.
         </p>
       </div>
     </section>
@@ -397,16 +670,12 @@
             </div>
           </div>
           <div class="editor-pane">
-            <label for="previewFrame">ODT preview</label>
-            <iframe
-              class="preview-frame"
-              id="previewFrame"
-              title="ODT preview"
-            ></iframe>
+            <label>ODT preview</label>
+            <iframe class="preview-frame" id="previewFrame" title="ODT preview"></iframe>
             <p class="preview-disclaimer">
               The generated <code>.odt</code> file displays correctly in LibreOffice, OnlyOffice,
-              Collabora, MS Word, and other ODF applications. The preview shown here is a
-              simplified rendering that may not match those applications exactly.
+              Collabora, MS Word, and other ODF applications. The preview shown here is a simplified
+              rendering that may not match those applications exactly.
             </p>
           </div>
         </div>
@@ -433,7 +702,7 @@
 
         <div class="convert-row">
           <div id="statusMsg" class="status"></div>
-          <div class="button-cluster" style="margin-left: auto;">
+          <div class="button-cluster" style="margin-left: auto">
             <button class="btn btn-secondary btn-sm" id="exampleBtn">Load example</button>
             <button class="btn btn-secondary btn-sm" id="clearBtn">Clear</button>
             <button class="btn btn-primary" id="generateBtn">Generate file</button>
@@ -442,7 +711,7 @@
         </div>
 
         <div class="saved-list-section" id="savedListSection">
-          <h4>Saved files this session</h4>
+          <h3>Saved files this session</h3>
           <ul class="saved-list" id="savedList"></ul>
           <p class="saved-list-note">
             Filenames are as requested — your browser may add (1), (2), etc. to avoid overwriting
@@ -454,35 +723,72 @@
 
     <section class="info-section">
       <div class="container-narrow">
-        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem;">
+        <p
+          style="
+            font-family: &quot;JetBrains Mono&quot;, monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+          "
+        >
           How it works
         </p>
-        <h2 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.4rem;">
+        <h2
+          style="
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+          "
+        >
           Private, fast, free
         </h2>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        <p style="color: var(--text-secondary); font-size: 0.9rem">
           Conversion runs entirely in your browser — no server, no account, no file size limits.
         </p>
         <div class="info-grid">
           <div class="info-card">
             <h3>🔒 Fully private</h3>
-            <p>Your HTML never leaves your browser. No network requests are made during conversion. Works offline after the page loads.</p>
+            <p>
+              Your HTML never leaves your browser. No network requests are made during conversion.
+              Works offline after the page loads.
+            </p>
           </div>
           <div class="info-card">
             <h3>⚡ Instant conversion</h3>
-            <p>Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting for upload or server processing.</p>
+            <p>
+              Conversion runs in milliseconds using odf-kit's pure JavaScript library. No waiting
+              for upload or server processing.
+            </p>
           </div>
           <div class="info-card">
             <h3>📋 What is supported</h3>
-            <p>Headings h1–h6, paragraphs with text alignment, bold, italic, underline, strikethrough, subscript, superscript, inline code, highlight (<code>&lt;mark&gt;</code>), links, bullet and numbered lists with nesting, tables with header cells and cell background colors, blockquotes, code blocks, horizontal rules, line breaks, images (with width/height/alt), and figures with captions. Inline CSS for color, font-size, font-family, font-weight, font-style, and text-decoration.</p>
+            <p>
+              Headings h1–h6, paragraphs with text alignment, bold, italic, underline,
+              strikethrough, subscript, superscript, inline code, highlight
+              (<code>&lt;mark&gt;</code>), links, bullet and numbered lists with nesting, tables
+              with header cells and cell background colors, blockquotes, code blocks, horizontal
+              rules, line breaks, images (with width/height/alt), and figures with captions. Inline
+              CSS for color, font-size, font-family, font-weight, font-style, and text-decoration.
+            </p>
           </div>
           <div class="info-card">
             <h3>🆓 Free, always</h3>
-            <p>No character limits, no conversions per day, no sign-up required. Powered by open source odf-kit.</p>
+            <p>
+              No character limits, no conversions per day, no sign-up required. Powered by open
+              source odf-kit.
+            </p>
           </div>
           <div class="info-card">
             <h3>🛡️ Spec-compliant</h3>
-            <p>Output passes the OASIS ODF validator without errors or warnings — enforced on every commit by CI. Round-trips cleanly through LibreOffice, OnlyOffice, Collabora, and MS Word.</p>
+            <p>
+              Output passes the OASIS ODF validator without errors or warnings — enforced on every
+              commit by CI. Round-trips cleanly through LibreOffice, OnlyOffice, Collabora, and MS
+              Word.
+            </p>
           </div>
         </div>
       </div>
@@ -495,88 +801,272 @@
             <h2>Need HTML → ODT in your app?</h2>
             <p>
               <strong>odf-kit</strong> is a free, open source JavaScript library.
-              <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.35em; border-radius: 3px;">htmlToOdt()</code>
+              <code
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 0.88em;
+                  background: #f5f5f0;
+                  padding: 0.1em 0.35em;
+                  border-radius: 3px;
+                "
+                >htmlToOdt()</code
+              >
               converts any HTML string to a valid
-              <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: #f5f5f0; padding: 0.1em 0.35em; border-radius: 3px;">.odt</code>
+              <code
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 0.88em;
+                  background: #f5f5f0;
+                  padding: 0.1em 0.35em;
+                  border-radius: 3px;
+                "
+                >.odt</code
+              >
               file in Node.js or the browser. No server, no LibreOffice.
             </p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
               <a href="../" class="btn btn-primary btn-sm">View documentation</a>
-              <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm">npm install odf-kit</a>
+              <a href="https://www.npmjs.com/package/odf-kit" class="btn btn-secondary btn-sm"
+                >npm install odf-kit</a
+              >
             </div>
           </div>
-          <div style="flex: 1; min-width: 280px;">
-            <div class="code-snippet"><span class="cmt">// The same code powering this tool</span>
-<span class="kw">import</span> { <span class="typ">htmlToOdt</span> } <span class="kw">from</span> <span class="str">"odf-kit"</span>;
+          <div style="flex: 1; min-width: 280px">
+            <div class="code-snippet">
+              <span class="cmt">// The same code powering this tool</span>
+              <span class="kw">import</span> { <span class="typ">htmlToOdt</span> }
+              <span class="kw">from</span> <span class="str">"odf-kit"</span>;
 
-<span class="kw">const</span> html = <span class="str">`&lt;h1&gt;Report&lt;/h1&gt;&lt;p&gt;Content here.&lt;/p&gt;`</span>;
-<span class="kw">const</span> bytes = <span class="kw">await</span> <span class="fn">htmlToOdt</span>(html, {
-  pageFormat: <span class="str">"A4"</span>,
-});
+              <span class="kw">const</span> html =
+              <span class="str">`&lt;h1&gt;Report&lt;/h1&gt;&lt;p&gt;Content here.&lt;/p&gt;`</span
+              >; <span class="kw">const</span> bytes = <span class="kw">await</span>
+              <span class="fn">htmlToOdt</span>(html, { pageFormat: <span class="str">"A4"</span>,
+              });
 
-<span class="cmt">// bytes → Uint8Array, save as .odt file</span></div>
+              <span class="cmt">// bytes → Uint8Array, save as .odt file</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border);">
+    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border)">
       <div class="container">
-        <div style="margin-bottom: 1.5rem;">
-          <a href="../" style="color: var(--accent); text-decoration: none; font-size: 0.95rem; font-weight: 500;">← landing page</a>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.15rem;">/odf-kit/</div>
+        <div style="margin-bottom: 1.5rem">
+          <a
+            href="../"
+            style="
+              color: var(--accent);
+              text-decoration: none;
+              font-size: 0.95rem;
+              font-weight: 500;
+            "
+            >← landing page</a
+          >
+          <div
+            style="
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 0.78rem;
+              color: var(--text-secondary);
+              margin-top: 0.15rem;
+            "
+          >
+            /odf-kit/
+          </div>
         </div>
 
-        <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
+        <h2
+          style="
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+          "
+        >
           More odf-kit tools &amp; guides
         </h2>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; font-size: 0.88rem;">
-
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; font-size: 0.88rem">
           <!-- Tools column -->
           <div>
-            <h3 style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.9rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);">Tools</h3>
+            <h3
+              style="
+                font-family: &quot;JetBrains Mono&quot;, monospace;
+                font-size: 0.72rem;
+                font-weight: 500;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                margin-bottom: 0.9rem;
+                padding-bottom: 0.4rem;
+                border-bottom: 1px solid var(--border);
+              "
+            >
+              Tools
+            </h3>
 
-            <div style="margin-bottom: 1.5rem;">
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Generate</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="markdown-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Markdown to ODT</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">markdown-to-odt.html</div>
+            <div style="margin-bottom: 1.5rem">
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Generate
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="markdown-to-odt.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Markdown to ODT</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    markdown-to-odt.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="lexical-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Lexical JSON to ODT</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">lexical-to-odt.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="lexical-to-odt.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Lexical JSON to ODT</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    lexical-to-odt.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="docx-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">DOCX to ODT</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docx-to-odt.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="docx-to-odt.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >DOCX to ODT</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    docx-to-odt.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="xlsx-to-ods.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">XLSX to ODS</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">xlsx-to-ods.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="xlsx-to-ods.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >XLSX to ODS</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    xlsx-to-ods.html
+                  </div>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Read</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="odt-to-html.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to HTML</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-html.html</div>
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Read
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="odt-to-html.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT to HTML</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-to-html.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="odt-to-markdown.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to Markdown</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-markdown.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="odt-to-markdown.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT to Markdown</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-to-markdown.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="odt-to-pdf.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to PDF (via Typst)</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-pdf.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="odt-to-pdf.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT to PDF (via Typst)</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-to-pdf.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="ods-to-html.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODS to HTML</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">ods-to-html.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="ods-to-html.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODS to HTML</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    ods-to-html.html
+                  </div>
                 </li>
               </ul>
             </div>
@@ -584,84 +1074,316 @@
 
           <!-- Guides column -->
           <div>
-            <h3 style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.9rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);">Guides</h3>
+            <h3
+              style="
+                font-family: &quot;JetBrains Mono&quot;, monospace;
+                font-size: 0.72rem;
+                font-weight: 500;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                margin-bottom: 0.9rem;
+                padding-bottom: 0.4rem;
+                border-bottom: 1px solid var(--border);
+              "
+            >
+              Guides
+            </h3>
 
-            <div style="margin-bottom: 1.5rem;">
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Generation</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/generate-odt-nodejs.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt files in Node.js</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-nodejs.html</div>
+            <div style="margin-bottom: 1.5rem">
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Generation
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/generate-odt-nodejs.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Generate .odt files in Node.js</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    generate-odt-nodejs.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/generate-odt-browser.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt files in the browser</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-browser.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/generate-odt-browser.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Generate .odt files in the browser</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    generate-odt-browser.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/generate-odt-without-libreoffice.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Generate .odt without LibreOffice</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">generate-odt-without-libreoffice.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/generate-odt-without-libreoffice.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Generate .odt without LibreOffice</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    generate-odt-without-libreoffice.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/libreoffice-headless-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">LibreOffice headless alternative</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">libreoffice-headless-alternative.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/libreoffice-headless-alternative.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >LibreOffice headless alternative</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    libreoffice-headless-alternative.html
+                  </div>
                 </li>
               </ul>
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Templates</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/fill-odt-template-javascript.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Fill .odt templates with JavaScript</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">fill-odt-template-javascript.html</div>
+            <div style="margin-bottom: 1.5rem">
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Templates
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/fill-odt-template-javascript.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Fill .odt templates with JavaScript</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    fill-odt-template-javascript.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/docxtemplater-odf-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">docxtemplater alternative for ODF</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docxtemplater-odf-alternative.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/docxtemplater-odf-alternative.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >docxtemplater alternative for ODF</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    docxtemplater-odf-alternative.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/simple-odf-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">simple-odf migration guide</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">simple-odf-alternative.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/simple-odf-alternative.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >simple-odf migration guide</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    simple-odf-alternative.html
+                  </div>
                 </li>
               </ul>
             </div>
 
-            <div style="margin-bottom: 1.5rem;">
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Conversion</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/docx-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">DOCX to ODT in JavaScript</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">docx-to-odt.html</div>
+            <div style="margin-bottom: 1.5rem">
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Conversion
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/docx-to-odt.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >DOCX to ODT in JavaScript</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    docx-to-odt.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/lexical-to-odt.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Lexical to ODT developer guide</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">lexical-to-odt.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/lexical-to-odt.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >Lexical to ODT developer guide</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    lexical-to-odt.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/odt-to-html-javascript.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to HTML in JavaScript</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-html-javascript.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/odt-to-html-javascript.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT to HTML in JavaScript</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-to-html-javascript.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/odt-to-typst-pdf.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT to PDF via Typst</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-to-typst-pdf.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/odt-to-typst-pdf.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT to PDF via Typst</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-to-typst-pdf.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/sheetjs-alternative.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">SheetJS alternative for ODS</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">sheetjs-alternative.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/sheetjs-alternative.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >SheetJS alternative for ODS</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    sheetjs-alternative.html
+                  </div>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h4 style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.6rem;">Reference</h4>
-              <ul style="list-style: none; margin: 0; padding: 0;">
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/odt-javascript-ecosystem.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODT JavaScript ecosystem overview</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odt-javascript-ecosystem.html</div>
+              <h4
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  color: var(--text-secondary);
+                  margin-bottom: 0.6rem;
+                "
+              >
+                Reference
+              </h4>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/odt-javascript-ecosystem.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODT JavaScript ecosystem overview</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odt-javascript-ecosystem.html
+                  </div>
                 </li>
-                <li style="margin-bottom: 0.65rem;">
-                  <a href="../guides/odf-government-compliance.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">ODF for government compliance</a>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.1rem;">odf-government-compliance.html</div>
+                <li style="margin-bottom: 0.65rem">
+                  <a
+                    href="../guides/odf-government-compliance.html"
+                    style="color: var(--accent); text-decoration: none; font-weight: 500"
+                    >ODF for government compliance</a
+                  >
+                  <div
+                    style="
+                      font-family: &quot;JetBrains Mono&quot;, monospace;
+                      font-size: 0.74rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.1rem;
+                    "
+                  >
+                    odf-government-compliance.html
+                  </div>
                 </li>
               </ul>
             </div>
@@ -673,10 +1395,9 @@
     <footer>
       <div class="container-narrow">
         <p>
-          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and TypeScript ·
-          <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
-          <a href="https://www.npmjs.com/package/odf-kit">npm</a> ·
-          Apache 2.0
+          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and
+          TypeScript · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a> · Apache 2.0
         </p>
       </div>
     </footer>
@@ -770,13 +1491,15 @@
         const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
         doc.open();
         doc.write(
-          `<!DOCTYPE html><html><head><style>${previewStyles}</style></head><body>${htmlContent}</body></html>`
+          `<!DOCTYPE html><html><head><style>${previewStyles}</style></head><body>${htmlContent}</body></html>`,
         );
         doc.close();
       }
 
       function renderEmptyPreview() {
-        renderPreview('<p class="empty-hint">Click "Generate file" to see the ODT preview here.</p>');
+        renderPreview(
+          '<p class="empty-hint">Click "Generate file" to see the ODT preview here.</p>',
+        );
       }
 
       // Initial empty preview
@@ -808,7 +1531,9 @@
               version: VERSION,
               error: err && err.message ? err.message.slice(0, 500) : String(err).slice(0, 500),
               stack: err && err.stack ? err.stack.slice(0, 800) : "",
-              engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || ["unknown"])[0],
+              engine: (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge)\/[\d.]+/) || [
+                "unknown",
+              ])[0],
             }),
           }).catch(() => {});
         } catch (_) {}
@@ -825,7 +1550,7 @@
         }
         if (generatedBytes && !inputDirty) {
           inputDirty = true;
-          showStatus("info", "Input changed — click \"Generate file\" to refresh the preview.");
+          showStatus("info", 'Input changed — click "Generate file" to refresh the preview.');
         }
       });
 
@@ -860,7 +1585,7 @@
         if (!ACCEPTED_EXTENSIONS.includes(ext)) {
           showStatus(
             "error",
-            "Please drop an HTML file (.html, .htm, or .xhtml). Rename the file's extension if needed."
+            "Please drop an HTML file (.html, .htm, or .xhtml). Rename the file's extension if needed.",
           );
           return;
         }
@@ -919,7 +1644,7 @@
           generatedBytes = bytes;
           inputDirty = false;
           saveBtn.disabled = false;
-          showStatus("success", "Preview ready. Click \"Save\" to download the file.");
+          showStatus("success", 'Preview ready. Click "Save" to download the file.');
         } catch (err) {
           reportError("html-to-odt", err);
           renderEmptyPreview();
@@ -987,11 +1712,13 @@
 
       saveBtn.addEventListener("click", () => {
         if (!generatedBytes) {
-          showStatus("error", "No file to save — click \"Generate file\" first.");
+          showStatus("error", 'No file to save — click "Generate file" first.');
           return;
         }
         const filename = getOutputFilename();
-        const blob = new Blob([generatedBytes], { type: "application/vnd.oasis.opendocument.text" });
+        const blob = new Blob([generatedBytes], {
+          type: "application/vnd.oasis.opendocument.text",
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

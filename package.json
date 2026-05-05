@@ -122,8 +122,9 @@
     "build": "node scripts/sync-version.js && tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests",
-    "format": "prettier --write src tests",
-    "format:check": "prettier --check src tests",
+    "format": "prettier --write src tests docs",
+    "format:check": "prettier --check src tests docs",
+    "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build",
     "prepare": "node scripts/sync-version.js"
@@ -168,6 +169,7 @@
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.21.0"
+    "typescript-eslint": "^8.21.0",
+    "vnu-jar": "^26.5.2"
   }
 }
