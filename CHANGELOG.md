@@ -5,6 +5,16 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.3] - 2026-05-04
+
+### Fixed
+
+- **Dependabot alert: marked OOM DoS** — bumped `marked` from 18.0.0 to 18.0.3 to address [GHSA — Marked Vulnerable to OOM Denial of Service via Infinite Recursion in marked Tokenizer](https://github.com/GitHubNewbie0/odf-kit/security/dependabot/26). The vulnerability allowed a 3-byte input sequence (`\x09\x0b\n`) to trigger infinite recursion in the marked tokenizer, leading to memory exhaustion and process crash. Affected applications using `markdownToOdt()` with untrusted Markdown input. Patched in marked 18.0.2; odf-kit v0.13.3 ships with marked 18.0.3 (the latest 18.x patch).
+
+### Added
+
+- **Dependabot version updates** — `.github/dependabot.yml` configures weekly automated PRs for npm dependency updates and monthly PRs for GitHub Actions version updates. Reduces lag between dependency patches and odf-kit lockfile updates. No effect on end-users.
+
 ## [0.13.2] - 2026-05-04
 
 ### Added

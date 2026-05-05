@@ -1040,6 +1040,8 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Version history
 
+**v0.13.3** — Dependency security fix: bumped `marked` from 18.0.0 to 18.0.3 to address an OOM DoS vulnerability in the marked tokenizer (Dependabot alert). Affected applications using `markdownToOdt()` with untrusted Markdown input. No API changes.
+
 **v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture for normalizer and parser. Default Tier 1 normalization applies seven spec-grounded transformations: empties script/style content, lowercases doctype, quotes unquoted boolean attributes, quotes unquoted attribute values, self-closes void elements, decodes named entities, escapes `&` in attribute values. `parseXml` now fails loudly on malformed input. New `odfKitNormalizer`, `odfKitParser`, and public types `ParsedHtmlTree`, `Parser`, `Normalizer`. Substitution hooks propagate to `markdownToOdt()`. New sub-export `odf-kit/html-normalizer`. See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md). 1307 tests passing.
 
 **v0.13.1** — `odtToMarkdown()` `embedImages` option for self-contained Markdown output. 1124 tests passing.
