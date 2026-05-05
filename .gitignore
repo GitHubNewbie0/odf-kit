@@ -8,3 +8,6 @@ coverage/
 
 validator-fixture.odt
 .~lock.*
+
+# Local verification fixtures for tool pages — load from /dist/ paths
+docs/tools/*-local.html
