@@ -120,6 +120,7 @@
   ],
   "scripts": {
     "build": "node scripts/sync-version.js && tsc",
+    "build:local-fixture": "node scripts/build-local-fixture.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests",
     "format": "prettier --write src tests docs",
