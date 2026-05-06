@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Rule 6 of the Tier 1 normalizer: quote unquoted attribute values.
  *
  * HTML5 allows attribute values to appear without quotes when the value
@@ -11,26 +11,26 @@
  * This rule scans every opening tag and rewrites unquoted values as
  * double-quoted: `<a href=page.html>` becomes `<a href="page.html">`.
  *
- * Spec reference: WHATWG HTML Living Standard § 13.1.2.3 "Attributes",
+ * Spec reference: WHATWG HTML Living Standard Â§ 13.1.2.3 "Attributes",
  * Unquoted attribute value syntax.
  *
  * Scope: only attribute *values* are rewritten. Attribute names without
- * `=` (boolean attributes) are out of scope — Rule 5 handles those.
+ * `=` (boolean attributes) are out of scope â€” Rule 5 handles those.
  * Quoted values (single or double) pass through unchanged. The tag name
  * itself is never rewritten.
  *
  * Composition note: this rule should run alongside Rule 5
  * (quoteUnquotedBooleanAttributes). Order between Rules 5 and 6 doesn't
- * matter — they handle disjoint patterns. By convention this rule runs
+ * matter â€” they handle disjoint patterns. By convention this rule runs
  * after Rule 5 so the rule numbers parallel composition order.
  */
 
-const TAG_PATTERN = /<([a-zA-Z][a-zA-Z0-9-]*)((?:\s[^>]*)?)>/g;
+const TAG_PATTERN = /<([a-zA-Z][a-zA-Z0-9-]*)(?=[\s>])([^>]*)>/g;
 
 /**
  * Scan an attribute area and rewrite unquoted attribute values to
  * double-quoted form. Quoted values pass through unchanged. Boolean
- * attributes (no `=`) pass through unchanged — Rule 5 handles those.
+ * attributes (no `=`) pass through unchanged â€” Rule 5 handles those.
  */
 function rewriteAttrArea(attrArea: string): string {
   if (!attrArea.trim()) return attrArea;
@@ -50,7 +50,7 @@ function rewriteAttrArea(attrArea: string): string {
     // Try to match an attribute name
     const nameMatch = /^[a-zA-Z_:][a-zA-Z0-9_:.-]*/.exec(attrArea.slice(i));
     if (!nameMatch) {
-      // Not an attribute — copy and advance
+      // Not an attribute â€” copy and advance
       result += attrArea[i];
       i++;
       continue;
@@ -64,7 +64,7 @@ function rewriteAttrArea(attrArea: string): string {
     while (j < attrArea.length && /\s/.test(attrArea[j])) j++;
 
     if (j >= attrArea.length || attrArea[j] !== "=") {
-      // Boolean attribute (no =) — pass through, Rule 5 handles
+      // Boolean attribute (no =) â€” pass through, Rule 5 handles
       result += attrName;
       // Copy whitespace between name and end (or next attr)
       result += attrArea.slice(afterName, j);
@@ -83,7 +83,7 @@ function rewriteAttrArea(attrArea: string): string {
     while (j < attrArea.length && /\s/.test(attrArea[j])) j++;
 
     if (j >= attrArea.length) {
-      // Trailing = with no value — preserve as-is
+      // Trailing = with no value â€” preserve as-is
       result += attrArea.slice(afterEq);
       i = attrArea.length;
       continue;
@@ -93,11 +93,11 @@ function rewriteAttrArea(attrArea: string): string {
     result += attrArea.slice(afterEq, j);
 
     if (attrArea[j] === '"' || attrArea[j] === "'") {
-      // Quoted value — pass through entirely
+      // Quoted value â€” pass through entirely
       const quote = attrArea[j];
       const end = attrArea.indexOf(quote, j + 1);
       if (end === -1) {
-        // Malformed — copy rest as-is
+        // Malformed â€” copy rest as-is
         result += attrArea.slice(j);
         i = attrArea.length;
         continue;
@@ -105,7 +105,7 @@ function rewriteAttrArea(attrArea: string): string {
       result += attrArea.slice(j, end + 1);
       i = end + 1;
     } else {
-      // Unquoted value — read until whitespace, end, or self-closing /
+      // Unquoted value â€” read until whitespace, end, or self-closing /
       // (per HTML5 spec, unquoted values terminate at whitespace, >, or
       // when `/` is followed by `>` for self-closing tags). The lone `/`
       // inside URLs like https://example.com/x.html is part of the value.

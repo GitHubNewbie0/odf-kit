@@ -1,5 +1,5 @@
-/**
- * ODS HTML renderer — converts an OdsDocumentModel to an HTML string.
+﻿/**
+ * ODS HTML renderer â€” converts an OdsDocumentModel to an HTML string.
  *
  * Each sheet is rendered as an HTML <table>. Merged cells use colspan/rowspan.
  * Covered cells are omitted. Cell formatting is applied as inline styles.
@@ -14,7 +14,7 @@ import type {
   OdsHtmlOptions,
 } from "./types.js";
 
-// ─── Style Building ───────────────────────────────────────────────────
+// â”€â”€â”€ Style Building â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function buildInlineStyle(fmt: OdsCellFormatting): string {
   const parts: string[] = [];
@@ -30,7 +30,7 @@ function buildInlineStyle(fmt: OdsCellFormatting): string {
   return parts.join(";");
 }
 
-// ─── HTML Escaping ────────────────────────────────────────────────────
+// â”€â”€â”€ HTML Escaping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function escapeHtml(text: string): string {
   return text
@@ -40,7 +40,7 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-// ─── Cell Rendering ───────────────────────────────────────────────────
+// â”€â”€â”€ Cell Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function renderCellValue(cell: OdsCellModel): string {
   // Prefer display text when available
@@ -74,7 +74,7 @@ function renderCell(cell: OdsCellModel, includeStyles: boolean, prefix: string):
     const existingStyle = attrs.find((a) => a.startsWith("style="));
     if (existingStyle) {
       const idx = attrs.indexOf(existingStyle);
-      attrs[idx] = existingStyle.replace('"', '"text-align:right;');
+      attrs[idx] = existingStyle.replace(/^style="/, 'style="text-align:right;');
     } else {
       attrs.push(`style="text-align:right"`);
     }
@@ -84,7 +84,7 @@ function renderCell(cell: OdsCellModel, includeStyles: boolean, prefix: string):
   return `<td ${attrs.join(" ")}>${content}</td>`;
 }
 
-// ─── Row Rendering ────────────────────────────────────────────────────
+// â”€â”€â”€ Row Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function renderRow(row: OdsRowModel, includeStyles: boolean, prefix: string): string {
   const cells = row.cells
@@ -96,7 +96,7 @@ function renderRow(row: OdsRowModel, includeStyles: boolean, prefix: string): st
   return `<tr class="${prefix}-row"${style}>${cells}</tr>`;
 }
 
-// ─── Sheet Rendering ──────────────────────────────────────────────────
+// â”€â”€â”€ Sheet Rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function renderSheet(sheet: OdsSheetModel, includeStyles: boolean, prefix: string): string {
   if (sheet.rows.length === 0) {
@@ -117,7 +117,7 @@ function renderSheet(sheet: OdsSheetModel, includeStyles: boolean, prefix: strin
   ].join("\n");
 }
 
-// ─── Public API ───────────────────────────────────────────────────────
+// â”€â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Render an OdsDocumentModel as an HTML string.

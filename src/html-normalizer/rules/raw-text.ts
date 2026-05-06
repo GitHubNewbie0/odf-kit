@@ -18,7 +18,7 @@
  * content. The composite order is enforced in src/html-normalizer/index.ts.
  */
 
-const RAW_TEXT_PATTERN = /<(script|style)((?:\s[^>]*)?)>[\s\S]*?<\/\1\s*>/g;
+const RAW_TEXT_PATTERN = /<(script|style)(?=[\s>])([^>]*)>[\s\S]*?<\/\1\s*>/g;
 
 /**
  * Empty the content of `<script>` and `<style>` elements while preserving

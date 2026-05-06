@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Rule 7 of the Tier 1 normalizer: escape unescaped `&` in attribute values.
  *
  * HTML5 attribute values commonly contain unescaped `&` characters in URLs:
@@ -11,7 +11,7 @@
  * characters with `&amp;`, leaving valid XML entities and numeric
  * character references untouched.
  *
- * Spec reference: WHATWG HTML Living Standard § 13.2.5.42 "Attribute
+ * Spec reference: WHATWG HTML Living Standard Â§ 13.2.5.42 "Attribute
  * value (double-quoted) state" describes character reference handling
  * for ambiguous ampersands.
  *
@@ -26,7 +26,7 @@
  * first, then attribute-content rules, then text-content rules.
  */
 
-const TAG_PATTERN = /<([a-zA-Z][a-zA-Z0-9-]*)((?:\s[^>]*)?)>/g;
+const TAG_PATTERN = /<([a-zA-Z][a-zA-Z0-9-]*)(?=[\s>])([^>]*)>/g;
 const ATTR_PATTERN = /([a-zA-Z_:][a-zA-Z0-9_:.-]*)=(?:"([^"]*)"|'([^']*)')/g;
 const VALID_ENTITY = /&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9a-fA-F]+);/y;
 
@@ -50,11 +50,11 @@ function escapeValueAmpersands(value: string): string {
     // Found a `&`. Test whether it starts a valid entity reference.
     VALID_ENTITY.lastIndex = i;
     if (VALID_ENTITY.test(value)) {
-      // Valid entity — copy the whole match through
+      // Valid entity â€” copy the whole match through
       result += value.slice(i, VALID_ENTITY.lastIndex);
       i = VALID_ENTITY.lastIndex;
     } else {
-      // Lone `&` — escape it
+      // Lone `&` â€” escape it
       result += "&amp;";
       i++;
     }

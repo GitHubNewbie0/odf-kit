@@ -1,22 +1,22 @@
-/**
+﻿/**
  * Markdown emitter for the ODT document model.
  *
  * Converts the structured document model produced by the ODT parser into
- * a Markdown string. Zero runtime dependencies — the emitter is a pure
+ * a Markdown string. Zero runtime dependencies â€” the emitter is a pure
  * function over OdtDocumentModel.
  *
  * Structural coverage:
- *  - Headings levels 1–6 (# through ######)
+ *  - Headings levels 1â€“6 (# through ######)
  *  - Paragraphs with blank-line separation
  *  - Bold, italic, bold+italic, strikethrough (GFM)
- *  - Underline → <u>text</u> (HTML passthrough — valid in GFM)
- *  - Superscript → <sup>text</sup>, subscript → <sub>text</sub>
- *  - Hyperlinks → [text](url)
- *  - Hard line breaks → two trailing spaces + newline
+ *  - Underline â†’ <u>text</u> (HTML passthrough â€” valid in GFM)
+ *  - Superscript â†’ <sup>text</sup>, subscript â†’ <sub>text</sub>
+ *  - Hyperlinks â†’ [text](url)
+ *  - Hard line breaks â†’ two trailing spaces + newline
  *  - Unordered and ordered lists with nested sub-lists
- *  - Tables → GFM pipe table with --- separator row
- *  - Images → ![alt](name) placeholder (base64 data not inlined)
- *  - Sections → body content only (no Markdown equivalent)
+ *  - Tables â†’ GFM pipe table with --- separator row
+ *  - Images â†’ ![alt](name) placeholder (base64 data not inlined)
+ *  - Sections â†’ body content only (no Markdown equivalent)
  *  - Tracked changes: final (default), original, and changes modes
  *
  * Text content is escaped for Markdown. The following characters are
@@ -50,10 +50,10 @@ export interface MarkdownEmitOptions {
   /**
    * Markdown flavor to target.
    *
-   * "gfm" (default): GitHub Flavored Markdown — enables pipe tables and
+   * "gfm" (default): GitHub Flavored Markdown â€” enables pipe tables and
    *   ~~strikethrough~~. Compatible with GitHub, GitLab, and most modern
    *   Markdown renderers.
-   * "commonmark": CommonMark only — tables are omitted (cells emitted as
+   * "commonmark": CommonMark only â€” tables are omitted (cells emitted as
    *   plain paragraphs), strikethrough falls back to plain text.
    */
   flavor?: "commonmark" | "gfm";
@@ -63,13 +63,13 @@ export interface MarkdownEmitOptions {
    *
    * "final" (default): insertions rendered as body; deletions produce no output.
    * "original": deletions rendered as body; insertions produce no output.
-   * "changes": insertions → <ins>body</ins>, deletions → <del>body</del>.
+   * "changes": insertions â†’ <ins>body</ins>, deletions â†’ <del>body</del>.
    */
   trackedChanges?: "final" | "original" | "changes";
   /**
    * If true, images are embedded as base64 data URLs (`![alt](data:image/png;base64,...)`).
    * Produces a fully self-contained Markdown file at the cost of larger file size.
-   * Defaults to false — images are emitted as `![alt](name)` placeholders.
+   * Defaults to false â€” images are emitted as `![alt](name)` placeholders.
    */
   embedImages?: boolean;
 }
@@ -97,8 +97,8 @@ function escapeMd(text: string): string {
  * Emit a TextSpan to a Markdown string.
  *
  * Formatting nesting order (innermost first):
- * superscript/subscript → underline → strikethrough → italic → bold
- * → hyperlink anchor.
+ * superscript/subscript â†’ underline â†’ strikethrough â†’ italic â†’ bold
+ * â†’ hyperlink anchor.
  */
 function emitTextSpan(span: TextSpan, options?: MarkdownEmitOptions): string {
   if (span.lineBreak) return "  \n";
@@ -132,7 +132,7 @@ function emitTextSpan(span: TextSpan, options?: MarkdownEmitOptions): string {
 /**
  * Emit an ImageNode as a Markdown image placeholder.
  *
- * By default, base64 image data is not inlined — the alt text and name are
+ * By default, base64 image data is not inlined â€” the alt text and name are
  * preserved as a placeholder so consumers can substitute with real paths.
  * Pass `{ embedImages: true }` to embed images as base64 data URLs instead.
  */
@@ -158,7 +158,7 @@ function emitNote(node: NoteNode, options?: MarkdownEmitOptions): string {
   return `^[${content.trim()}]`;
 }
 
-/** Emit a FieldNode — page number and page count get descriptive placeholders. */
+/** Emit a FieldNode â€” page number and page count get descriptive placeholders. */
 function emitField(node: FieldNode): string {
   if (node.fieldType === "pageNumber") return node.value ?? "[page]";
   if (node.fieldType === "pageCount") return node.value ?? "[pages]";
@@ -174,7 +174,7 @@ function emitInlineNode(node: InlineNode, options?: MarkdownEmitOptions): string
       case "note":
         return emitNote(node, options);
       case "bookmark":
-        // Bookmarks have no Markdown equivalent — emit nothing
+        // Bookmarks have no Markdown equivalent â€” emit nothing
         return "";
       case "field":
         return emitField(node);
@@ -219,11 +219,15 @@ function emitList(list: ListNode, options?: MarkdownEmitOptions, depth = 0): str
  * cells is inserted after it. Falls back to plain paragraph text per cell
  * when flavor is "commonmark".
  */
+function escapeMarkdownTableCell(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
 function emitTable(table: TableNode, options?: MarkdownEmitOptions): string {
   if (table.rows.length === 0) return "";
 
   if (options?.flavor === "commonmark") {
-    // CommonMark has no table syntax — emit rows as plain text paragraphs
+    // CommonMark has no table syntax â€” emit rows as plain text paragraphs
     return table.rows
       .map((row) => row.cells.map((cell) => emitSpans(cell.spans, options)).join(" | "))
       .join("\n\n");
@@ -232,7 +236,7 @@ function emitTable(table: TableNode, options?: MarkdownEmitOptions): string {
   const rows = table.rows.map(
     (row) =>
       "| " +
-      row.cells.map((cell) => emitSpans(cell.spans, options).replace(/\|/g, "\\|")).join(" | ") +
+      row.cells.map((cell) => escapeMarkdownTableCell(emitSpans(cell.spans, options))).join(" | ") +
       " |",
   );
 
@@ -246,7 +250,7 @@ function emitTable(table: TableNode, options?: MarkdownEmitOptions): string {
 }
 
 /**
- * Emit a SectionNode — Markdown has no section construct.
+ * Emit a SectionNode â€” Markdown has no section construct.
  * Emits the body content directly.
  */
 function emitSection(node: SectionNode, options?: MarkdownEmitOptions): string {
@@ -256,7 +260,7 @@ function emitSection(node: SectionNode, options?: MarkdownEmitOptions): string {
 /**
  * Emit a TrackedChangeNode.
  *
- * "changes" mode: insertions → <ins>body</ins>, deletions → <del>body</del>.
+ * "changes" mode: insertions â†’ <ins>body</ins>, deletions â†’ <del>body</del>.
  * Other modes: body emitted transparently.
  */
 function emitTrackedChange(node: TrackedChangeNode, options?: MarkdownEmitOptions): string {

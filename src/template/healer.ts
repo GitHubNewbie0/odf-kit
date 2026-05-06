@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Placeholder healer for ODF XML.
  *
  * When a user types {name} in LibreOffice, the editor may split it across
@@ -8,7 +8,7 @@
  *
  * Algorithm:
  * 1. Tokenize XML into tag/text segments
- * 2. Build a "text ribbon" — concatenation of all text segments with
+ * 2. Build a "text ribbon" â€” concatenation of all text segments with
  *    character-to-segment position mapping
  * 3. Find all placeholder patterns in the ribbon
  * 4. For any placeholder spanning multiple text segments, consolidate:
@@ -19,7 +19,7 @@
  * 5. Rebuild XML from segments
  * 6. Remove empty <text:span> elements left behind
  *
- * This is uniform — every fragmented placeholder gets the same treatment
+ * This is uniform â€” every fragmented placeholder gets the same treatment
  * regardless of span count, style differences, or tag context.
  */
 
@@ -37,10 +37,10 @@ interface CharOrigin {
 
 /**
  * Valid placeholder pattern:
- * - {varName}        — simple replacement
- * - {#varName}       — loop/conditional open
- * - {/varName}       — loop/conditional close
- * - {object.property} — dot notation for nested data
+ * - {varName}        â€” simple replacement
+ * - {#varName}       â€” loop/conditional open
+ * - {/varName}       â€” loop/conditional close
+ * - {object.property} â€” dot notation for nested data
  *
  * Identifier: starts with letter or underscore, followed by letters, digits,
  * underscores, or dots.
@@ -72,7 +72,7 @@ export function tokenize(xml: string): Segment[] {
         }
       }
       if (j >= xml.length) {
-        // Malformed XML — treat remainder as text
+        // Malformed XML â€” treat remainder as text
         segments.push({ type: "text", content: xml.slice(i) });
         break;
       }
@@ -145,7 +145,7 @@ function removeEmptySpans(xml: string): string {
   let prev: string;
   do {
     prev = result;
-    result = result.replace(/<text:span(?:\s+[^>]*)?>(?:<\/text:span>)/g, "");
+    result = result.replace(/<text:span(?=[\s>])[^>]*>(?:<\/text:span>)/g, "");
   } while (result !== prev);
   return result;
 }
@@ -173,7 +173,7 @@ export function healPlaceholders(xml: string): string {
     const firstSegIdx = charMap[ph.start].segIndex;
     const lastSegIdx = charMap[ph.end].segIndex;
 
-    // Not fragmented — placeholder is entirely within one text segment
+    // Not fragmented â€” placeholder is entirely within one text segment
     if (firstSegIdx === lastSegIdx) continue;
 
     const firstCharIdx = charMap[ph.start].charIndex;
