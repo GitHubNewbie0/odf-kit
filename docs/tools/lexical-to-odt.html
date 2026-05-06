@@ -1401,6 +1401,7 @@ Get it from your editor with:
     <script type="module">
       import { lexicalToOdt, VERSION } from "https://esm.run/odf-kit@0.13.4/lexical";
       import { odtToHtml } from "https://esm.run/odf-kit@0.13.4/reader";
+      import { setStatusContent, makeIcon, makeText } from "./shared/status-helpers.js";
 
       const jsonInput = document.getElementById("jsonInput");
       const previewFrame = document.getElementById("previewFrame");
@@ -1639,16 +1640,13 @@ Get it from your editor with:
       function showStatus(type, msg) {
         statusMsg.className = "status " + type;
         if (type === "loading") {
-          statusMsg.style.display = "flex";
-          statusMsg.innerHTML = '<div class="spinner"></div><span>' + msg + "</span>";
+          setStatusContent(statusMsg, makeIcon('<div class="spinner"></div>'), makeText(msg));
         } else if (type === "success") {
-          statusMsg.style.display = "flex";
-          statusMsg.innerHTML = "<span>✓</span><span>" + msg + "</span>";
+          setStatusContent(statusMsg, makeIcon("<span>✓</span>"), makeText(msg));
         } else if (type === "error" || type === "info") {
-          statusMsg.style.display = "block";
           statusMsg.textContent = msg;
         } else {
-          statusMsg.style.display = "none";
+          statusMsg.replaceChildren();
         }
       }
 

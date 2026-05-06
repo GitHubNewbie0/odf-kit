@@ -877,6 +877,7 @@ Paste or type your **Markdown** here.
 
     <script type="module">
       import { markdownToOdt, VERSION } from "https://esm.run/odf-kit@0.13.4";
+      import { setStatusContent, makeIcon, makeText } from "./shared/status-helpers.js";
 
       // Live preview using marked (same library odf-kit uses internally)
       const markedScript = document.createElement("script");
@@ -915,14 +916,14 @@ Paste or type your **Markdown** here.
 
       function showStatus(type, msg) {
         statusMsg.className = "status " + type;
-        statusMsg.style.display = type === "loading" ? "flex" : type ? "flex" : "none";
         if (type === "loading") {
-          statusMsg.innerHTML = '<div class="spinner"></div><span>' + msg + "</span>";
+          setStatusContent(statusMsg, makeIcon('<div class="spinner"></div>'), makeText(msg));
         } else if (type === "success") {
-          statusMsg.innerHTML = "<span>✓</span><span>" + msg + "</span>";
-        } else if (type === "error") {
-          statusMsg.style.display = "block";
+          setStatusContent(statusMsg, makeIcon("<span>✓</span>"), makeText(msg));
+        } else if (type === "error" || type === "info") {
           statusMsg.textContent = msg;
+        } else {
+          statusMsg.replaceChildren();
         }
       }
 
