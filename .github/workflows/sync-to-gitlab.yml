@@ -1,0 +1,31 @@
+# Push to gitlab.opencode.de on every commit to main, so the openCode.de
+# software directory indexer always sees the current publiccode.yml.
+#
+# Authentication: GITLAB_TOKEN repo secret, a GitLab personal access token
+# with `write_repository` scope. Token belongs to user oc00013173229 (the
+# GitLab account where odf-kit is mirrored).
+#
+# Source of truth: this GitHub repo. Direct edits made on the GitLab side
+# will be overwritten on the next sync.
+name: Sync to gitlab.opencode.de
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Push to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.opencode.de/oc00013173229/odf-kit.git"
+          git push --force gitlab main
