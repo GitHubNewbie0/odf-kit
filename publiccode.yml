@@ -21,8 +21,8 @@ intendedAudience:
 description:
   en:
     localisedName: odf-kit
-    shortDescription: TypeScript library for generating, filling, reading, and
-      converting OpenDocument Format (.odt, .ods) files in Node.js and browsers.
+    genericName: JavaScript OpenDocument ODF Library
+    shortDescription: Library to generate, fill, read, and convert OpenDocument (.odt, .ods) files in Node.js and browsers using JavaScript or TypeScript.
     longDescription: >-
       odf-kit is an open-source TypeScript library for working with OpenDocument
       Format (ODF) documents programmatically. It provides thirteen distinct
