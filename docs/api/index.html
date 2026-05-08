@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>odf-kit — API Reference</title>
+    <meta
+      name="description"
+      content="Complete API reference for odf-kit, a JavaScript/TypeScript library for generating, filling, reading, and converting OpenDocument Format files."
+    />
+    <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/api/" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+    />
+    <style>
+      :root {
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --text: #1f2937;
+        --text-secondary: #6b7280;
+        --surface: #ffffff;
+        --surface-alt: #f9fafb;
+        --border: #e5e7eb;
+        --code-bg: #f3f4f6;
+        --code-text: #111827;
+        --table-stripe: #f9fafb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          "DM Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.6;
+        color: var(--text);
+        background: var(--surface);
+        padding: 2rem 1rem 4rem;
+      }
+
+      article {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-weight: 700;
+        line-height: 1.25;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        scroll-margin-top: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+        margin-top: 0;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.4rem;
+        margin-top: 2.5rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+      }
+
+      h4 {
+        font-size: 1.05rem;
+      }
+
+      .anchor {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 400;
+        opacity: 0;
+        margin-right: 0.25rem;
+        transition: opacity 0.15s;
+      }
+
+      h1:hover .anchor,
+      h2:hover .anchor,
+      h3:hover .anchor,
+      h4:hover .anchor,
+      h5:hover .anchor,
+      h6:hover .anchor {
+        opacity: 1;
+      }
+
+      p {
+        margin: 0.75rem 0;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code {
+        font-family:
+          "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.92em;
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+      }
+
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: 0.9rem;
+        color: var(--code-text);
+        line-height: 1.5;
+      }
+
+      ul,
+      ol {
+        padding-left: 1.5rem;
+        margin: 0.75rem 0;
+      }
+
+      li {
+        margin: 0.3rem 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--surface-alt);
+        font-weight: 600;
+      }
+
+      tbody tr:nth-child(even) {
+        background: var(--table-stripe);
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 2rem 0;
+      }
+
+      blockquote {
+        margin: 1rem 0;
+        padding: 0.5rem 1rem;
+        border-left: 3px solid var(--accent);
+        background: var(--surface-alt);
+        color: var(--text-secondary);
+      }
+
+      .footer {
+        max-width: 860px;
+        margin: 3rem auto 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      @media print {
+        body {
+          padding: 0;
+        }
+        .anchor {
+          display: none;
+        }
+        pre {
+          page-break-inside: avoid;
+        }
+        h1,
+        h2,
+        h3 {
+          page-break-after: avoid;
+        }
+      }
+
+      @media (max-width: 700px) {
+        body {
+          padding: 1rem 0.75rem 3rem;
+        }
+        h1 {
+          font-size: 1.5rem;
+        }
+        h2 {
+          font-size: 1.25rem;
+        }
+        table {
+          font-size: 0.85rem;
+        }
+        th,
+        td {
+          padding: 0.4rem 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article>
+      <h1 id="odf-kit-opendocument-format-for-javascript-and-typescript"><a class="anchor" href="#odf-kit-opendocument-format-for-javascript-and-typescript">#</a> odf-kit — OpenDocument Format for JavaScript and TypeScript</h1>
+<h2 id="overview"><a class="anchor" href="#overview">#</a> Overview</h2>
+<p>An <code>.odt</code> file is an OpenDocument Format text document — an ISO standard (ISO/IEC 26300) ZIP archive containing XML files. It is the native format for LibreOffice, Apache OpenOffice, Collabora, OnlyOffice, and is supported by Google Docs and Microsoft Office.</p>
+<p>odf-kit is the only actively maintained JavaScript/TypeScript library for ODF generation. It produces spec-validated output (validated against the OASIS ODF Validator on every CI run). Works in Node.js 22+ and browsers. No LibreOffice dependency.</p>
+<h2 id="quick-reference"><a class="anchor" href="#quick-reference">#</a> Quick Reference</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Task</th>
+      <th>Import</th>
+      <th>Function</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create new ODT document</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>new OdtDocument()</code></td>
+    </tr>
+    <tr>
+      <td>Fill existing ODT template</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>fillTemplate(bytes, data)</code></td>
+    </tr>
+    <tr>
+      <td>HTML → ODT</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>htmlToOdt(html, options?)</code></td>
+    </tr>
+    <tr>
+      <td>Markdown → ODT</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>markdownToOdt(markdown, options?)</code></td>
+    </tr>
+    <tr>
+      <td>TipTap/ProseMirror JSON → ODT</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>tiptapToOdt(json, options?)</code></td>
+    </tr>
+    <tr>
+      <td>Build ODS spreadsheet</td>
+      <td><code>&quot;odf-kit&quot;</code></td>
+      <td><code>new OdsDocument()</code></td>
+    </tr>
+    <tr>
+      <td>Read ODT / convert to HTML</td>
+      <td><code>&quot;odf-kit/reader&quot;</code></td>
+      <td><code>readOdt(bytes)</code> / <code>odtToHtml(bytes)</code></td>
+    </tr>
+    <tr>
+      <td>Read ODS</td>
+      <td><code>&quot;odf-kit/ods-reader&quot;</code></td>
+      <td><code>readOds(bytes)</code> / <code>odsToHtml(bytes)</code></td>
+    </tr>
+    <tr>
+      <td>XLSX → ODS</td>
+      <td><code>&quot;odf-kit/xlsx&quot;</code></td>
+      <td><code>xlsxToOds(bytes)</code></td>
+    </tr>
+    <tr>
+      <td>DOCX → ODT</td>
+      <td><code>&quot;odf-kit/docx&quot;</code></td>
+      <td><code>docxToOdt(bytes, options?)</code></td>
+    </tr>
+    <tr>
+      <td>ODT → Typst / PDF</td>
+      <td><code>&quot;odf-kit/typst&quot;</code></td>
+      <td><code>odtToTypst(bytes)</code></td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="installation"><a class="anchor" href="#installation">#</a> Installation</h2>
+<pre><code>npm install odf-kit</code></pre>
+<p>Requires Node.js 22 or later. ESM only.</p>
+<h2 id="creating-new-odt-documents"><a class="anchor" href="#creating-new-odt-documents">#</a> Creating New ODT Documents</h2>
+<p>Generate <code>.odt</code> files with JavaScript using odf-kit&#x27;s builder API.</p>
+<h3 id="setup"><a class="anchor" href="#setup">#</a> Setup</h3>
+<pre><code class="lang-javascript">import { OdtDocument } from &quot;odf-kit&quot;;
+import { writeFileSync } from &quot;fs&quot;;
+
+const doc = new OdtDocument();
+doc.addHeading(&quot;Document Title&quot;, 1);
+doc.addParagraph(&quot;Body text goes here.&quot;);
+
+const bytes = await doc.save();
+writeFileSync(&quot;output.odt&quot;, bytes);</code></pre>
+<h3 id="metadata"><a class="anchor" href="#metadata">#</a> Metadata</h3>
+<pre><code class="lang-javascript">doc.setMetadata({
+  title: &quot;Quarterly Report&quot;,
+  creator: &quot;Jane Doe&quot;,
+  description: &quot;Q4 2026 financial summary&quot;,
+});</code></pre>
+<h3 id="page-layout"><a class="anchor" href="#page-layout">#</a> Page Layout</h3>
+<pre><code class="lang-javascript">doc.setPageLayout({
+  orientation: &quot;landscape&quot;,
+  width: &quot;21cm&quot;,
+  height: &quot;29.7cm&quot;,
+  marginTop: &quot;2cm&quot;,
+  marginBottom: &quot;2cm&quot;,
+  marginLeft: &quot;2cm&quot;,
+  marginRight: &quot;2cm&quot;,
+});</code></pre>
+<p>For US Letter: Use <code>width: &quot;8.5in&quot;</code> and <code>height: &quot;11in&quot;</code>.</p>
+<h3 id="headers-and-footers"><a class="anchor" href="#headers-and-footers">#</a> Headers and Footers</h3>
+<pre><code class="lang-javascript">doc.setHeader(&quot;Confidential — Page ###&quot;);
+doc.setFooter(&quot;© 2026 Acme Corp — Page ###&quot;);
+
+doc.setHeader((h) =&gt; {
+  h.addText(&quot;Confidential&quot;, { bold: true, color: &quot;gray&quot; });
+  h.addText(&quot; — Page &quot;);
+  h.addPageNumber();
+});</code></pre>
+<h3 id="headings"><a class="anchor" href="#headings">#</a> Headings</h3>
+<pre><code class="lang-javascript">doc.addHeading(&quot;Chapter Title&quot;, 1);
+doc.addHeading(&quot;Section Title&quot;, 2);
+doc.addHeading(&quot;Centered Title&quot;, 1, { align: &quot;center&quot; });
+doc.addHeading(&quot;Title with Space&quot;, 1, { spaceBefore: &quot;0.5cm&quot;, spaceAfter: &quot;0.5cm&quot; });</code></pre>
+<h3 id="paragraphs"><a class="anchor" href="#paragraphs">#</a> Paragraphs</h3>
+<pre><code class="lang-javascript">doc.addParagraph(&quot;Simple paragraph.&quot;);
+doc.addParagraph(&quot;Right-aligned text.&quot;, { align: &quot;right&quot; });
+
+doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Normal and &quot;);
+  p.addText(&quot;bold&quot;, { bold: true });
+  p.addText(&quot; text.&quot;);
+});
+
+doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Indented paragraph content.&quot;);
+}, { indentLeft: &quot;1cm&quot;, indentFirst: &quot;0.5cm&quot; });</code></pre>
+<p>Paragraph options:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Example</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>align</code></td>
+      <td>string</td>
+      <td><code>&quot;left&quot;</code>, <code>&quot;center&quot;</code>, <code>&quot;right&quot;</code>, <code>&quot;justify&quot;</code></td>
+      <td>Text alignment</td>
+    </tr>
+    <tr>
+      <td><code>spaceBefore</code></td>
+      <td>string</td>
+      <td><code>&quot;0.5cm&quot;</code></td>
+      <td>Space above paragraph</td>
+    </tr>
+    <tr>
+      <td><code>spaceAfter</code></td>
+      <td>string</td>
+      <td><code>&quot;0.5cm&quot;</code></td>
+      <td>Space below paragraph</td>
+    </tr>
+    <tr>
+      <td><code>lineHeight</code></td>
+      <td>number or string</td>
+      <td><code>1.5</code> or <code>&quot;150%&quot;</code></td>
+      <td>Line spacing</td>
+    </tr>
+    <tr>
+      <td><code>indentLeft</code></td>
+      <td>string</td>
+      <td><code>&quot;1cm&quot;</code></td>
+      <td>Left indent</td>
+    </tr>
+    <tr>
+      <td><code>indentRight</code></td>
+      <td>string</td>
+      <td><code>&quot;1cm&quot;</code></td>
+      <td>Right indent</td>
+    </tr>
+    <tr>
+      <td><code>indentFirst</code></td>
+      <td>string</td>
+      <td><code>&quot;0.5cm&quot;</code></td>
+      <td>First-line indent (positive) or hanging indent (negative)</td>
+    </tr>
+    <tr>
+      <td><code>tabStops</code></td>
+      <td>array</td>
+      <td><code>[{ position: &quot;6cm&quot;, type: &quot;right&quot; }]</code></td>
+      <td>Tab stop positions</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="text-formatting"><a class="anchor" href="#text-formatting">#</a> Text Formatting</h3>
+<pre><code class="lang-javascript">doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Bold&quot;, { bold: true });
+  p.addText(&quot;Italic&quot;, { italic: true });
+  p.addText(&quot;Underline&quot;, { underline: true });
+  p.addText(&quot;Arial 14pt red&quot;, { fontFamily: &quot;Arial&quot;, fontSize: 14, color: &quot;#CC0000&quot; });
+  p.addText(&quot;Highlighted&quot;, { highlightColor: &quot;#FFFF00&quot; });
+  p.addText(&quot;UPPERCASE&quot;, { textTransform: &quot;uppercase&quot; });
+});</code></pre>
+<p>All text formatting options:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>bold</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>italic</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>underline</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>strikethrough</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>superscript</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>subscript</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>fontSize</code></td>
+      <td>number or string</td>
+      <td><code>14</code> or <code>&quot;14pt&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>fontFamily</code></td>
+      <td>string</td>
+      <td><code>&quot;Arial&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>fontWeight</code></td>
+      <td>string or number</td>
+      <td><code>&quot;bold&quot;</code>, <code>300</code>, <code>700</code></td>
+    </tr>
+    <tr>
+      <td><code>fontStyle</code></td>
+      <td>string</td>
+      <td><code>&quot;normal&quot;</code>, <code>&quot;italic&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>color</code></td>
+      <td>string</td>
+      <td><code>&quot;#FF0000&quot;</code> or <code>&quot;red&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>highlightColor</code></td>
+      <td>string</td>
+      <td><code>&quot;#FFFF00&quot;</code> or <code>&quot;yellow&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>textTransform</code></td>
+      <td>string</td>
+      <td><code>&quot;uppercase&quot;</code>, <code>&quot;lowercase&quot;</code>, <code>&quot;capitalize&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>smallCaps</code></td>
+      <td>boolean</td>
+      <td><code>true</code></td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="tables"><a class="anchor" href="#tables">#</a> Tables</h3>
+<pre><code class="lang-javascript">doc.addTable([
+  [&quot;Name&quot;, &quot;Role&quot;, &quot;Department&quot;],
+  [&quot;Alice&quot;, &quot;Engineer&quot;, &quot;R&amp;D&quot;],
+  [&quot;Bob&quot;, &quot;Designer&quot;, &quot;UX&quot;],
+]);
+
+doc.addTable([
+  [&quot;Item&quot;, &quot;Price&quot;],
+  [&quot;Widget&quot;, &quot;$9.99&quot;],
+], { columnWidths: [&quot;8cm&quot;, &quot;4cm&quot;], border: &quot;0.5pt solid #000000&quot; });
+
+doc.addTable((t) =&gt; {
+  t.addRow((r) =&gt; {
+    r.addCell(&quot;Header&quot;, {
+      bold: true,
+      backgroundColor: &quot;#DDDDDD&quot;,
+      verticalAlign: &quot;middle&quot;,
+      padding: &quot;0.15cm&quot;,
+    });
+    r.addCell(&quot;Value&quot;, {
+      bold: true,
+      backgroundColor: &quot;#DDDDDD&quot;,
+      colSpan: 2,
+    });
+  });
+
+  t.addRow((r) =&gt; {
+    r.addCell(&quot;Status&quot;);
+    r.addCell(&quot;Complete&quot;, { color: &quot;green&quot; });
+    r.addCell(&quot;Verified&quot;, { border: &quot;0.5pt solid #000000&quot; });
+  });
+});</code></pre>
+<p>Cell options (all text formatting options, plus):</p>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>backgroundColor</code></td>
+      <td>string</td>
+      <td><code>&quot;#EEEEEE&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>border</code></td>
+      <td>string</td>
+      <td><code>&quot;0.5pt solid #000000&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>borderTop</code> / <code>borderBottom</code> / <code>borderLeft</code> / <code>borderRight</code></td>
+      <td>string</td>
+      <td>Per-side borders</td>
+    </tr>
+    <tr>
+      <td><code>colSpan</code></td>
+      <td>number</td>
+      <td><code>2</code></td>
+    </tr>
+    <tr>
+      <td><code>rowSpan</code></td>
+      <td>number</td>
+      <td><code>3</code></td>
+    </tr>
+    <tr>
+      <td><code>verticalAlign</code></td>
+      <td>string</td>
+      <td><code>&quot;top&quot;</code>, <code>&quot;middle&quot;</code>, <code>&quot;bottom&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>padding</code></td>
+      <td>string</td>
+      <td><code>&quot;0.15cm&quot;</code></td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="lists"><a class="anchor" href="#lists">#</a> Lists</h3>
+<pre><code class="lang-javascript">doc.addList([&quot;Apples&quot;, &quot;Bananas&quot;, &quot;Cherries&quot;]);
+doc.addList([&quot;First&quot;, &quot;Second&quot;, &quot;Third&quot;], { type: &quot;numbered&quot; });
+doc.addList([&quot;Item a&quot;, &quot;Item b&quot;], { type: &quot;numbered&quot;, numFormat: &quot;a&quot; });
+doc.addList([&quot;Step 5&quot;, &quot;Step 6&quot;], { type: &quot;numbered&quot;, startValue: 5 });
+
+doc.addList((l) =&gt; {
+  l.addItem((p) =&gt; {
+    p.addText(&quot;Important: &quot;, { bold: true });
+    p.addText(&quot;read the documentation&quot;);
+  });
+  l.addItem(&quot;Main topic&quot;);
+  l.addNested((sub) =&gt; {
+    sub.addItem(&quot;Subtopic A&quot;);
+    sub.addItem(&quot;Subtopic B&quot;);
+  });
+});</code></pre>
+<p>List options:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Example</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>type</code></td>
+      <td>string</td>
+      <td><code>&quot;numbered&quot;</code></td>
+      <td><code>&quot;bullet&quot;</code> (default) or <code>&quot;numbered&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>numFormat</code></td>
+      <td>string</td>
+      <td><code>&quot;a&quot;</code>, <code>&quot;A&quot;</code>, <code>&quot;i&quot;</code>, <code>&quot;I&quot;</code></td>
+      <td>Number format; default <code>&quot;1&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>numPrefix</code></td>
+      <td>string</td>
+      <td><code>&quot;(&quot;</code></td>
+      <td>Text before number</td>
+    </tr>
+    <tr>
+      <td><code>numSuffix</code></td>
+      <td>string</td>
+      <td><code>&quot;)&quot;</code></td>
+      <td>Text after number; default <code>&quot;.&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>startValue</code></td>
+      <td>number</td>
+      <td><code>5</code></td>
+      <td>Starting number</td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="images"><a class="anchor" href="#images">#</a> Images</h3>
+<pre><code class="lang-javascript">import { readFile } from &quot;fs/promises&quot;;
+const logo = await readFile(&quot;logo.png&quot;);
+
+doc.addImage(logo, { width: &quot;10cm&quot;, height: &quot;6cm&quot;, mimeType: &quot;image/png&quot; });
+
+doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Logo: &quot;);
+  p.addImage(logo, { width: &quot;2cm&quot;, height: &quot;1cm&quot;, mimeType: &quot;image/png&quot; });
+});</code></pre>
+<p>Image options:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>width</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td><code>&quot;10cm&quot;</code>, <code>&quot;4in&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>height</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td><code>&quot;6cm&quot;</code>, <code>&quot;3in&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>mimeType</code></td>
+      <td>string</td>
+      <td>Yes</td>
+      <td><code>&quot;image/png&quot;</code>, <code>&quot;image/jpeg&quot;</code></td>
+    </tr>
+    <tr>
+      <td><code>anchor</code></td>
+      <td>string</td>
+      <td>No</td>
+      <td><code>&quot;as-character&quot;</code> or <code>&quot;paragraph&quot;</code></td>
+    </tr>
+  </tbody>
+</table>
+<h3 id="links-and-bookmarks"><a class="anchor" href="#links-and-bookmarks">#</a> Links and Bookmarks</h3>
+<pre><code class="lang-javascript">doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Visit &quot;);
+  p.addLink(&quot;our website&quot;, &quot;https://example.com&quot;, { bold: true });
+});
+
+doc.addParagraph((p) =&gt; {
+  p.addBookmark(&quot;section-one&quot;);
+  p.addText(&quot;Section 1: Introduction&quot;);
+});
+
+doc.addParagraph((p) =&gt; {
+  p.addLink(&quot;Go to Section 1&quot;, &quot;#section-one&quot;);
+});</code></pre>
+<h3 id="tab-stops"><a class="anchor" href="#tab-stops">#</a> Tab Stops</h3>
+<pre><code class="lang-javascript">doc.addParagraph((p) =&gt; {
+  p.addText(&quot;Item&quot;);
+  p.addTab();
+  p.addText(&quot;Qty&quot;);
+  p.addTab();
+  p.addText(&quot;$100.00&quot;);
+}, {
+  tabStops: [
+    { position: &quot;6cm&quot; },
+    { position: &quot;12cm&quot;, type: &quot;right&quot; },
+  ],
+});</code></pre>
+<h3 id="page-breaks"><a class="anchor" href="#page-breaks">#</a> Page Breaks</h3>
+<pre><code class="lang-javascript">doc.addPageBreak();</code></pre>
+<h3 id="method-chaining"><a class="anchor" href="#method-chaining">#</a> Method Chaining</h3>
+<p>Every method returns the document for chaining:</p>
+<pre><code class="lang-javascript">const bytes = await new OdtDocument()
+  .setMetadata({ title: &quot;Report&quot; })
+  .setPageLayout({ orientation: &quot;landscape&quot; })
+  .setHeader(&quot;Confidential&quot;)
+  .setFooter(&quot;Page ###&quot;)
+  .addHeading(&quot;Summary&quot;, 1)
+  .addParagraph(&quot;All systems operational.&quot;)
+  .addTable([[&quot;System&quot;, &quot;Status&quot;], [&quot;API&quot;, &quot;OK&quot;], [&quot;DB&quot;, &quot;OK&quot;]])
+  .addList([&quot;No incidents&quot;, &quot;No alerts&quot;], { type: &quot;numbered&quot; })
+  .save();</code></pre>
+<h2 id="template-filling"><a class="anchor" href="#template-filling">#</a> Template Filling</h2>
+<p>Fill existing <code>.odt</code> templates created in LibreOffice with dynamic data. Templates use <code>{placeholder}</code> syntax.</p>
+<h3 id="basic-usage"><a class="anchor" href="#basic-usage">#</a> Basic Usage</h3>
+<pre><code class="lang-javascript">import { fillTemplate } from &quot;odf-kit&quot;;
+import { readFileSync, writeFileSync } from &quot;fs&quot;;
+
+const template = readFileSync(&quot;template.odt&quot;);
+const result = fillTemplate(template, {
+  name: &quot;Alice&quot;,
+  company: &quot;Acme Corp&quot;,
+  date: &quot;2026-03-01&quot;,
+});
+writeFileSync(&quot;output.odt&quot;, result);</code></pre>
+<h3 id="template-syntax"><a class="anchor" href="#template-syntax">#</a> Template Syntax</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Syntax</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>{tag}</code></td>
+      <td>Simple replacement</td>
+      <td><code>Dear {name},</code></td>
+    </tr>
+    <tr>
+      <td><code>{object.property}</code></td>
+      <td>Dot notation for nested data</td>
+      <td><code>{company.address.city}</code></td>
+    </tr>
+    <tr>
+      <td><code>{#tag}...{/tag}</code></td>
+      <td>Loop over array</td>
+      <td><code>{#items}...{/items}</code></td>
+    </tr>
+    <tr>
+      <td><code>{#tag}...{/tag}</code></td>
+      <td>Conditional (truthy/falsy)</td>
+      <td><code>{#showNotes}...{/showNotes}</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>Loop items inherit parent data. Item properties override parent properties of the same name. Falsy values remove conditional sections.</p>
+<h3 id="placeholder-healing"><a class="anchor" href="#placeholder-healing">#</a> Placeholder Healing</h3>
+<p>LibreOffice often fragments <code>{placeholder}</code> text across multiple XML elements due to editing history or spell-check. odf-kit automatically reassembles fragmented placeholders before replacement — no manual XML cleanup needed.</p>
+<h2 id="html-odt"><a class="anchor" href="#html-odt">#</a> HTML → ODT</h2>
+<pre><code class="lang-javascript">import { htmlToOdt } from &quot;odf-kit&quot;;
+
+const bytes = await htmlToOdt(`
+  &lt;h1&gt;Meeting Notes&lt;/h1&gt;
+  &lt;p&gt;Attendees: &lt;strong&gt;Alice&lt;/strong&gt;, Bob&lt;/p&gt;
+  &lt;ul&gt;&lt;li&gt;Project status&lt;/li&gt;&lt;li&gt;Budget review&lt;/li&gt;&lt;/ul&gt;
+  &lt;table&gt;
+    &lt;tr&gt;&lt;th&gt;Action&lt;/th&gt;&lt;th&gt;Owner&lt;/th&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Send report&lt;/td&gt;&lt;td&gt;Alice&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+`, {
+  pageFormat: &quot;A4&quot;,
+  orientation: &quot;portrait&quot;,
+  metadata: { title: &quot;Meeting Notes&quot;, creator: &quot;Alice&quot; },
+});</code></pre>
+<p>Supports headings (h1–h6), paragraphs, bold, italic, underline, lists (ordered/unordered, nested), tables, blockquotes, code blocks, horizontal rules, inline CSS (color, font-size, font-family, text-align, background-color on cells).</p>
+<h2 id="markdown-odt"><a class="anchor" href="#markdown-odt">#</a> Markdown → ODT</h2>
+<pre><code class="lang-javascript">import { markdownToOdt } from &quot;odf-kit&quot;;
+
+const bytes = await markdownToOdt(`
+# Report Title
+
+Revenue **exceeded** expectations.
+
+## Action Items
+- Send report by Friday
+- Review budget
+
+| Region | Revenue |
+|--------|---------|
+| North  | $2.1M   |
+`, { pageFormat: &quot;A4&quot; });</code></pre>
+<p>Full CommonMark support. Accepts the same options as <code>htmlToOdt</code>.</p>
+<h2 id="tiptap-prosemirror-json-odt"><a class="anchor" href="#tiptap-prosemirror-json-odt">#</a> TipTap / ProseMirror JSON → ODT</h2>
+<pre><code class="lang-javascript">import { tiptapToOdt } from &quot;odf-kit&quot;;
+
+const bytes = await tiptapToOdt(editor.getJSON(), {
+  pageFormat: &quot;A4&quot;,
+  images: { [imageUrl]: imageBytes },
+  unknownNodeHandler: (node, doc) =&gt; {
+    if (node.type === &quot;callout&quot;) doc.addParagraph(`⚠️ ${extractText(node)}`);
+  },
+});</code></pre>
+<p>No <code>@tiptap/core</code> dependency — walks the JSON tree directly. Supports all standard TipTap nodes and marks including tables, images, and nested lists.</p>
+<h2 id="build-ods-spreadsheets"><a class="anchor" href="#build-ods-spreadsheets">#</a> Build ODS Spreadsheets</h2>
+<pre><code class="lang-javascript">import { OdsDocument } from &quot;odf-kit&quot;;
+import { writeFileSync } from &quot;fs&quot;;
+
+const doc = new OdsDocument();
+const sheet = doc.addSheet(&quot;Sales&quot;);
+
+sheet.addRow([&quot;Month&quot;, &quot;Revenue&quot;, &quot;Growth&quot;], { bold: true, backgroundColor: &quot;#DDDDDD&quot; });
+sheet.addRow([&quot;January&quot;,  12500, 0.08]);
+sheet.addRow([&quot;February&quot;, 14200, 0.136]);
+sheet.addRow([&quot;Total&quot;, { value: &quot;=SUM(B2:B3)&quot;, type: &quot;formula&quot; }]);
+sheet.addRow([{ value: 0.1234, type: &quot;percentage&quot;, numberFormat: &quot;percentage:1&quot; }]);
+sheet.addRow([{ value: 1234.56, type: &quot;currency&quot;, numberFormat: &quot;currency:EUR&quot; }]);
+
+sheet.setColumnWidth(0, &quot;4cm&quot;);
+sheet.freezeRows(1);
+sheet.freezeColumns(1);
+sheet.setTabColor(&quot;#4CAF50&quot;);
+
+const bytes = await doc.save();
+writeFileSync(&quot;sales.ods&quot;, bytes);</code></pre>
+<p>Cell value auto-types: <code>number</code> → float · <code>Date</code> → date · <code>boolean</code> → boolean · <code>null</code>/<code>undefined</code> → empty · <code>string</code> → string. Use <code>{ value, type }</code> object for formula/percentage/currency.</p>
+<p>Number formats: <code>&quot;integer&quot;</code> · <code>&quot;decimal:N&quot;</code> · <code>&quot;percentage&quot;</code> / <code>&quot;percentage:N&quot;</code> · <code>&quot;currency:CODE&quot;</code> / <code>&quot;currency:CODE:N&quot;</code></p>
+<h2 id="read-odt-convert-to-html"><a class="anchor" href="#read-odt-convert-to-html">#</a> Read ODT / Convert to HTML</h2>
+<pre><code class="lang-javascript">import { readOdt, odtToHtml } from &quot;odf-kit/reader&quot;;
+import { readFileSync } from &quot;fs&quot;;
+
+const bytes = readFileSync(&quot;document.odt&quot;);
+const doc = readOdt(bytes);
+
+const html = odtToHtml(bytes);
+const fragment = odtToHtml(bytes, { fragment: true });
+
+for (const node of doc.body) {
+  if (node.kind === &quot;heading&quot;)   console.log(`H${node.level}:`, node.spans[0].text);
+  if (node.kind === &quot;paragraph&quot;) console.log(node.spans.map(s =&gt; s.text).join(&quot;&quot;));
+}
+console.log(doc.metadata.title);</code></pre>
+<h2 id="read-ods"><a class="anchor" href="#read-ods">#</a> Read ODS</h2>
+<pre><code class="lang-javascript">import { readOds, odsToHtml } from &quot;odf-kit/ods-reader&quot;;
+import { readFileSync } from &quot;fs&quot;;
+
+const bytes = readFileSync(&quot;data.ods&quot;);
+
+const model = readOds(bytes);
+for (const row of model.sheets[0].rows) {
+  for (const cell of row.cells) {
+    console.log(cell.type, cell.value);
+  }
+}
+
+const html = odsToHtml(bytes);</code></pre>
+<p>Cell types: <code>&quot;string&quot; | &quot;float&quot; | &quot;boolean&quot; | &quot;date&quot; | &quot;formula&quot; | &quot;empty&quot; | &quot;covered&quot;</code>. Cell values: <code>string | number | boolean | Date | null</code> — never a display-formatted string.</p>
+<h2 id="xlsx-ods"><a class="anchor" href="#xlsx-ods">#</a> XLSX → ODS</h2>
+<pre><code class="lang-javascript">import { xlsxToOds } from &quot;odf-kit/xlsx&quot;;
+import { readFileSync, writeFileSync } from &quot;fs&quot;;
+
+const ods = await xlsxToOds(readFileSync(&quot;report.xlsx&quot;));
+writeFileSync(&quot;report.ods&quot;, ods);
+
+const ods2 = await xlsxToOds(await file.arrayBuffer());</code></pre>
+<p>Preserves: strings, numbers, booleans, dates, formulas (cached result), merged cells, freeze panes, multiple sheets. No SheetJS dependency — own parser built on fflate.</p>
+<h2 id="docx-odt"><a class="anchor" href="#docx-odt">#</a> DOCX → ODT</h2>
+<pre><code class="lang-javascript">import { docxToOdt } from &quot;odf-kit/docx&quot;;
+import { readFileSync, writeFileSync } from &quot;fs&quot;;
+
+const { bytes, warnings } = await docxToOdt(readFileSync(&quot;report.docx&quot;), {
+  pageFormat: &quot;letter&quot;,
+  preservePageLayout: true,
+  styleMap: { &quot;Section Title&quot;: 1, &quot;Sub Title&quot;: 2 },
+  metadata: { title: &quot;My Report&quot; },
+});
+writeFileSync(&quot;report.odt&quot;, bytes);
+if (warnings.length) console.warn(warnings);
+
+const { bytes: odt } = await docxToOdt(await file.arrayBuffer());</code></pre>
+<p>Preserves: headings, paragraphs, all text formatting (bold, italic, underline, font sizes, colors), lists (bullet/numbered/nested), tables (merged cells, column widths), hyperlinks, bookmarks, images (actual dimensions), page layout, headers/footers, footnotes, tracked changes (final-text mode).</p>
+<h2 id="odt-typst-pdf"><a class="anchor" href="#odt-typst-pdf">#</a> ODT → Typst / PDF</h2>
+<pre><code class="lang-javascript">import { odtToTypst, modelToTypst } from &quot;odf-kit/typst&quot;;
+import { readOdt } from &quot;odf-kit/reader&quot;;
+import { readFileSync, writeFileSync } from &quot;fs&quot;;
+import { execSync } from &quot;child_process&quot;;
+
+const bytes = new Uint8Array(readFileSync(&quot;document.odt&quot;));
+
+const typ = odtToTypst(bytes);
+writeFileSync(&quot;document.typ&quot;, typ);
+execSync(&quot;typst compile document.typ document.pdf&quot;);
+
+const model = readOdt(bytes);
+const typst = modelToTypst(model);</code></pre>
+<p><code>odf-kit/typst</code> is zero-dependency and browser-safe. The Typst CLI is only needed when compiling to PDF.</p>
+<h2 id="critical-rules"><a class="anchor" href="#critical-rules">#</a> Critical Rules</h2>
+<ul>
+  <li><strong>Always use <code>await</code> with <code>save()</code></strong> — it returns a <code>Promise&lt;Uint8Array&gt;</code></li>
+  <li><strong>ESM only</strong> — use <code>import</code>, not <code>require</code>. File must use <code>.mjs</code> extension or <code>&quot;type&quot;: &quot;module&quot;</code> in <code>package.json</code></li>
+  <li><strong>Use <code>writeFileSync</code> (or <code>writeFile</code>)</strong> to write the <code>Uint8Array</code> to disk</li>
+  <li><strong><code>fontSize</code> as number = points</strong> — <code>14</code> means 14pt</li>
+  <li><strong>Images require all three options</strong> — <code>width</code>, <code>height</code>, and <code>mimeType</code> are all required</li>
+  <li><strong><code>fillTemplate</code> is synchronous</strong> — returns <code>Uint8Array</code> directly, no <code>await</code> needed</li>
+  <li><strong><code>###</code> in header/footer strings is replaced with page numbers automatically</strong></li>
+  <li><strong>A4 is the default page size</strong> — set explicit dimensions for US Letter (<code>8.5in × 11in</code>)</li>
+  <li><strong><code>fontWeight</code> numeric</strong> — accepts CSS-style values 100–900 as well as <code>&quot;bold&quot;</code> / <code>&quot;normal&quot;</code></li>
+  <li><strong><code>lineHeight</code> as number</strong> — <code>1.5</code> means 150% line height; strings like <code>&quot;150%&quot;</code> also accepted</li>
+  <li><strong><code>docxToOdt</code> returns <code>{ bytes, warnings }</code></strong> — always destructure, log warnings in development</li>
+  <li><strong><code>readOds</code> cell values are typed</strong> — <code>cell.value</code> is <code>string | number | boolean | Date | null</code>, never a display-formatted string</li>
+</ul>
+<h2 id="complete-example"><a class="anchor" href="#complete-example">#</a> Complete Example</h2>
+<pre><code class="lang-javascript">import { OdtDocument } from &quot;odf-kit&quot;;
+import { writeFileSync } from &quot;fs&quot;;
+
+async function createReport() {
+  const doc = new OdtDocument();
+
+  doc.setMetadata({ title: &quot;Monthly Report&quot;, creator: &quot;Operations Team&quot; });
+  doc.setPageLayout({
+    width: &quot;8.5in&quot;, height: &quot;11in&quot;,
+    marginTop: &quot;1in&quot;, marginBottom: &quot;1in&quot;,
+    marginLeft: &quot;1in&quot;, marginRight: &quot;1in&quot;,
+  });
+  doc.setHeader((h) =&gt; {
+    h.addText(&quot;Monthly Operations Report&quot;, { bold: true });
+    h.addText(&quot; — Page &quot;);
+    h.addPageNumber();
+  });
+  doc.setFooter(&quot;© 2026 Acme Corp&quot;);
+
+  doc.addHeading(&quot;Executive Summary&quot;, 1, { spaceBefore: &quot;0.5cm&quot; });
+  doc.addParagraph(
+    &quot;All operations performed within expected parameters.&quot;,
+    { align: &quot;justify&quot;, lineHeight: 1.5 }
+  );
+
+  doc.addHeading(&quot;Key Metrics&quot;, 2);
+  doc.addTable((t) =&gt; {
+    t.addRow((r) =&gt; {
+      [&quot;Metric&quot;, &quot;Target&quot;, &quot;Actual&quot;, &quot;Status&quot;].forEach((h) =&gt;
+        r.addCell(h, { bold: true, backgroundColor: &quot;#DDDDDD&quot;, verticalAlign: &quot;middle&quot; })
+      );
+    });
+    t.addRow((r) =&gt; {
+      r.addCell(&quot;Uptime&quot;); r.addCell(&quot;99.9%&quot;); r.addCell(&quot;99.95%&quot;);
+      r.addCell(&quot;✓&quot;, { color: &quot;green&quot; });
+    });
+  }, { columnWidths: [&quot;5cm&quot;, &quot;3cm&quot;, &quot;3cm&quot;, &quot;2cm&quot;], border: &quot;0.5pt solid #000000&quot; });
+
+  doc.addHeading(&quot;Action Items&quot;, 2);
+  doc.addList([
+    &quot;Complete infrastructure audit by March 15&quot;,
+    &quot;Deploy monitoring upgrade to production&quot;,
+    &quot;Review disaster recovery procedures&quot;,
+  ], { type: &quot;numbered&quot; });
+
+  const bytes = await doc.save();
+  writeFileSync(&quot;report.odt&quot;, bytes);
+}
+
+createReport();</code></pre>
+<h2 id="license"><a class="anchor" href="#license">#</a> License</h2>
+<p>Apache 2.0 — see <a href="LICENSE">LICENSE</a> for details.</p>
+<h2 id="more-information"><a class="anchor" href="#more-information">#</a> More Information</h2>
+<ul>
+  <li>Source code: https://github.com/GitHubNewbie0/odf-kit</li>
+  <li>Documentation site: https://githubnewbie0.github.io/odf-kit</li>
+  <li>Issue tracker: https://github.com/GitHubNewbie0/odf-kit/issues</li>
+  <li>Package: https://www.npmjs.com/package/odf-kit</li>
+</ul>
+    </article>
+    <div class="footer">
+      <p>
+        odf-kit is licensed under
+        <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+        Source on
+        <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>.
+      </p>
+    </div>
+  </body>
+</html>

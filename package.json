@@ -125,7 +125,7 @@
     "lint": "eslint src tests",
     "format": "prettier --write src tests docs",
     "format:check": "prettier --check src tests docs",
-    "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools",
+    "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools docs/api",
     "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build",
     "prepare": "node scripts/sync-version.js"
