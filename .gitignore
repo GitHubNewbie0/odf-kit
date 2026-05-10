@@ -18,3 +18,6 @@ src/version.ts
 # CodeQL local analysis artifacts
 .codeql-db/
 codeql-results.sarif
+
+docs/tools/index.html
+
