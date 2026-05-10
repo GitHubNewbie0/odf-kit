@@ -3,11 +3,334 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <meta name="build-date" content="<!-- BUILD_DATE -->" />
-    <title>odf-kit — Free file conversion tool</title>
+    <title>Free File Converter — HTML, Markdown, DOCX, XLSX to ODT, ODS · odf-kit</title>
+    <meta
+      name="description"
+      content="Convert HTML, Markdown, DOCX, XLSX, Lexical and TipTap JSON to OpenDocument (.odt, .ods) and back — free, private, browser-based. Nothing is uploaded; conversion runs entirely in your browser."
+    />
+    <meta
+      name="keywords"
+      content="file converter, html to odt, markdown to odt, docx to odt, xlsx to ods, odt to html, ods to html, odt to markdown, lexical to odt, tiptap to odt, opendocument converter, libreoffice converter, free file converter, browser file converter, offline file converter, odf-kit"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://githubnewbie0.github.io/odf-kit/tools/" />
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Free File Converter — HTML, Markdown, DOCX, XLSX to ODT, ODS"
+    />
+    <meta
+      property="og:description"
+      content="Free, private, browser-based file conversion tool. Convert between HTML, Markdown, DOCX, XLSX, ODT, ODS, Lexical and TipTap JSON. Nothing is uploaded; runs entirely in your browser."
+    />
+    <meta property="og:url" content="https://githubnewbie0.github.io/odf-kit/tools/" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "odf-kit File Converter",
+        "description": "Free browser-based tool to convert between HTML, Markdown, DOCX, XLSX, ODT, ODS, Lexical and TipTap JSON. No upload, no server — conversion runs entirely in your browser using odf-kit.",
+        "url": "https://githubnewbie0.github.io/odf-kit/tools/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0" }
+      }
+    </script>
+
+    <style>
+      :root {
+        --bg: #fafaf8;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-secondary: #5a5a5a;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-light: #dbeafe;
+        --border: #e5e5e0;
+        --code-bg: #1e1e2e;
+        --code-text: #cdd6f4;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .container-narrow {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      nav {
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+        background: var(--surface);
+      }
+      nav .inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav-brand {
+        font-family:
+          ui-monospace, SFMono-Regular, "Cascadia Mono", "Segoe UI Mono", Menlo, monospace;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text);
+        text-decoration: none;
+      }
+      .nav-brand span {
+        color: var(--accent);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .nav-links a,
+      .nav-links button {
+        font-family: inherit;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover,
+      .nav-links button:hover {
+        color: var(--text);
+      }
+
+      .tool-section {
+        padding: 2.5rem 0 3rem;
+      }
+
+      .input-method-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .io-pane {
+        min-height: 320px;
+        max-height: 540px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow: auto;
+        margin-bottom: 1rem;
+      }
+      .io-pane-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 320px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+
+      .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.65rem 1.1rem;
+        border-radius: 7px;
+        border: none;
+        cursor: pointer;
+        transition:
+          background-color 0.15s,
+          opacity 0.15s;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+      .btn-primary:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      footer {
+        padding: 2.5rem 0;
+        text-align: center;
+        border-top: 1px solid var(--border);
+      }
+      footer p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .mobile-notice {
+        display: none;
+        padding: 2.5rem 0;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
+      .mobile-notice .icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+      }
+      .mobile-notice h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .mobile-notice p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        max-width: 420px;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 1024px) {
+        .tool-section {
+          display: none;
+        }
+        .mobile-notice {
+          display: block;
+        }
+      }
+    </style>
   </head>
   <body>
-    <p id="hello">Loading…</p>
+    <h1 class="visually-hidden">
+      Free browser-based file conversion tool — runs entirely in your browser with no server upload,
+      supports OpenDocument and other office formats
+    </h1>
+
+    <nav>
+      <div class="inner">
+        <a href="../" class="nav-brand"><span>odf-kit</span></a>
+        <div class="nav-links">
+          <a href="../">Docs</a>
+          <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a>
+          <button type="button" id="aboutBtn">About</button>
+        </div>
+      </div>
+    </nav>
+
+    <section class="mobile-notice">
+      <div class="container-narrow">
+        <div class="icon">🖥️</div>
+        <h2>Best on a larger screen</h2>
+        <p>
+          This conversion tool needs a wider display. Please return on a desktop or laptop browser
+          to use it.
+        </p>
+      </div>
+    </section>
+
+    <div class="tool-section">
+      <div class="container">
+        <div class="input-method-buttons" role="group" aria-label="Choose an input method">
+          <button type="button" class="btn btn-primary" id="browseBtn">Browse to File</button>
+          <button type="button" class="btn btn-primary" id="sampleBtn">Load Sample File</button>
+          <button type="button" class="btn btn-primary" id="keyboardBtn">
+            Type Keyboard Input
+          </button>
+        </div>
+
+        <div class="io-pane io-pane-input" id="inputPane" role="region" aria-label="Input">
+          <div class="io-pane-empty">Select an input method above</div>
+        </div>
+
+        <div class="io-pane io-pane-output" id="outputPane" role="region" aria-label="Output">
+          <div class="io-pane-empty">Output will appear here after Generate</div>
+        </div>
+
+        <div class="action-buttons" role="group" aria-label="Output actions">
+          <button type="button" class="btn btn-primary" id="generateBtn" disabled>Generate</button>
+          <button type="button" class="btn btn-primary" id="saveBtn" disabled>Save</button>
+          <button type="button" class="btn btn-primary" id="clearBtn" disabled>Clear</button>
+          <button type="button" class="btn btn-primary" id="saveAndClearBtn" disabled>
+            Save and Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container-narrow">
+        <p>
+          Powered by <a href="../">odf-kit</a> — open source ODF library for JavaScript and
+          TypeScript · <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/odf-kit">npm</a> · Apache 2.0
+        </p>
+      </div>
+    </footer>
+
     <!-- ODF_KIT_BUNDLE_START -->
     <script type="module">
       /* placeholder — replaced at build time */
