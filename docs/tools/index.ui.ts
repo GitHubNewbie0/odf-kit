@@ -13,10 +13,12 @@
 //   - Clear fully functional (returns to State A)
 //   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
 //   - showPopup() is the reusable popup helper: native <dialog>, Promise-based,
-//     used today for the format selector and sample selector, will serve
-//     output selector, trust popup, and error popup in future commits.
+//     used today for the format selector and sample selector. The optional
+//     body parameter supports an additional content block between title and
+//     options, used by showError() for error display.
+//   - showError() is the thin error-popup wrapper: title + body + OK.
 //   - State C entirely deferred until Generate actually produces output
-//   - Trust popup, About button, error popup, conversion plumbing — all later
+//   - Trust popup, About button, conversion plumbing — all later
 //
 // Samples: harvested from existing tool pages (HTML, Lexical) and test fixtures
 // (Markdown, TipTap). All four are parallel "Meeting Notes" content for easy
@@ -420,6 +422,7 @@ type Elements = {
   // Popup (modal dialog) — reused for all popups via showPopup()
   popup: HTMLDialogElement;
   popupTitle: HTMLHeadingElement;
+  popupBody: HTMLDivElement;
   popupOptions: HTMLDivElement;
 };
 
@@ -437,6 +440,7 @@ function lookupElements(): Elements | null {
     "saveAndClearBtn",
     "popup",
     "popupTitle",
+    "popupBody",
     "popupOptions",
   ] as const;
 
@@ -606,11 +610,23 @@ type PopupOption = {
  */
 function showPopup(
   els: Elements,
-  args: { title: string; options: PopupOption[] },
+  args: { title: string; body?: string; options: PopupOption[] },
 ): Promise<string | null> {
   return new Promise((resolve) => {
     // Populate title
     els.popupTitle.textContent = args.title;
+
+    // Populate body (optional). When absent, the body div is hidden so the
+    // popup renders identically to a body-less call. Reset explicitly every
+    // time so a popup with body followed by one without doesn't leak the
+    // previous body's content.
+    if (args.body !== undefined && args.body !== "") {
+      els.popupBody.textContent = args.body;
+      els.popupBody.hidden = false;
+    } else {
+      els.popupBody.textContent = "";
+      els.popupBody.hidden = true;
+    }
 
     // Build option buttons fresh each time (caller's options array drives this).
     const buttons: HTMLButtonElement[] = [];
@@ -669,6 +685,24 @@ function showPopup(
 
     // Focus the first option for keyboard accessibility.
     buttons[0]?.focus();
+  });
+}
+
+/**
+ * Show an error popup with a title and message body, single OK button.
+ * Thin wrapper around showPopup for the common "tell the user something is
+ * wrong with the file or unsupported, wait for acknowledgement" case. All
+ * dismissal paths (OK button, Escape, backdrop click) are equivalent; the
+ * promise resolves and state is unchanged. The popup is for informational
+ * dismissal — its return value carries no decision and is intentionally void.
+ */
+// Used by Browse-to-File in the next commit; this disable goes away there.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function showError(els: Elements, args: { title: string; message: string }): Promise<void> {
+  await showPopup(els, {
+    title: args.title,
+    body: args.message,
+    options: [{ label: "OK", value: "ok" }],
   });
 }
 
