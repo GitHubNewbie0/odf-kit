@@ -4,17 +4,25 @@
 // into docs/tools/index.html by scripts/build-tool-page.js.
 // See unified-tool-design-v2.md for the full design.
 //
-// Current scope: state machine + reusable popup infrastructure.
+// Current scope: state machine + reusable popup infrastructure + sample loading.
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
-//       Browse to File / Load Sample File — placeholder "Not yet implemented"
+//       Load Sample File — fully functional with sample-selector popup,
+//                          loads a hardcoded sample document for the chosen format
+//       Browse to File — placeholder "Not yet implemented"
 //   - Clear fully functional (returns to State A)
 //   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
 //   - showPopup() is the reusable popup helper: native <dialog>, Promise-based,
-//     used today for the format selector, will serve sample selector, output
-//     selector, trust popup, and error popup in future commits.
+//     used today for the format selector and sample selector, will serve
+//     output selector, trust popup, and error popup in future commits.
 //   - State C entirely deferred until Generate actually produces output
 //   - Trust popup, About button, error popup, conversion plumbing — all later
+//
+// Samples: harvested from existing tool pages (HTML, Lexical) and test fixtures
+// (Markdown, TipTap). All four are parallel "Meeting Notes" content for easy
+// cross-format comparison. Hardcoded here for this commit; build-time inlining
+// of real sample files and binary-format samples (DOCX/XLSX/ODT/ODS) deferred
+// to a later commit.
 
 import { VERSION } from "odf-kit/odt";
 
@@ -51,6 +59,339 @@ type AppState =
       /** Whether this State B is a placeholder (Browse/Sample not-yet-impl). */
       isPlaceholder: boolean;
     };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Samples
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Four sample documents — one per supported text input format — used by the
+// Load Sample File button. All four are "Meeting Notes" content with parallel
+// structure (heading, date, list/agenda, table or link), so a user picking
+// different sample formats sees similar content rendered through each format.
+//
+// Sources (verbatim or near-verbatim):
+//   - SAMPLE_HTML:     EXAMPLE_HTML from docs/tools/html-to-odt.html
+//   - SAMPLE_MARKDOWN: "full markdown document" test in tests/markdown-to-odt.test.ts
+//   - SAMPLE_LEXICAL:  SAMPLE from docs/tools/lexical-to-odt.html
+//   - SAMPLE_TIPTAP:   "full realistic document" test in tests/tiptap-to-odt.test.ts
+
+const SAMPLE_HTML = `<h1>Hello World</h1>
+
+<p>This is an example showing what <strong>HTML to ODT</strong> can do.</p>
+
+<h2>Supported elements</h2>
+<ul>
+  <li>Headings h1\u2013h6</li>
+  <li>Bold, italic, underline, strikethrough</li>
+  <li>Lists (ordered and unordered, nested)</li>
+  <li>Tables with rows, cells, and headers</li>
+  <li>Links and blockquotes</li>
+  <li>Code blocks and inline <code>code</code></li>
+</ul>
+
+<h2>Sample table</h2>
+<table>
+  <tr><th>Name</th><th>Score</th><th>Notes</th></tr>
+  <tr><td>Alice</td><td>98</td><td>Top of the class</td></tr>
+  <tr><td>Bob</td><td>87</td><td>Solid effort</td></tr>
+  <tr><td>Carol</td><td>92</td><td>Honor roll</td></tr>
+</table>
+
+<blockquote>
+  ODT is the only ISO-standardized document format (ISO/IEC 26300).
+</blockquote>
+
+<p>Generate the file to see how this content becomes a valid <code>.odt</code> document.</p>`;
+
+const SAMPLE_MARKDOWN = `# Meeting Notes
+
+**Date:** April 9, 2026
+
+## Agenda
+
+1. Project status
+2. Budget review
+3. Next steps
+
+## Action Items
+
+| Owner | Task | Due |
+|-------|------|-----|
+| Alice | Send report | Friday |
+| Bob | Review budget | Monday |
+
+See [odf-kit](https://github.com/GitHubNewbie0/odf-kit) for details.`;
+
+const SAMPLE_LEXICAL = JSON.stringify(
+  {
+    root: {
+      children: [
+        {
+          type: "heading",
+          tag: "h1",
+          format: "",
+          indent: 0,
+          direction: "ltr",
+          version: 1,
+          children: [
+            {
+              type: "text",
+              text: "Meeting Notes",
+              format: 0,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          format: "",
+          indent: 0,
+          direction: "ltr",
+          version: 1,
+          children: [
+            {
+              type: "text",
+              text: "Date: ",
+              format: 0,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+            {
+              type: "text",
+              text: "April 18, 2026",
+              format: 1,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+        {
+          type: "heading",
+          tag: "h2",
+          format: "",
+          indent: 0,
+          direction: "ltr",
+          version: 1,
+          children: [
+            {
+              type: "text",
+              text: "Action Items",
+              format: 0,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+        {
+          type: "list",
+          listType: "bullet",
+          start: 1,
+          direction: "ltr",
+          version: 1,
+          children: [
+            {
+              type: "listitem",
+              value: 1,
+              indent: 0,
+              direction: "ltr",
+              version: 1,
+              children: [
+                {
+                  type: "text",
+                  text: "Send report by Friday",
+                  format: 0,
+                  style: "",
+                  mode: "normal",
+                  detail: 0,
+                  version: 1,
+                },
+              ],
+            },
+            {
+              type: "listitem",
+              value: 2,
+              indent: 0,
+              direction: "ltr",
+              version: 1,
+              children: [
+                {
+                  type: "text",
+                  text: "Review budget on Monday",
+                  format: 0,
+                  style: "",
+                  mode: "normal",
+                  detail: 0,
+                  version: 1,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          format: "",
+          indent: 0,
+          direction: "ltr",
+          version: 1,
+          children: [
+            {
+              type: "text",
+              text: "See ",
+              format: 0,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+            {
+              type: "link",
+              url: "https://github.com/GitHubNewbie0/odf-kit",
+              direction: "ltr",
+              format: "",
+              indent: 0,
+              version: 1,
+              children: [
+                {
+                  type: "text",
+                  text: "odf-kit on GitHub",
+                  format: 0,
+                  style: "",
+                  mode: "normal",
+                  detail: 0,
+                  version: 1,
+                },
+              ],
+            },
+            {
+              type: "text",
+              text: " for more.",
+              format: 0,
+              style: "",
+              mode: "normal",
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+      ],
+      direction: "ltr",
+      format: "",
+      indent: 0,
+      type: "root",
+      version: 1,
+    },
+  },
+  null,
+  2,
+);
+
+const SAMPLE_TIPTAP = JSON.stringify(
+  {
+    type: "doc",
+    content: [
+      { type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "Meeting Notes" }] },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Date: " },
+          { type: "text", text: "April 9, 2026", marks: [{ type: "bold" }] },
+        ],
+      },
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Agenda" }] },
+      {
+        type: "orderedList",
+        content: [
+          {
+            type: "listItem",
+            content: [{ type: "paragraph", content: [{ type: "text", text: "Project status" }] }],
+          },
+          {
+            type: "listItem",
+            content: [{ type: "paragraph", content: [{ type: "text", text: "Budget review" }] }],
+          },
+          {
+            type: "listItem",
+            content: [{ type: "paragraph", content: [{ type: "text", text: "Next steps" }] }],
+          },
+        ],
+      },
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Action Items" }] },
+      {
+        type: "table",
+        content: [
+          {
+            type: "tableRow",
+            content: [
+              {
+                type: "tableHeader",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Owner" }] }],
+              },
+              {
+                type: "tableHeader",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Task" }] }],
+              },
+              {
+                type: "tableHeader",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Due" }] }],
+              },
+            ],
+          },
+          {
+            type: "tableRow",
+            content: [
+              {
+                type: "tableCell",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Alice" }] }],
+              },
+              {
+                type: "tableCell",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Send report" }] }],
+              },
+              {
+                type: "tableCell",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Friday" }] }],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "See " },
+          {
+            type: "text",
+            text: "odf-kit",
+            marks: [{ type: "link", attrs: { href: "https://github.com/GitHubNewbie0/odf-kit" } }],
+          },
+          { type: "text", text: " for details." },
+        ],
+      },
+    ],
+  },
+  null,
+  2,
+);
+
+// Lookup table: format value → sample content + filename used in State B
+const SAMPLES: Record<
+  "html" | "markdown" | "lexical" | "tiptap",
+  { content: string; filename: string }
+> = {
+  html: { content: SAMPLE_HTML, filename: "sample_html.html" },
+  markdown: { content: SAMPLE_MARKDOWN, filename: "sample_md.md" },
+  lexical: { content: SAMPLE_LEXICAL, filename: "sample_lexical.json" },
+  tiptap: { content: SAMPLE_TIPTAP, filename: "sample_tiptap.json" },
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM references
@@ -230,7 +571,12 @@ function setPaneTextarea(pane: HTMLDivElement, format: InputFormat, value: strin
   });
 
   pane.replaceChildren(textarea);
+  // Set cursor to start BEFORE focusing — otherwise focus may scroll the
+  // textarea to wherever the cursor lands (the end, for freshly-populated
+  // content), and the user sees the bottom of the file rather than the top.
+  textarea.setSelectionRange(0, 0);
   textarea.focus();
+  textarea.scrollTop = 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -340,14 +686,52 @@ function onBrowseClick(els: Elements): void {
   render(currentState, els);
 }
 
-function onSampleClick(els: Elements): void {
+async function onSampleClick(els: Elements): Promise<void> {
+  // Show sample-selector popup. User picks one of four text-format samples;
+  // we then transition to State B with that sample's content pre-populating
+  // the textarea and the sample's filename set for eventual output naming.
+  // If the user dismisses without picking, state remains A.
+  // Binary-format samples (DOCX, XLSX, ODT, ODS) are deferred to a future
+  // commit alongside binary input handling.
+  const chosen = await showPopup(els, {
+    title: "Choose a sample file",
+    options: [
+      {
+        label: "Sample HTML",
+        description: "headings, list, table, blockquote, code",
+        value: "html",
+      },
+      {
+        label: "Sample Markdown",
+        description: "headings, list, table, bold text, link",
+        value: "markdown",
+      },
+      {
+        label: "Sample Lexical",
+        description: "JSON document with headings, list, formatting",
+        value: "lexical",
+      },
+      {
+        label: "Sample TipTap",
+        description: "JSON document with headings, list, table, link",
+        value: "tiptap",
+      },
+    ],
+  });
+
+  if (chosen === null) {
+    // Dismissed without choosing — state stays A
+    return;
+  }
+
+  const sample = SAMPLES[chosen as keyof typeof SAMPLES];
   currentState = {
     state: "B",
-    inputFormat: "html",
-    inputFilename: "Document",
+    inputFormat: chosen as InputFormat,
+    inputFilename: sample.filename,
     inputKind: "text",
-    inputText: "",
-    isPlaceholder: true,
+    inputText: sample.content,
+    isPlaceholder: false,
   };
   render(currentState, els);
 }
@@ -418,7 +802,9 @@ function bootstrap(): void {
   }
 
   els.browseBtn.addEventListener("click", () => onBrowseClick(els));
-  els.sampleBtn.addEventListener("click", () => onSampleClick(els));
+  els.sampleBtn.addEventListener("click", () => {
+    void onSampleClick(els);
+  });
   els.keyboardBtn.addEventListener("click", () => {
     void onKeyboardClick(els);
   });
@@ -432,7 +818,7 @@ function bootstrap(): void {
 
   console.log(
     `odf-kit unified tool page — v${VERSION} — state machine wired ` +
-      `(States A and B; State C and conversion not yet implemented).`,
+      `(Keyboard input, Sample loading; State C and conversion not yet implemented).`,
   );
 }
 
