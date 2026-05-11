@@ -76,6 +76,9 @@
         color: var(--text);
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
       }
 
       .visually-hidden {
@@ -148,7 +151,15 @@
       }
 
       .tool-section {
-        padding: 2.5rem 0 3rem;
+        padding: 1.5rem 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .tool-section > .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
 
       .input-method-buttons {
@@ -158,21 +169,29 @@
         margin-bottom: 1.5rem;
       }
 
+      .panes {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-height: 0;
+        margin-bottom: 1rem;
+      }
       .io-pane {
-        min-height: 320px;
-        max-height: 540px;
+        flex: 1;
+        min-height: 250px;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 1rem;
         overflow: auto;
-        margin-bottom: 1rem;
       }
       .io-pane-empty {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 320px;
+        height: 100%;
+        min-height: 0;
         color: var(--text-secondary);
         font-size: 0.9rem;
         font-style: italic;
@@ -183,6 +202,11 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 0.75rem;
         margin-top: 0.5rem;
+        position: sticky;
+        bottom: 0;
+        background: var(--bg);
+        padding: 0.75rem 0;
+        border-top: 1px solid var(--border);
       }
 
       .btn {
@@ -215,7 +239,7 @@
       }
 
       footer {
-        padding: 2.5rem 0;
+        padding: 1.5rem 0;
         text-align: center;
         border-top: 1px solid var(--border);
       }
@@ -252,6 +276,16 @@
         max-width: 420px;
         margin: 0 auto;
       }
+      .mobile-notice p + p {
+        margin-top: 0.6rem;
+      }
+      .mobile-notice a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .mobile-notice a:hover {
+        text-decoration: underline;
+      }
 
       @media (max-width: 1024px) {
         .tool-section {
@@ -260,6 +294,66 @@
         .mobile-notice {
           display: block;
         }
+      }
+
+      /* Popup (modal dialog) — reusable across format selector, sample
+       * selector, output selector, trust popup, and error popup. The native
+       * <dialog> element handles focus trapping, escape-to-close, and the
+       * aria-modal semantics for free. */
+      .popup {
+        max-width: 480px;
+        width: calc(100% - 2rem);
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .popup::backdrop {
+        background: rgba(0, 0, 0, 0.4);
+      }
+      .popup-title {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 1.1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .popup-options {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem;
+      }
+      .popup-option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.12s;
+      }
+      .popup-option:hover {
+        background: var(--accent-light);
+      }
+      .popup-option:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+      }
+      .popup-option-desc {
+        display: block;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-top: 0.15rem;
       }
     </style>
   </head>
@@ -286,8 +380,12 @@
         <div class="icon">🖥️</div>
         <h2>Best on a larger screen</h2>
         <p>
-          This conversion tool needs a wider display. Please return on a desktop or laptop browser
-          to use it.
+          Sorry, but this conversion tool really needs a wider display. Please come back on a
+          desktop or laptop browser to use it.
+        </p>
+        <p>
+          If you'd like more information on odf-kit please visit <a href="../">our landing page</a>.
+          Thank you!
         </p>
       </div>
     </section>
@@ -302,12 +400,14 @@
           </button>
         </div>
 
-        <div class="io-pane io-pane-input" id="inputPane" role="region" aria-label="Input">
-          <div class="io-pane-empty">Select an input method above</div>
-        </div>
+        <div class="panes">
+          <div class="io-pane io-pane-input" id="inputPane" role="region" aria-label="Input">
+            <div class="io-pane-empty">Select an input method above</div>
+          </div>
 
-        <div class="io-pane io-pane-output" id="outputPane" role="region" aria-label="Output">
-          <div class="io-pane-empty">Output will appear here after Generate</div>
+          <div class="io-pane io-pane-output" id="outputPane" role="region" aria-label="Output">
+            <div class="io-pane-empty">Output will appear here after Generate</div>
+          </div>
         </div>
 
         <div class="action-buttons" role="group" aria-label="Output actions">
@@ -330,6 +430,11 @@
         </p>
       </div>
     </footer>
+
+    <dialog id="popup" class="popup" aria-labelledby="popupTitle">
+      <h2 id="popupTitle" class="popup-title">Popup</h2>
+      <div id="popupOptions" class="popup-options"></div>
+    </dialog>
 
     <!-- ODF_KIT_BUNDLE_START -->
     <script type="module">

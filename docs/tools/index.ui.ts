@@ -4,12 +4,15 @@
 // into docs/tools/index.html by scripts/build-tool-page.js.
 // See unified-tool-design-v2.md for the full design.
 //
-// Current scope: state machine + State A↔B wiring.
+// Current scope: state machine + reusable popup infrastructure.
 //   - Three input methods all wired:
-//       Type Keyboard Input — fully functional (HTML hardcoded for now)
+//       Type Keyboard Input — fully functional with format-selector popup
 //       Browse to File / Load Sample File — placeholder "Not yet implemented"
 //   - Clear fully functional (returns to State A)
 //   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
+//   - showPopup() is the reusable popup helper: native <dialog>, Promise-based,
+//     used today for the format selector, will serve sample selector, output
+//     selector, trust popup, and error popup in future commits.
 //   - State C entirely deferred until Generate actually produces output
 //   - Trust popup, About button, error popup, conversion plumbing — all later
 
@@ -73,6 +76,10 @@ type Elements = {
   saveBtn: HTMLButtonElement;
   clearBtn: HTMLButtonElement;
   saveAndClearBtn: HTMLButtonElement;
+  // Popup (modal dialog) — reused for all popups via showPopup()
+  popup: HTMLDialogElement;
+  popupTitle: HTMLHeadingElement;
+  popupOptions: HTMLDivElement;
 };
 
 function lookupElements(): Elements | null {
@@ -87,6 +94,9 @@ function lookupElements(): Elements | null {
     "saveBtn",
     "clearBtn",
     "saveAndClearBtn",
+    "popup",
+    "popupTitle",
+    "popupOptions",
   ] as const;
 
   const missing: string[] = [];
@@ -224,8 +234,97 @@ function setPaneTextarea(pane: HTMLDivElement, format: InputFormat, value: strin
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Event handlers
+// Popup helper
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** A selectable option in a popup. */
+type PopupOption = {
+  /** Short label shown as the primary text on the button. */
+  label: string;
+  /** Optional longer description shown beneath the label in lighter text. */
+  description?: string;
+  /** Value returned via the promise when this option is chosen. */
+  value: string;
+};
+
+/**
+ * Show a modal popup with a title and a list of options. Returns a promise
+ * that resolves to the chosen option's value, or null if the user dismissed
+ * the popup (Escape, click backdrop, no click).
+ *
+ * Uses the page's single <dialog> element with showModal(); the browser
+ * handles focus trapping, escape key, and aria-modal semantics natively.
+ * The dialog's contents are populated dynamically so the same element can
+ * serve every popup the page needs (format selector, sample selector,
+ * output selector, trust popup, error popup).
+ */
+function showPopup(
+  els: Elements,
+  args: { title: string; options: PopupOption[] },
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    // Populate title
+    els.popupTitle.textContent = args.title;
+
+    // Build option buttons fresh each time (caller's options array drives this).
+    const buttons: HTMLButtonElement[] = [];
+    for (const opt of args.options) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "popup-option";
+      btn.dataset.value = opt.value;
+
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = opt.label;
+      btn.appendChild(labelSpan);
+
+      if (opt.description) {
+        const descSpan = document.createElement("span");
+        descSpan.className = "popup-option-desc";
+        descSpan.textContent = opt.description;
+        btn.appendChild(descSpan);
+      }
+
+      btn.addEventListener("click", () => {
+        cleanup();
+        els.popup.close();
+        resolve(opt.value);
+      });
+
+      buttons.push(btn);
+    }
+    els.popupOptions.replaceChildren(...buttons);
+
+    // Dismiss handlers — the dialog's "close" event fires on Escape, on
+    // showModal-then-close calls, and (if we wire it) on backdrop clicks.
+    // Native dialog doesn't dismiss on backdrop click by default; we add
+    // that ourselves below.
+    function onDialogClose(): void {
+      cleanup();
+      // If close fired because of a selection, the selection branch already
+      // resolved; this branch resolves null for any other close reason.
+      resolve(null);
+    }
+    function onBackdropClick(e: MouseEvent): void {
+      // The dialog's content fills its bounding box; clicking outside the
+      // content but still on the dialog itself means the backdrop was hit.
+      if (e.target === els.popup) {
+        els.popup.close();
+      }
+    }
+    function cleanup(): void {
+      els.popup.removeEventListener("close", onDialogClose);
+      els.popup.removeEventListener("click", onBackdropClick);
+    }
+    els.popup.addEventListener("close", onDialogClose);
+    els.popup.addEventListener("click", onBackdropClick);
+
+    els.popup.showModal();
+
+    // Focus the first option for keyboard accessibility.
+    buttons[0]?.focus();
+  });
+}
 
 function onBrowseClick(els: Elements): void {
   // Placeholder per design discussion (decision 2.i): show as State B with
@@ -253,13 +352,28 @@ function onSampleClick(els: Elements): void {
   render(currentState, els);
 }
 
-function onKeyboardClick(els: Elements): void {
-  // Hardcoded HTML format per design discussion (decision 3). Format-selector
-  // popup arrives in a later commit; for now, clicking the button drops you
-  // straight into a textarea ready for HTML input.
+async function onKeyboardClick(els: Elements): Promise<void> {
+  // Show format-selector popup per the v2 plan. User picks one of four text
+  // formats; only then do we transition to State B with that format chosen.
+  // If the user dismisses without picking, state remains A.
+  const chosen = await showPopup(els, {
+    title: "Choose an input format",
+    options: [
+      { label: "HTML", description: "web markup", value: "html" },
+      { label: "Markdown", description: "prose with formatting", value: "markdown" },
+      { label: "Lexical", description: "JSON from Lexical editor", value: "lexical" },
+      { label: "TipTap", description: "JSON from TipTap editor", value: "tiptap" },
+    ],
+  });
+
+  if (chosen === null) {
+    // Dismissed without choosing — state stays A
+    return;
+  }
+
   currentState = {
     state: "B",
-    inputFormat: "html",
+    inputFormat: chosen as InputFormat,
     inputFilename: "Document",
     inputKind: "text",
     inputText: "",
@@ -305,7 +419,9 @@ function bootstrap(): void {
 
   els.browseBtn.addEventListener("click", () => onBrowseClick(els));
   els.sampleBtn.addEventListener("click", () => onSampleClick(els));
-  els.keyboardBtn.addEventListener("click", () => onKeyboardClick(els));
+  els.keyboardBtn.addEventListener("click", () => {
+    void onKeyboardClick(els);
+  });
   els.generateBtn.addEventListener("click", () => onGenerateClick(els));
   els.saveBtn.addEventListener("click", () => onSaveClick(els));
   els.clearBtn.addEventListener("click", () => onClearClick(els));
