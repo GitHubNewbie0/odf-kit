@@ -4,12 +4,17 @@
 // into docs/tools/index.html by scripts/build-tool-page.js.
 // See unified-tool-design-v2.md for the full design.
 //
-// Current scope: state machine + reusable popup infrastructure + sample loading.
+// Current scope: state machine + reusable popup infrastructure + sample loading
+// + Browse-to-File for text formats.
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
 //       Load Sample File — fully functional with sample-selector popup,
 //                          loads a hardcoded sample document for the chosen format
-//       Browse to File — placeholder "Not yet implemented"
+//       Browse to File — fully functional for text formats (HTML, Markdown,
+//                        Lexical JSON, TipTap JSON). Binary formats (DOCX,
+//                        XLSX, ODT, ODS) emit a "not yet supported" error
+//                        popup and stay in State A. JSON files are
+//                        disambiguated by inspecting their parsed structure.
 //   - Clear fully functional (returns to State A)
 //   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
 //   - showPopup() is the reusable popup helper: native <dialog>, Promise-based,
@@ -52,14 +57,12 @@ type AppState =
       /**
        * Whether the input is text (in which case it's editable in the textarea)
        * or binary (file bytes loaded; not editable, will preview later).
-       * Phase 1a / this commit: only "text" is reachable, since Browse/Sample
-       * are placeholders.
+       * This commit: only "text" is reachable, since binary file selection is
+       * intercepted by an error popup and the binary preview path is deferred.
        */
       inputKind: "text" | "binary";
       /** Text content for text-kind inputs. Empty string until user types. */
       inputText: string;
-      /** Whether this State B is a placeholder (Browse/Sample not-yet-impl). */
-      isPlaceholder: boolean;
     };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -411,6 +414,8 @@ type Elements = {
   browseBtn: HTMLButtonElement;
   sampleBtn: HTMLButtonElement;
   keyboardBtn: HTMLButtonElement;
+  // Hidden file input — clicked programmatically by Browse to open native picker
+  fileInput: HTMLInputElement;
   // Two panes
   inputPane: HTMLDivElement;
   outputPane: HTMLDivElement;
@@ -432,6 +437,7 @@ function lookupElements(): Elements | null {
     "browseBtn",
     "sampleBtn",
     "keyboardBtn",
+    "fileInput",
     "inputPane",
     "outputPane",
     "generateBtn",
@@ -525,10 +531,9 @@ function renderStateB(state: Extract<AppState, { state: "B" }>, els: Elements): 
   els.clearBtn.disabled = false;
   els.saveAndClearBtn.disabled = true;
 
-  // Input pane: depends on whether this is the placeholder branch or real input
-  if (state.isPlaceholder) {
-    setPaneEmpty(els.inputPane, "Not yet implemented — Clear to try a different input method");
-  } else if (state.inputKind === "text") {
+  // Input pane: depends on whether the input is text-kind (editable textarea)
+  // or binary-kind (read-only summary; binary preview lands in a later commit).
+  if (state.inputKind === "text") {
     setPaneTextarea(els.inputPane, state.inputFormat, state.inputText);
   } else {
     // Binary inputs aren't reachable this commit, but the branch is here for completeness
@@ -696,8 +701,6 @@ function showPopup(
  * promise resolves and state is unchanged. The popup is for informational
  * dismissal — its return value carries no decision and is intentionally void.
  */
-// Used by Browse-to-File in the next commit; this disable goes away there.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function showError(els: Elements, args: { title: string; message: string }): Promise<void> {
   await showPopup(els, {
     title: args.title,
@@ -706,16 +709,237 @@ async function showError(els: Elements, args: { title: string; message: string }
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// File loading helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Result of parsing a filename. The `ok: true` branch carries the case-preserved
+ * stem and the lowercased extension; the `ok: false` branch carries a reason
+ * that the caller maps to a specific error popup.
+ */
+type ParsedFilename =
+  | { ok: true; stem: string; ext: string }
+  | { ok: false; reason: "no-extension" | "empty-stem" };
+
+/**
+ * Split a filename on the LAST dot. Extension is lowercased for matching;
+ * stem retains the original case for output naming. Reports a specific
+ * failure reason for two cases the caller will surface as distinct errors:
+ *   - "no-extension"  — no dot at all, OR ends with a dot (e.g. "file.")
+ *   - "empty-stem"    — starts with a dot (e.g. ".gitignore")
+ */
+function parseFilename(name: string): ParsedFilename {
+  const lastDot = name.lastIndexOf(".");
+  if (lastDot === -1) return { ok: false, reason: "no-extension" };
+  const stem = name.slice(0, lastDot);
+  const ext = name.slice(lastDot + 1).toLowerCase();
+  if (ext === "") return { ok: false, reason: "no-extension" };
+  if (stem === "") return { ok: false, reason: "empty-stem" };
+  return { ok: true, stem, ext };
+}
+
+/**
+ * Detect whether parsed JSON is a Lexical document or a TipTap document by
+ * inspecting top-level structure. Returns null if neither shape matches.
+ *
+ * Lexical: top-level object with a `root` object whose `type === "root"`.
+ * TipTap:  top-level object with `type === "doc"` and array `content`.
+ *
+ * Mutually exclusive in practice. If a value somehow satisfied both,
+ * Lexical takes precedence (checked first), which is fine for our purposes.
+ */
+function detectJsonFormat(parsed: unknown): "lexical" | "tiptap" | null {
+  if (parsed === null || typeof parsed !== "object") return null;
+  const obj = parsed as Record<string, unknown>;
+
+  const root = obj.root;
+  if (root !== null && typeof root === "object") {
+    const rootObj = root as Record<string, unknown>;
+    if (rootObj.type === "root") return "lexical";
+  }
+
+  if (obj.type === "doc" && Array.isArray(obj.content)) {
+    return "tiptap";
+  }
+
+  return null;
+}
+
+/**
+ * Promise wrapper around FileReader.readAsText. Resolves with the decoded
+ * text; rejects with the FileReader error (or a generic Error) if reading
+ * fails. UTF-8 is the default encoding, matching how text files are
+ * typically authored for this tool's input formats.
+ */
+function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (): void => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("FileReader returned non-string result"));
+        return;
+      }
+      resolve(result);
+    };
+    reader.onerror = (): void => {
+      reject(reader.error ?? new Error("Unknown FileReader error"));
+    };
+    reader.readAsText(file);
+  });
+}
+
+/** Extract a human-readable message from an unknown thrown value. */
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 function onBrowseClick(els: Elements): void {
-  // Placeholder per design discussion (decision 2.i): show as State B with
-  // "Not yet implemented" so the state machine is exercisable end-to-end.
+  // Reset value defensively so the change event fires even if the user picks
+  // the same file twice across separate Browse clicks. The persistent change
+  // listener attached at bootstrap handles the resulting selection.
+  els.fileInput.value = "";
+  els.fileInput.click();
+}
+
+/**
+ * Persistent change handler attached to the hidden file input at bootstrap.
+ * Reads the selected file, validates the filename, and dispatches to the
+ * appropriate loader (text, JSON, binary stub) or error popup. State remains
+ * A throughout this handler until a successful text-or-JSON load transitions
+ * to State B.
+ */
+async function onFileSelected(els: Elements, file: File): Promise<void> {
+  const parsed = parseFilename(file.name);
+  if (!parsed.ok) {
+    if (parsed.reason === "no-extension") {
+      await showError(els, {
+        title: "File has no extension",
+        message:
+          "The tool detects format from the file extension. Supported: " +
+          ".html, .htm, .md, .markdown, .docx, .xlsx, .odt, .ods, .json.",
+      });
+    } else {
+      await showError(els, {
+        title: "File name is empty before the extension",
+        message:
+          "Files like '.gitignore' are config files without a base name. " +
+          "The tool needs a base name to use for the converted output.",
+      });
+    }
+    return;
+  }
+
+  const { ext } = parsed;
+  switch (ext) {
+    case "html":
+    case "htm":
+      await loadTextFile(els, file, "html");
+      return;
+    case "md":
+    case "markdown":
+      await loadTextFile(els, file, "markdown");
+      return;
+    case "json":
+      await loadJsonFile(els, file);
+      return;
+    case "docx":
+    case "xlsx":
+    case "odt":
+    case "ods":
+      await showError(els, {
+        title: "Binary files are not yet supported",
+        message:
+          "Binary input (.docx, .xlsx, .odt, .ods) is coming soon. " +
+          "For now, try a text format (HTML, Markdown, or JSON), or use " +
+          "Load Sample File or Type Keyboard Input.",
+      });
+      return;
+    default:
+      await showError(els, {
+        title: "Unsupported file type",
+        message:
+          `The file extension ".${ext}" is not supported. Supported types: ` +
+          ".html, .htm, .md, .markdown, .docx, .xlsx, .odt, .ods, .json.",
+      });
+      return;
+  }
+}
+
+/**
+ * Read a text file and transition to State B with its content. Reports
+ * FileReader errors via showError; state remains A on failure.
+ */
+async function loadTextFile(els: Elements, file: File, format: "html" | "markdown"): Promise<void> {
+  let text: string;
+  try {
+    text = await readFileAsText(file);
+  } catch (err) {
+    await showError(els, {
+      title: "Couldn't read file",
+      message: `The browser reported an error while reading the file. ${errorMessage(err)}`,
+    });
+    return;
+  }
+
   currentState = {
     state: "B",
-    inputFormat: "html",
-    inputFilename: "Document",
+    inputFormat: format,
+    inputFilename: file.name,
     inputKind: "text",
-    inputText: "",
-    isPlaceholder: true,
+    inputText: text,
+  };
+  render(currentState, els);
+}
+
+/**
+ * Read a JSON file, parse it, disambiguate Lexical vs TipTap by structure,
+ * and transition to State B with its content. Reports FileReader errors,
+ * JSON parse errors, and unrecognized-format cases via showError; state
+ * remains A on any failure.
+ */
+async function loadJsonFile(els: Elements, file: File): Promise<void> {
+  let text: string;
+  try {
+    text = await readFileAsText(file);
+  } catch (err) {
+    await showError(els, {
+      title: "Couldn't read file",
+      message: `The browser reported an error while reading the file. ${errorMessage(err)}`,
+    });
+    return;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (err) {
+    await showError(els, {
+      title: "File is not valid JSON",
+      message: `The file's contents could not be parsed as JSON. Parser said: ${errorMessage(err)}`,
+    });
+    return;
+  }
+
+  const format = detectJsonFormat(parsed);
+  if (format === null) {
+    await showError(els, {
+      title: "JSON not recognized as Lexical or TipTap",
+      message:
+        "The tool detects Lexical by a top-level 'root' object, and " +
+        "TipTap by a top-level 'doc' type with a 'content' array. " +
+        "The file does not match either shape.",
+    });
+    return;
+  }
+
+  currentState = {
+    state: "B",
+    inputFormat: format,
+    inputFilename: file.name,
+    inputKind: "text",
+    inputText: text,
   };
   render(currentState, els);
 }
@@ -765,7 +989,6 @@ async function onSampleClick(els: Elements): Promise<void> {
     inputFilename: sample.filename,
     inputKind: "text",
     inputText: sample.content,
-    isPlaceholder: false,
   };
   render(currentState, els);
 }
@@ -795,7 +1018,6 @@ async function onKeyboardClick(els: Elements): Promise<void> {
     inputFilename: "Document",
     inputKind: "text",
     inputText: "",
-    isPlaceholder: false,
   };
   render(currentState, els);
 }
@@ -848,11 +1070,21 @@ function bootstrap(): void {
   els.saveAndClearBtn.addEventListener("click", () => onSaveAndClearClick(els));
   els.aboutBtn.addEventListener("click", () => onAboutClick(els));
 
+  // Persistent change handler on the hidden file input. Fires when the user
+  // picks a file via the native picker; does not fire on cancel. Attached
+  // once at bootstrap so no per-click listener accumulation occurs.
+  els.fileInput.addEventListener("change", () => {
+    const file = els.fileInput.files?.[0];
+    if (!file) return;
+    void onFileSelected(els, file);
+  });
+
   render(currentState, els);
 
   console.log(
     `odf-kit unified tool page — v${VERSION} — state machine wired ` +
-      `(Keyboard input, Sample loading; State C and conversion not yet implemented).`,
+      `(Keyboard input, Sample loading, Browse to File for text formats; ` +
+      `binary file preview and State C / conversion not yet implemented).`,
   );
 }
 
