@@ -5,7 +5,7 @@
 // See unified-tool-design-v2.md for the full design.
 //
 // Current scope: state machine + reusable popup infrastructure + sample loading
-// + Browse-to-File for text formats.
+// + Browse-to-File for text formats + About popup.
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
 //       Load Sample File — fully functional with sample-selector popup,
@@ -15,15 +15,16 @@
 //                        XLSX, ODT, ODS) emit a "not yet supported" error
 //                        popup and stay in State A. JSON files are
 //                        disambiguated by inspecting their parsed structure.
+//   - About button — fully functional, shows About popup with pathway list,
+//                    trust language, and identity/provenance.
 //   - Clear fully functional (returns to State A)
 //   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
-//   - showPopup() is the reusable popup helper: native <dialog>, Promise-based,
-//     used today for the format selector and sample selector. The optional
-//     body parameter supports an additional content block between title and
-//     options, used by showError() for error display.
-//   - showError() is the thin error-popup wrapper: title + body + OK.
+//   - Three popup primitives (deliberately explicit, not overloaded):
+//       showPopup() — selector popups (title + optional body + options list)
+//       showError() — error popups (title + message + single OK)
+//       showAbout() — About popup (rich DOM body + single Close)
 //   - State C entirely deferred until Generate actually produces output
-//   - Trust popup, About button, conversion plumbing — all later
+//   - Trust popup on first visit, conversion plumbing — all later
 //
 // Samples: harvested from existing tool pages (HTML, Lexical) and test fixtures
 // (Markdown, TipTap). All four are parallel "Meeting Notes" content for easy
@@ -1042,9 +1043,173 @@ function onSaveAndClearClick(_els: Elements): void {
   console.log("Save and Clear clicked — not yet implemented.");
 }
 
-function onAboutClick(_els: Elements): void {
-  // Trust popup arrives in a later commit.
-  console.log("About clicked — trust popup not yet implemented.");
+/**
+ * Show the About popup. Three sections: pathway list (what this page does),
+ * trust language (why it's safe), and identity/provenance (about odf-kit).
+ * Single "Close" button; dismissible via button, Escape, or backdrop click.
+ *
+ * Deliberately separate from showPopup and showError because the body is
+ * rich DOM content (lists, link) rather than plain text — making it the
+ * third popup primitive keeps each primitive single-purpose and explicit.
+ * Some dialog mechanics duplicate showPopup; that duplication is honest,
+ * matching the genuinely different content shape.
+ */
+function showAbout(els: Elements): Promise<void> {
+  return new Promise((resolve) => {
+    // Title
+    els.popupTitle.textContent = "About";
+
+    // Body — rich DOM content built fresh each open
+    els.popupBody.replaceChildren(buildAboutContent());
+    els.popupBody.hidden = false;
+
+    // Single Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "popup-option";
+    closeBtn.dataset.value = "close";
+    const labelSpan = document.createElement("span");
+    labelSpan.textContent = "Close";
+    closeBtn.appendChild(labelSpan);
+    closeBtn.addEventListener("click", () => {
+      els.popup.close();
+    });
+    els.popupOptions.replaceChildren(closeBtn);
+
+    // Dismiss handlers — same backdrop/escape/close pattern as showPopup.
+    // Any dismiss path resolves the same way (void); no decision is carried.
+    function onDialogClose(): void {
+      cleanup();
+      resolve();
+    }
+    function onBackdropClick(e: MouseEvent): void {
+      if (e.target === els.popup) {
+        els.popup.close();
+      }
+    }
+    function cleanup(): void {
+      els.popup.removeEventListener("close", onDialogClose);
+      els.popup.removeEventListener("click", onBackdropClick);
+    }
+    els.popup.addEventListener("close", onDialogClose);
+    els.popup.addEventListener("click", onBackdropClick);
+
+    els.popup.showModal();
+    closeBtn.focus();
+    // Force the body to scroll-top. Same pattern as the input-pane fix in
+    // state56's d67cfbd — explicit reset after the showModal/focus dance,
+    // since focus or showModal can leave the scrollable body at a non-zero
+    // scrollTop. The "cursor" equivalent for a scrollable div.
+    els.popupBody.scrollTop = 0;
+  });
+}
+
+/**
+ * Construct the About popup's body content as a DOM tree. Pure DOM
+ * construction (no innerHTML); every text node is built explicitly so the
+ * output is unambiguously text, not interpreted as markup.
+ *
+ * Three sections:
+ *   1. "What this page does" — pathway list grouped by destination format
+ *   2. "Why it's safe" — trust language (local execution, no upload, dare
+ *      the reader to verify by disconnecting)
+ *   3. "About odf-kit" — version, build date, license, link to GitHub
+ *
+ * The pathway list deliberately covers the page's conversions only — not
+ * every odf-kit library capability. The landing page (separate work) will
+ * eventually describe the library's full surface area.
+ */
+function buildAboutContent(): HTMLElement {
+  const container = document.createElement("div");
+  container.className = "about-content";
+
+  // Section 1: What this page does
+  const s1 = document.createElement("section");
+  const s1h = document.createElement("h3");
+  s1h.textContent = "What this page does";
+  s1.appendChild(s1h);
+
+  const pathways: Array<{ group: string; items: string[] }> = [
+    {
+      group: "Convert to ODT (word processor format)",
+      items: ["HTML", "Markdown", "Lexical JSON", "TipTap JSON", "DOCX"],
+    },
+    {
+      group: "Convert to ODS (spreadsheet format)",
+      items: ["XLSX"],
+    },
+    {
+      group: "Convert from ODT",
+      items: ["to HTML", "to Markdown", "to Typst (for PDF generation)"],
+    },
+    {
+      group: "Convert from ODS",
+      items: ["to HTML"],
+    },
+  ];
+  for (const { group, items } of pathways) {
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "pathway-group";
+    const h = document.createElement("h4");
+    h.textContent = group;
+    groupDiv.appendChild(h);
+    const ul = document.createElement("ul");
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.textContent = item;
+      ul.appendChild(li);
+    }
+    groupDiv.appendChild(ul);
+    s1.appendChild(groupDiv);
+  }
+  container.appendChild(s1);
+
+  // Section 2: Why it's safe
+  const s2 = document.createElement("section");
+  const s2h = document.createElement("h3");
+  s2h.textContent = "Why it's safe";
+  s2.appendChild(s2h);
+  const trustP = document.createElement("p");
+  trustP.textContent =
+    "Your files never leave your computer. All conversion runs locally in " +
+    "your browser. No upload, no server, no analytics on file contents.";
+  s2.appendChild(trustP);
+  const dareP = document.createElement("p");
+  dareP.textContent =
+    "Verify it yourself: disconnect your internet after the page loads, " +
+    "then run conversions — everything still works.";
+  s2.appendChild(dareP);
+  container.appendChild(s2);
+
+  // Section 3: About odf-kit
+  const s3 = document.createElement("section");
+  const s3h = document.createElement("h3");
+  s3h.textContent = "About odf-kit";
+  s3.appendChild(s3h);
+  const buildDate =
+    document.querySelector('meta[name="build-date"]')?.getAttribute("content") ?? "unknown";
+  const idP = document.createElement("p");
+  idP.appendChild(
+    document.createTextNode(
+      `odf-kit v${VERSION} — open source library for OpenDocument file formats. ` +
+        `Apache 2.0 licensed. Build date: ${buildDate}. `,
+    ),
+  );
+  const link = document.createElement("a");
+  link.href = "https://github.com/GitHubNewbie0/odf-kit";
+  link.textContent = "GitHub repository";
+  link.rel = "noopener noreferrer";
+  link.target = "_blank";
+  idP.appendChild(link);
+  idP.appendChild(document.createTextNode("."));
+  s3.appendChild(idP);
+  container.appendChild(s3);
+
+  return container;
+}
+
+async function onAboutClick(els: Elements): Promise<void> {
+  await showAbout(els);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1068,7 +1233,9 @@ function bootstrap(): void {
   els.saveBtn.addEventListener("click", () => onSaveClick(els));
   els.clearBtn.addEventListener("click", () => onClearClick(els));
   els.saveAndClearBtn.addEventListener("click", () => onSaveAndClearClick(els));
-  els.aboutBtn.addEventListener("click", () => onAboutClick(els));
+  els.aboutBtn.addEventListener("click", () => {
+    void onAboutClick(els);
+  });
 
   // Persistent change handler on the hidden file input. Fires when the user
   // picks a file via the native picker; does not fire on cancel. Attached
@@ -1083,8 +1250,8 @@ function bootstrap(): void {
 
   console.log(
     `odf-kit unified tool page — v${VERSION} — state machine wired ` +
-      `(Keyboard input, Sample loading, Browse to File for text formats; ` +
-      `binary file preview and State C / conversion not yet implemented).`,
+      `(Keyboard input, Sample loading, Browse to File for text formats, ` +
+      `About popup; binary file preview and State C / conversion not yet implemented).`,
   );
 }
 
