@@ -69,7 +69,9 @@ export async function readDocx(
   try {
     zip = unzipSync(bytes);
   } catch (err) {
-    throw new Error(`readDocx: failed to unzip input — is this a valid .docx file? (${err})`);
+    throw new Error(`readDocx: failed to unzip input — is this a valid .docx file? (${err})`, {
+      cause: err,
+    });
   }
 
   // Helper: decode a ZIP entry to a UTF-8 string, return null if absent

@@ -46,17 +46,16 @@ function mapCell(cell: XlsxCell, options: XlsxToOdsOptions): OdsCellObject {
       };
 
     case "formula": {
-      // Determine the cell type from the cached value
-      const val = cell.value;
-      let type: OdsCellObject["type"] = "formula";
-      if (typeof val === "string") type = "formula";
-      else if (typeof val === "boolean") type = "formula";
-      else if (val instanceof Date) type = "formula";
-      else type = "formula";
-
+      // TODO(#25): formula cells currently round-trip with the wrong shape —
+      // the OdsDocument layer reads `value` as the formula string and
+      // ignores `formula`, so the emitted table:formula attribute holds the
+      // cached result rather than the expression. LibreOffice masks this
+      // because it parses the cached result as a constant. Proper fix
+      // requires reconciling the converter and document-layer contracts.
+      // See https://github.com/GitHubNewbie0/odf-kit/issues/25.
       return {
-        value: val,
-        type,
+        value: cell.value,
+        type: "formula",
         formula: cell.formula ? `=${cell.formula.replace(/^=/, "")}` : undefined,
       } as OdsCellObject;
     }
