@@ -29,17 +29,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Lint
-        run: npm run lint
+      # ── Verification pipeline ─────────────────────────────────────────────
+      #
+      # Order matches the local canonical pipeline (state56):
+      #   format:check → lint → build → test → validate-html → ODF-validator
+      #
+      # Rationale: fail fast on the cheapest checks first (format/lint take
+      # seconds and don't depend on build output), then build, then test,
+      # then the heavier validators. A single mental model across local and
+      # CI makes failures faster to reproduce locally.
 
       - name: Check formatting
         run: npm run format:check
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
       - name: Test
         run: npm test
+
+      - name: Validate HTML
+        run: npm run validate-html
 
       # ── ODF Spec Validation ───────────────────────────────────────────────
       #
@@ -74,3 +87,52 @@ jobs:
             exit 1
           fi
           echo "✅ ODF validation passed."
+
+      # ── Pages artifact upload ─────────────────────────────────────────────
+      #
+      # Push to main only (not PRs). The freshly built docs/ directory is
+      # uploaded as a Pages artifact, picked up by the deploy job below.
+      # docs/tools/index.html is gitignored — it exists only here, in the
+      # artifact, and on the deployed site. Source/artifact separation
+      # preserved end-to-end.
+
+      - name: Setup Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+  # ── Deploy to GitHub Pages ──────────────────────────────────────────────
+  #
+  # Runs only after build-and-test passes, only on push to main, never
+  # on PRs. Permissions scoped to this job only — the rest of the
+  # workflow keeps the minimal contents:read default.
+  #
+  # Concurrency limits to one deploy at a time without canceling queued
+  # deploys, so rapid pushes deploy in commit order.
+
+  deploy:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
