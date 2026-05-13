@@ -29,7 +29,7 @@ outputTypes:
   - application/vnd.oasis.opendocument.spreadsheet
   - text/html
   - text/markdown
-logo: 'https://githubnewbie0.github.io/odf-kit/images/logo.svg'
+logo: logo.svg
 maintenance:
   type: community
   contacts:
