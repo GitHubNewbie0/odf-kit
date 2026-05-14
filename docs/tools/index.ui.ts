@@ -4,8 +4,9 @@
 // into docs/tools/index.html by scripts/build-tool-page.js.
 // See unified-tool-design-v2.md for the full design.
 //
-// Current scope: state machine + reusable popup infrastructure + sample loading
-// + Browse-to-File for text formats + About popup.
+// Current scope: state machine (States A, B, C in the type system) + reusable
+// popup infrastructure + sample loading + Browse-to-File for text formats +
+// About popup + State C scaffolding (unreachable until C2 wires Generate).
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
 //       Load Sample File — fully functional with sample-selector popup,
@@ -18,13 +19,35 @@
 //   - About button — fully functional, shows About popup with pathway list,
 //                    trust language, and identity/provenance.
 //   - Clear fully functional (returns to State A)
-//   - Generate is a no-op placeholder (transitions remain B; no conversion yet)
+//   - Generate is a no-op placeholder (transitions remain B; no conversion
+//     yet). C2 will wire HTML→ODT end-to-end (adding the ConversionInput
+//     type, runConversion / convertOne, the html→odt case, and the output-
+//     pane CSS for bytes-kind rendering); subsequent commits fan out to
+//     the remaining pathways.
 //   - Three popup primitives (deliberately explicit, not overloaded):
 //       showPopup() — selector popups (title + optional body + options list)
 //       showError() — error popups (title + message + single OK)
 //       showAbout() — About popup (rich DOM body + single Close)
-//   - State C entirely deferred until Generate actually produces output
-//   - Trust popup on first visit, conversion plumbing — all later
+//     (showInfo, an alias around showPopup for success/neutral info, lands
+//     in C3 when Save uses it.)
+//   - State C is in the type system and in render(), but unreachable from
+//     any user action this commit. C2 wires the first path.
+//   - Trust popup on first visit — later.
+//
+// State C scaffolding (this commit):
+//   - AppState union extended with a "C" variant carrying inputFormat,
+//     inputFilename, inputKind, inputText, outputFormat, outputContent
+//     (discriminated by kind: "bytes" | "text"), and isStale.
+//   - OutputFormat and ConversionResult types added; both are reachable
+//     through the State C variant of AppState, which keeps the compiler
+//     happy under noUnusedLocals.
+//   - render() refactored into three diff-aware sub-renderers
+//     (renderInputPane, renderOutputPane, renderButtons). renderInputPane
+//     leaves a mounted textarea alone if the new state still wants one,
+//     preserving cursor/scroll/focus across B→C and C→C transitions. This
+//     means the textarea's input listener can safely call render() directly.
+//   - setPaneTextarea() gained a readOnly flag; State C will mount a
+//     readOnly=true textarea in the output pane (no input listener).
 //
 // Samples: harvested from existing tool pages (HTML, Lexical) and test fixtures
 // (Markdown, TipTap). All four are parallel "Meeting Notes" content for easy
@@ -42,11 +65,47 @@ import { VERSION } from "odf-kit/odt";
 type InputFormat = "html" | "markdown" | "lexical" | "tiptap" | "docx" | "xlsx" | "odt" | "ods";
 
 /**
+ * Output formats the page produces. ODT and ODS are the OpenDocument targets;
+ * HTML / Markdown / Typst are the text-format targets reached by going
+ * "back out" of an ODT input (via odtToHtml / odtToMarkdown / odtToTypst).
+ * PDF is NOT in this union — PDF generation lives on the standalone
+ * odt-to-pdf.html page (Typst-mediated, external compile step).
+ */
+type OutputFormat = "odt" | "ods" | "html" | "markdown" | "typst";
+
+/**
+ * A single conversion result. Discriminated by kind so the rendering layer
+ * can switch on it cleanly:
+ *   - "bytes" for ODT / ODS outputs (binary, saved as-is via Blob; preview
+ *     round-trips through the matching reader to produce HTML source string
+ *     for the read-only output textarea).
+ *   - "text" for HTML / Markdown / Typst outputs (UTF-8 string, saved via
+ *     Blob with the appropriate MIME type; the same string is what the
+ *     output textarea shows directly).
+ *
+ * The outputFilename is the name the saved file should have — stem from the
+ * input filename, extension from the output format. Constructed inside
+ * runConversion (C2) per design decision E so the click handler doesn't
+ * need to know the input-format → output-extension mapping.
+ *
+ * The ConversionInput counterpart and runConversion itself land in C2; this
+ * type is in C1 because State C references it.
+ */
+type ConversionResult =
+  | { kind: "bytes"; outputFormat: "odt" | "ods"; bytes: Uint8Array; outputFilename: string }
+  | {
+      kind: "text";
+      outputFormat: "html" | "markdown" | "typst";
+      text: string;
+      outputFilename: string;
+    };
+
+/**
  * Page state. Discriminated union: each state carries only the data relevant
  * to that state, so e.g. there's no way to access output content while in B.
  *
- * State C is deliberately omitted from the type for this commit — adding it
- * before Generate produces output would be scaffolding for nothing.
+ * State C scaffolding is present in the type system this commit, but no user
+ * action transitions to it yet. C2 wires the first path (HTML → ODT).
  */
 type AppState =
   | { state: "A" }
@@ -64,6 +123,27 @@ type AppState =
       inputKind: "text" | "binary";
       /** Text content for text-kind inputs. Empty string until user types. */
       inputText: string;
+    }
+  | {
+      state: "C";
+      // Input-side fields carried forward from B so the user can re-edit
+      // and re-Generate without losing context.
+      inputFormat: InputFormat;
+      inputFilename: string;
+      inputKind: "text" | "binary";
+      inputText: string;
+      // Output-side fields produced by Generate.
+      outputFormat: OutputFormat;
+      outputContent: ConversionResult;
+      /**
+       * Set when the user edits the input after a successful Generate; the
+       * output textarea is then no longer in sync with the input. The sticky
+       * disclosure footer in the output pane flips to the stale message; the
+       * Save / Save-and-Clear buttons stay enabled (saving stale output is
+       * not invalid — the user may have intended that snapshot). C4 wires
+       * the visual indicator; this commit just tracks the flag.
+       */
+      isStale: boolean;
     };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -485,64 +565,155 @@ let currentState: AppState = { state: "A" };
 
 /**
  * Single source of truth for "what the UI should look like, given a state."
- * Idempotent: calling render(state) twice produces the same UI.
+ * Coordinator over three diff-aware sub-renderers — one per region of the UI:
+ *
+ *   - renderInputPane:  the editable textarea (or empty placeholder)
+ *   - renderOutputPane: the read-only textarea showing converted content
+ *                       (or empty placeholder)
+ *   - renderButtons:    the four action buttons' disabled states
+ *
+ * Sub-renderers are individually idempotent: calling render(state) twice
+ * produces the same UI. Some of them are diff-aware in the sense that they
+ * look at the current DOM before deciding whether to mutate it, so a
+ * mounted-and-focused textarea isn't destroyed on every state change.
+ *
+ * Concretely: once the input textarea is mounted, calling render() during
+ * B→C, C→C, or C→B-back-to-text transitions leaves the textarea element
+ * alone (it owns its own cursor / scroll / focus / selection). State syncs
+ * to the textarea via its input listener; the textarea's DOM is the
+ * authoritative display while it's mounted. This makes it safe for the
+ * input listener itself to call render() directly — for example to flip
+ * isStale in State C and update the output pane's disclosure footer.
  *
  * Called after every state mutation. Never called from inside event handlers
  * before the mutation; always after.
  */
 function render(state: AppState, els: Elements): void {
+  renderInputPane(state, els);
+  renderOutputPane(state, els);
+  renderButtons(state, els);
+}
+
+/**
+ * Diff-aware: if the new state wants a text-editable textarea and one is
+ * already mounted, leave it alone (preserves cursor / scroll / focus /
+ * selection across transitions). If the new state wants a textarea and
+ * none is mounted, mount one populated from state.inputText. If the new
+ * state wants the empty placeholder, replace whatever's there with that.
+ */
+function renderInputPane(state: AppState, els: Elements): void {
+  if (state.state === "A") {
+    setPaneEmpty(els.inputPane, "Select an input method above");
+    return;
+  }
+
+  // States B and C both want the input textarea (for text-kind inputs).
+  // Binary-kind isn't reachable this commit; the placeholder branch is
+  // here for completeness when binary preview lands.
+  if (state.inputKind === "binary") {
+    setPaneEmpty(els.inputPane, `Loaded: ${state.inputFilename}`);
+    return;
+  }
+
+  // Text-kind: if a textarea is already mounted, leave it alone — the
+  // textarea owns its display while mounted, and destroying it would lose
+  // cursor / scroll / focus. State already mirrors the textarea's value via
+  // the input listener attached in setPaneTextarea.
+  const existing = els.inputPane.querySelector("textarea");
+  if (existing !== null) {
+    return;
+  }
+
+  // No textarea mounted: build one populated from state.inputText.
+  setPaneTextarea(els.inputPane, state.inputFormat, state.inputText, false, els);
+}
+
+/**
+ * In States A and B the output pane shows an empty placeholder; the message
+ * differs slightly between the two ("Output will appear here after Generate"
+ * vs. "Click Generate to convert") so the user knows what's expected next.
+ *
+ * In State C the output pane shows a read-only textarea populated from the
+ * conversion result. For text-kind results the textarea content is the
+ * result text directly; for bytes-kind results, the result bytes will be
+ * round-tripped through a reader by the caller of runConversion (or here,
+ * once C2 wires the reading-back path). This commit creates the rendering
+ * scaffolding only; State C isn't reachable yet.
+ */
+function renderOutputPane(state: AppState, els: Elements): void {
+  if (state.state === "A") {
+    setPaneEmpty(els.outputPane, "Output will appear here after Generate");
+    return;
+  }
+
+  if (state.state === "B") {
+    setPaneEmpty(els.outputPane, "Click Generate to convert");
+    return;
+  }
+
+  // State C. For "text" results the textarea content is the result string
+  // itself. For "bytes" results (ODT / ODS), the round-trip-through-reader
+  // step that turns bytes back into HTML source for display is wired in C2
+  // when the first binary-output path goes live. Until then this branch is
+  // unreachable.
+  const result = state.outputContent;
+  if (result.kind === "text") {
+    // Diff-aware: if an output textarea is already mounted and its value
+    // matches the new content, leave the element alone (preserves any
+    // selection the user has). This matters because the input listener
+    // calls render() on every keystroke during a stale-flag flip in
+    // State C; without this check, the output textarea would be torn
+    // down and rebuilt on every keystroke, destroying mid-copy selections.
+    const existing = els.outputPane.querySelector("textarea");
+    if (existing !== null && existing.value === result.text) {
+      return;
+    }
+    setPaneTextarea(els.outputPane, state.inputFormat, result.text, true, els);
+    return;
+  }
+  // result.kind === "bytes"; rendering for this kind is added in C2.
+  setPaneEmpty(els.outputPane, "Binary output rendering not yet implemented");
+}
+
+/**
+ * Action button enabled/disabled states by state.
+ *
+ *   State A: all four disabled.
+ *   State B: Generate + Clear enabled; Save + SaveAndClear disabled.
+ *   State C: all four enabled (output exists and can be saved).
+ *
+ * Pure attribute updates — no DOM children to preserve.
+ */
+function renderButtons(state: AppState, els: Elements): void {
   switch (state.state) {
     case "A":
-      renderStateA(els);
+      els.browseBtn.disabled = false;
+      els.sampleBtn.disabled = false;
+      els.keyboardBtn.disabled = false;
+      els.generateBtn.disabled = true;
+      els.saveBtn.disabled = true;
+      els.clearBtn.disabled = true;
+      els.saveAndClearBtn.disabled = true;
       return;
     case "B":
-      renderStateB(state, els);
+      els.browseBtn.disabled = true;
+      els.sampleBtn.disabled = true;
+      els.keyboardBtn.disabled = true;
+      els.generateBtn.disabled = false;
+      els.saveBtn.disabled = true;
+      els.clearBtn.disabled = false;
+      els.saveAndClearBtn.disabled = true;
+      return;
+    case "C":
+      els.browseBtn.disabled = true;
+      els.sampleBtn.disabled = true;
+      els.keyboardBtn.disabled = true;
+      els.generateBtn.disabled = false;
+      els.saveBtn.disabled = false;
+      els.clearBtn.disabled = false;
+      els.saveAndClearBtn.disabled = false;
       return;
   }
-}
-
-function renderStateA(els: Elements): void {
-  // Three input-method buttons: active
-  els.browseBtn.disabled = false;
-  els.sampleBtn.disabled = false;
-  els.keyboardBtn.disabled = false;
-
-  // Four action buttons: all inactive
-  els.generateBtn.disabled = true;
-  els.saveBtn.disabled = true;
-  els.clearBtn.disabled = true;
-  els.saveAndClearBtn.disabled = true;
-
-  // Input pane: empty placeholder
-  setPaneEmpty(els.inputPane, "Select an input method above");
-
-  // Output pane: empty placeholder
-  setPaneEmpty(els.outputPane, "Output will appear here after Generate");
-}
-
-function renderStateB(state: Extract<AppState, { state: "B" }>, els: Elements): void {
-  // Three input-method buttons: inactive (input is loaded; can't change it)
-  els.browseBtn.disabled = true;
-  els.sampleBtn.disabled = true;
-  els.keyboardBtn.disabled = true;
-
-  // Four action buttons: Generate active, Clear active, others inactive
-  els.generateBtn.disabled = false;
-  els.saveBtn.disabled = true;
-  els.clearBtn.disabled = false;
-  els.saveAndClearBtn.disabled = true;
-
-  // Input pane: depends on whether the input is text-kind (editable textarea)
-  // or binary-kind (read-only summary; binary preview lands in a later commit).
-  if (state.inputKind === "text") {
-    setPaneTextarea(els.inputPane, state.inputFormat, state.inputText);
-  } else {
-    // Binary inputs aren't reachable this commit, but the branch is here for completeness
-    setPaneEmpty(els.inputPane, `Loaded: ${state.inputFilename}`);
-  }
-
-  // Output pane: still empty in State B (Generate hasn't run)
-  setPaneEmpty(els.outputPane, "Click Generate to convert");
 }
 
 /** Replace pane contents with an empty placeholder div containing the message. */
@@ -553,13 +724,33 @@ function setPaneEmpty(pane: HTMLDivElement, message: string): void {
   pane.replaceChildren(empty);
 }
 
-/** Replace pane contents with a textarea for text-kind inputs. */
-function setPaneTextarea(pane: HTMLDivElement, format: InputFormat, value: string): void {
+/**
+ * Replace pane contents with a textarea.
+ *
+ * When readOnly is false (input pane), wires an input listener that mirrors
+ * the textarea's value into currentState.inputText. The listener updates
+ * state without re-rendering, since the textarea is its own authoritative
+ * display while mounted — renderInputPane's diff-aware check would no-op
+ * anyway if called, but skipping the render is cheaper and more obviously
+ * correct.
+ *
+ * When readOnly is true (output pane in State C), no listener is attached:
+ * the output textarea is a passive display of the conversion result. The
+ * user can select and copy text from it but not edit it.
+ */
+function setPaneTextarea(
+  pane: HTMLDivElement,
+  format: InputFormat,
+  value: string,
+  readOnly: boolean,
+  els: Elements,
+): void {
   const textarea = document.createElement("textarea");
-  textarea.id = "inputTextarea";
+  textarea.id = readOnly ? "outputTextarea" : "inputTextarea";
   textarea.spellcheck = false;
-  textarea.placeholder = `Type your ${format} input here...`;
+  textarea.placeholder = readOnly ? "" : `Type your ${format} input here...`;
   textarea.value = value;
+  textarea.readOnly = readOnly;
   textarea.style.width = "100%";
   textarea.style.minHeight = "300px";
   textarea.style.fontFamily =
@@ -570,22 +761,51 @@ function setPaneTextarea(pane: HTMLDivElement, format: InputFormat, value: strin
   textarea.style.resize = "vertical";
   textarea.style.background = "transparent";
 
-  // Keep state in sync as the user types. Note: this updates state without
-  // re-rendering, because re-rendering would replace the textarea and lose
-  // focus / cursor. The textarea's own DOM is the authoritative display while
-  // it's mounted; state is updated for when transitions later need the value.
-  textarea.addEventListener("input", () => {
-    if (currentState.state === "B") {
-      currentState = { ...currentState, inputText: textarea.value };
-    }
-  });
+  if (!readOnly) {
+    // Keep state in sync as the user types. Updates state without
+    // re-rendering: the textarea is its own authoritative display while
+    // mounted (renderInputPane's diff-aware check would no-op anyway, but
+    // skipping the call is cheaper and more obviously correct).
+    //
+    // Special case: in State C, edits make the output stale. We DO call
+    // render() in that case so renderOutputPane can flip the disclosure
+    // footer to the stale message. renderInputPane sees the textarea
+    // already mounted and leaves it alone, so cursor / focus survive.
+    textarea.addEventListener("input", () => {
+      if (currentState.state === "B") {
+        currentState = { ...currentState, inputText: textarea.value };
+        return;
+      }
+      if (currentState.state === "C") {
+        if (currentState.isStale) {
+          // Already marked stale; just mirror the text. Skip render() — no
+          // visual transition to make, and the textarea owns its DOM.
+          currentState = { ...currentState, inputText: textarea.value };
+          return;
+        }
+        currentState = { ...currentState, inputText: textarea.value, isStale: true };
+        // C4 will wire the visual stale indicator. For now the state flag
+        // is set but no on-screen change occurs — render() is still safe
+        // to call (it'll just no-op the input textarea via the diff-aware
+        // check), and we call it so the wiring is in place when C4 adds
+        // the disclosure-footer update.
+        render(currentState, els);
+      }
+    });
+  }
 
   pane.replaceChildren(textarea);
   // Set cursor to start BEFORE focusing — otherwise focus may scroll the
   // textarea to wherever the cursor lands (the end, for freshly-populated
   // content), and the user sees the bottom of the file rather than the top.
   textarea.setSelectionRange(0, 0);
-  textarea.focus();
+  // Don't steal focus when mounting a read-only output textarea: the user
+  // just clicked Generate and is reading the result, not typing. Focusing
+  // an output textarea would steal the cursor from any input field the
+  // user may have shifted back to.
+  if (!readOnly) {
+    textarea.focus();
+  }
   textarea.scrollTop = 0;
 }
 
