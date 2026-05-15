@@ -22,13 +22,18 @@
 //   - Generate: HTML→ODT wired end-to-end. Other pathways still throw "not
 //     yet implemented" inside runConversion and surface via showError;
 //     subsequent commits fan out one pathway at a time.
-//   - Save / Save-and-Clear: still no-op placeholders (C3 wires them).
-//   - Three popup primitives (deliberately explicit, not overloaded):
+//   - Save / Save-and-Clear: fully wired (C3). Save triggers a browser
+//     download via Blob + anchor click + revoke and shows a success popup;
+//     Save-and-Clear triggers the same download then transitions to State A
+//     without a popup (the state change is the feedback for a user doing
+//     multiple saves back-to-back who doesn't want to dismiss a popup
+//     between each one). Both surface errors via showError and stay in
+//     State C on failure.
+//   - Four popup primitives (deliberately explicit, not overloaded):
 //       showPopup() — selector popups (title + optional body + options list)
 //       showError() — error popups (title + message + single OK)
+//       showInfo()  — success / neutral info popups (title + message + OK)
 //       showAbout() — About popup (rich DOM body + single Close)
-//     (showInfo, an alias around showPopup for success/neutral info, lands
-//     in C3 when Save uses it.)
 //   - State C now reachable via Generate from HTML input. Output pane
 //     renders the round-tripped ODT preview as a visual page in a
 //     sandboxed iframe via odtToHtml's HTML output (per the rendering
@@ -69,6 +74,7 @@ import {
   runConversion,
 } from "./conversion.js";
 import { parseFilename } from "./filename.js";
+import { buildSaveBlob, triggerDownload } from "./save.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -963,6 +969,23 @@ async function showError(els: Elements, args: { title: string; message: string }
   });
 }
 
+/**
+ * Show an info popup with a title and message body, single OK button.
+ * Mirror of showError for the success / neutral-info case (e.g. "File saved").
+ * Distinct from showError so call sites read semantically — same modal
+ * mechanics underneath, but a code reader scanning a handler can tell at a
+ * glance whether something succeeded or failed. The dismissal paths are
+ * equivalent (OK button, Escape, backdrop click); the promise resolves and
+ * state is unchanged.
+ */
+async function showInfo(els: Elements, args: { title: string; message: string }): Promise<void> {
+  await showPopup(els, {
+    title: args.title,
+    body: args.message,
+    options: [{ label: "OK", value: "ok" }],
+  });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // File loading helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1448,14 +1471,63 @@ function onClearClick(els: Elements): void {
   render(currentState, els);
 }
 
-function onSaveClick(_els: Elements): void {
-  // Unreachable in State B (button is disabled). Wired for completeness.
-  console.log("Save clicked — not yet implemented.");
+/**
+ * Save the State-C output to the user's Downloads folder, then show a
+ * success popup. State stays at C — the user can re-edit input and
+ * re-Generate, or save again. On failure, surfaces an error popup and
+ * leaves state unchanged so the user can retry.
+ *
+ * Defensive guard for States A and B: Save is disabled by renderButtons
+ * in those states so the handler shouldn't fire, but if it does the
+ * guard returns silently rather than producing a malformed Blob.
+ */
+async function onSaveClick(els: Elements): Promise<void> {
+  if (currentState.state !== "C") {
+    return;
+  }
+  const result = currentState.outputContent;
+  try {
+    const { blob, filename } = buildSaveBlob(result);
+    triggerDownload(blob, filename);
+  } catch (err) {
+    await showError(els, {
+      title: "Save failed",
+      message: `Couldn't save the file. ${errorMessage(err)}`,
+    });
+    return;
+  }
+  await showInfo(els, {
+    title: "File saved",
+    message: `Saved as ${result.outputFilename} in your Downloads folder.`,
+  });
 }
 
-function onSaveAndClearClick(_els: Elements): void {
-  // Unreachable in State B (button is disabled). Wired for completeness.
-  console.log("Save and Clear clicked — not yet implemented.");
+/**
+ * Save the State-C output to the user's Downloads folder, then transition
+ * to State A. No success popup — the state change to A is itself the
+ * feedback (deliberately quieter than plain Save, since this button is
+ * for users doing multiple back-to-back saves who don't want to dismiss
+ * a popup between each one). On failure, surfaces an error popup and
+ * stays in State C so the user can retry without losing the output.
+ *
+ * Defensive guard for States A and B: same rationale as onSaveClick.
+ */
+async function onSaveAndClearClick(els: Elements): Promise<void> {
+  if (currentState.state !== "C") {
+    return;
+  }
+  const result = currentState.outputContent;
+  try {
+    const { blob, filename } = buildSaveBlob(result);
+    triggerDownload(blob, filename);
+  } catch (err) {
+    await showError(els, {
+      title: "Save failed",
+      message: `Couldn't save the file. ${errorMessage(err)}`,
+    });
+    return;
+  }
+  onClearClick(els);
 }
 
 /**
@@ -1647,9 +1719,13 @@ function bootstrap(): void {
   els.generateBtn.addEventListener("click", () => {
     void onGenerateClick(els);
   });
-  els.saveBtn.addEventListener("click", () => onSaveClick(els));
+  els.saveBtn.addEventListener("click", () => {
+    void onSaveClick(els);
+  });
   els.clearBtn.addEventListener("click", () => onClearClick(els));
-  els.saveAndClearBtn.addEventListener("click", () => onSaveAndClearClick(els));
+  els.saveAndClearBtn.addEventListener("click", () => {
+    void onSaveAndClearClick(els);
+  });
   els.aboutBtn.addEventListener("click", () => {
     void onAboutClick(els);
   });
