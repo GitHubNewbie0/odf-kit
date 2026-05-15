@@ -4,9 +4,9 @@
 // into docs/tools/index.html by scripts/build-tool-page.js.
 // See unified-tool-design-v2.md for the full design.
 //
-// Current scope: state machine (States A, B, C in the type system) + reusable
-// popup infrastructure + sample loading + Browse-to-File for text formats +
-// About popup + State C scaffolding (unreachable until C2 wires Generate).
+// Current scope: state machine (States A, B, C) + reusable popup infrastructure
+// + sample loading + Browse-to-File for text formats + About popup + HTML→ODT
+// conversion end-to-end (vertical slice).
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
 //       Load Sample File — fully functional with sample-selector popup,
@@ -19,35 +19,41 @@
 //   - About button — fully functional, shows About popup with pathway list,
 //                    trust language, and identity/provenance.
 //   - Clear fully functional (returns to State A)
-//   - Generate is a no-op placeholder (transitions remain B; no conversion
-//     yet). C2 will wire HTML→ODT end-to-end (adding the ConversionInput
-//     type, runConversion / convertOne, the html→odt case, and the output-
-//     pane CSS for bytes-kind rendering); subsequent commits fan out to
-//     the remaining pathways.
+//   - Generate: HTML→ODT wired end-to-end. Other pathways still throw "not
+//     yet implemented" inside runConversion and surface via showError;
+//     subsequent commits fan out one pathway at a time.
+//   - Save / Save-and-Clear: still no-op placeholders (C3 wires them).
 //   - Three popup primitives (deliberately explicit, not overloaded):
 //       showPopup() — selector popups (title + optional body + options list)
 //       showError() — error popups (title + message + single OK)
 //       showAbout() — About popup (rich DOM body + single Close)
 //     (showInfo, an alias around showPopup for success/neutral info, lands
 //     in C3 when Save uses it.)
-//   - State C is in the type system and in render(), but unreachable from
-//     any user action this commit. C2 wires the first path.
+//   - State C now reachable via Generate from HTML input. Output pane
+//     renders the round-tripped ODT preview as a visual page in a
+//     sandboxed iframe via odtToHtml's HTML output (per the rendering
+//     table in unified-tool-design-v2). The sticky disclosure footer
+//     tells users "Preview is rendered approximately. The saved file
+//     is exact." since the iframe shows an HTML approximation of the
+//     ODT document, not the ODT itself.
 //   - Trust popup on first visit — later.
 //
-// State C scaffolding (this commit):
-//   - AppState union extended with a "C" variant carrying inputFormat,
-//     inputFilename, inputKind, inputText, outputFormat, outputContent
-//     (discriminated by kind: "bytes" | "text"), and isStale.
-//   - OutputFormat and ConversionResult types added; both are reachable
-//     through the State C variant of AppState, which keeps the compiler
-//     happy under noUnusedLocals.
-//   - render() refactored into three diff-aware sub-renderers
-//     (renderInputPane, renderOutputPane, renderButtons). renderInputPane
-//     leaves a mounted textarea alone if the new state still wants one,
-//     preserving cursor/scroll/focus across B→C and C→C transitions. This
-//     means the textarea's input listener can safely call render() directly.
-//   - setPaneTextarea() gained a readOnly flag; State C will mount a
-//     readOnly=true textarea in the output pane (no input listener).
+// Architecture notes:
+//   - Conversion logic lives in conversion.ts (UI ↔ library seam) and
+//     filename.ts (pure string utilities). index.ui.ts handles the DOM,
+//     event wiring, and state transitions; it imports from those two
+//     modules but contains no library calls of its own.
+//   - render() is a coordinator over three diff-aware sub-renderers
+//     (renderInputPane, renderOutputPane, renderButtons). Each is
+//     idempotent and looks at the current DOM before deciding what to
+//     change. Mounted textareas survive transitions: cursor/scroll/focus/
+//     selection in the input textarea persist across B→C and C→C
+//     transitions; output-textarea selection survives stale-flag flips.
+//   - Generate uses an appear-threshold + minimum-display pattern for the
+//     "Generating..." indicator: timer set at 200ms, minimum on-screen
+//     time 400ms once shown. Avoids the flash on fast conversions and the
+//     flash on barely-over-threshold conversions. Inline in onGenerateClick
+//     for now; factor out if a second site needs the same pattern.
 //
 // Samples: harvested from existing tool pages (HTML, Lexical) and test fixtures
 // (Markdown, TipTap). All four are parallel "Meeting Notes" content for easy
@@ -56,6 +62,13 @@
 // to a later commit.
 
 import { VERSION } from "odf-kit/odt";
+import {
+  type ConversionInput,
+  type ConversionResult,
+  type OutputFormat,
+  runConversion,
+} from "./conversion.js";
+import { parseFilename } from "./filename.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -63,42 +76,6 @@ import { VERSION } from "odf-kit/odt";
 
 /** Input formats the page accepts. */
 type InputFormat = "html" | "markdown" | "lexical" | "tiptap" | "docx" | "xlsx" | "odt" | "ods";
-
-/**
- * Output formats the page produces. ODT and ODS are the OpenDocument targets;
- * HTML / Markdown / Typst are the text-format targets reached by going
- * "back out" of an ODT input (via odtToHtml / odtToMarkdown / odtToTypst).
- * PDF is NOT in this union — PDF generation lives on the standalone
- * odt-to-pdf.html page (Typst-mediated, external compile step).
- */
-type OutputFormat = "odt" | "ods" | "html" | "markdown" | "typst";
-
-/**
- * A single conversion result. Discriminated by kind so the rendering layer
- * can switch on it cleanly:
- *   - "bytes" for ODT / ODS outputs (binary, saved as-is via Blob; preview
- *     round-trips through the matching reader to produce HTML source string
- *     for the read-only output textarea).
- *   - "text" for HTML / Markdown / Typst outputs (UTF-8 string, saved via
- *     Blob with the appropriate MIME type; the same string is what the
- *     output textarea shows directly).
- *
- * The outputFilename is the name the saved file should have — stem from the
- * input filename, extension from the output format. Constructed inside
- * runConversion (C2) per design decision E so the click handler doesn't
- * need to know the input-format → output-extension mapping.
- *
- * The ConversionInput counterpart and runConversion itself land in C2; this
- * type is in C1 because State C references it.
- */
-type ConversionResult =
-  | { kind: "bytes"; outputFormat: "odt" | "ods"; bytes: Uint8Array; outputFilename: string }
-  | {
-      kind: "text";
-      outputFormat: "html" | "markdown" | "typst";
-      text: string;
-      outputFilename: string;
-    };
 
 /**
  * Page state. Discriminated union: each state carries only the data relevant
@@ -651,28 +628,84 @@ function renderOutputPane(state: AppState, els: Elements): void {
     return;
   }
 
-  // State C. For "text" results the textarea content is the result string
-  // itself. For "bytes" results (ODT / ODS), the round-trip-through-reader
-  // step that turns bytes back into HTML source for display is wired in C2
-  // when the first binary-output path goes live. Until then this branch is
-  // unreachable.
+  // State C. Output rendering varies by result kind and output format:
+  //   - "bytes" (ODT / ODS): round-tripped to HTML via the matching reader
+  //     at conversion time (cached as previewText), then rendered as a
+  //     visual preview in an iframe so the user sees what a viewer would
+  //     show — not the HTML source.
+  //   - "text" with outputFormat "html": rendered as a visual preview in
+  //     an iframe (the HTML IS the source).
+  //   - "text" with outputFormat "markdown" or "typst": pure text formats;
+  //     shown verbatim in a read-only textarea so the user can read and
+  //     copy the source. (Future commits exercise these branches; html→odt
+  //     this commit doesn't reach them.)
   const result = state.outputContent;
-  if (result.kind === "text") {
-    // Diff-aware: if an output textarea is already mounted and its value
-    // matches the new content, leave the element alone (preserves any
-    // selection the user has). This matters because the input listener
-    // calls render() on every keystroke during a stale-flag flip in
-    // State C; without this check, the output textarea would be torn
-    // down and rebuilt on every keystroke, destroying mid-copy selections.
-    const existing = els.outputPane.querySelector("textarea");
-    if (existing !== null && existing.value === result.text) {
-      return;
-    }
-    setPaneTextarea(els.outputPane, state.inputFormat, result.text, true, els);
+  if (result.kind === "bytes") {
+    setPaneIframe(els.outputPane, result.previewText);
+    ensureOutputDisclosure(els.outputPane);
     return;
   }
-  // result.kind === "bytes"; rendering for this kind is added in C2.
-  setPaneEmpty(els.outputPane, "Binary output rendering not yet implemented");
+  // result.kind === "text"
+  if (result.outputFormat === "html") {
+    setPaneIframe(els.outputPane, result.text);
+    ensureOutputDisclosure(els.outputPane);
+    return;
+  }
+  // Markdown or Typst: read-only textarea.
+  // Diff-aware: skip the rebuild if content matches what's already shown,
+  // so stale-flag flips (every keystroke in input) don't tear down the
+  // user's text selection in the output pane.
+  const existing = els.outputPane.querySelector("textarea");
+  if (existing !== null && existing.value === result.text) {
+    ensureOutputDisclosure(els.outputPane);
+    return;
+  }
+  setPaneTextarea(els.outputPane, state.inputFormat, result.text, true, els);
+  ensureOutputDisclosure(els.outputPane);
+}
+
+/**
+ * Replace pane contents with an iframe rendering the given HTML via the
+ * srcdoc attribute. Sandboxed without allow-scripts (the round-tripped or
+ * generated HTML never contains script, but defense in depth).
+ * allow-same-origin lets the iframe's inline styles resolve normally.
+ *
+ * Diff-aware: stashes the HTML on the iframe element's dataset so a
+ * subsequent render call with the same content can return early without
+ * tearing down the iframe — preserves the user's scroll position in the
+ * preview across stale-flag flips during input editing.
+ */
+function setPaneIframe(pane: HTMLDivElement, html: string): void {
+  const existing = pane.querySelector("iframe");
+  if (existing !== null && existing.dataset.previewText === html) {
+    return;
+  }
+  const iframe = document.createElement("iframe");
+  iframe.id = "outputIframe";
+  iframe.sandbox.add("allow-same-origin");
+  iframe.srcdoc = html;
+  iframe.dataset.previewText = html;
+  pane.replaceChildren(iframe);
+}
+
+/**
+ * Ensure the output pane has its disclosure footer mounted. Idempotent:
+ * if one is already there, leaves it alone. If not, appends a fresh one
+ * with the "fresh" message text. C4 will add the stale-message branch
+ * when isStale is true.
+ *
+ * Sibling to the textarea/placeholder inside the pane. CSS makes it
+ * sticky-bottom so it remains visible regardless of scroll position.
+ */
+function ensureOutputDisclosure(pane: HTMLDivElement): void {
+  const existing = pane.querySelector(".io-pane-disclosure");
+  if (existing !== null) {
+    return;
+  }
+  const disclosure = document.createElement("div");
+  disclosure.className = "io-pane-disclosure";
+  disclosure.textContent = "Preview is rendered approximately. The saved file is exact.";
+  pane.appendChild(disclosure);
 }
 
 /**
@@ -933,32 +966,6 @@ async function showError(els: Elements, args: { title: string; message: string }
 // ─────────────────────────────────────────────────────────────────────────────
 // File loading helpers
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Result of parsing a filename. The `ok: true` branch carries the case-preserved
- * stem and the lowercased extension; the `ok: false` branch carries a reason
- * that the caller maps to a specific error popup.
- */
-type ParsedFilename =
-  | { ok: true; stem: string; ext: string }
-  | { ok: false; reason: "no-extension" | "empty-stem" };
-
-/**
- * Split a filename on the LAST dot. Extension is lowercased for matching;
- * stem retains the original case for output naming. Reports a specific
- * failure reason for two cases the caller will surface as distinct errors:
- *   - "no-extension"  — no dot at all, OR ends with a dot (e.g. "file.")
- *   - "empty-stem"    — starts with a dot (e.g. ".gitignore")
- */
-function parseFilename(name: string): ParsedFilename {
-  const lastDot = name.lastIndexOf(".");
-  if (lastDot === -1) return { ok: false, reason: "no-extension" };
-  const stem = name.slice(0, lastDot);
-  const ext = name.slice(lastDot + 1).toLowerCase();
-  if (ext === "") return { ok: false, reason: "no-extension" };
-  if (stem === "") return { ok: false, reason: "empty-stem" };
-  return { ok: true, stem, ext };
-}
 
 /**
  * Detect whether parsed JSON is a Lexical document or a TipTap document by
@@ -1243,9 +1250,197 @@ async function onKeyboardClick(els: Elements): Promise<void> {
   render(currentState, els);
 }
 
-function onGenerateClick(_els: Elements): void {
-  // No-op placeholder. Real conversion arrives in a later commit. State stays B.
-  console.log("Generate clicked — conversion not yet implemented.");
+/**
+ * Indicator threshold: arm a timer when conversion starts; if it fires before
+ * conversion completes, mount the "Generating..." label on the Generate button.
+ * Avoids the flash on fast conversions (timer never fires).
+ */
+const INDICATOR_APPEAR_THRESHOLD_MS = 200;
+
+/**
+ * Minimum display time once the indicator is shown. If conversion completes
+ * shortly after the indicator appears (e.g. timer fires at 200ms and
+ * conversion finishes at 220ms), pad with an artificial delay so the
+ * indicator stays on screen for at least this long. Avoids the flash on
+ * barely-over-threshold conversions.
+ */
+const INDICATOR_MIN_DISPLAY_MS = 400;
+
+async function onGenerateClick(els: Elements): Promise<void> {
+  // Generate is only enabled in State B; defensive guard for any path that
+  // could call this otherwise (e.g. if a future code change wires it in
+  // State C without updating this check).
+  if (currentState.state !== "B" && currentState.state !== "C") {
+    return;
+  }
+
+  // Build the ConversionInput from current state. This commit: only text-
+  // kind inputs are reachable (binary inputs intercepted before State B).
+  // The default html→odt pathway is the only one wired; other input
+  // formats will throw "not yet implemented" from runConversion, which
+  // we surface via showError below.
+  //
+  // currentState is narrowed to "B" | "C" by the guard above. Both
+  // variants carry the same input-side fields (inputFormat, inputKind,
+  // inputText, inputFilename) with identical types, so reading them is
+  // safe regardless of which we're in.
+  const inputState = currentState;
+  if (inputState.inputKind !== "text") {
+    // Binary inputs aren't reachable this commit (file loading blocks
+    // them before State B); future binary preview work will fill this in.
+    await showError(els, {
+      title: "Generation failed",
+      message: "Binary input conversion is not yet supported. Please use a text-format input.",
+    });
+    return;
+  }
+
+  // For the vertical slice, all text inputs target ODT. Multi-output (ODT
+  // → HTML / Markdown / Typst) requires the second popup per design
+  // decision F, which lands when the first ODT-input pathway is wired.
+  const outputFormat: OutputFormat = chooseOutputFormat(inputState.inputFormat);
+
+  const input: ConversionInput = buildConversionInput(
+    inputState.inputFormat,
+    inputState.inputText,
+    inputState.inputFilename,
+  );
+
+  // Appear-threshold + minimum-display indicator. The timer is armed
+  // before conversion starts; if it fires, the Generate button gets the
+  // "Generating..." label and is disabled. Once conversion completes,
+  // the finally block clears the timer (no-op if it already fired) and
+  // enforces the minimum-display delay if the indicator was shown.
+  let indicatorShown = false;
+  let indicatorShownAt = 0;
+  const timer = window.setTimeout(() => {
+    indicatorShown = true;
+    indicatorShownAt = performance.now();
+    els.generateBtn.textContent = "Generating...";
+    els.generateBtn.disabled = true;
+  }, INDICATOR_APPEAR_THRESHOLD_MS);
+
+  try {
+    const results = await runConversion([input], outputFormat);
+    // Phase 1a always returns exactly one result. (The array contract is
+    // for Phase 1b batch processing.) Defensive guard in case that ever
+    // drifts: surface a clear error rather than silently dropping data.
+    if (results.length !== 1) {
+      throw new Error(`expected 1 conversion result, got ${results.length}`);
+    }
+    const result = results[0]!;
+
+    // Transition to State C. The input-side fields carry forward so the
+    // user can re-edit and re-Generate without losing context.
+    currentState = {
+      state: "C",
+      inputFormat: inputState.inputFormat,
+      inputFilename: inputState.inputFilename,
+      inputKind: inputState.inputKind,
+      inputText: inputState.inputText,
+      outputFormat,
+      outputContent: result,
+      isStale: false,
+    };
+  } catch (err) {
+    // Conversion failed. State stays at B (or returns to B if it was C)
+    // so the user can fix the input and retry. If we came from State C,
+    // we discard the previous output and revert to B; the alternative
+    // (keep stale output visible alongside an error) would be confusing.
+    if (currentState.state === "C") {
+      currentState = {
+        state: "B",
+        inputFormat: currentState.inputFormat,
+        inputFilename: currentState.inputFilename,
+        inputKind: currentState.inputKind,
+        inputText: currentState.inputText,
+      };
+    }
+    await showError(els, {
+      title: "Generation failed",
+      message: errorMessage(err),
+    });
+  } finally {
+    window.clearTimeout(timer);
+    // Enforce minimum-display time. If the indicator was shown and
+    // conversion completed quickly after, pad with a delay so the
+    // indicator stays on screen at least INDICATOR_MIN_DISPLAY_MS.
+    if (indicatorShown) {
+      const elapsed = performance.now() - indicatorShownAt;
+      const remaining = INDICATOR_MIN_DISPLAY_MS - elapsed;
+      if (remaining > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      }
+    }
+    // Restore the button label. render() below will set disabled per
+    // the current state's normal rules.
+    els.generateBtn.textContent = "Generate";
+  }
+
+  render(currentState, els);
+}
+
+/**
+ * Pick the output format for a given input format. For inputs with a single
+ * sensible output (HTML, Markdown, Lexical, TipTap → ODT; DOCX → ODT;
+ * XLSX → ODS; ODS → HTML), no popup is needed; we return the only choice
+ * directly. For inputs with multiple sensible outputs (ODT → HTML / Markdown
+ * / Typst), the second popup per design decision F belongs here — landing in
+ * the commit that wires the first ODT-input pathway.
+ *
+ * This commit: only single-output cases. ODT input throws unreachable here
+ * because file-loading blocks it before State B anyway. Defensive default
+ * for compiler exhaustiveness.
+ */
+function chooseOutputFormat(inputFormat: InputFormat): OutputFormat {
+  switch (inputFormat) {
+    case "html":
+    case "markdown":
+    case "lexical":
+    case "tiptap":
+    case "docx":
+      return "odt";
+    case "xlsx":
+      return "ods";
+    case "odt":
+    case "ods":
+      // Unreachable this commit (binary inputs blocked before State B).
+      // ODT input will return one of html/markdown/typst per a popup
+      // selection; ODS will return html. Falling back to html here is
+      // arbitrary but safe — the path can't actually execute.
+      return "html";
+  }
+}
+
+/**
+ * Build a ConversionInput for the given input format from the State B fields.
+ * Text-kind inputs only this commit; binary-kind comes later when binary
+ * file loading lands.
+ */
+function buildConversionInput(
+  inputFormat: InputFormat,
+  text: string,
+  inputFilename: string,
+): ConversionInput {
+  switch (inputFormat) {
+    case "html":
+      return { inputFormat: "html", text, inputFilename };
+    case "markdown":
+      return { inputFormat: "markdown", text, inputFilename };
+    case "lexical":
+      return { inputFormat: "lexical", text, inputFilename };
+    case "tiptap":
+      return { inputFormat: "tiptap", text, inputFilename };
+    case "docx":
+    case "xlsx":
+    case "odt":
+    case "ods":
+      // Unreachable: caller checks inputKind === "text" before calling.
+      // Binary-kind ConversionInput needs a bytes field which isn't
+      // available here. Throw rather than silently producing a
+      // malformed input.
+      throw new Error(`buildConversionInput called with binary inputFormat: ${inputFormat}`);
+  }
 }
 
 function onClearClick(els: Elements): void {
@@ -1449,7 +1644,9 @@ function bootstrap(): void {
   els.keyboardBtn.addEventListener("click", () => {
     void onKeyboardClick(els);
   });
-  els.generateBtn.addEventListener("click", () => onGenerateClick(els));
+  els.generateBtn.addEventListener("click", () => {
+    void onGenerateClick(els);
+  });
   els.saveBtn.addEventListener("click", () => onSaveClick(els));
   els.clearBtn.addEventListener("click", () => onClearClick(els));
   els.saveAndClearBtn.addEventListener("click", () => onSaveAndClearClick(els));

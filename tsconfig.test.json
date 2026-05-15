@@ -2,8 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["node", "jest"],
-    "rootDir": "."
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "odf-kit/*": ["./src/*/index.ts"]
+    },
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "docs/tests", "docs/tools"],
   "exclude": ["node_modules", "dist"]
 }

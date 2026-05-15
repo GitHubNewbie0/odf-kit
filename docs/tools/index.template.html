@@ -185,16 +185,70 @@
         border-radius: 8px;
         padding: 1rem;
         overflow: auto;
+        display: flex;
+        flex-direction: column;
       }
       .io-pane-empty {
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100%;
         min-height: 0;
         color: var(--text-secondary);
         font-size: 0.9rem;
         font-style: italic;
+      }
+
+      /*
+       * Iframe rendering the output preview for bytes-kind results (ODT/
+       * ODS round-tripped via odtToHtml/odsToHtml) and HTML text-kind
+       * results. Sandboxed at runtime (no allow-scripts) so the rendered
+       * HTML can resolve its own inline styles but cannot execute script.
+       * Fills the pane vertically alongside the sticky disclosure footer.
+       */
+      .io-pane iframe {
+        flex: 1;
+        width: 100%;
+        min-height: 0;
+        border: none;
+        background: #ffffff;
+      }
+
+      /*
+       * Textarea rendering for input panes (editable in States B/C) and
+       * for output panes with pure-text outputs (Markdown / Typst — used
+       * by future fan-out commits). Inline styles set by setPaneTextarea
+       * override most properties; this rule provides flex sizing so the
+       * textarea fills the pane vertically.
+       */
+      .io-pane textarea {
+        flex: 1;
+        min-height: 0;
+      }
+
+      /*
+       * Disclosure footer at the bottom of an io-pane. Sits naturally as
+       * the last flex child below the iframe / textarea / placeholder
+       * above. The negative horizontal margins span the footer full-width
+       * across the pane's padding so the border-top reaches edge to edge.
+       *
+       * Two text states (just the message swaps; styling is identical for
+       * the fresh state):
+       *   - Fresh:  "Preview is rendered approximately. The saved file is exact."
+       *   - Stale:  "Stale — click Generate to refresh."
+       *
+       * The .is-stale modifier lands in C4 alongside the visual treatment
+       * (e.g. amber background tint). This commit only ships the fresh
+       * state; the modifier class is reserved for the C4 styling addition.
+       */
+      .io-pane-disclosure {
+        margin: 1rem -1rem -1rem -1rem;
+        padding: 0.4rem 0.75rem;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        font-size: 0.78rem;
+        font-style: italic;
+        color: var(--text-secondary);
       }
 
       .action-buttons {
