@@ -116,6 +116,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: relative;
       }
       .nav-brand {
         font-family:
@@ -147,6 +148,36 @@
       }
       .nav-links a:hover,
       .nav-links button:hover {
+        color: var(--text);
+      }
+
+      /*
+       * Save-page-to-computer button. Centered absolutely within nav .inner
+       * (which is position: relative) so it stays mathematically centered
+       * regardless of the widths of the brand on the left and the nav-links
+       * cluster on the right. Visual styling matches .nav-links button
+       * (lightweight text, same color/font/hover) for cohesion with the
+       * existing right-cluster items.
+       *
+       * Below 1024px the .tool-section is hidden by .mobile-notice (see
+       * media query further down), so the nav is only seen at widths
+       * comfortable for all three zones. No need to handle narrow-viewport
+       * overlap here.
+       */
+      .nav-save-page {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: inherit;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+      .nav-save-page:hover {
         color: var(--text);
       }
 
@@ -394,7 +425,18 @@
         color: var(--text);
         border-radius: 6px;
         cursor: pointer;
-        transition: background-color 0.12s;
+        /*
+         * 0.04s is below the human visual-perception threshold for "this
+         * appeared instantly," but long enough to avoid a hard snap. Earlier
+         * value was 0.12s, which produced a window where users clicking
+         * shortly after popup-open got no hover feedback (the option was
+         * still transitioning into its hover background) and would click a
+         * second time before the first click registered. C3b smoke-test
+         * surfaced this; the diagnosis was a transition-paint race, not
+         * click-handling, so the fix is shortening the transition rather
+         * than changing dialog mechanics.
+         */
+        transition: background-color 0.04s;
       }
       .popup-option:hover {
         background: var(--accent-light);
@@ -465,6 +507,9 @@
     <nav>
       <div class="inner">
         <a href="../" class="nav-brand"><span>odf-kit</span></a>
+        <button type="button" id="savePageBtn" class="nav-save-page">
+          Click here to download converter to your computer.
+        </button>
         <div class="nav-links">
           <a href="../">Docs</a>
           <a href="https://github.com/GitHubNewbie0/odf-kit">GitHub</a>
@@ -502,6 +547,15 @@
         <input type="file" id="fileInput" hidden />
 
         <div class="panes">
+          <!--
+            The two empty-state placeholder strings below (in .io-pane-empty
+            divs) are duplicated in docs/tools/state-a-placeholders.ts, which
+            is imported by both index.ui.ts (for State A renders) and
+            serialize-page.ts (for resetting cloned DOM before save).
+            If you change either string here, update the constants in
+            state-a-placeholders.ts to match. The template can't import
+            TypeScript at build time, which is why duplication exists at all.
+          -->
           <div class="io-pane io-pane-input" id="inputPane" role="region" aria-label="Input">
             <div class="io-pane-empty">Select an input method above</div>
           </div>

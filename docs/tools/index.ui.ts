@@ -22,17 +22,23 @@
 //   - Generate: HTML→ODT wired end-to-end. Other pathways still throw "not
 //     yet implemented" inside runConversion and surface via showError;
 //     subsequent commits fan out one pathway at a time.
-//   - Save / Save-and-Clear: fully wired (C3). Save triggers a browser
-//     download via Blob + anchor click + revoke and shows a success popup;
-//     Save-and-Clear triggers the same download then transitions to State A
-//     without a popup (the state change is the feedback for a user doing
-//     multiple saves back-to-back who doesn't want to dismiss a popup
-//     between each one). Both surface errors via showError and stay in
-//     State C on failure.
-//   - Four popup primitives (deliberately explicit, not overloaded):
+//   - Save / Save-and-Clear: fully wired (C3). Both trigger a browser
+//     download via Blob + anchor click + revoke. Save stays in State C
+//     so the user can re-edit input or save again; Save-and-Clear
+//     transitions to State A. Neither shows a success popup — the
+//     browser's own download UI (Chrome's bubble, Firefox's tray icon,
+//     etc.) is the visible feedback that the download happened.
+//     Originally C3 added a "File saved" popup on plain Save, but smoke-
+//     testing surfaced that Chrome's download bubble briefly blocks the
+//     page's main thread, causing hover events on the popup to lag
+//     several seconds before paint. Investigation concluded the popup
+//     was redundant with the browser's own feedback anyway, so it was
+//     removed (Path 2 in the C3 design discussion). Both Save handlers
+//     surface synchronous errors (Blob/URL API failures) via showError
+//     and stay in State C on failure.
+//   - Three popup primitives (deliberately explicit, not overloaded):
 //       showPopup() — selector popups (title + optional body + options list)
 //       showError() — error popups (title + message + single OK)
-//       showInfo()  — success / neutral info popups (title + message + OK)
 //       showAbout() — About popup (rich DOM body + single Close)
 //   - State C now reachable via Generate from HTML input. Output pane
 //     renders the round-tripped ODT preview as a visual page in a
@@ -75,6 +81,11 @@ import {
 } from "./conversion.js";
 import { parseFilename } from "./filename.js";
 import { buildSaveBlob, triggerDownload } from "./save.js";
+import { buildSavePageFilename, serializePage } from "./serialize-page.js";
+import {
+  INPUT_PANE_PLACEHOLDER_TEXT,
+  OUTPUT_PANE_PLACEHOLDER_TEXT,
+} from "./state-a-placeholders.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -474,6 +485,7 @@ const SAMPLES: Record<
 type Elements = {
   // Nav
   aboutBtn: HTMLButtonElement;
+  savePageBtn: HTMLButtonElement;
   // Three input-method buttons
   browseBtn: HTMLButtonElement;
   sampleBtn: HTMLButtonElement;
@@ -498,6 +510,7 @@ type Elements = {
 function lookupElements(): Elements | null {
   const ids = [
     "aboutBtn",
+    "savePageBtn",
     "browseBtn",
     "sampleBtn",
     "keyboardBtn",
@@ -586,7 +599,7 @@ function render(state: AppState, els: Elements): void {
  */
 function renderInputPane(state: AppState, els: Elements): void {
   if (state.state === "A") {
-    setPaneEmpty(els.inputPane, "Select an input method above");
+    setPaneEmpty(els.inputPane, INPUT_PANE_PLACEHOLDER_TEXT);
     return;
   }
 
@@ -625,7 +638,7 @@ function renderInputPane(state: AppState, els: Elements): void {
  */
 function renderOutputPane(state: AppState, els: Elements): void {
   if (state.state === "A") {
-    setPaneEmpty(els.outputPane, "Output will appear here after Generate");
+    setPaneEmpty(els.outputPane, OUTPUT_PANE_PLACEHOLDER_TEXT);
     return;
   }
 
@@ -962,23 +975,6 @@ function showPopup(
  * dismissal — its return value carries no decision and is intentionally void.
  */
 async function showError(els: Elements, args: { title: string; message: string }): Promise<void> {
-  await showPopup(els, {
-    title: args.title,
-    body: args.message,
-    options: [{ label: "OK", value: "ok" }],
-  });
-}
-
-/**
- * Show an info popup with a title and message body, single OK button.
- * Mirror of showError for the success / neutral-info case (e.g. "File saved").
- * Distinct from showError so call sites read semantically — same modal
- * mechanics underneath, but a code reader scanning a handler can tell at a
- * glance whether something succeeded or failed. The dismissal paths are
- * equivalent (OK button, Escape, backdrop click); the promise resolves and
- * state is unchanged.
- */
-async function showInfo(els: Elements, args: { title: string; message: string }): Promise<void> {
   await showPopup(els, {
     title: args.title,
     body: args.message,
@@ -1472,10 +1468,17 @@ function onClearClick(els: Elements): void {
 }
 
 /**
- * Save the State-C output to the user's Downloads folder, then show a
- * success popup. State stays at C — the user can re-edit input and
- * re-Generate, or save again. On failure, surfaces an error popup and
- * leaves state unchanged so the user can retry.
+ * Save the State-C output to the user's Downloads folder. State stays
+ * at C — the user can re-edit input and re-Generate, or save again.
+ * On failure, surfaces an error popup and leaves state unchanged so
+ * the user can retry.
+ *
+ * No success popup. The browser's own download UI (Chrome's download
+ * bubble, Firefox's download tray, etc.) is the visible feedback that
+ * the download was initiated. We can't verify the file actually
+ * reached disk — no browser API exposes that — so the most honest
+ * response is to let the browser's own UI carry the message rather
+ * than overlay a page-level claim of success we can't back up.
  *
  * Defensive guard for States A and B: Save is disabled by renderButtons
  * in those states so the handler shouldn't fire, but if it does the
@@ -1494,12 +1497,7 @@ async function onSaveClick(els: Elements): Promise<void> {
       title: "Save failed",
       message: `Couldn't save the file. ${errorMessage(err)}`,
     });
-    return;
   }
-  await showInfo(els, {
-    title: "File saved",
-    message: `Saved as ${result.outputFilename} in your Downloads folder.`,
-  });
 }
 
 /**
@@ -1695,6 +1693,45 @@ function buildAboutContent(): HTMLElement {
   return container;
 }
 
+/**
+ * Serialize the current tool page to a standalone HTML file and trigger
+ * a browser download. The saved file works fully offline (the build
+ * pipeline already inlines all CSS and JS into the page; the serialize
+ * step just reads what's there). Verified by the disconnect-test at
+ * the time of C3b's design — the page makes zero external requests
+ * after the initial HTML load.
+ *
+ * The live page is NOT mutated by this operation. serializePage clones
+ * the document first and strips transient state (open dialogs, input/
+ * output pane contents, enabled action buttons) from the clone only;
+ * the user keeps working uninterrupted in whatever state they were in
+ * when they clicked Save-page.
+ *
+ * Filename format: odf-kit-tool-${VERSION}-${BUILD_DATE}.html.
+ * VERSION is the odf-kit library version (imported from odf-kit/odt at
+ * the top of this file). BUILD_DATE is read from the <meta name=
+ * "build-date"> tag, which the build pipeline (scripts/build-tool-
+ * page.js) substitutes at deploy time.
+ *
+ * Errors from URL/Blob APIs (very rare; only on extreme memory pressure
+ * or disabled APIs) are caught and surfaced via showError.
+ */
+async function onSavePageClick(els: Elements): Promise<void> {
+  try {
+    const buildDateMeta = document.querySelector<HTMLMetaElement>('meta[name="build-date"]');
+    const buildDate = buildDateMeta?.content ?? "unknown";
+    const filename = buildSavePageFilename(VERSION, buildDate);
+    const html = serializePage(document);
+    const blob = new Blob([html], { type: "text/html" });
+    triggerDownload(blob, filename);
+  } catch (err) {
+    await showError(els, {
+      title: "Download failed",
+      message: `Couldn't save the page. ${errorMessage(err)}`,
+    });
+  }
+}
+
 async function onAboutClick(els: Elements): Promise<void> {
   await showAbout(els);
 }
@@ -1726,6 +1763,9 @@ function bootstrap(): void {
   els.saveAndClearBtn.addEventListener("click", () => {
     void onSaveAndClearClick(els);
   });
+  els.savePageBtn.addEventListener("click", () => {
+    void onSavePageClick(els);
+  });
   els.aboutBtn.addEventListener("click", () => {
     void onAboutClick(els);
   });
@@ -1742,9 +1782,9 @@ function bootstrap(): void {
   render(currentState, els);
 
   console.log(
-    `odf-kit unified tool page — v${VERSION} — state machine wired ` +
-      `(Keyboard input, Sample loading, Browse to File for text formats, ` +
-      `About popup; binary file preview and State C / conversion not yet implemented).`,
+    `odf-kit unified tool page — v${VERSION} — state machine fully wired ` +
+      `(html→odt pathway end-to-end; Save, Save-and-Clear, and Save-page-to-` +
+      `computer all wired; nine remaining pathways pending fan-out commits).`,
   );
 }
 
