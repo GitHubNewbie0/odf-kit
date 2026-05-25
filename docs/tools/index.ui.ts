@@ -79,6 +79,7 @@ import {
   type OutputFormat,
   runConversion,
 } from "./conversion.js";
+import { disclosureMessage } from "./disclosure.js";
 import { parseFilename } from "./filename.js";
 import { buildSaveBlob, triggerDownload } from "./save.js";
 import { buildSavePageFilename, serializePage } from "./serialize-page.js";
@@ -132,10 +133,10 @@ type AppState =
       /**
        * Set when the user edits the input after a successful Generate; the
        * output textarea is then no longer in sync with the input. The sticky
-       * disclosure footer in the output pane flips to the stale message; the
-       * Save / Save-and-Clear buttons stay enabled (saving stale output is
-       * not invalid — the user may have intended that snapshot). C4 wires
-       * the visual indicator; this commit just tracks the flag.
+       * disclosure footer in the output pane flips to the stale message and
+       * takes the .is-stale amber treatment; the Save / Save-and-Clear
+       * buttons stay enabled (saving stale output is not invalid — the user
+       * may have intended that snapshot).
        */
       isStale: boolean;
     };
@@ -661,13 +662,13 @@ function renderOutputPane(state: AppState, els: Elements): void {
   const result = state.outputContent;
   if (result.kind === "bytes") {
     setPaneIframe(els.outputPane, result.previewText);
-    ensureOutputDisclosure(els.outputPane);
+    ensureOutputDisclosure(els.outputPane, state.isStale);
     return;
   }
   // result.kind === "text"
   if (result.outputFormat === "html") {
     setPaneIframe(els.outputPane, result.text);
-    ensureOutputDisclosure(els.outputPane);
+    ensureOutputDisclosure(els.outputPane, state.isStale);
     return;
   }
   // Markdown or Typst: read-only textarea.
@@ -676,11 +677,11 @@ function renderOutputPane(state: AppState, els: Elements): void {
   // user's text selection in the output pane.
   const existing = els.outputPane.querySelector("textarea");
   if (existing !== null && existing.value === result.text) {
-    ensureOutputDisclosure(els.outputPane);
+    ensureOutputDisclosure(els.outputPane, state.isStale);
     return;
   }
   setPaneTextarea(els.outputPane, state.inputFormat, result.text, true, els);
-  ensureOutputDisclosure(els.outputPane);
+  ensureOutputDisclosure(els.outputPane, state.isStale);
 }
 
 /**
@@ -708,23 +709,30 @@ function setPaneIframe(pane: HTMLDivElement, html: string): void {
 }
 
 /**
- * Ensure the output pane has its disclosure footer mounted. Idempotent:
- * if one is already there, leaves it alone. If not, appends a fresh one
- * with the "fresh" message text. C4 will add the stale-message branch
- * when isStale is true.
+ * Ensure the output pane's disclosure footer is mounted and reflects the
+ * current staleness. Update-aware: if a footer already exists it is reused
+ * — preserving its DOM identity across the stale-flag flip, which fires on
+ * the same render() that leaves the iframe / output textarea untouched — and
+ * its message and .is-stale modifier are set on every call so the footer
+ * always matches isStale. If none exists, one is created.
  *
- * Sibling to the textarea/placeholder inside the pane. CSS makes it
+ * The message swaps between the fresh honest-preview note and the stale
+ * reminder (see disclosure.ts); .is-stale carries the amber treatment and
+ * drops the italic (see index.template.html). Save stays enabled regardless
+ * — the footer is a reminder, not a lock.
+ *
+ * Sibling to the textarea / placeholder inside the pane. CSS makes it
  * sticky-bottom so it remains visible regardless of scroll position.
  */
-function ensureOutputDisclosure(pane: HTMLDivElement): void {
-  const existing = pane.querySelector(".io-pane-disclosure");
-  if (existing !== null) {
-    return;
+function ensureOutputDisclosure(pane: HTMLDivElement, isStale: boolean): void {
+  let disclosure = pane.querySelector<HTMLDivElement>(".io-pane-disclosure");
+  if (disclosure === null) {
+    disclosure = document.createElement("div");
+    disclosure.className = "io-pane-disclosure";
+    pane.appendChild(disclosure);
   }
-  const disclosure = document.createElement("div");
-  disclosure.className = "io-pane-disclosure";
-  disclosure.textContent = "Preview is rendered approximately. The saved file is exact.";
-  pane.appendChild(disclosure);
+  disclosure.classList.toggle("is-stale", isStale);
+  disclosure.textContent = disclosureMessage(isStale);
 }
 
 /**
@@ -836,11 +844,11 @@ function setPaneTextarea(
           return;
         }
         currentState = { ...currentState, inputText: textarea.value, isStale: true };
-        // C4 will wire the visual stale indicator. For now the state flag
-        // is set but no on-screen change occurs — render() is still safe
-        // to call (it'll just no-op the input textarea via the diff-aware
-        // check), and we call it so the wiring is in place when C4 adds
-        // the disclosure-footer update.
+        // render() flips the output pane's disclosure footer to the stale
+        // message and .is-stale amber treatment via renderOutputPane →
+        // ensureOutputDisclosure. The diff-aware checks leave the input
+        // textarea and the output iframe / textarea untouched, so only the
+        // footer changes — cursor / focus / selection all survive.
         render(currentState, els);
       }
     });

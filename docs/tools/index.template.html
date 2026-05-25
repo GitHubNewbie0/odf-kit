@@ -54,6 +54,10 @@
         --border: #e5e5e0;
         --code-bg: #1e1e2e;
         --code-text: #cdd6f4;
+        /* Stale output-preview footer (C4): soft amber, legible, not alarming. */
+        --stale-bg: #fef3c7;
+        --stale-border: #f59e0b;
+        --stale-text: #92400e;
       }
       *,
       *::before,
@@ -263,14 +267,14 @@
        * above. The negative horizontal margins span the footer full-width
        * across the pane's padding so the border-top reaches edge to edge.
        *
-       * Two text states (just the message swaps; styling is identical for
-       * the fresh state):
+       * Two text states (just the message swaps; the layout is identical):
        *   - Fresh:  "Preview is rendered approximately. The saved file is exact."
        *   - Stale:  "Stale — click Generate to refresh."
        *
-       * The .is-stale modifier lands in C4 alongside the visual treatment
-       * (e.g. amber background tint). This commit only ships the fresh
-       * state; the modifier class is reserved for the C4 styling addition.
+       * The .is-stale modifier (rule below) carries the amber treatment for
+       * the stale state and drops the italic so the reminder reads as a
+       * status rather than an aside. ensureOutputDisclosure in index.ui.ts
+       * swaps the message text and toggles .is-stale per state.isStale.
        */
       .io-pane-disclosure {
         margin: 1rem -1rem -1rem -1rem;
@@ -280,6 +284,20 @@
         font-size: 0.78rem;
         font-style: italic;
         color: var(--text-secondary);
+      }
+
+      /*
+       * Stale modifier: the output preview no longer reflects the current
+       * input (the user edited it after Generate). Amber tint plus non-italic
+       * so the reminder reads as a status. Save stays enabled — this is a
+       * reminder, not a lock. Overrides only border-top-color, leaving the
+       * base rule's "1px solid" width/style intact. Tokens live in :root.
+       */
+      .io-pane-disclosure.is-stale {
+        background: var(--stale-bg);
+        border-top-color: var(--stale-border);
+        color: var(--stale-text);
+        font-style: normal;
       }
 
       .action-buttons {
