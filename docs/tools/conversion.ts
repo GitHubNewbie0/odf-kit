@@ -10,7 +10,7 @@
 //
 // Every (inputFormat, outputFormat) pair is enumerated as a case so the
 // TypeScript compiler enforces exhaustiveness as new pathways are added.
-// This commit: html→odt is implemented; the other nine pairs throw
+// html→odt and markdown→odt are implemented; the other eight pairs throw
 // "not yet implemented" or "unsupported pathway". Subsequent commits fan
 // out to the remaining pathways one at a time.
 //
@@ -37,7 +37,7 @@
 // (c) future non-UI consumers can be served by an opt-out option without
 // restructuring the module.
 
-import { htmlToOdt } from "odf-kit/odt";
+import { htmlToOdt, markdownToOdt } from "odf-kit/odt";
 import { odtToHtml } from "odf-kit/reader";
 import { buildOutputFilename, type OutputFormat } from "./filename.js";
 
@@ -141,8 +141,8 @@ export async function runConversion(
  * switch on output format. Reads top-to-bottom as a coverage matrix of
  * the ten (input → output) pairs the page supports:
  *
- *     html     → odt      ✓ (this commit)
- *     markdown → odt      throw "not yet implemented"
+ *     html     → odt      ✓ (C2)
+ *     markdown → odt      ✓ (C5)
  *     lexical  → odt      throw "not yet implemented"
  *     tiptap   → odt      throw "not yet implemented"
  *     docx     → odt      throw "not yet implemented"
@@ -190,8 +190,17 @@ async function convertOne(
       break;
     case "markdown":
       switch (outputFormat) {
-        case "odt":
-          throw new Error("not yet implemented: markdown→odt");
+        case "odt": {
+          const bytes = await markdownToOdt(input.text);
+          const previewText = odtToHtml(bytes);
+          return {
+            kind: "bytes",
+            outputFormat: "odt",
+            bytes,
+            previewText,
+            outputFilename: buildOutputFilename(input.inputFilename, "odt"),
+          };
+        }
         case "ods":
         case "html":
         case "markdown":

@@ -31,6 +31,12 @@ import { runConversion, type ConversionInput } from "../tools/conversion.js";
 
 const MINIMAL_HTML = "<!DOCTYPE html><html><body><p>Hello world</p></body></html>";
 
+// Small but real CommonMark input — enough that markdownToOdt (Markdown →
+// HTML via marked, then htmlToOdt) produces a valid ODT document. As with
+// the HTML fixture, the structure is bare so the test isn't sensitive to
+// library-side rendering choices; we check shape, not exact bytes.
+const MINIMAL_MARKDOWN = "# Hello\n\nWorld";
+
 describe("runConversion(html → odt)", () => {
   test("happy path: returns bytes-kind result with all expected fields", async () => {
     const input: ConversionInput = {
@@ -96,19 +102,42 @@ describe("runConversion(html → odt)", () => {
   });
 });
 
-describe("runConversion error paths", () => {
-  test("not-yet-implemented pair throws with descriptive message", async () => {
-    // Markdown → ODT is in the dispatch table but not yet wired (lands in
-    // a later commit). The error message includes the pathway label so
-    // the developer surfacing it via showError can see exactly which
-    // case is missing.
+describe("runConversion(markdown → odt)", () => {
+  test("happy path: returns bytes-kind result with all expected fields", async () => {
     const input: ConversionInput = {
       inputFormat: "markdown",
-      text: "# Hello",
-      inputFilename: "test.md",
+      text: MINIMAL_MARKDOWN,
+      inputFilename: "fixture.md",
+    };
+    const results = await runConversion([input], "odt");
+    expect(results).toHaveLength(1);
+
+    const result = results[0]!;
+    expect(result.kind).toBe("bytes");
+    if (result.kind !== "bytes") return; // Narrowing for TypeScript
+    expect(result.outputFormat).toBe("odt");
+    expect(result.bytes).toBeInstanceOf(Uint8Array);
+    expect(result.bytes.length).toBeGreaterThan(0);
+    expect(typeof result.previewText).toBe("string");
+    expect(result.previewText.length).toBeGreaterThan(0);
+    expect(result.outputFilename).toBe("fixture.odt");
+  });
+});
+
+describe("runConversion error paths", () => {
+  test("not-yet-implemented pair throws with descriptive message", async () => {
+    // Lexical → ODT is in the dispatch table but not yet wired (lands in a
+    // later fan-out commit; markdown→odt was wired in C5). The error message
+    // includes the pathway label so the developer surfacing it via showError
+    // can see exactly which case is missing. Re-point this to the next
+    // still-unimplemented pathway as each fan-out commit lands.
+    const input: ConversionInput = {
+      inputFormat: "lexical",
+      text: "{}",
+      inputFilename: "test.json",
     };
     await expect(runConversion([input], "odt")).rejects.toThrow(
-      /not yet implemented.*markdown.*odt/,
+      /not yet implemented.*lexical.*odt/,
     );
   });
 });

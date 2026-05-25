@@ -6,7 +6,7 @@
 //
 // Current scope: state machine (States A, B, C) + reusable popup infrastructure
 // + sample loading + Browse-to-File for text formats + About popup + HTML→ODT
-// conversion end-to-end (vertical slice).
+// and Markdown→ODT conversion end-to-end.
 //   - Three input methods all wired:
 //       Type Keyboard Input — fully functional with format-selector popup
 //       Load Sample File — fully functional with sample-selector popup,
@@ -19,9 +19,9 @@
 //   - About button — fully functional, shows About popup with pathway list,
 //                    trust language, and identity/provenance.
 //   - Clear fully functional (returns to State A)
-//   - Generate: HTML→ODT wired end-to-end. Other pathways still throw "not
-//     yet implemented" inside runConversion and surface via showError;
-//     subsequent commits fan out one pathway at a time.
+//   - Generate: HTML→ODT and Markdown→ODT wired end-to-end. Other pathways
+//     still throw "not yet implemented" inside runConversion and surface via
+//     showError; subsequent commits fan out one pathway at a time.
 //   - Save / Save-and-Clear: fully wired (C3). Both trigger a browser
 //     download via Blob + anchor click + revoke. Save stays in State C
 //     so the user can re-edit input or save again; Save-and-Clear
@@ -1791,8 +1791,9 @@ function bootstrap(): void {
 
   console.log(
     `odf-kit unified tool page — v${VERSION} — state machine fully wired ` +
-      `(html→odt pathway end-to-end; Save, Save-and-Clear, and Save-page-to-` +
-      `computer all wired; nine remaining pathways pending fan-out commits).`,
+      `(html→odt and markdown→odt pathways end-to-end; Save, Save-and-Clear, ` +
+      `and Save-page-to-computer all wired; eight remaining pathways pending ` +
+      `fan-out commits).`,
   );
 }
 
