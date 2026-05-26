@@ -10,7 +10,8 @@
 //
 // Every (inputFormat, outputFormat) pair is enumerated as a case so the
 // TypeScript compiler enforces exhaustiveness as new pathways are added.
-// html→odt and markdown→odt are implemented; the other eight pairs throw
+// html→odt, markdown→odt, and lexical→odt are implemented; the other seven
+// pairs throw
 // "not yet implemented" or "unsupported pathway". Subsequent commits fan
 // out to the remaining pathways one at a time.
 //
@@ -38,6 +39,7 @@
 // restructuring the module.
 
 import { htmlToOdt, markdownToOdt } from "odf-kit/odt";
+import { lexicalToOdt } from "odf-kit/lexical";
 import { odtToHtml } from "odf-kit/reader";
 import { buildOutputFilename, type OutputFormat } from "./filename.js";
 
@@ -143,7 +145,7 @@ export async function runConversion(
  *
  *     html     → odt      ✓ (C2)
  *     markdown → odt      ✓ (C5)
- *     lexical  → odt      throw "not yet implemented"
+ *     lexical  → odt      ✓ (C6)
  *     tiptap   → odt      throw "not yet implemented"
  *     docx     → odt      throw "not yet implemented"
  *     xlsx     → ods      throw "not yet implemented"
@@ -210,8 +212,28 @@ async function convertOne(
       break;
     case "lexical":
       switch (outputFormat) {
-        case "odt":
-          throw new Error("not yet implemented: lexical→odt");
+        case "odt": {
+          // lexicalToOdt takes a parsed SerializedEditorState object, not a
+          // string (unlike htmlToOdt/markdownToOdt). The input text was
+          // already validated as parseable JSON at load time (detectJsonFormat
+          // parses it to disambiguate Lexical vs TipTap and rejects anything
+          // else with an error popup), so a parse failure here would be an
+          // internal inconsistency; we let it throw and propagate as an Error
+          // via runConversion's contract. JSON.parse returns `any`; the value
+          // flows into lexicalToOdt's typed parameter (if lint flags
+          // no-unsafe-argument, cast it: `as LexicalSerializedEditorState`,
+          // importing the type from "odf-kit/lexical").
+          const editorState = JSON.parse(input.text);
+          const bytes = await lexicalToOdt(editorState);
+          const previewText = odtToHtml(bytes);
+          return {
+            kind: "bytes",
+            outputFormat: "odt",
+            bytes,
+            previewText,
+            outputFilename: buildOutputFilename(input.inputFilename, "odt"),
+          };
+        }
         case "ods":
         case "html":
         case "markdown":

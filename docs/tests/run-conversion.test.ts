@@ -37,6 +37,41 @@ const MINIMAL_HTML = "<!DOCTYPE html><html><body><p>Hello world</p></body></html
 // library-side rendering choices; we check shape, not exact bytes.
 const MINIMAL_MARKDOWN = "# Hello\n\nWorld";
 
+// Minimal valid Lexical SerializedEditorState as a JSON *string* — this is
+// how it arrives at runConversion (ConversionInput.text carries the raw file
+// / sample / typed text; the lexical case JSON.parses it before calling
+// lexicalToOdt, which takes a parsed object). A root with one paragraph and
+// one text node is the smallest structure the walker renders to a valid ODT.
+const MINIMAL_LEXICAL = JSON.stringify({
+  root: {
+    type: "root",
+    version: 1,
+    direction: "ltr",
+    format: "",
+    indent: 0,
+    children: [
+      {
+        type: "paragraph",
+        version: 1,
+        direction: "ltr",
+        format: "",
+        indent: 0,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "Hello world",
+            format: 0,
+            style: "",
+            mode: "normal",
+            detail: 0,
+          },
+        ],
+      },
+    ],
+  },
+});
+
 describe("runConversion(html → odt)", () => {
   test("happy path: returns bytes-kind result with all expected fields", async () => {
     const input: ConversionInput = {
@@ -124,20 +159,40 @@ describe("runConversion(markdown → odt)", () => {
   });
 });
 
+describe("runConversion(lexical → odt)", () => {
+  test("happy path: returns bytes-kind result with all expected fields", async () => {
+    const input: ConversionInput = {
+      inputFormat: "lexical",
+      text: MINIMAL_LEXICAL,
+      inputFilename: "sample_lexical.json",
+    };
+    const results = await runConversion([input], "odt");
+    expect(results).toHaveLength(1);
+
+    const result = results[0]!;
+    expect(result.kind).toBe("bytes");
+    if (result.kind !== "bytes") return; // Narrowing for TypeScript
+    expect(result.outputFormat).toBe("odt");
+    expect(result.bytes).toBeInstanceOf(Uint8Array);
+    expect(result.bytes.length).toBeGreaterThan(0);
+    expect(typeof result.previewText).toBe("string");
+    expect(result.previewText.length).toBeGreaterThan(0);
+    expect(result.outputFilename).toBe("sample_lexical.odt");
+  });
+});
+
 describe("runConversion error paths", () => {
   test("not-yet-implemented pair throws with descriptive message", async () => {
-    // Lexical → ODT is in the dispatch table but not yet wired (lands in a
-    // later fan-out commit; markdown→odt was wired in C5). The error message
+    // TipTap → ODT is in the dispatch table but not yet wired (lands in a
+    // later fan-out commit; lexical→odt was wired in C6). The error message
     // includes the pathway label so the developer surfacing it via showError
     // can see exactly which case is missing. Re-point this to the next
     // still-unimplemented pathway as each fan-out commit lands.
     const input: ConversionInput = {
-      inputFormat: "lexical",
+      inputFormat: "tiptap",
       text: "{}",
       inputFilename: "test.json",
     };
-    await expect(runConversion([input], "odt")).rejects.toThrow(
-      /not yet implemented.*lexical.*odt/,
-    );
+    await expect(runConversion([input], "odt")).rejects.toThrow(/not yet implemented.*tiptap.*odt/);
   });
 });
