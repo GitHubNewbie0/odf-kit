@@ -72,6 +72,21 @@ const MINIMAL_LEXICAL = JSON.stringify({
   },
 });
 
+// Minimal valid TipTap JSONContent document as a JSON *string* — same arrival
+// path as lexical (ConversionInput.text carries raw JSON; the tiptap case
+// JSON.parses it before calling tiptapToOdt, which takes a parsed object with
+// type "doc"). A doc with one paragraph and one text node is the smallest
+// structure tiptapToOdt renders to a valid ODT.
+const MINIMAL_TIPTAP = JSON.stringify({
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "Hello world" }],
+    },
+  ],
+});
+
 describe("runConversion(html → odt)", () => {
   test("happy path: returns bytes-kind result with all expected fields", async () => {
     const input: ConversionInput = {
@@ -181,18 +196,41 @@ describe("runConversion(lexical → odt)", () => {
   });
 });
 
-describe("runConversion error paths", () => {
-  test("not-yet-implemented pair throws with descriptive message", async () => {
-    // TipTap → ODT is in the dispatch table but not yet wired (lands in a
-    // later fan-out commit; lexical→odt was wired in C6). The error message
-    // includes the pathway label so the developer surfacing it via showError
-    // can see exactly which case is missing. Re-point this to the next
-    // still-unimplemented pathway as each fan-out commit lands.
+describe("runConversion(tiptap → odt)", () => {
+  test("happy path: returns bytes-kind result with all expected fields", async () => {
     const input: ConversionInput = {
       inputFormat: "tiptap",
-      text: "{}",
-      inputFilename: "test.json",
+      text: MINIMAL_TIPTAP,
+      inputFilename: "sample_tiptap.json",
     };
-    await expect(runConversion([input], "odt")).rejects.toThrow(/not yet implemented.*tiptap.*odt/);
+    const results = await runConversion([input], "odt");
+    expect(results).toHaveLength(1);
+
+    const result = results[0]!;
+    expect(result.kind).toBe("bytes");
+    if (result.kind !== "bytes") return; // Narrowing for TypeScript
+    expect(result.outputFormat).toBe("odt");
+    expect(result.bytes).toBeInstanceOf(Uint8Array);
+    expect(result.bytes.length).toBeGreaterThan(0);
+    expect(typeof result.previewText).toBe("string");
+    expect(result.previewText.length).toBeGreaterThan(0);
+    expect(result.outputFilename).toBe("sample_tiptap.odt");
+  });
+});
+
+describe("runConversion error paths", () => {
+  test("not-yet-implemented pair throws with descriptive message", async () => {
+    // DOCX → ODT is in the dispatch table but not yet wired. With C7 all four
+    // text→ODT pathways are implemented, so the specimen is now a binary-input
+    // pair — note the shape change from `text` to `bytes` (docx carries a
+    // Uint8Array). The dispatch throws before reading the bytes, so an empty
+    // array is sufficient. Re-point to the next still-unimplemented pathway as
+    // each remaining (binary) fan-out commit lands.
+    const input: ConversionInput = {
+      inputFormat: "docx",
+      bytes: new Uint8Array(),
+      inputFilename: "test.docx",
+    };
+    await expect(runConversion([input], "odt")).rejects.toThrow(/not yet implemented.*docx.*odt/);
   });
 });

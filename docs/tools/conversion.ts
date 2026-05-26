@@ -10,8 +10,8 @@
 //
 // Every (inputFormat, outputFormat) pair is enumerated as a case so the
 // TypeScript compiler enforces exhaustiveness as new pathways are added.
-// html→odt, markdown→odt, and lexical→odt are implemented; the other seven
-// pairs throw
+// html→odt, markdown→odt, lexical→odt, and tiptap→odt are implemented (all
+// four text→ODT pathways); the other six pairs throw
 // "not yet implemented" or "unsupported pathway". Subsequent commits fan
 // out to the remaining pathways one at a time.
 //
@@ -38,7 +38,7 @@
 // (c) future non-UI consumers can be served by an opt-out option without
 // restructuring the module.
 
-import { htmlToOdt, markdownToOdt } from "odf-kit/odt";
+import { htmlToOdt, markdownToOdt, tiptapToOdt } from "odf-kit/odt";
 import { lexicalToOdt } from "odf-kit/lexical";
 import { odtToHtml } from "odf-kit/reader";
 import { buildOutputFilename, type OutputFormat } from "./filename.js";
@@ -146,7 +146,7 @@ export async function runConversion(
  *     html     → odt      ✓ (C2)
  *     markdown → odt      ✓ (C5)
  *     lexical  → odt      ✓ (C6)
- *     tiptap   → odt      throw "not yet implemented"
+ *     tiptap   → odt      ✓ (C7)
  *     docx     → odt      throw "not yet implemented"
  *     xlsx     → ods      throw "not yet implemented"
  *     odt      → html     throw "not yet implemented"
@@ -243,8 +243,23 @@ async function convertOne(
       break;
     case "tiptap":
       switch (outputFormat) {
-        case "odt":
-          throw new Error("not yet implemented: tiptap→odt");
+        case "odt": {
+          // tiptapToOdt takes a parsed TipTap JSONContent object (type "doc"),
+          // not a string — same shape as the lexical case. The input text was
+          // already validated as parseable JSON at load time (detectJsonFormat
+          // parses it to disambiguate Lexical vs TipTap), so the parse is
+          // unwrapped and any failure propagates as an Error via runConversion.
+          const json = JSON.parse(input.text);
+          const bytes = await tiptapToOdt(json);
+          const previewText = odtToHtml(bytes);
+          return {
+            kind: "bytes",
+            outputFormat: "odt",
+            bytes,
+            previewText,
+            outputFilename: buildOutputFilename(input.inputFilename, "odt"),
+          };
+        }
         case "ods":
         case "html":
         case "markdown":
