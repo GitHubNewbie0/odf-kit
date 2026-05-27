@@ -7,16 +7,21 @@
 #
 # Source of truth: this GitHub repo. Direct edits made on the GitLab side
 # will be overwritten on the next sync.
+#
+# Resilience: the push is a --force of main, so a single successful run
+# brings the mirror fully current regardless of how many prior runs failed
+# (no need for one success per commit). The push is retried with backoff to
+# ride out brief DNS / connectivity blips against gitlab.opencode.de, which
+# has shown intermittent unreachability. A sustained outage will exhaust the
+# retries and fail the run (by design — the failure is real and surfaced, not
+# masked); re-run the workflow once the host is reachable again.
 name: Sync to gitlab.opencode.de
-
 on:
   push:
     branches:
       - main
-
 permissions:
   contents: read
-
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -25,10 +30,34 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Push to GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.opencode.de/oc00013173229/odf-kit.git"
-          git push --force gitlab main
+          # Idempotent remote: add it, or update the URL if a prior step or
+          # checkout left it defined. Avoids "remote gitlab already exists"
+          # failing the run before the push is even attempted.
+          remote_url="https://oauth2:${GITLAB_TOKEN}@gitlab.opencode.de/oc00013173229/odf-kit.git"
+          git remote add gitlab "$remote_url" 2>/dev/null \
+            || git remote set-url gitlab "$remote_url"
+
+          # Retry with backoff to ride out brief connectivity / DNS blips.
+          # 4 attempts, 30s apart. Sustained outage exhausts these and the
+          # step exits non-zero (the failure is intentionally surfaced).
+          attempts=4
+          delay=30
+          n=1
+          until git push --force gitlab main; do
+            if [ "$n" -ge "$attempts" ]; then
+              echo "::error::GitLab sync failed after ${attempts} attempts. \
+          If this is 'Could not resolve host', gitlab.opencode.de is \
+          unreachable from the runner (openCode-side outage); re-run this \
+          workflow once it is reachable. The GitHub repo (source of truth) is \
+          unaffected."
+              exit 1
+            fi
+            echo "Push attempt ${n}/${attempts} failed; retrying in ${delay}s..."
+            n=$((n + 1))
+            sleep "$delay"
+          done
+          echo "GitLab mirror synced (attempt ${n}/${attempts})."
