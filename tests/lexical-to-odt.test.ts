@@ -378,6 +378,25 @@ describe("lexicalToOdt", () => {
     expect(styles).toContain("21.59cm");
   });
 
+  // Regression test for v0.13.5: landscape orientation must produce
+  // landscape page dimensions. Bug against v0.13.4: lexicalToOdt resolved
+  // a portrait A4 preset and passed portrait dimensions to setPageLayout,
+  // and (additionally) did not thread `orientation` through at all, so
+  // landscape was silently ignored even at the metadata level. v0.13.5
+  // threads orientation through setPageLayout (lexical-to-odt.ts fix) and
+  // adds the swap in buildStylesConfig (document.ts fix); both are required
+  // for lexical landscape to work end-to-end.
+  it("should produce landscape page dimensions when orientation is landscape", async () => {
+    const bytes = await lexicalToOdt(editorState(paragraph([text("Hello")])), {
+      pageFormat: "A4",
+      orientation: "landscape",
+    });
+    const styles = await getStylesXml(bytes);
+    expect(styles).toContain('fo:page-width="29.7cm"');
+    expect(styles).toContain('fo:page-height="21cm"');
+    expect(styles).toContain('style:print-orientation="landscape"');
+  });
+
   // ── Full document ─────────────────────────────────────────────────────────
 
   it("should convert a realistic full document", async () => {

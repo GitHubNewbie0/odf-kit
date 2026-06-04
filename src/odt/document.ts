@@ -92,8 +92,16 @@ export class OdtDocument {
    * Set the page layout (size, margins, orientation).
    *
    * Defaults to A4 portrait with 2cm margins if not called.
-   * When orientation is "landscape" and no explicit width/height is given,
-   * the A4 dimensions are swapped automatically.
+   *
+   * When `orientation` is `"landscape"`, the emitted page dimensions are
+   * always in landscape order. If `width`/`height` are omitted, A4
+   * landscape (29.7 × 21 cm) is used. If portrait-shaped dimensions are
+   * supplied (width < height) alongside `orientation: "landscape"`, they
+   * are swapped to match the requested orientation. This is the bug fix
+   * for v0.13.5 — previously, supplying portrait dimensions with
+   * `orientation: "landscape"` would emit `style:print-orientation="landscape"`
+   * while leaving `fo:page-width`/`fo:page-height` in portrait order,
+   * causing LibreOffice and Word to open the document in portrait.
    *
    * @param layout - Page layout options.
    * @returns This document, for chaining.
@@ -439,9 +447,41 @@ export class OdtDocument {
       const isLandscape = pl.orientation === "landscape";
       const hasExplicitDimensions = pl.width !== undefined && pl.height !== undefined;
 
+      let resolvedWidth = pl.width ?? (isLandscape && !hasExplicitDimensions ? "29.7cm" : "21cm");
+      let resolvedHeight = pl.height ?? (isLandscape && !hasExplicitDimensions ? "21cm" : "29.7cm");
+
+      // If landscape was requested but the resolved dimensions are still in
+      // portrait order (width < height), swap them. This catches the public
+      // converter case (htmlToOdt, markdownToOdt, lexicalToOdt, tiptapToOdt):
+      // those resolve a portrait preset and pass width+height alongside
+      // orientation:"landscape", which made the hasExplicitDimensions branch
+      // above skip the swap. Without this final check, the document would
+      // emit style:print-orientation="landscape" while leaving
+      // fo:page-width / fo:page-height in portrait order, so LibreOffice
+      // and Word would open it portrait. Bug reported by the community
+      // against v0.13.4; fix shipped in v0.13.5.
+      //
+      // parseFloat compares correctly only when both dimensions share a
+      // unit. All current callers (the four public converters and the
+      // hardcoded preset table) use cm, so this is safe today. Mixed-unit
+      // inputs (e.g. width:"8.5in" + height:"10cm") would compare bare
+      // numbers and could swap incorrectly. The unit-normalization layer
+      // planned for v0.14.0 (alongside the explicit-dimensions public API)
+      // will close this hole; see the v0.14.0 plan for the validation
+      // approach modeled on the Mars Climate Orbiter lesson — never let
+      // values of different units flow through arithmetic comparisons
+      // without explicit conversion or rejection.
+      if (isLandscape) {
+        const w = parseFloat(resolvedWidth);
+        const h = parseFloat(resolvedHeight);
+        if (Number.isFinite(w) && Number.isFinite(h) && w < h) {
+          [resolvedWidth, resolvedHeight] = [resolvedHeight, resolvedWidth];
+        }
+      }
+
       config.pageLayout = {
-        width: pl.width ?? (isLandscape && !hasExplicitDimensions ? "29.7cm" : "21cm"),
-        height: pl.height ?? (isLandscape && !hasExplicitDimensions ? "21cm" : "29.7cm"),
+        width: resolvedWidth,
+        height: resolvedHeight,
         orientation: pl.orientation ?? "portrait",
         marginTop: pl.marginTop ?? "2cm",
         marginBottom: pl.marginBottom ?? "2cm",

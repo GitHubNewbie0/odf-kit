@@ -48,6 +48,7 @@ export async function lexicalToOdt(
   doc.setPageLayout({
     width: format.width,
     height: format.height,
+    orientation: options?.orientation,
     marginTop: options?.marginTop ?? format.margin,
     marginBottom: options?.marginBottom ?? format.margin,
     marginLeft: options?.marginLeft ?? format.margin,

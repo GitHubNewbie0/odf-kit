@@ -117,6 +117,23 @@ describe("markdownToOdt", () => {
     expect(styles).toContain("21.59cm");
   });
 
+  // Regression test for v0.13.5: landscape orientation must produce
+  // landscape page dimensions. markdownToOdt delegates to htmlToOdt, so
+  // this test confirms the delegation correctly threads orientation
+  // through to the buildStylesConfig fix in document.ts. If this test
+  // passes while the htmlToOdt regression test fails (or vice versa),
+  // the delegation is broken — both pathways should agree.
+  it("should produce landscape page dimensions when orientation is landscape", async () => {
+    const bytes = await markdownToOdt("Hello", {
+      pageFormat: "A4",
+      orientation: "landscape",
+    });
+    const styles = await getStylesXml(bytes);
+    expect(styles).toContain('fo:page-width="29.7cm"');
+    expect(styles).toContain('fo:page-height="21cm"');
+    expect(styles).toContain('style:print-orientation="landscape"');
+  });
+
   it("should support metadata", async () => {
     const bytes = await markdownToOdt("Hello", {
       metadata: { title: "My Doc", creator: "Alice" },

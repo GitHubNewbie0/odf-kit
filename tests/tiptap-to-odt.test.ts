@@ -371,6 +371,26 @@ describe("tiptapToOdt", () => {
     expect(styles).toContain("21.59cm");
   });
 
+  // Regression test for v0.13.5: landscape orientation must produce
+  // landscape page dimensions. Bug against v0.13.4: tiptapToOdt resolved
+  // a portrait A4 preset and passed portrait dimensions to setPageLayout
+  // alongside orientation:"landscape", so styles.xml carried the
+  // print-orientation flag but kept fo:page-width / fo:page-height in
+  // portrait order. The fix in document.ts's buildStylesConfig swaps
+  // dimensions when landscape + portrait-order is detected. This test
+  // matches the user's original reproduction (the German bug report used
+  // exactly this pattern: unzipSync + regex against styles.xml).
+  it("should produce landscape page dimensions when orientation is landscape", async () => {
+    const bytes = await tiptapToOdt(doc(paragraph(text("Hello"))), {
+      pageFormat: "A4",
+      orientation: "landscape",
+    });
+    const styles = await getStylesXml(bytes);
+    expect(styles).toContain('fo:page-width="29.7cm"');
+    expect(styles).toContain('fo:page-height="21cm"');
+    expect(styles).toContain('style:print-orientation="landscape"');
+  });
+
   it("should apply metadata", async () => {
     const bytes = await tiptapToOdt(doc(paragraph(text("Hello"))), {
       metadata: { title: "My Doc", creator: "Alice" },

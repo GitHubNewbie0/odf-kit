@@ -514,6 +514,28 @@ describe("htmlToOdt — page format", () => {
     expect(styles).toContain("landscape");
   });
 
+  // Regression test for v0.13.5: landscape orientation must produce
+  // landscape page dimensions, not just style:print-orientation="landscape".
+  // Bug against v0.13.4: htmlToOdt resolved a portrait A4 preset and passed
+  // portrait width/height to setPageLayout alongside orientation:"landscape",
+  // so styles.xml emitted style:print-orientation="landscape" but kept
+  // fo:page-width="21cm" / fo:page-height="29.7cm" — LibreOffice and Word
+  // opened the document in portrait. Asserts dimensions are now in
+  // landscape order. (The existing "landscape orientation swaps dimensions"
+  // test above only checks for the word "landscape" and passes regardless
+  // of whether the swap actually happens; this test exercises the bug
+  // condition directly. Consider strengthening or removing the older test
+  // separately — it has a misleading name relative to its assertions.)
+  test("landscape orientation produces landscape page dimensions", async () => {
+    const styles = await getStyles("<p>Hello</p>", {
+      pageFormat: "A4",
+      orientation: "landscape",
+    });
+    expect(styles).toContain('fo:page-width="29.7cm"');
+    expect(styles).toContain('fo:page-height="21cm"');
+    expect(styles).toContain('style:print-orientation="landscape"');
+  });
+
   test("custom margin overrides preset default", async () => {
     const styles = await getStyles("<p>Hello</p>", {
       pageFormat: "A4",

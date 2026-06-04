@@ -185,6 +185,12 @@ export interface LexicalToOdtOptions {
   pageFormat?: "A4" | "letter" | "legal" | "A3" | "A5";
 
   /**
+   * Page orientation. Defaults to `"portrait"`.
+   * Swaps page width and height when set to `"landscape"`.
+   */
+  orientation?: "portrait" | "landscape";
+
+  /**
    * Top margin with units. Defaults to '2.54cm'.
    */
   marginTop?: string;

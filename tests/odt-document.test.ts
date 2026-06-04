@@ -549,6 +549,63 @@ describe("OdtDocument", () => {
       expect(styles).toContain('style:print-orientation="landscape"');
     });
 
+    // Regression test for v0.13.5: landscape orientation passed alongside
+    // portrait-shaped explicit dimensions must still emit landscape page
+    // dimensions. Bug reported against v0.13.4: the public converters
+    // (htmlToOdt, markdownToOdt, lexicalToOdt, tiptapToOdt) all resolved a
+    // portrait preset and called setPageLayout with both portrait
+    // width/height and orientation:"landscape" — buildStylesConfig wrote
+    // style:print-orientation="landscape" but left fo:page-width /
+    // fo:page-height in portrait order, so LibreOffice and Word opened
+    // the documents in portrait.
+    it("should swap portrait dimensions when landscape orientation is requested", async () => {
+      const doc = new OdtDocument();
+      doc.setPageLayout({
+        width: "21cm",
+        height: "29.7cm",
+        orientation: "landscape",
+      });
+      doc.addParagraph("Test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('fo:page-width="29.7cm"');
+      expect(styles).toContain('fo:page-height="21cm"');
+      expect(styles).toContain('style:print-orientation="landscape"');
+    });
+
+    it("should not swap landscape-shaped dimensions when landscape is requested", async () => {
+      // If the caller already supplies landscape-ordered dimensions
+      // alongside orientation:"landscape", they should pass through
+      // unchanged. (Width > height, so the swap condition does not fire.)
+      const doc = new OdtDocument();
+      doc.setPageLayout({
+        width: "29.7cm",
+        height: "21cm",
+        orientation: "landscape",
+      });
+      doc.addParagraph("Test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('fo:page-width="29.7cm"');
+      expect(styles).toContain('fo:page-height="21cm"');
+    });
+
+    it("should not swap dimensions when portrait orientation is requested", async () => {
+      // Portrait orientation must leave portrait-shaped dimensions
+      // untouched — the swap is gated on isLandscape.
+      const doc = new OdtDocument();
+      doc.setPageLayout({
+        width: "21cm",
+        height: "29.7cm",
+        orientation: "portrait",
+      });
+      doc.addParagraph("Test");
+      const styles = await getStylesXml(doc);
+
+      expect(styles).toContain('fo:page-width="21cm"');
+      expect(styles).toContain('fo:page-height="29.7cm"');
+    });
+
     it("should support custom page dimensions (US Letter)", async () => {
       const doc = new OdtDocument();
       doc.setPageLayout({ width: "8.5in", height: "11in" });
