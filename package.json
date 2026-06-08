@@ -157,6 +157,13 @@
   ],
   "author": "GitHubNewbie0",
   "license": "Apache-2.0",
+  "homepage": "https://githubnewbie0.github.io/odf-kit",
+  "bugs": {
+    "url": "https://github.com/GitHubNewbie0/odf-kit/issues"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GitHubNewbie0/odf-kit.git"

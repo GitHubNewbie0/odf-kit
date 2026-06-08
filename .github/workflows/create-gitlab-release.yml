@@ -1,0 +1,81 @@
+# Create a matching release on the GitLab mirror whenever a GitHub release
+# is published. Fires after `gh release create` in the local release flow.
+#
+# Authentication: GITLAB_TOKEN repo secret, a GitLab personal access token
+# with `api` and `write_repository` scopes. Token belongs to user
+# oc00013173229 (the GitLab account where odf-kit is mirrored).
+#
+# Source of truth: this GitHub repo. The GitLab release is created from the
+# GitHub release tag name, title, and auto-generated release notes body.
+#
+# Resilience: the tag push uses the same retry-with-backoff pattern as
+# sync-to-gitlab.yml to ride out brief DNS / connectivity blips against
+# gitlab.opencode.de. The API call to create the release follows only after
+# the tag lands successfully.
+name: Create GitLab release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  create-gitlab-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Push tag to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          # Idempotent remote: matches sync-to-gitlab.yml pattern.
+          remote_url="https://oauth2:${GITLAB_TOKEN}@gitlab.opencode.de/oc00013173229/odf-kit.git"
+          git remote add gitlab "$remote_url" 2>/dev/null \
+            || git remote set-url gitlab "$remote_url"
+
+          # Retry with backoff to ride out brief connectivity / DNS blips.
+          # 4 attempts, 30s apart. Sustained outage exhausts these and the
+          # step exits non-zero (the failure is intentionally surfaced).
+          attempts=4
+          delay=30
+          n=1
+          until git push gitlab "refs/tags/${TAG_NAME}"; do
+            if [ "$n" -ge "$attempts" ]; then
+              echo "::error::Failed to push tag ${TAG_NAME} to GitLab after \
+          ${attempts} attempts. If this is 'Could not resolve host', \
+          gitlab.opencode.de is unreachable from the runner (openCode-side \
+          outage); re-run this workflow once it is reachable."
+              exit 1
+            fi
+            echo "Push attempt ${n}/${attempts} failed; retrying in ${delay}s..."
+            n=$((n + 1))
+            sleep "$delay"
+          done
+          echo "Tag ${TAG_NAME} pushed to GitLab mirror (attempt ${n}/${attempts})."
+
+      - name: Create GitLab release
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          PROJECT="oc00013173229%2Fodf-kit"
+          # jq --arg handles arbitrary string content safely (newlines,
+          # quotes, special characters in the auto-generated release notes).
+          payload=$(jq -n \
+            --arg tag  "$TAG_NAME" \
+            --arg name "$RELEASE_NAME" \
+            --arg desc "$RELEASE_BODY" \
+            '{tag_name: $tag, name: $name, description: $desc}')
+          curl --fail-with-body \
+            --silent --show-error \
+            --header "Authorization: Bearer ${GITLAB_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "https://gitlab.opencode.de/api/v4/projects/${PROJECT}/releases"
+          echo "GitLab release ${TAG_NAME} created."
