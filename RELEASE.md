@@ -49,7 +49,23 @@ npm publish
 
 Verify the new version appears at https://www.npmjs.com/package/odf-kit.
 
-## 6. Create the GitHub release
+## 6. Update publiccode.yml
+
+Update `softwareVersion` and `releaseDate` in `publiccode.yml` to the new
+version and today's date. Validate at https://editor.opencode.de, download
+the verbatim output, and save to the repo root. Never commit a hand-edited
+version — always use the validator's output.
+
+```powershell
+git add publiccode.yml
+git commit -m "chore: update publiccode.yml to vX.Y.Z"
+git push origin main
+```
+
+The GitLab sync will push the updated `publiccode.yml` to the mirror, where
+the openCode.de indexer will pick it up.
+
+## 7. Create the GitHub release
 
 ```powershell
 gh release create vX.Y.Z --generate-notes
@@ -64,9 +80,10 @@ Creating the GitHub release triggers the `Create GitLab release` workflow
 automatically, which pushes the tag to the GitLab mirror and creates a
 matching release there. No manual GitLab steps required.
 
-## 7. Verify
+## 8. Verify
 
 - [ ] npm: https://www.npmjs.com/package/odf-kit shows the new version
 - [ ] GitHub: Releases page shows the new release with notes
 - [ ] GitHub Actions: `Create GitLab release` workflow run completed green
 - [ ] GitLab: https://gitlab.opencode.de/oc00013173229/odf-kit/-/releases shows the new release
+- [ ] openCode: https://gitlab.opencode.de/oc00013173229/odf-kit shows updated softwareVersion
