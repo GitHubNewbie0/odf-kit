@@ -84,6 +84,7 @@ import { disclosureMessage } from "./disclosure.js";
 import { parseFilename } from "./filename.js";
 import { buildSaveBlob, triggerDownload } from "./save.js";
 import { buildSavePageFilename, serializePage } from "./serialize-page.js";
+import { withDelayedIndicator } from "./delayed-indicator.js";
 import {
   INPUT_PANE_PLACEHOLDER_TEXT,
   OUTPUT_PANE_PLACEHOLDER_TEXT,
@@ -1278,22 +1279,6 @@ async function onKeyboardClick(els: Elements): Promise<void> {
   render(currentState, els);
 }
 
-/**
- * Indicator threshold: arm a timer when conversion starts; if it fires before
- * conversion completes, mount the "Generating..." label on the Generate button.
- * Avoids the flash on fast conversions (timer never fires).
- */
-const INDICATOR_APPEAR_THRESHOLD_MS = 200;
-
-/**
- * Minimum display time once the indicator is shown. If conversion completes
- * shortly after the indicator appears (e.g. timer fires at 200ms and
- * conversion finishes at 220ms), pad with an artificial delay so the
- * indicator stays on screen for at least this long. Avoids the flash on
- * barely-over-threshold conversions.
- */
-const INDICATOR_MIN_DISPLAY_MS = 400;
-
 async function onGenerateClick(els: Elements): Promise<void> {
   // Generate is only enabled in State B; defensive guard for any path that
   // could call this otherwise (e.g. if a future code change wires it in
@@ -1334,22 +1319,25 @@ async function onGenerateClick(els: Elements): Promise<void> {
     inputState.inputFilename,
   );
 
-  // Appear-threshold + minimum-display indicator. The timer is armed
-  // before conversion starts; if it fires, the Generate button gets the
-  // "Generating..." label and is disabled. Once conversion completes,
-  // the finally block clears the timer (no-op if it already fired) and
-  // enforces the minimum-display delay if the indicator was shown.
-  let indicatorShown = false;
-  let indicatorShownAt = 0;
-  const timer = window.setTimeout(() => {
-    indicatorShown = true;
-    indicatorShownAt = performance.now();
-    els.generateBtn.textContent = "Generating...";
-    els.generateBtn.disabled = true;
-  }, INDICATOR_APPEAR_THRESHOLD_MS);
-
+  // The conversion is wrapped in withDelayedIndicator: if it runs past the
+  // appear threshold the Generate button shows the "Generating..." label
+  // (and is disabled); once it settles the helper enforces the minimum
+  // on-screen time before restoring the label. The same helper drives the
+  // binary-preview spinner (see loadBinaryFile), which is why this timing
+  // logic now lives in delayed-indicator.ts rather than inline here.
   try {
-    const results = await runConversion([input], outputFormat);
+    const results = await withDelayedIndicator(
+      () => runConversion([input], outputFormat),
+      () => {
+        els.generateBtn.textContent = "Generating...";
+        els.generateBtn.disabled = true;
+      },
+      () => {
+        // Restore the label. render() below reconciles the disabled state
+        // per the resulting state's normal rules.
+        els.generateBtn.textContent = "Generate";
+      },
+    );
     // Phase 1a always returns exactly one result. (The array contract is
     // for Phase 1b batch processing.) Defensive guard in case that ever
     // drifts: surface a clear error rather than silently dropping data.
@@ -1388,21 +1376,6 @@ async function onGenerateClick(els: Elements): Promise<void> {
       title: "Generation failed",
       message: errorMessage(err),
     });
-  } finally {
-    window.clearTimeout(timer);
-    // Enforce minimum-display time. If the indicator was shown and
-    // conversion completed quickly after, pad with a delay so the
-    // indicator stays on screen at least INDICATOR_MIN_DISPLAY_MS.
-    if (indicatorShown) {
-      const elapsed = performance.now() - indicatorShownAt;
-      const remaining = INDICATOR_MIN_DISPLAY_MS - elapsed;
-      if (remaining > 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, remaining));
-      }
-    }
-    // Restore the button label. render() below will set disabled per
-    // the current state's normal rules.
-    els.generateBtn.textContent = "Generate";
   }
 
   render(currentState, els);
