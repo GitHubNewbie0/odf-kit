@@ -6,8 +6,8 @@ publiccodeYmlVersion: '0.2'
 name: odf-kit
 url: 'https://github.com/GitHubNewbie0/odf-kit'
 landingURL: 'https://githubnewbie0.github.io/odf-kit'
-softwareVersion: 0.13.5
-releaseDate: '2026-06-04'
+softwareVersion: 0.13.6
+releaseDate: '2026-06-08'
 platforms:
   - web
 categories:
