@@ -5,6 +5,13 @@ All notable changes to odf-kit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **XLSX→ODS formula cell interface mismatch** — `xlsxToOds()` now correctly round-trips formula cells. Previously, the cached numeric result ended up in `table:formula` (e.g. `of:3`) and `office:value` was hardcoded to `0`, producing spec-invalid XML that LibreOffice masked by evaluating the cached result as a constant. The converter now maps the cached result to the correct ODS value type (`float`, `string`, `boolean`, or `date`) and passes the formula expression separately, so `table:formula` holds the expression (e.g. `of:=SUM(1,2)`) and `office:value` holds the cached result (e.g. `3`). Fixes [#25](https://github.com/GitHubNewbie0/odf-kit/issues/25).
+- **`formula` field added to `OdsCellObject` and `OdsCellData`** — formula cells can now be constructed directly: `{ value: 3, type: "float", formula: "=SUM(A1:A2)" }`. The existing `{ value: "=SUM(A1:A2)", type: "formula" }` shorthand is preserved for backward compatibility.
+
 ## [0.13.4] - 2026-05-05
 
 ### Added
@@ -355,7 +362,20 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.5...HEAD
+[0.13.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.5
+[0.13.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.4
+[0.13.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.3
 [0.13.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.2
+[0.13.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.1
+[0.13.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.0
+[0.12.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.3
+[0.12.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.1
+[0.12.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.0
+[0.11.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.11.0
+[0.10.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.4
+[0.10.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.3
+[0.10.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.2
 [0.10.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.0
 [0.9.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.9
 [0.9.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.8
@@ -372,10 +392,6 @@ Initial release. Complete ODT generation support.
 [0.8.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.7.0
-[0.11.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.11.0
-[0.10.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.4
-[0.10.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.3
-[0.10.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.2
 [0.4.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0

@@ -155,6 +155,7 @@ function toCellData(value: OdsCellValue): OdsCellData {
       colSpan: value.colSpan,
       rowSpan: value.rowSpan,
       href: value.href,
+      formula: value.formula,
     };
   }
 

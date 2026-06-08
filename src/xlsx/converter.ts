@@ -46,18 +46,30 @@ function mapCell(cell: XlsxCell, options: XlsxToOdsOptions): OdsCellObject {
       };
 
     case "formula": {
-      // TODO(#25): formula cells currently round-trip with the wrong shape —
-      // the OdsDocument layer reads `value` as the formula string and
-      // ignores `formula`, so the emitted table:formula attribute holds the
-      // cached result rather than the expression. LibreOffice masks this
-      // because it parses the cached result as a constant. Proper fix
-      // requires reconciling the converter and document-layer contracts.
-      // See https://github.com/GitHubNewbie0/odf-kit/issues/25.
-      return {
-        value: cell.value,
-        type: "formula",
-        formula: cell.formula ? `=${cell.formula.replace(/^=/, "")}` : undefined,
-      } as OdsCellObject;
+      // The XLSX cell carries both a cached result (cell.value) and a formula
+      // expression (cell.formula). Map the cached result to the appropriate
+      // ODS value type so buildCellElement emits correct office:value-type and
+      // office:value attributes. The formula expression is passed separately so
+      // buildCellElement can emit table:formula alongside the cached result.
+      const formula = cell.formula ? `=${cell.formula.replace(/^=/, "")}` : undefined;
+      const val = cell.value;
+
+      if (typeof val === "boolean") {
+        return { value: val, type: "boolean", formula };
+      }
+      if (val instanceof Date) {
+        return {
+          value: val,
+          type: "date",
+          formula,
+          ...(options.dateFormat ? { dateFormat: options.dateFormat } : {}),
+        };
+      }
+      if (typeof val === "string") {
+        return { value: val, type: "string", formula };
+      }
+      // number, null, or anything else → float
+      return { value: val as number | null, type: "float", formula };
     }
 
     case "error":

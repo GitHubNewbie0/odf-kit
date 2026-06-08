@@ -160,6 +160,20 @@ export interface OdsCellObject extends OdsCellOptions {
    * { value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" }
    */
   href?: string;
+
+  /**
+   * OpenFormula expression for formula cells (e.g. `"=SUM(A1:A2)"`).
+   *
+   * When set alongside a typed value, the cell emits a proper formula cell:
+   * `table:formula` holds the expression and `office:value` holds the cached
+   * result. The `type` field reflects the cached-result value type
+   * (`"float"`, `"string"`, `"boolean"`, or `"date"`), not `"formula"`.
+   *
+   * @example
+   * // XLSX→ODS round-trip: cached result 3, formula =SUM(A1:A2)
+   * { value: 3, type: "float", formula: "=SUM(A1:A2)" }
+   */
+  formula?: string;
 }
 
 /**
@@ -199,6 +213,13 @@ export interface OdsCellData {
 
   /** Hyperlink URL — when set, cell text is rendered as a link. */
   href?: string;
+
+  /**
+   * OpenFormula expression — when set, the cell emits `table:formula` in
+   * addition to the normal value-type attributes derived from `value` and
+   * `type`. Set by the XLSX→ODS converter; not produced by auto-typing.
+   */
+  formula?: string;
 }
 
 /** Internal representation of a row. */

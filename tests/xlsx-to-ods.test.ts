@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
-import { zipSync } from "fflate";
+import { zipSync, unzipSync } from "fflate";
 import {
   parseCellRef,
   parseMergeRef,
@@ -389,5 +389,35 @@ describe("xlsxToOds — round-trip via readOds", () => {
     const ods = await xlsxToOds(xlsx.buffer);
     const model = readOds(ods);
     expect(model.sheets[0].rows[0].cells[0].value).toBe(99);
+  });
+});
+// ─── xlsxToOds — formula cells ───────────────────────────────────────
+
+describe("xlsxToOds — formula cells", () => {
+  it("preserves cached numeric result and correct value-type in ODS XML", async () => {
+    // Verifies the core fix: table:formula holds the expression, office:value
+    // holds the cached result, office:value-type is "float" — not the broken
+    // pre-fix output where the cached result ended up in table:formula and
+    // office:value was hardcoded to "0".
+    const xlsx = buildSimpleXlsx(
+      `<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="1"><c r="A1"><f>SUM(1,2)</f><v>3</v></c></row></sheetData></worksheet>`,
+    );
+    const ods = await xlsxToOds(xlsx);
+    const files = unzipSync(ods);
+    const contentXml = new TextDecoder().decode(files["content.xml"]);
+    expect(contentXml).toContain('table:formula="of:=SUM(1,2)"');
+    expect(contentXml).toContain('office:value-type="float"');
+    expect(contentXml).toContain('office:value="3"');
+  });
+
+  it("round-trips numeric formula cached value via readOds", async () => {
+    const xlsx = buildSimpleXlsx(
+      `<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="1"><c r="A1"><f>SUM(1,2)</f><v>3</v></c></row></sheetData></worksheet>`,
+    );
+    const ods = await xlsxToOds(xlsx);
+    const model = readOds(ods);
+    const cell = model.sheets[0].rows[0].cells[0];
+    expect(cell.value).toBe(3);
+    expect(cell.type).toBe("formula");
   });
 });

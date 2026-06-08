@@ -674,16 +674,21 @@ function buildCellElement(
     return p;
   };
 
-  // Value type, value attributes, and display paragraph
+  // Value type, value attributes, and display paragraph.
+  // When cell.formula is set, table:formula is emitted alongside the normal
+  // value-type output so that the cached result and formula expression are
+  // both preserved in the ODS file per the ODF spec.
   switch (cell.type) {
     case "string":
       cellEl.attr("office:value-type", "string");
+      if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
       cellEl.appendChild(buildTextP(String(cell.value ?? "")));
       break;
 
     case "float":
       cellEl.attr("office:value-type", "float");
       cellEl.attr("office:value", String(cell.value));
+      if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
       cellEl.appendChild(buildTextP(String(cell.value)));
       break;
 
@@ -692,6 +697,7 @@ function buildCellElement(
       const rawVal = Number(cell.value ?? 0);
       cellEl.attr("office:value-type", "percentage");
       cellEl.attr("office:value", String(rawVal));
+      if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
       // Display value: multiply by 100 for display (LibreOffice recalculates)
       cellEl.appendChild(buildTextP(String(rawVal)));
       break;
@@ -704,6 +710,7 @@ function buildCellElement(
       cellEl.attr("office:value-type", "currency");
       cellEl.attr("office:currency", currencyCode);
       cellEl.attr("office:value", String(cell.value));
+      if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
       cellEl.appendChild(buildTextP(String(cell.value)));
       break;
     }
@@ -714,9 +721,11 @@ function buildCellElement(
       cellEl.attr("office:value-type", "date");
       if (isDatetime(date)) {
         cellEl.attr("office:date-value", formatDatetimeISO(date));
+        if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
         cellEl.appendChild(buildTextP(formatDatetimeDisplay(date)));
       } else {
         cellEl.attr("office:date-value", formatDateISO(date));
+        if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
         cellEl.appendChild(buildTextP(formatDateDisplay(date, cellDateFmt)));
       }
       break;
@@ -725,10 +734,14 @@ function buildCellElement(
     case "boolean":
       cellEl.attr("office:value-type", "boolean");
       cellEl.attr("office:boolean-value", cell.value ? "true" : "false");
+      if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
       cellEl.appendChild(buildTextP(cell.value ? "TRUE" : "FALSE"));
       break;
 
     case "formula": {
+      // Legacy path: { value: "=SUM(B1:B10)", type: "formula" } with no
+      // formula field. Reads value as the expression string. Preserved for
+      // backward compatibility with existing public API callers.
       cellEl.attr("table:formula", `of:${String(cell.value)}`);
       cellEl.attr("office:value-type", "float");
       cellEl.attr("office:value", "0");
