@@ -10,10 +10,10 @@
 //
 // Every (inputFormat, outputFormat) pair is enumerated as a case so the
 // TypeScript compiler enforces exhaustiveness as new pathways are added.
-// html→odt, markdown→odt, lexical→odt, and tiptap→odt are implemented (all
-// four text→ODT pathways); the other six pairs throw
-// "not yet implemented" or "unsupported pathway". Subsequent commits fan
-// out to the remaining pathways one at a time.
+// html→odt, markdown→odt, lexical→odt, tiptap→odt (the four text→ODT
+// pathways), docx→odt, and odt→html are implemented; the remaining four
+// pairs throw "not yet implemented" or "unsupported pathway". Subsequent
+// commits fan out to the remaining pathways one at a time.
 //
 // The function signature is array-in / array-out so Phase 1b (batch / State
 // D) doesn't change call sites — only the loop body inside runConversion
@@ -37,9 +37,15 @@
 // complexity elsewhere; (b) the round-trip cost is uniformly modest;
 // (c) future non-UI consumers can be served by an opt-out option without
 // restructuring the module.
+//
+// previewBinary (below) is the input-side analogue: it round-trips a loaded
+// binary input's bytes to an HTML preview string for the INPUT pane, run
+// once on file load. It lives here for the same reason previewText does —
+// it's a library call, and index.ui.ts holds no library calls of its own.
 
 import { htmlToOdt, markdownToOdt, tiptapToOdt } from "odf-kit/odt";
 import { lexicalToOdt } from "odf-kit/lexical";
+import { docxToOdt } from "odf-kit/docx";
 import { odtToHtml } from "odf-kit/reader";
 import { buildOutputFilename, type OutputFormat } from "./filename.js";
 
@@ -138,6 +144,50 @@ export async function runConversion(
 }
 
 /**
+ * Round-trip a loaded binary input's bytes to an HTML preview string for the
+ * INPUT pane. Called once on file load (loadBinaryFile in index.ui.ts),
+ * separate from the output conversion that runs on Generate. The design
+ * accepts the modest recompute — the preview runs the reader here, and a
+ * later Generate runs it again — in exchange for not coupling preview state
+ * to output state (see unified-tool-design-v2, "Output rendering" →
+ * "Implications for binary inputs").
+ *
+ *   - odt:  odtToHtml(bytes) directly.
+ *   - docx: docxToOdt(bytes) → odtToHtml(...) — the same intermediate the
+ *           docx→odt output produces, shown as a visual approximation. Note
+ *           docxToOdt returns { bytes, warnings }, not raw bytes like the
+ *           other *ToOdt builders; we take .bytes and ignore warnings here.
+ *   - xlsx / ods: not yet implemented. Their preview needs the sheet-tab
+ *           renderer (next chunk), so loadBinaryFile must not route them
+ *           here yet. Throwing keeps the boundary honest if it ever does.
+ *
+ * Async because docxToOdt is async (odtToHtml is synchronous, but the
+ * uniform Promise return lets the caller await regardless of format).
+ *
+ * Lives in this module — not in index.ui.ts — because it is a library call,
+ * and index.ui.ts holds no library calls of its own.
+ */
+export async function previewBinary(
+  bytes: Uint8Array,
+  inputFormat: "docx" | "xlsx" | "odt" | "ods",
+): Promise<string> {
+  switch (inputFormat) {
+    case "odt":
+      return odtToHtml(bytes);
+    case "docx": {
+      // docxToOdt returns { bytes, warnings } (see the docx→odt case in
+      // convertOne). Take the ODT bytes for the preview; warnings are not
+      // surfaced yet.
+      const { bytes: odtBytes } = await docxToOdt(bytes);
+      return odtToHtml(odtBytes);
+    }
+    case "xlsx":
+    case "ods":
+      throw new Error(`not yet implemented: ${inputFormat} preview`);
+  }
+}
+
+/**
  * Convert a single input. Pulled out of runConversion's loop so the
  * dispatch table is one straight switch per input format, each nesting a
  * switch on output format. Reads top-to-bottom as a coverage matrix of
@@ -147,9 +197,9 @@ export async function runConversion(
  *     markdown → odt      ✓ (C5)
  *     lexical  → odt      ✓ (C6)
  *     tiptap   → odt      ✓ (C7)
- *     docx     → odt      throw "not yet implemented"
+ *     docx     → odt      ✓ (this commit)
  *     xlsx     → ods      throw "not yet implemented"
- *     odt      → html     throw "not yet implemented"
+ *     odt      → html     ✓ (this commit)
  *     odt      → markdown throw "not yet implemented"
  *     odt      → typst    throw "not yet implemented"
  *     ods      → html     throw "not yet implemented"
@@ -269,8 +319,25 @@ async function convertOne(
       break;
     case "docx":
       switch (outputFormat) {
-        case "odt":
-          throw new Error("not yet implemented: docx→odt");
+        case "odt": {
+          // docx→odt: convert the DOCX bytes to ODT bytes, then round-trip
+          // the ODT to HTML for the output-pane preview (same previewText
+          // contract as the text→ODT pathways above). docxToOdt is async and,
+          // unlike the other *ToOdt builders, returns { bytes, warnings }
+          // rather than raw bytes — DOCX conversion can drop a feature (e.g.
+          // a dangling image reference) on an otherwise-valid document, so it
+          // reports non-fatal warnings alongside the result. We take the bytes
+          // here; surfacing warnings to the user is a separate follow-up.
+          const { bytes } = await docxToOdt(input.bytes);
+          const previewText = odtToHtml(bytes);
+          return {
+            kind: "bytes",
+            outputFormat: "odt",
+            bytes,
+            previewText,
+            outputFilename: buildOutputFilename(input.inputFilename, "odt"),
+          };
+        }
         case "ods":
         case "html":
         case "markdown":
@@ -291,8 +358,19 @@ async function convertOne(
       break;
     case "odt":
       switch (outputFormat) {
-        case "html":
-          throw new Error("not yet implemented: odt→html");
+        case "html": {
+          // odt→html: the HTML output IS the round-tripped reader output —
+          // the same string used as previewText for ODT-bytes results, but
+          // here it is the deliverable, returned as a text-kind result that
+          // save.ts writes to a .html file (text/html MIME).
+          const text = odtToHtml(input.bytes);
+          return {
+            kind: "text",
+            outputFormat: "html",
+            text,
+            outputFilename: buildOutputFilename(input.inputFilename, "html"),
+          };
+        }
         case "markdown":
           throw new Error("not yet implemented: odt→markdown");
         case "typst":
