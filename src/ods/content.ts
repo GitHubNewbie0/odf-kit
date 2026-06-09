@@ -255,11 +255,13 @@ function numberFormatToStyleName(format: string): string | undefined {
   const pctMatch = format.match(/^percentage:(\d+)$/);
   if (pctMatch) return `Nnum-pct${pctMatch[1]}`;
 
-  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?$/);
+  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?(?::(left|right))?$/);
   if (curMatch) {
     const code = curMatch[1].toLowerCase();
     const decimals = curMatch[2] ?? "2";
-    return `Nnum-${code}${decimals}`;
+    const position = curMatch[3] ?? "left";
+    const suffix = position === "right" ? "r" : "";
+    return `Nnum-${code}${decimals}${suffix}`;
   }
 
   return undefined;
@@ -348,24 +350,31 @@ function buildNumberFormatStyle(format: string): XmlElement | undefined {
     return s;
   }
 
-  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?$/);
+  const curMatch = format.match(/^currency:([A-Z]{3})(?::(\d+))?(?::(left|right))?$/);
   if (curMatch) {
     const code = curMatch[1];
     const decimals = curMatch[2] ?? "2";
+    const position = curMatch[3] ?? "left";
     const symbol = CURRENCY_SYMBOLS[code] ?? code;
     const s = el("number:currency-style").attr("style:name", styleName);
-    s.appendChild(
-      el("number:currency-symbol")
-        .attr("number:language", "en")
-        .attr("number:country", "US")
-        .text(symbol),
-    );
-    s.appendChild(
-      el("number:number")
-        .attr("number:decimal-places", decimals)
-        .attr("number:grouping", "true")
-        .attr("number:min-integer-digits", "1"),
-    );
+
+    const symbolEl = el("number:currency-symbol")
+      .attr("number:language", "en")
+      .attr("number:country", "US")
+      .text(symbol);
+    const numberEl = el("number:number")
+      .attr("number:decimal-places", decimals)
+      .attr("number:grouping", "true")
+      .attr("number:min-integer-digits", "1");
+
+    if (position === "right") {
+      s.appendChild(numberEl);
+      s.appendChild(el("number:text").text("\u00A0"));
+      s.appendChild(symbolEl);
+    } else {
+      s.appendChild(symbolEl);
+      s.appendChild(numberEl);
+    }
     return s;
   }
 

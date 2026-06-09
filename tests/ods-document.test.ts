@@ -547,6 +547,72 @@ describe("OdsDocument — number formats", () => {
     const { "content.xml": content } = await extractFiles(doc);
     expect(content).toContain("Nnum-int");
   });
+  test("currency:EUR:right emits number then NBSP then currency-symbol", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR:right" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    const styleMatch = content.match(/<number:currency-style[^>]*>.*?<\/number:currency-style>/s);
+    expect(styleMatch).not.toBeNull();
+    const styleXml = styleMatch![0];
+    const numberIdx = styleXml.indexOf("<number:number");
+    const nbspIdx = styleXml.indexOf("<number:text>\u00A0</number:text>");
+    const symbolIdx = styleXml.indexOf("<number:currency-symbol");
+    expect(numberIdx).toBeLessThan(nbspIdx);
+    expect(nbspIdx).toBeLessThan(symbolIdx);
+  });
+
+  test("currency:EUR:2:right composes decimals with right position", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234.5, type: "currency", numberFormat: "currency:EUR:2:right" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    const styleMatch = content.match(/<number:currency-style[^>]*>.*?<\/number:currency-style>/s);
+    expect(styleMatch).not.toBeNull();
+    const styleXml = styleMatch![0];
+    expect(styleXml).toContain('number:decimal-places="2"');
+    const numberIdx = styleXml.indexOf("<number:number");
+    const symbolIdx = styleXml.indexOf("<number:currency-symbol");
+    expect(numberIdx).toBeLessThan(symbolIdx);
+  });
+
+  test("currency:EUR (default left) emits symbol before number — regression", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    const styleMatch = content.match(/<number:currency-style[^>]*>.*?<\/number:currency-style>/s);
+    expect(styleMatch).not.toBeNull();
+    const styleXml = styleMatch![0];
+    const symbolIdx = styleXml.indexOf("<number:currency-symbol");
+    const numberIdx = styleXml.indexOf("<number:number");
+    expect(symbolIdx).toBeLessThan(numberIdx);
+    expect(styleXml).not.toContain("<number:text>\u00A0</number:text>");
+  });
+
+  test("left and right positioned currency styles dedupe independently", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([
+      { value: 100, type: "currency", numberFormat: "currency:EUR" },
+      { value: 200, type: "currency", numberFormat: "currency:EUR:right" },
+      { value: 300, type: "currency", numberFormat: "currency:EUR" },
+      { value: 400, type: "currency", numberFormat: "currency:EUR:right" },
+    ]);
+    const { "content.xml": content } = await extractFiles(doc);
+    const styleMatches = content.match(/<number:currency-style[^>]+style:name="[^"]+"/g);
+    expect(styleMatches).toHaveLength(2);
+    expect(content).toContain('style:name="Nnum-eur2"');
+    expect(content).toContain('style:name="Nnum-eur2r"');
+  });
+
+  test("currency with unknown position parameter silently produces no style", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: 100, type: "currency", numberFormat: "currency:EUR:middle" }]);
+    const { "content.xml": content } = await extractFiles(doc);
+    expect(content).not.toContain("number:currency-style");
+  });
 });
 
 // ─── Merged Cells ─────────────────────────────────────────────────────

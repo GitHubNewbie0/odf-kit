@@ -7,10 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.7] - 2026-06-09
+
+### Added
+
+- **`currency:CODE:right` and `currency:CODE:N:right` number formats** — `OdsCellOptions.numberFormat` now accepts an optional `:right` position parameter to place the currency symbol after the value with a non-breaking space (e.g. `1 234,56 €`), matching European typographic convention used in France, Germany, Spain, Italy, Portugal, the Netherlands, and most other Eurozone countries. The reader's reverse-mapping in `readOds()` follows suit: documents with right-positioned currency cells return `numberFormat: "currency:CODE:N:right"`. Default behaviour (`currency:EUR`, `currency:EUR:2`) is unchanged — symbol remains on the left for backward compatibility. Fixes [#44](https://github.com/GitHubNewbie0/odf-kit/issues/44). Thanks to [@pascal-brand38](https://github.com/pascal-brand38) for the report.
+
+## [0.13.6] - 2026-06-08
+
 ### Fixed
 
 - **XLSX→ODS formula cell interface mismatch** — `xlsxToOds()` now correctly round-trips formula cells. Previously, the cached numeric result ended up in `table:formula` (e.g. `of:3`) and `office:value` was hardcoded to `0`, producing spec-invalid XML that LibreOffice masked by evaluating the cached result as a constant. The converter now maps the cached result to the correct ODS value type (`float`, `string`, `boolean`, or `date`) and passes the formula expression separately, so `table:formula` holds the expression (e.g. `of:=SUM(1,2)`) and `office:value` holds the cached result (e.g. `3`). Fixes [#25](https://github.com/GitHubNewbie0/odf-kit/issues/25).
 - **`formula` field added to `OdsCellObject` and `OdsCellData`** — formula cells can now be constructed directly: `{ value: 3, type: "float", formula: "=SUM(A1:A2)" }`. The existing `{ value: "=SUM(A1:A2)", type: "formula" }` shorthand is preserved for backward compatibility.
+
+### Internal
+
+- Dependency updates: `typescript-eslint` 8.60.0→8.60.1, `vnu-jar` 26.5.22→26.5.29, `eslint` 10.4.0→10.4.1. CI action bumps: `actions/configure-pages` 5→6, `actions/upload-pages-artifact` 3→5, `actions/deploy-pages` 4→5. `homepage`, `bugs`, and `engines` fields added to `package.json`. New GitLab release workflow.
+
+## [0.13.5] - 2026-06-04
+
+### Fixed
+
+- **Landscape orientation produced portrait dimensions** — `htmlToOdt()`, `markdownToOdt()`, `lexicalToOdt()`, and `tiptapToOdt()` previously resolved a portrait preset and passed portrait width/height to `setPageLayout` alongside `orientation: 'landscape'`. The result: `styles.xml` emitted `style:print-orientation='landscape'` but kept `fo:page-width`/`fo:page-height` in portrait order, and LibreOffice and Word opened the resulting documents in portrait. `buildStylesConfig()` now swaps resolved dimensions when `isLandscape && width<height`, completing the existing swap-when-absent logic. Reported by the community against v0.13.4. 7 regression tests added (1340→1347).
+- **Spinner hidden on initial load** of five standalone tool pages (`odt-to-pdf`, `odt-to-html`, `odt-to-markdown`, `ods-to-html`, `xlsx-to-ods`) — the "Converting…" spinner was visible on page load before any user action.
+
+### Added
+
+- **`LexicalToOdtOptions.orientation`** — was missing from the public API; lexical landscape was inaccessible alongside being broken at the styles.xml layer. Now exposed alongside the dimension fix above.
+
+### Internal
+
+- ESLint 10 migration; `sideEffects: false` declared in `package.json`; unified tool page scaffolding (States A/B/C, popup infrastructure, sample loading, error popup, HTML→ODT, markdown→ODT, lexical→ODT, and tiptap→ODT pathways wired); CodeQL ReDoS and XSS-via-exception fixes; `SECURITY.md` and `CONTRIBUTING.md` added for openCode badge eligibility; GitHub Actions workflow to auto-sync `main` to `gitlab.opencode.de`; GitLab sync hardened with idempotent remote and retry/backoff. Multiple Dependabot patch updates.
 
 ## [0.13.4] - 2026-05-05
 
@@ -88,6 +115,12 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **ODT `settings.xml` missing `xmlns:ooo` namespace** — consistent with the ODS fix in v0.12.1.
 - 6 new tests (1113 total, 25 test suites).
 
+## [0.12.2] - 2026-04-18
+
+### Internal
+
+- Lexical-to-odt test suite added (29 tests). No user-facing changes.
+
 ## [0.12.1] - 2026-04-18
 
 ### Fixed
@@ -142,6 +175,14 @@ No code changes required for typical users. Default behaviour is preserved for e
 
 - **ODS freeze rows/columns** — `freezeRows()` and `freezeColumns()` now work correctly in LibreOffice and other ODF-compliant spreadsheet applications. The root cause was a missing `ActiveSplitRange` config item in `settings.xml` — without it, LibreOffice silently ignores the freeze pane entirely. Additionally, both split axes (`HorizontalSplitMode` and `VerticalSplitMode`) and all four position items (`PositionLeft`, `PositionRight`, `PositionTop`, `PositionBottom`) are now always emitted with correct values, matching what LibreOffice itself writes when freezing panes.
 
+## [0.10.1] - 2026-04-13
+
+### Added
+
+- **`typesVersions` field in `package.json`** — fixes TypeScript sub-export resolution when `moduleResolution` is set to `"node"` (the legacy resolver). All ten sub-exports covered.
+- **Automatic error reporting to GitHub Issues via Cloudflare Worker** — the unified tool page's error path can now file structured issues automatically.
+- **New guide page:** [Convert DOCX to ODT in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html). Landing page rewritten to cover all eleven modes; all 7 tool pages linked from README and landing page footer.
+
 ## [0.10.0] - 2026-04-12
 
 ### Added
@@ -161,9 +202,6 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **Deprecates** `@odf-kit/docx-to-odt` (CommonJS, browser-incompatible) — use `odf-kit/docx` instead.
 - Spec-validated against ECMA-376 5th edition Part 1 (WordprocessingML). Every XSD schema element verified against the authoritative spec PDF.
 - 117 new tests (1053 total, 23 test suites).
-- Landing page updated: eleven modes, all 11 code examples, updated stats.
-- New guide: [Convert DOCX to ODT in JavaScript](https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html).
-- All 7 tool pages now linked from README and landing page footer.
 
 ## [0.9.9] - 2026-04-11
 
@@ -240,6 +278,12 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **ODS datetime detection** — `Date` objects with a nonzero UTC time component now render as datetime (`YYYY-MM-DDTHH:MM:SS`) rather than date-only (`YYYY-MM-DD`). Auto-detected: if `getUTCHours()`, `getUTCMinutes()`, `getUTCSeconds()`, or `getUTCMilliseconds()` are nonzero, the cell uses `office:date-value` with full datetime format and a matching `number:date-style`.
 - **ODS formula namespace** — Added `xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2"` to the `office:document-content` root element. Previously the `of:` prefix used in formula values was undeclared, causing LibreOffice to display `Err:510` in formula cells.
 
+## [0.9.3] - 2026-04-04
+
+### Notes
+
+- Same-day re-publish of v0.9.2 with no functional changes. The user-facing additions (`htmlToOdt()`, `addLineBreak()`, `ParagraphOptions.borderBottom`) are documented under v0.9.2.
+
 ## [0.9.2] - 2026-04-05
 
 ### Added
@@ -272,6 +316,12 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **Style deduplication** — Identical cell styles across all sheets share a single ODF style element.
 - **Package restructure** — New sub-exports: `odf-kit/odt`, `odf-kit/ods`, `odf-kit/template`, `odf-kit/reader`, `odf-kit/typst`. Existing `import { OdtDocument } from "odf-kit"` continues to work unchanged.
 - 57 new tests (707 total).
+
+## [0.8.5] - 2026-03-30
+
+### Fixed
+
+- **CodeQL security alerts** in template and reader modules.
 
 ## [0.8.4] - 2026-04-03
 
@@ -321,16 +371,42 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **`odtToHtml()`** — Convert ODT to an HTML string.
 - **HTML renderer** — Full fidelity rendering of headings, paragraphs, formatting, lists, tables, images (as base64 data URIs), hyperlinks.
 
-## [0.4.0] - 2026-03-05
+## [0.6.0] - 2026-03-15
 
 ### Added
 
-- **Advanced text formatting** — Underline, strikethrough, superscript, subscript, highlight color (hex and named CSS colors).
-- **Hyperlinks** — External URLs (`https://...`) and internal bookmark links (`#name`). Optional text formatting on links.
-- **Bookmarks** — `addBookmark(name)` on `ParagraphBuilder`.
-- **Images** — Embedded PNG, JPEG, GIF, SVG, WebP, BMP, TIFF. Standalone (paragraph anchor) or inline (as-character). Stored in ZIP under `Pictures/` with correct MIME types in manifest.
-- **`draw` and `xlink` namespaces** added to content.xml.
-- 109 new tests.
+- **ODT reader Tier 2 — styled HTML output** — Colors, fonts, images, notes, bookmarks, and field references now flow through to the rendered HTML. Significant fidelity improvement over the Tier 1 output shipped in v0.5.0.
+
+## [0.5.2] - 2026-03-07
+
+### Fixed
+
+- **Reader: paragraph-level bold/italic now applied** — `styles.xml` is now integrated with `content.xml` style resolution.
+
+## [0.5.1] - 2026-03-06
+
+### Fixed
+
+- **Template engine** — 7 bug fixes: tag boundary parsing, nested empty spans, meta.xml processing.
+- **Reader** — 7 bug fixes: single-quoted attributes, numeric character references, CharStyle tri-state, styles.xml integration, HTML5 charset handling.
+
+### Added
+
+- **OASIS ODF Validator in CI** — generated output is now validated against the ODF spec on every push. 410 tests passing.
+
+## [0.5.0] - 2026-03-06
+
+### Added
+
+- **ODT reader (Tier 1)** — `readOdt()` and `odtToHtml()`, available via the new `odf-kit/reader` sub-export. Tier 1 returns the raw XML model; Tier 2 (styled HTML) follows in v0.6.0; Tier 3 (full fidelity) follows in v0.7.0.
+- New guide pages: browser usage, government usage, docxtemplater comparison, LibreOffice alternatives.
+- `robots.txt` and updated sitemap.
+
+## [0.4.0] - 2026-03-02
+
+### Added
+
+- **Browser support** — odf-kit now runs in browsers in addition to Node.js. Required minor build configuration changes (`env.d.ts` for DOM globals, dual tsconfig setup for source vs tests). README updated with browser usage examples. Browser-test fixture added under `browser-test/`.
 
 ## [0.3.0] - 2026-02-23
 
@@ -345,7 +421,15 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **Header/footer templates** — Placeholders in `styles.xml` processed alongside `content.xml`.
 - 120 new tests (222 total).
 
-## [0.2.0] - 2026-02-21
+## [0.2.0] - 2026-02-23
+
+### Added
+
+- **Advanced text formatting** — Underline, strikethrough, superscript, subscript, highlight color (hex and named CSS colors).
+- **Hyperlinks** — External URLs (`https://...`) and internal bookmark links (`#name`). Optional text formatting on links.
+- **Bookmarks** — `addBookmark(name)` on `ParagraphBuilder`.
+- **Images** — Embedded PNG, JPEG, GIF, SVG, WebP, BMP, TIFF. Standalone (paragraph anchor) or inline (as-character). Stored in ZIP under `Pictures/` with correct MIME types in manifest.
+- **`draw` and `xlink` namespaces** added to content.xml.
 
 ### Changed
 
@@ -358,11 +442,13 @@ Initial release. Complete ODT generation support.
 ### Added
 
 - Core ODF ZIP packaging, XML generation, namespace management, manifest, metadata.
-- Paragraphs, headings (levels 1–6), text formatting (bold, italic, font size, color, etc.).
+- Paragraphs, headings (levels 1–6), text formatting (bold, italic, font size, color).
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.5...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.7...HEAD
+[0.13.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.7
+[0.13.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.6
 [0.13.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.5
 [0.13.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.4
 [0.13.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.3
@@ -370,12 +456,14 @@ Initial release. Complete ODT generation support.
 [0.13.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.1
 [0.13.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.0
 [0.12.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.3
+[0.12.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.2
 [0.12.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.1
 [0.12.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.12.0
 [0.11.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.11.0
 [0.10.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.4
 [0.10.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.3
 [0.10.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.2
+[0.10.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.1
 [0.10.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.10.0
 [0.9.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.9
 [0.9.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.8
@@ -383,16 +471,22 @@ Initial release. Complete ODT generation support.
 [0.9.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.6
 [0.9.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.5
 [0.9.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.4
+[0.9.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.3
 [0.9.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.9.0
+[0.8.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.2
 [0.8.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.7.0
-[0.4.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.4.0
+[0.6.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.6.0
+[0.5.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.5.2
+[0.5.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.5.1
+[0.5.0]: https://www.npmjs.com/package/odf-kit/v/0.5.0
+[0.4.0]: https://www.npmjs.com/package/odf-kit/v/0.4.0
 [0.3.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.3.0
-[0.2.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.2.0
+[0.2.0]: https://www.npmjs.com/package/odf-kit/v/0.2.0
 [0.1.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.1.0

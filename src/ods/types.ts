@@ -84,17 +84,25 @@ export interface OdsCellOptions {
    * Number display format. Applies when the cell contains a numeric value.
    *
    * Predefined formats:
-   * - `"integer"`          — 1,234 (no decimal places, thousands separator)
-   * - `"decimal:N"`        — 1,234.56 (N decimal places, thousands separator)
-   * - `"percentage"`       — 12.34% (raw value × 100, 2 decimal places)
-   * - `"percentage:N"`     — 12.3% (N decimal places)
-   * - `"currency:CODE"`    — €1,234.56 (ISO 4217 code, 2 decimal places)
-   * - `"currency:CODE:N"`  — €1,234.6 (currency with N decimal places)
+   * - `"integer"`                — 1,234 (no decimal places, thousands separator)
+   * - `"decimal:N"`              — 1,234.56 (N decimal places, thousands separator)
+   * - `"percentage"`             — 12.34% (raw value × 100, 2 decimal places)
+   * - `"percentage:N"`           — 12.3% (N decimal places)
+   * - `"currency:CODE"`          — €1,234.56 (ISO 4217 code, 2 decimal places, symbol on left)
+   * - `"currency:CODE:N"`        — €1,234.6 (currency with N decimal places)
+   * - `"currency:CODE:right"`    — 1,234.56 € (symbol after value with non-breaking space)
+   * - `"currency:CODE:N:right"`  — 1,234.6 € (composes N decimals and right position)
+   *
+   * The `:right` position parameter places the currency symbol after the value
+   * with a non-breaking space (U+00A0), matching European typographic convention
+   * (e.g. `1 234,56 €` in France, Germany, Spain, Italy). Default position is
+   * `left` for backward compatibility.
    *
    * @example
    * { value: 1234567.89, type: "float", numberFormat: "decimal:2" }
    * { value: 0.1234, type: "percentage", numberFormat: "percentage:1" }
    * { value: 1234.56, type: "currency", numberFormat: "currency:EUR" }
+   * { value: 1234.56, type: "currency", numberFormat: "currency:EUR:right" }
    * { value: 9999, type: "float", numberFormat: "integer" }
    */
   numberFormat?: string;

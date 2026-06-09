@@ -462,3 +462,37 @@ describe("odsToHtml", () => {
     expect(html).toContain('class="myapp-sheet"');
   });
 });
+
+// ─── Currency Position ────────────────────────────────────────────────
+
+describe("readOds — currency position", () => {
+  it("reads currency:EUR:right back with :right suffix", async () => {
+    const bytes = await makeOds((doc) => {
+      const sheet = doc.addSheet("Sheet1");
+      sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR:right" }]);
+    });
+    const model = readOds(bytes);
+    const cell = model.sheets[0].rows[0].cells[0];
+    expect(cell.formatting?.numberFormat).toBe("currency:EUR:2:right");
+  });
+
+  it("reads currency:EUR (default left) without :right suffix — regression", async () => {
+    const bytes = await makeOds((doc) => {
+      const sheet = doc.addSheet("Sheet1");
+      sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);
+    });
+    const model = readOds(bytes);
+    const cell = model.sheets[0].rows[0].cells[0];
+    expect(cell.formatting?.numberFormat).toBe("currency:EUR:2");
+  });
+
+  it("round-trips currency:EUR:2:right", async () => {
+    const bytes = await makeOds((doc) => {
+      const sheet = doc.addSheet("Sheet1");
+      sheet.addRow([{ value: 99.95, type: "currency", numberFormat: "currency:EUR:2:right" }]);
+    });
+    const model = readOds(bytes);
+    const cell = model.sheets[0].rows[0].cells[0];
+    expect(cell.formatting?.numberFormat).toBe("currency:EUR:2:right");
+  });
+});

@@ -474,8 +474,13 @@ sheet.addRow([{ value: 9999, type: "float", numberFormat: "integer" }]);        
 sheet.addRow([{ value: 1234.567, type: "float", numberFormat: "decimal:2" }]);     // 1,234.57
 sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage" }]); // 12.34%
 sheet.addRow([{ value: 0.075, type: "percentage", numberFormat: "percentage:1" }]);// 7.5%
-sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);// €1,234.56
-sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD:0" }]);// $100
+sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);       // €1,234.56
+sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD:0" }]);       // $100
+sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR:right" }]); // 1,234.56 €
+sheet.addRow([{ value: 1234.5, type: "currency", numberFormat: "currency:EUR:2:right" }]);// 1,234.50 €
+
+// `:right` places the symbol after the value with a non-breaking space —
+// matches European typographic convention (France, Germany, Spain, Italy, etc.)
 
 // Row-level number format — applies to all cells in the row
 sheet.addRow([1000, 2000, 3000], { numberFormat: "integer" });
@@ -827,16 +832,21 @@ const bytes3 = await xlsxToOds(arrayBuffer)
 
 **What is preserved:**
 - All sheets in tab order, with their names
-- Cell values: strings, numbers, booleans, dates, formula cached results
-- Formula strings
+- Cell values: strings, numbers, booleans, dates, formula cached results, errors (as strings)
+- Formula strings (the original `=SUM(...)` expression alongside the cached result)
+- Excel serial date conversion with the Lotus 1900 leap-year bug correctly handled
 - Merged cells (colSpan/rowSpan)
-- Freeze rows/columns
-- Multiple sheets
+- Freeze rows and freeze columns
+- Document metadata (via options)
 
-**What is not preserved** (out of scope for v0.9.9):
-- Cell formatting (colors, fonts, borders)
+**What is not preserved:**
+- Cell formatting (colors, fonts, font sizes, bold/italic, alignment, borders, background colors)
+- Source number format codes (currency, decimal places, percentage formats from the XLSX)
 - Column widths and row heights
+- Sheet tab colors
+- Hyperlinks in cells
 - Charts, images, pivot tables
+- Comments, conditional formatting, data validation, defined names
 
 ---
 
@@ -1040,58 +1050,49 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Version history
 
-**v0.13.4** — Adds `VERSION` runtime export from the root entry point and all 11 published sub-paths. Allows runtime consumers (notably the tool pages on githubnewbie0.github.io) to report the actual loaded version in error reports and telemetry. Auto-synced from `package.json` at build time via new `scripts/sync-version.js`. Tool pages and landing page now display the correct version automatically. No breaking changes.
+See [CHANGELOG.md](CHANGELOG.md) for the complete release history. Recent and significant releases:
 
-**v0.13.3** — Dependency security fix: bumped `marked` from 18.0.0 to 18.0.3 to address an OOM DoS vulnerability in the marked tokenizer (Dependabot alert). Affected applications using `markdownToOdt()` with untrusted Markdown input. No API changes.
+**v0.13.7** — `currency:CODE:right` and `currency:CODE:N:right` number formats for ODS. Places the currency symbol after the value with a non-breaking space, matching European typographic convention (e.g. `1 234,56 €`). Default position is unchanged. Fixes [#44](https://github.com/GitHubNewbie0/odf-kit/issues/44).
 
-**v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture for normalizer and parser. Default Tier 1 normalization applies seven spec-grounded transformations: empties script/style content, lowercases doctype, quotes unquoted boolean attributes, quotes unquoted attribute values, self-closes void elements, decodes named entities, escapes `&` in attribute values. `parseXml` now fails loudly on malformed input. New `odfKitNormalizer`, `odfKitParser`, and public types `ParsedHtmlTree`, `Parser`, `Normalizer`. Substitution hooks propagate to `markdownToOdt()`. New sub-export `odf-kit/html-normalizer`. See [ADAPTERS.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/ADAPTERS.md). 1307 tests passing.
+**v0.13.6** — XLSX→ODS formula cell interface fix — `xlsxToOds()` now correctly round-trips formula cells with proper cached-result handling. `formula` field added to `OdsCellObject` for direct formula construction.
 
-**v0.13.1** — `odtToMarkdown()` `embedImages` option for self-contained Markdown output. 1124 tests passing.
+**v0.13.5** — Landscape orientation fix: `htmlToOdt`, `markdownToOdt`, `lexicalToOdt`, and `tiptapToOdt` now correctly produce landscape page dimensions when `orientation: 'landscape'` is set. `LexicalToOdtOptions.orientation` added.
 
-**v0.13.0** — `htmlToOdt()` image support: base64 data URLs, `images` map, async `fetchImage` callback. 1120 tests passing.
+**v0.13.4** — `VERSION` runtime export from the root and all sub-paths. Auto-synced from `package.json` at build time.
 
-**v0.12.3** — ODT `settings.xml` added. 1113 tests passing.
+**v0.13.2** — HTML5 normalizer for `htmlToOdt()` and substitution architecture. Default Tier 1 normalization handles void elements, named entities, boolean attributes, ampersands, and four other spec-grounded transformations. `parseXml` now fails loudly on malformed input.
 
-**v0.12.0** — `lexicalToOdt()` via `odf-kit/lexical`. Converts Lexical `SerializedEditorState` to ODT. `CellBuilder.addLink()`, `addLineBreak()`, `addImage()`. ODS freeze panes fixed. 1107 tests passing.
+**v0.13.0** — `htmlToOdt()` image support: base64 data URLs, `images` map, async `fetchImage` callback.
 
-**v0.11.0** — `odtToMarkdown()` and `modelToMarkdown()` via `odf-kit/markdown`. GFM and CommonMark flavors. 1078 tests passing.
+**v0.12.0** — `lexicalToOdt()` via `odf-kit/lexical`. Lexical `SerializedEditorState` → ODT.
 
-**v0.10.4** — ODS freeze fix: `ViewId` and `ActiveTable` added to `settings.xml`. `typesVersions` restored (dropped in v0.10.3). 1059 tests passing.
+**v0.11.0** — `odtToMarkdown()` via `odf-kit/markdown`. GFM and CommonMark flavors.
 
-**v0.10.3** — `module-sync` exports condition for bundler compatibility. `typesVersions` for TypeScript `moduleResolution: node` compatibility.
+**v0.10.0** — `docxToOdt()` via `odf-kit/docx`. Pure ESM, zero new dependencies, browser-safe.
 
-**v0.10.2** — ODS freeze rows/columns fix — `ActiveSplitRange` and all split axis items now correctly emitted in `settings.xml`.
+**v0.9.9** — `xlsxToOds()` via `odf-kit/xlsx`. XLSX→ODS conversion with zero new dependencies.
 
-**v0.10.0** — `docxToOdt()` via `odf-kit/docx`. Native DOCX→ODT converter — pure ESM, zero new dependencies, browser-safe. Preserves text, headings, formatting, tables, lists, images (actual dimensions), hyperlinks, bookmarks, footnotes, page layout, headers/footers, and tracked changes. Spec-validated against ECMA-376 5th edition. 1053 tests passing.
+**v0.9.8** — `readOds()` and `odsToHtml()` via `odf-kit/ods-reader`.
 
-**v0.9.9** — `xlsxToOds()` via `odf-kit/xlsx`. XLSX→ODS conversion with zero new dependencies. 936 tests passing.
+**v0.9.6** — `tiptapToOdt()`: TipTap/ProseMirror JSON→ODT.
 
-**v0.9.8** — ODS reader: `readOds()` and `odsToHtml()` via `odf-kit/ods-reader`. Typed values, formula strings, merged cell handling, formatting, metadata. `odf-kit/odt-reader` alias added. 889 tests passing.
+**v0.9.5** — `markdownToOdt()`: Markdown→ODT.
 
-**v0.9.7** — ODS enhancements: number formats (integer, decimal:N, percentage, currency), merged cells (colSpan/rowSpan), freeze rows/columns, hyperlinks in cells, sheet tab color. 849 tests passing.
+**v0.9.2** — `htmlToOdt()`: HTML→ODT.
 
-**v0.9.6** — `tiptapToOdt()`: TipTap/ProseMirror JSON→ODT conversion. `TiptapNode`, `TiptapMark`, `TiptapToOdtOptions` types. `unknownNodeHandler` for custom extensions. Image support via pre-fetched bytes map. 817 tests passing.
+**v0.9.0** — ODS spreadsheet generation.
 
-**v0.9.5** — `markdownToOdt()`: Markdown→ODT via marked + htmlToOdt. 786 tests passing.
+**v0.8.0** — `odf-kit/typst`: zero-dependency ODT→Typst emitter.
 
-**v0.9.4** — ODS datetime auto-detection (nonzero UTC time → datetime format). ODS formula `xmlns:of` namespace fix (Err:510 resolved).
+**v0.7.0** — Tier 3 reader: full-fidelity ODT parsing including tracked changes.
 
-**v0.9.2** — `htmlToOdt()`: HTML→ODT conversion with page format presets, full inline formatting, lists, tables, blockquote, pre, hr, and inline CSS. 769 tests passing.
-
-**v0.9.0** — ODS spreadsheet generation: `OdsDocument`, multiple sheets, auto-typed cells, formulas, date formatting, row and cell formatting, column widths, row heights. 707 tests passing.
-
-**v0.8.0** — `odf-kit/typst`: `odtToTypst()` and `modelToTypst()`. Zero-dependency ODT→Typst emitter for PDF generation.
-
-**v0.7.0** — Tier 3 reader: paragraph styles, page geometry, headers/footers, sections, tracked changes (all three ODF modes).
-
-**v0.6.0** — Tier 2 reader: span styles, image float/wrap, footnotes/endnotes, bookmarks, fields, cell/row styles.
-
-**v0.5.0** — `odf-kit/reader`: `readOdt()`, `odtToHtml()`. Tier 1 parsing.
+**v0.5.0** — `odf-kit/reader`: `readOdt()` and `odtToHtml()`.
 
 **v0.3.0** — Template engine: loops, conditionals, dot notation, automatic XML fragment healing.
 
-**v0.1.0** — Programmatic ODT creation: text, tables, page layout, lists, images, links, bookmarks.
+**v0.2.0** — fflate migration (zero transitive dependencies), advanced text formatting, hyperlinks, bookmarks, images.
 
+**v0.1.0** — Initial release. Programmatic ODT creation: paragraphs, headings, tables, lists, page layout, headers/footers.
 ---
 
 ## Guides
@@ -1124,14 +1125,11 @@ odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP pack
 
 ## Contributing
 
-Issues and pull requests welcome at [github.com/GitHubNewbie0/odf-kit](https://github.com/GitHubNewbie0/odf-kit).
+Contributions welcome at [github.com/GitHubNewbie0/odf-kit](https://github.com/GitHubNewbie0/odf-kit). See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, design principles, and the pull request process.
 
-```bash
-git clone https://github.com/GitHubNewbie0/odf-kit.git
-cd odf-kit
-npm install
-npm run build
-npm test
+For security issues, please use [private vulnerability reporting](https://github.com/GitHubNewbie0/odf-kit/security) — see [SECURITY.md](SECURITY.md).
+
+All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 ```
 
 ---

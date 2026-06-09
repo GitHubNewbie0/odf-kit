@@ -183,8 +183,13 @@ function parseNumberStyleName(name: string): string {
   if (decMatch) return `decimal:${decMatch[1]}`;
   const pctMatch = name.match(/^Nnum-pct(\d+)$/);
   if (pctMatch) return `percentage:${pctMatch[1]}`;
-  const curMatch = name.match(/^Nnum-([a-z]{3})(\d+)$/);
-  if (curMatch) return `currency:${curMatch[1].toUpperCase()}:${curMatch[2]}`;
+  const curMatch = name.match(/^Nnum-([a-z]{3})(\d+)(r)?$/);
+  if (curMatch) {
+    const code = curMatch[1].toUpperCase();
+    const decimals = curMatch[2];
+    const positionSuffix = curMatch[3] ? ":right" : "";
+    return `currency:${code}:${decimals}${positionSuffix}`;
+  }
   return name; // unknown — return as-is
 }
 
