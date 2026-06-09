@@ -1,0 +1,71 @@
+name: Question
+description: Ask a question about using odf-kit
+title: "[question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Questions are welcome. A few quick checks first:
+
+        - The [README](https://github.com/GitHubNewbie0/odf-kit/blob/main/README.md)
+          and [docs site](https://githubnewbie0.github.io/odf-kit/) cover
+          most common usage.
+        - The [guides](https://githubnewbie0.github.io/odf-kit/guides/) walk
+          through specific conversion pathways (DOCX→ODT, HTML→ODT, etc.).
+        - For security issues, please use
+          [private vulnerability reporting](https://github.com/GitHubNewbie0/odf-kit/security)
+          instead.
+
+        If your question isn't covered, please fill out the fields below.
+
+  - type: input
+    id: version
+    attributes:
+      label: odf-kit version
+      placeholder: "0.13.6"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of odf-kit is your question about?
+      options:
+        - Build (OdtDocument, OdsDocument)
+        - Fill (template engine)
+        - Read (readOdt, readOds, odtToHtml, odsToHtml)
+        - Convert — from HTML / Markdown / TipTap / Lexical
+        - Convert — from DOCX / XLSX
+        - Convert — to Markdown / Typst
+        - Unified tool page (githubnewbie0.github.io/odf-kit/tools/)
+        - General / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: |
+        What are you trying to do, and what's unclear or not working as you
+        expected? Include code snippets if relevant.
+      render: javascript
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: What have you tried so far?
+      description: |
+        Any approaches you've already attempted, documentation you've
+        consulted, or related issues you've found.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else?
+      description: |
+        Context that might help — your use case, the broader project, etc.

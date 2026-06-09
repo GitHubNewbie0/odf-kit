@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/GitHubNewbie0/odf-kit/security
+    about: Please report security vulnerabilities privately, not as public issues. See SECURITY.md for the process.
+  - name: Discussion / general chat
+    url: https://github.com/GitHubNewbie0/odf-kit/discussions
+    about: For open-ended discussion that isn't a specific bug, feature, or question.

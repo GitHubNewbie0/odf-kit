@@ -1,0 +1,84 @@
+name: Feature request
+description: Suggest a new feature or enhancement for odf-kit
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for thinking about how odf-kit could be better.
+
+        **Please read [CONTRIBUTING.md](https://github.com/GitHubNewbie0/odf-kit/blob/main/CONTRIBUTING.md)
+        before opening a feature request.** odf-kit has design constraints
+        (ODF spec compliance, zero new runtime dependencies, additive-only
+        public API) that aren't visible from the code. A brief discussion
+        here saves contributors from investing in work that conflicts with
+        those constraints.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: |
+        Describe the use case. What are you trying to do that odf-kit doesn't
+        currently support, or supports awkwardly?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: |
+        What would the API or behaviour look like? Code sketches welcome —
+        they don't need to be final.
+      render: javascript
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        Other approaches you've thought about, and why the proposal above is
+        better. If you've found a workaround with the current API, please
+        describe it.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of odf-kit does this affect?
+      options:
+        - Build (OdtDocument, OdsDocument)
+        - Fill (template engine)
+        - Read (readOdt, readOds, odtToHtml, odsToHtml)
+        - Convert — from HTML / Markdown / TipTap / Lexical
+        - Convert — from DOCX / XLSX
+        - Convert — to Markdown / Typst
+        - Unified tool page (githubnewbie0.github.io/odf-kit/tools/)
+        - New area / cross-cutting
+    validations:
+      required: true
+
+  - type: dropdown
+    id: willing-to-contribute
+    attributes:
+      label: Are you willing to implement this?
+      description: |
+        Either answer is fine — this just helps with planning.
+      options:
+        - Yes, I'd like to submit a PR after the design is agreed
+        - Maybe, with guidance
+        - No, just suggesting
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else?
+      description: |
+        Related issues, prior art in other libraries, spec references, or
+        other context.
