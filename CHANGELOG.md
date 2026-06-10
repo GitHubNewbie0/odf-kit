@@ -371,6 +371,9 @@ No code changes required for typical users. Default behaviour is preserved for e
 - **`odtToHtml()`** — Convert ODT to an HTML string.
 - **HTML renderer** — Full fidelity rendering of headings, paragraphs, formatting, lists, tables, images (as base64 data URIs), hyperlinks.
 
+### Changed
+- **`BodyNode` discriminated union expanded** (TypeScript-level breaking change): `SectionNode` and `TrackedChangeNode` added as new members. Consumer code performing exhaustive switches on `BodyNode.kind` without a `default:` clause will fail to compile until those cases are handled. No runtime behavior change. Minor version bump per pre-1.0 semver convention.
+
 ## [0.6.0] - 2026-03-15
 
 ### Added
