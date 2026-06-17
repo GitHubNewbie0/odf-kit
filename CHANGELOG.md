@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.8] - 2026-06-17
+
+### Fixed
+
+- **Block content inside table cells dropped on read** — when reading ODT, `readOdt()` and `odtToHtml()` silently discarded any block-level content inside a `<table:table-cell>` other than paragraphs. Lists, headings, nested tables, and the boundaries between multiple paragraphs in a cell did not appear in the output. The reader modeled a cell as flattened inline content only, so block children had no representation and were dropped during the parser's cell walk. Cells now carry full block content and are parsed and rendered through the same path used for the document body, so a list (or heading, or nested table) inside a cell converts the same as it would anywhere else. Covered by a regression test against a real LibreOffice document with list, heading, multi-paragraph, and nested-table cells. Fixes [#45](https://github.com/GitHubNewbie0/odf-kit/issues/45). Thanks to [@wheymann](https://github.com/wheymann) for the report.
+
+### Added
+
+- **`body` field on `TableCellNode`** — the reader's table cell model gains `body?: BodyNode[]`, the faithful block-level representation of cell content (paragraphs, headings, lists, nested tables). The existing `spans` field is retained for backward compatibility and derived from `body` (paragraph and heading text; lists and tables have no inline projection). Additive — no breaking changes.
+
 ## [0.13.7] - 2026-06-09
 
 ### Added
@@ -449,7 +459,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.7...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.8...HEAD
+[0.13.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.8
 [0.13.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.7
 [0.13.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.6
 [0.13.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.5
