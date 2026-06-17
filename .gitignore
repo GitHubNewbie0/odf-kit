@@ -20,4 +20,4 @@ src/version.ts
 codeql-results.sarif
 
 docs/tools/index.html
-
+clear-dependabot.ps1
