@@ -58,6 +58,7 @@ import type {
   CellStyle,
   RowStyle,
   HtmlOptions,
+  TableCellNode,
 } from "./types.js";
 
 // ============================================================
@@ -340,6 +341,19 @@ function renderList(list: ListNode, options?: HtmlOptions): string {
 }
 
 /**
+ * Render the content of a table cell. Cells carry block content in `body`.
+ * A cell with no `body` — a hand-built or legacy model carrying only flat
+ * `spans` — is normalized to a single paragraph so every cell renders through
+ * the same block path. Cell paragraphs and headings get a vertical-margin reset
+ * (see renderBodyNode), matching LibreOffice and other ODF→HTML producers.
+ */
+function renderCellContent(cell: TableCellNode, options?: HtmlOptions): string {
+  const body: BodyNode[] =
+    cell.body && cell.body.length > 0 ? cell.body : [{ kind: "paragraph", spans: cell.spans }];
+  return body.map((n) => renderBodyNode(n, options, true)).join("");
+}
+
+/**
  * Render a TableNode to an HTML <table> string with Tier 2 inline styles
  * and Tier 3 column width layout via <colgroup>.
  *
@@ -382,7 +396,7 @@ function renderTable(table: TableNode, options?: HtmlOptions): string {
             if (css) attrParts.push(`style="${css}"`);
           }
           const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
-          return `<td${attrs}>${renderSpans(cell.spans, options)}</td>`;
+          return `<td${attrs}>${renderCellContent(cell, options)}</td>`;
         })
         .join("");
 
@@ -443,24 +457,22 @@ function renderTrackedChange(node: TrackedChangeNode, options?: HtmlOptions): st
 }
 
 /** Render a single BodyNode to an HTML string. */
-function renderBodyNode(node: BodyNode, options?: HtmlOptions): string {
+function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): string {
   switch (node.kind) {
     case "paragraph": {
-      const attrParts: string[] = [];
-      if (node.paragraphStyle !== undefined) {
-        const css = paragraphStyleToCss(node.paragraphStyle);
-        if (css) attrParts.push(`style="${css}"`);
-      }
-      const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
+      const reset = inCell ? "margin-top:0;margin-bottom:0" : "";
+      const sourceCss =
+        node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
+      const css = [reset, sourceCss].filter((s) => s).join(";");
+      const attrs = css ? ` style="${css}"` : "";
       return `<p${attrs}>${renderSpans(node.spans, options)}</p>`;
     }
     case "heading": {
-      const attrParts: string[] = [];
-      if (node.paragraphStyle !== undefined) {
-        const css = paragraphStyleToCss(node.paragraphStyle);
-        if (css) attrParts.push(`style="${css}"`);
-      }
-      const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
+      const reset = inCell ? "margin-top:0;margin-bottom:0" : "";
+      const sourceCss =
+        node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
+      const css = [reset, sourceCss].filter((s) => s).join(";");
+      const attrs = css ? ` style="${css}"` : "";
       return `<h${node.level}${attrs}>${renderSpans(node.spans, options)}</h${node.level}>`;
     }
     case "list":

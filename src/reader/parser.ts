@@ -1012,6 +1012,25 @@ function parseList(listEl: XmlElementNode, ctx: ParseContext): ListNode {
   return { kind: "list", ordered, items };
 }
 
+/**
+ * Derive backward-compatible flat spans from cell block content. Concatenates
+ * the inline content of paragraph and heading nodes in order; lists, tables,
+ * sections, and tracked-change nodes have no inline projection and are skipped.
+ *
+ * For the common paragraph-only cell this reproduces the exact spans the old
+ * text:p-only parser produced. Cells with a heading gain the heading text,
+ * which the old parser dropped entirely.
+ */
+function deriveCellSpans(body: BodyNode[]): InlineNode[] {
+  const spans: InlineNode[] = [];
+  for (const node of body) {
+    if (node.kind === "paragraph" || node.kind === "heading") {
+      spans.push(...node.spans);
+    }
+  }
+  return spans;
+}
+
 /** Parse a <table:table> element into a TableNode. */
 function parseTable(tableEl: XmlElementNode, ctx: ParseContext): TableNode {
   const tableStyleName = tableEl.attrs["table:style-name"];
@@ -1082,26 +1101,13 @@ function parseTable(tableEl: XmlElementNode, ctx: ParseContext): TableNode {
         }
       }
 
-      // Collect spans from all <text:p> children
-      // (multi-paragraph cells are flattened for Tier 1/2; Tier 3 will model them separately)
-      let spans: InlineNode[] = [];
-      for (const cellChild of cellEl.children) {
-        if (cellChild.type === "element" && cellChild.tag === "text:p") {
-          const paraStyleName = cellChild.attrs["text:style-name"];
-          const paraBaseStyle =
-            paraStyleName !== undefined ? (ctx.charStyles.get(paraStyleName) ?? {}) : {};
-          let baseVisualStyle: SpanStyle | undefined;
-          if (paraStyleName) {
-            const resolved = resolve(ctx.registry, "paragraph", paraStyleName);
-            baseVisualStyle = extractSpanStyle(resolved.textProps, ctx.registry);
-          }
-          spans = spans.concat(
-            parseSpans(cellChild, ctx, paraBaseStyle, undefined, baseVisualStyle),
-          );
-        }
-      }
+      // Parse cell content as full block content using the same walker as the
+      // document body, so a cell can hold paragraphs, headings, lists, nested
+      // tables, and sections. spans is derived for backward compatibility.
+      const cellBody = parseBodyNodes(cellEl, ctx);
+      const spans = deriveCellSpans(cellBody);
 
-      const cell: TableCellNode = { spans };
+      const cell: TableCellNode = { spans, body: cellBody };
       if (colSpan > 1) cell.colSpan = colSpan;
       if (rowSpan > 1) cell.rowSpan = rowSpan;
       if (cellStyleName) cell.styleName = cellStyleName;

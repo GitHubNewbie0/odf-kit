@@ -276,7 +276,10 @@ describe("renderHtml — tables", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe(
-      "<table>" + "<tr><td>A</td><td>B</td></tr>" + "<tr><td>C</td><td>D</td></tr>" + "</table>",
+      "<table>" +
+        '<tr><td><p style="margin-top:0;margin-bottom:0">A</p></td><td><p style="margin-top:0;margin-bottom:0">B</p></td></tr>' +
+        '<tr><td><p style="margin-top:0;margin-bottom:0">C</p></td><td><p style="margin-top:0;margin-bottom:0">D</p></td></tr>' +
+        "</table>",
     );
   });
 
@@ -292,7 +295,7 @@ describe("renderHtml — tables", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe(
-      '<table><tr><td colspan="2">Merged</td></tr></table>',
+      '<table><tr><td colspan="2"><p style="margin-top:0;margin-bottom:0">Merged</p></td></tr></table>',
     );
   });
 
@@ -308,7 +311,7 @@ describe("renderHtml — tables", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe(
-      '<table><tr><td rowspan="3">Tall</td></tr></table>',
+      '<table><tr><td rowspan="3"><p style="margin-top:0;margin-bottom:0">Tall</p></td></tr></table>',
     );
   });
 
@@ -324,7 +327,7 @@ describe("renderHtml — tables", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe(
-      '<table><tr><td colspan="2" rowspan="2">Big</td></tr></table>',
+      '<table><tr><td colspan="2" rowspan="2"><p style="margin-top:0;margin-bottom:0">Big</p></td></tr></table>',
     );
   });
 
@@ -339,7 +342,9 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<table><tr><td>Normal</td></tr></table>");
+    expect(renderHtml(body, { fragment: true })).toBe(
+      '<table><tr><td><p style="margin-top:0;margin-bottom:0">Normal</p></td></tr></table>',
+    );
   });
 
   test("renders formatted content inside table cells", () => {
@@ -354,7 +359,7 @@ describe("renderHtml — tables", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe(
-      "<table><tr><td><strong>Bold</strong></td></tr></table>",
+      '<table><tr><td><p style="margin-top:0;margin-bottom:0"><strong>Bold</strong></p></td></tr></table>',
     );
   });
 });

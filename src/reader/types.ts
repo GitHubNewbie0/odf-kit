@@ -460,6 +460,17 @@ export interface TableCellNode {
    * structure within cells is a Tier 3 concern.
    */
   spans: InlineNode[];
+  /**
+   * Block-level cell content in document order: paragraphs, headings, lists,
+   * nested tables, and sections. The faithful representation of the cell — a
+   * cell may hold anything the document body can, not only inline runs.
+   *
+   * Populated on every cell the reader produces. `spans` is retained for
+   * backward compatibility and is derived from this body (paragraph and heading
+   * text flattened; lists and tables omitted, as they have no inline
+   * projection). Prefer `body` for new code.
+   */
+  body?: BodyNode[];
   colSpan?: number;
   rowSpan?: number;
   /** ODF internal style name for the cell. */
