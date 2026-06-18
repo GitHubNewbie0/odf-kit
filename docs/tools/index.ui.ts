@@ -75,12 +75,13 @@
 
 import { VERSION } from "odf-kit/odt";
 import {
+  previewBinary,
+  runConversion,
   type ConversionInput,
   type ConversionResult,
   type OutputFormat,
-  runConversion,
 } from "./conversion.js";
-import { disclosureMessage } from "./disclosure.js";
+import { disclosureMessage, DISCLOSURE_INPUT_PREVIEW } from "./disclosure.js";
 import { parseFilename } from "./filename.js";
 import { buildSaveBlob, triggerDownload } from "./save.js";
 import { buildSavePageFilename, serializePage } from "./serialize-page.js";
@@ -94,54 +95,59 @@ import {
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Input formats the page accepts. */
-type InputFormat = "html" | "markdown" | "lexical" | "tiptap" | "docx" | "xlsx" | "odt" | "ods";
+/** Text input formats — editable in the textarea, carried as a UTF-8 string. */
+type TextFormat = "html" | "markdown" | "lexical" | "tiptap";
+/** Binary input formats — loaded as bytes, previewed via round-trip to HTML. */
+type BinaryFormat = "docx" | "xlsx" | "odt" | "ods";
+/** All input formats the page accepts. */
+type InputFormat = TextFormat | BinaryFormat;
 
 /**
- * Page state. Discriminated union: each state carries only the data relevant
- * to that state, so e.g. there's no way to access output content while in B.
+ * The loaded input, independent of whether output has been generated yet.
+ * Both State B and State C carry exactly this — the B→C transition copies it
+ * forward unchanged — so it is factored out and intersected into both.
  *
- * State C scaffolding is present in the type system this commit, but no user
- * action transitions to it yet. C2 wires the first path (HTML → ODT).
+ * Discriminated by inputKind so invalid combinations are unrepresentable:
+ *   - text:   a UTF-8 string shown in an editable textarea (State C iteration).
+ *   - binary: raw file bytes plus the HTML preview produced by round-tripping
+ *             them through the matching reader on load (previewBinary); shown
+ *             in a read-only iframe. Not editable, so it never goes stale.
  */
-type AppState =
-  | { state: "A" }
+type InputData =
   | {
-      state: "B";
-      inputFormat: InputFormat;
-      /** Filename used for naming the eventual saved output. */
+      inputKind: "text";
+      inputFormat: TextFormat;
       inputFilename: string;
-      /**
-       * Whether the input is text (in which case it's editable in the textarea)
-       * or binary (file bytes loaded; not editable, will preview later).
-       * This commit: only "text" is reachable, since binary file selection is
-       * intercepted by an error popup and the binary preview path is deferred.
-       */
-      inputKind: "text" | "binary";
-      /** Text content for text-kind inputs. Empty string until user types. */
       inputText: string;
     }
   | {
-      state: "C";
-      // Input-side fields carried forward from B so the user can re-edit
-      // and re-Generate without losing context.
-      inputFormat: InputFormat;
+      inputKind: "binary";
+      inputFormat: BinaryFormat;
       inputFilename: string;
-      inputKind: "text" | "binary";
-      inputText: string;
-      // Output-side fields produced by Generate.
-      outputFormat: OutputFormat;
-      outputContent: ConversionResult;
-      /**
-       * Set when the user edits the input after a successful Generate; the
-       * output textarea is then no longer in sync with the input. The sticky
-       * disclosure footer in the output pane flips to the stale message and
-       * takes the .is-stale amber treatment; the Save / Save-and-Clear
-       * buttons stay enabled (saving stale output is not invalid — the user
-       * may have intended that snapshot).
-       */
-      isStale: boolean;
+      bytes: Uint8Array;
+      /** HTML preview of the binary input, from previewBinary on load. */
+      previewHtml: string;
     };
+
+/**
+ * Page state. Discriminated union on `state`; B and C additionally carry the
+ * InputData union (narrow on inputKind before touching variant fields — same
+ * idiom as narrowing on state). Invalid cross-combinations (binary-with-text,
+ * text-with-bytes, output-while-in-B) are all unrepresentable.
+ */
+type AppState =
+  | { state: "A" }
+  | ({ state: "B" } & InputData)
+  | ({ state: "C" } & InputData & {
+        outputFormat: OutputFormat;
+        outputContent: ConversionResult;
+        /**
+         * Set when the user edits a text input after a successful Generate; the
+         * output preview is then out of sync. Only reachable for text inputs
+         * (binary inputs aren't editable), so a binary State C is never stale.
+         */
+        isStale: boolean;
+      });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Samples
@@ -606,11 +612,15 @@ function renderInputPane(state: AppState, els: Elements): void {
     return;
   }
 
-  // States B and C both want the input textarea (for text-kind inputs).
-  // Binary-kind isn't reachable this commit; the placeholder branch is
-  // here for completeness when binary preview lands.
+  // Binary inputs (DOCX/ODT) render a read-only preview iframe; text inputs
+  // render the editable textarea below.
   if (state.inputKind === "binary") {
-    setPaneEmpty(els.inputPane, `Loaded: ${state.inputFilename}`);
+    // Binary input: show the HTML preview produced on load (previewBinary)
+    // in a read-only iframe, mirroring how renderOutputPane shows binary
+    // output. Same setPaneIframe path with a distinct id so the input and
+    // output iframes don't collide. The disclosure marks it approximate.
+    setPaneIframe(els.inputPane, state.previewHtml, "inputIframe");
+    ensureInputDisclosure(els.inputPane);
     return;
   }
 
@@ -663,13 +673,13 @@ function renderOutputPane(state: AppState, els: Elements): void {
   //     this commit doesn't reach them.)
   const result = state.outputContent;
   if (result.kind === "bytes") {
-    setPaneIframe(els.outputPane, result.previewText);
+    setPaneIframe(els.outputPane, result.previewText, "outputIframe");
     ensureOutputDisclosure(els.outputPane, state.isStale);
     return;
   }
   // result.kind === "text"
   if (result.outputFormat === "html") {
-    setPaneIframe(els.outputPane, result.text);
+    setPaneIframe(els.outputPane, result.text, "outputIframe");
     ensureOutputDisclosure(els.outputPane, state.isStale);
     return;
   }
@@ -697,13 +707,13 @@ function renderOutputPane(state: AppState, els: Elements): void {
  * tearing down the iframe — preserves the user's scroll position in the
  * preview across stale-flag flips during input editing.
  */
-function setPaneIframe(pane: HTMLDivElement, html: string): void {
+function setPaneIframe(pane: HTMLDivElement, html: string, id: string): void {
   const existing = pane.querySelector("iframe");
   if (existing !== null && existing.dataset.previewText === html) {
     return;
   }
   const iframe = document.createElement("iframe");
-  iframe.id = "outputIframe";
+  iframe.id = id;
   iframe.sandbox.add("allow-same-origin");
   iframe.srcdoc = html;
   iframe.dataset.previewText = html;
@@ -735,6 +745,50 @@ function ensureOutputDisclosure(pane: HTMLDivElement, isStale: boolean): void {
   }
   disclosure.classList.toggle("is-stale", isStale);
   disclosure.textContent = disclosureMessage(isStale);
+}
+
+/**
+ * Ensure the input pane's disclosure footer is mounted. The input preview is
+ * always an approximate render and never stale (binary inputs aren't
+ * editable), so unlike ensureOutputDisclosure there is no message swap or
+ * .is-stale toggle — the text is fixed. Same .io-pane-disclosure class, so it
+ * gets the same full-width sticky-bottom treatment.
+ */
+function ensureInputDisclosure(pane: HTMLDivElement): void {
+  let disclosure = pane.querySelector<HTMLDivElement>(".io-pane-disclosure");
+  if (disclosure === null) {
+    disclosure = document.createElement("div");
+    disclosure.className = "io-pane-disclosure";
+    pane.appendChild(disclosure);
+  }
+  disclosure.textContent = DISCLOSURE_INPUT_PREVIEW;
+}
+
+/**
+ * Mount the preview spinner overlay on the input pane. Paired with
+ * hideInputSpinner via withDelayedIndicator, so it appears only when binary
+ * preview-conversion runs past the appear threshold (see loadBinaryFile) —
+ * a fast preview never flashes one. The .io-pane-spinner / .spinner /
+ * @keyframes spin styles live in index.template.html (spinner copied from the
+ * standalone tool pages for continuity).
+ */
+function showInputSpinner(els: Elements): void {
+  if (els.inputPane.querySelector(".io-pane-spinner") !== null) {
+    return;
+  }
+  const overlay = document.createElement("div");
+  overlay.className = "io-pane-spinner";
+  const circle = document.createElement("div");
+  circle.className = "spinner";
+  const label = document.createElement("span");
+  label.textContent = "Loading preview…";
+  overlay.append(circle, label);
+  els.inputPane.appendChild(overlay);
+}
+
+/** Remove the preview spinner overlay if present. */
+function hideInputSpinner(els: Elements): void {
+  els.inputPane.querySelector(".io-pane-spinner")?.remove();
 }
 
 /**
@@ -834,11 +888,11 @@ function setPaneTextarea(
     // footer to the stale message. renderInputPane sees the textarea
     // already mounted and leaves it alone, so cursor / focus survive.
     textarea.addEventListener("input", () => {
-      if (currentState.state === "B") {
+      if (currentState.state === "B" && currentState.inputKind === "text") {
         currentState = { ...currentState, inputText: textarea.value };
         return;
       }
-      if (currentState.state === "C") {
+      if (currentState.state === "C" && currentState.inputKind === "text") {
         if (currentState.isStale) {
           // Already marked stale; just mirror the text. Skip render() — no
           // visual transition to make, and the textarea owns its DOM.
@@ -1047,6 +1101,29 @@ function readFileAsText(file: File): Promise<string> {
   });
 }
 
+/**
+ * Read a File as bytes. Mirror of readFileAsText for binary inputs (DOCX/ODT
+ * now; XLSX/ODS when the spreadsheet preview lands). Rejects on FileReader
+ * error or an unexpected non-ArrayBuffer result.
+ */
+function readFileAsArrayBuffer(file: File): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (): void => {
+      const result = reader.result;
+      if (!(result instanceof ArrayBuffer)) {
+        reject(new Error("FileReader returned non-ArrayBuffer result"));
+        return;
+      }
+      resolve(new Uint8Array(result));
+    };
+    reader.onerror = (): void => {
+      reject(reader.error ?? new Error("Unknown FileReader error"));
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 /** Extract a human-readable message from an unknown thrown value. */
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -1101,16 +1178,20 @@ async function onFileSelected(els: Elements, file: File): Promise<void> {
     case "json":
       await loadJsonFile(els, file);
       return;
-    case "docx":
-    case "xlsx":
     case "odt":
+      await loadBinaryFile(els, file, "odt");
+      return;
+    case "docx":
+      await loadBinaryFile(els, file, "docx");
+      return;
+    case "xlsx":
     case "ods":
       await showError(els, {
-        title: "Binary files are not yet supported",
+        title: "Spreadsheet preview is coming soon",
         message:
-          "Binary input (.docx, .xlsx, .odt, .ods) is coming soon. " +
-          "For now, try a text format (HTML, Markdown, or JSON), or use " +
-          "Load Sample File or Type Keyboard Input.",
+          "ODT and DOCX are supported now. XLSX and ODS spreadsheet preview " +
+          "is coming soon. For now, try a document format (ODT, DOCX, HTML, " +
+          "Markdown, or JSON), or use Load Sample File or Type Keyboard Input.",
       });
       return;
     default:
@@ -1201,6 +1282,56 @@ async function loadJsonFile(els: Elements, file: File): Promise<void> {
   render(currentState, els);
 }
 
+/**
+ * Read a binary file as bytes, round-trip it to an HTML preview via
+ * previewBinary (with the spinner overlay while that runs), and transition to
+ * State B. Reports FileReader errors and preview-conversion errors via
+ * showError; state remains A on any failure.
+ *
+ * Scope: ODT and DOCX. XLSX and ODS are intercepted earlier (onFileSelected)
+ * pending the spreadsheet preview path, so previewBinary is only ever called
+ * here with a format it supports.
+ */
+async function loadBinaryFile(els: Elements, file: File, format: "odt" | "docx"): Promise<void> {
+  let bytes: Uint8Array;
+  try {
+    bytes = await readFileAsArrayBuffer(file);
+  } catch (err) {
+    await showError(els, {
+      title: "Couldn't read file",
+      message: `The browser reported an error while reading the file. ${errorMessage(err)}`,
+    });
+    return;
+  }
+
+  let previewHtml: string;
+  try {
+    previewHtml = await withDelayedIndicator(
+      () => previewBinary(bytes, format),
+      () => showInputSpinner(els),
+      () => hideInputSpinner(els),
+    );
+  } catch (err) {
+    await showError(els, {
+      title: "Couldn't read file",
+      message:
+        `The file couldn't be read as a valid ${format.toUpperCase()} document. ` +
+        errorMessage(err),
+    });
+    return;
+  }
+
+  currentState = {
+    state: "B",
+    inputKind: "binary",
+    inputFormat: format,
+    inputFilename: file.name,
+    bytes,
+    previewHtml,
+  };
+  render(currentState, els);
+}
+
 async function onSampleClick(els: Elements): Promise<void> {
   // Show sample-selector popup. User picks one of four text-format samples;
   // we then transition to State B with that sample's content pre-populating
@@ -1242,7 +1373,7 @@ async function onSampleClick(els: Elements): Promise<void> {
   const sample = SAMPLES[chosen as keyof typeof SAMPLES];
   currentState = {
     state: "B",
-    inputFormat: chosen as InputFormat,
+    inputFormat: chosen as TextFormat,
     inputFilename: sample.filename,
     inputKind: "text",
     inputText: sample.content,
@@ -1271,7 +1402,7 @@ async function onKeyboardClick(els: Elements): Promise<void> {
 
   currentState = {
     state: "B",
-    inputFormat: chosen as InputFormat,
+    inputFormat: chosen as TextFormat,
     inputFilename: "Document",
     inputKind: "text",
     inputText: "",
@@ -1299,11 +1430,11 @@ async function onGenerateClick(els: Elements): Promise<void> {
   // safe regardless of which we're in.
   const inputState = currentState;
   if (inputState.inputKind !== "text") {
-    // Binary inputs aren't reachable this commit (file loading blocks
-    // them before State B); future binary preview work will fill this in.
     await showError(els, {
-      title: "Generation failed",
-      message: "Binary input conversion is not yet supported. Please use a text-format input.",
+      title: "Generation not available yet",
+      message:
+        "Converting from a binary file isn't available yet — it's coming " +
+        "soon. You can still preview the loaded file above.",
     });
     return;
   }
@@ -1350,9 +1481,9 @@ async function onGenerateClick(els: Elements): Promise<void> {
     // user can re-edit and re-Generate without losing context.
     currentState = {
       state: "C",
+      inputKind: "text",
       inputFormat: inputState.inputFormat,
       inputFilename: inputState.inputFilename,
-      inputKind: inputState.inputKind,
       inputText: inputState.inputText,
       outputFormat,
       outputContent: result,
@@ -1363,12 +1494,12 @@ async function onGenerateClick(els: Elements): Promise<void> {
     // so the user can fix the input and retry. If we came from State C,
     // we discard the previous output and revert to B; the alternative
     // (keep stale output visible alongside an error) would be confusing.
-    if (currentState.state === "C") {
+    if (currentState.state === "C" && currentState.inputKind === "text") {
       currentState = {
         state: "B",
+        inputKind: "text",
         inputFormat: currentState.inputFormat,
         inputFilename: currentState.inputFilename,
-        inputKind: currentState.inputKind,
         inputText: currentState.inputText,
       };
     }

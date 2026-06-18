@@ -270,6 +270,8 @@
        * Two text states (just the message swaps; the layout is identical):
        *   - Fresh:  "Preview is rendered approximately. The saved file is exact."
        *   - Stale:  "Stale — click Generate to refresh."
+       *   - Input:  "Preview is rendered approximately." (binary input preview;
+       *             see DISCLOSURE_INPUT_PREVIEW — never stale, no saved-file clause)
        *
        * The .is-stale modifier (rule below) carries the amber treatment for
        * the stale state and drops the italic so the reminder reads as a
@@ -298,6 +300,49 @@
         border-top-color: var(--stale-border);
         color: var(--stale-text);
         font-style: normal;
+      }
+
+      /*
+       * Input-pane preview spinner. Binary inputs (DOCX/ODT now; XLSX/ODS
+       * later) round-trip to an HTML preview on load; while that conversion
+       * runs, this overlay covers the input pane. Shown via the 200/400ms
+       * appear/min-display helper (delayed-indicator.ts), so a fast preview
+       * (small ODT) never flashes a spinner and a slow one (DOCX) reads as
+       * deliberate feedback. The .spinner circle and @keyframes spin are
+       * copied verbatim from the standalone tool pages for visual continuity.
+       *
+       * .io-pane-input is position:relative so the absolutely-positioned
+       * overlay is contained to the input pane. Only the input pane gets a
+       * spinner; the output pane's busy feedback is the Generate button label.
+       */
+      .io-pane-input {
+        position: relative;
+      }
+      .io-pane-spinner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--accent);
+        font-size: 0.9rem;
+        z-index: 1;
+      }
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #bfdbfe;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .action-buttons {

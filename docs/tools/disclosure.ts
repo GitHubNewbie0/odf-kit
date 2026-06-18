@@ -21,6 +21,16 @@ export const DISCLOSURE_FRESH = "Preview is rendered approximately. The saved fi
 export const DISCLOSURE_STALE = "Stale — click Generate to refresh.";
 
 /**
+ * The input-pane disclosure for a binary-input preview (DOCX/ODT now;
+ * XLSX/ODS later, round-tripped to HTML for display). Unlike the output
+ * disclosure, the input preview is never stale (binary inputs aren't
+ * editable) and there is no "saved file" on the input side — so this is the
+ * first sentence of DISCLOSURE_FRESH only, without the "saved file is exact"
+ * clause.
+ */
+export const DISCLOSURE_INPUT_PREVIEW = "Preview is rendered approximately.";
+
+/**
  * The disclosure-footer message for the given staleness. Fresh when the
  * output is in sync with the input; the stale reminder once the input has
  * been edited after Generate.
