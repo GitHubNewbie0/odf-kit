@@ -1,6 +1,40 @@
-# Release checklist
+# Release checklist — odf-kit
 
-Steps to publish a new version of odf-kit. Run in order; do not skip steps.
+Print this page and tick each box by hand as you go. **Run the steps in order;
+do not skip.** Each checklist item maps to a numbered section below with the
+exact commands and detail.
+
+> The version-bump commit now syncs the landing-page badge automatically (via the
+> `version` npm hook). There is no longer any manual `docs/index.html` amend/retag
+> step — that bug is fixed in `package.json`.
+
+---
+
+## Release: v_________   Date: 20___-___-___
+
+```
+PRE-FLIGHT
+[ ]  0. npm auth OK (npm whoami)
+[ ]  1. Pull latest main
+[ ]  2. No security PRs you meant to include are still open (glance)
+
+PREPARE CONTENT (everything below the tag must be done BEFORE step 7)
+[ ]  3. CHANGELOG.md updated (entry + footer links)
+[ ]  4. publiccode.yml updated (softwareVersion + releaseDate, via validator)
+[ ]  5. Full pipeline green (format:check, lint, build, test, validate-html)
+[ ]  6. Release content committed (explicit paths; unrelated changes separate)
+
+CUT THE RELEASE
+[ ]  7. npm version patch   (badge auto-syncs into the version commit + tag)
+[ ]  8. Push commits + tag   (git push origin main --follow-tags)
+[ ]  9. npm publish   (browser 2FA expected)
+
+PUBLISH METADATA
+[ ] 10. GitHub release (gh release create --generate-notes) — THEN EDIT the body
+[ ] 11. Verify everything (npm, GitHub, GitLab, openCode listing)
+```
+
+---
 
 ## 0. Verify npm authentication
 
@@ -8,62 +42,65 @@ Steps to publish a new version of odf-kit. Run in order; do not skip steps.
 npm whoami
 ```
 
-If this errors with `E401`, `ENEEDAUTH`, or anything other than your npm username, your token is missing or expired and you must restore it before step 7.
+If this errors (`E401`, `ENEEDAUTH`, anything but your username), the token is
+missing or expired — restore it before step 9.
 
-Since the npm Shai-Hulud incident of May 2026, npm has tightened token policy:
+Token policy (post May-2026 npm changes):
+- **Bypass-2FA tokens are permanently revoked.** Do not create one.
+- **Granular write tokens expire every 90 days.** Rotate quarterly; set a reminder.
+- Local publishes use interactive browser 2FA at publish time — that is correct.
 
-- **Bypass-2FA tokens are permanently revoked.** Do not create one — even if the npm UI offers the option for "CI/CD" use.
-- **Granular access tokens with write permission expire every 90 days.** You will need to rotate at least quarterly. Set a calendar reminder when you create a new token.
-- **Classic / legacy tokens were removed in November 2025.** Only granular tokens exist now.
-
-To restore authentication:
-
-1. Visit https://www.npmjs.com/settings/<your-username>/tokens
-2. Generate New Token → **Granular Access Token**
-3. Token name: `odf-kit-publish-local-YYYY-MM` (descriptive helps when reviewing later)
-4. Expiration: 90 days (current maximum for write tokens)
-5. Packages and scopes → Permissions: **Read and write**, scope: **Only select packages → odf-kit**
-6. **Do NOT check Bypass 2FA.** Leave it unchecked. Local publishes use interactive browser-based 2FA at publish time, which is correct.
-7. Generate. Copy the token immediately — it is not shown again.
-
-Install locally:
+To restore: npmjs.com → settings → tokens → Generate New → **Granular Access
+Token**, name `odf-kit-publish-local-YYYY-MM`, 90-day expiry, **Read and write**
+scoped to **only odf-kit**, **Bypass 2FA unchecked**. Copy it once, then:
 
 ```powershell
-npm config set //registry.npmjs.org/:_authToken "npm_paste-the-token-here"
+npm config set //registry.npmjs.org/:_authToken "npm_paste-token-here"
 npm whoami
 ```
 
-`whoami` should now print your username.
-
 ## 1. Pull latest from origin
-
-If any commits landed on `main` since you last pulled (Dependabot merges,
-direct pushes from another machine, etc.), pulling now avoids a push
-rejection later in the release.
 
 ```powershell
 cd C:\dev\odf-kit2
 git pull origin main
 ```
 
-## 2. Update CHANGELOG.md
+Catches Dependabot merges or other-machine pushes before they cause a push
+rejection later.
 
-Convert the `[Unreleased]` section into a versioned section for the release
-you are about to cut, and prepare a fresh empty `[Unreleased]` for the next
-cycle.
+## 2. Security glance (not a task — just a look)
 
-In `CHANGELOG.md`:
+Check there are no Dependabot/CodeQL security PRs you intended to fold into this
+release still sitting open. If one should ship in this release, merge it now so
+the fix rides *in* the release rather than trailing it afterward. Dependabot
+handles the routine updates; this is only to avoid shipping while a security fix
+you meant to include is unmerged.
 
-1. Rename the existing `## [Unreleased]` heading to
-   `## [X.Y.Z] - YYYY-MM-DD`, using today's date.
-2. Insert a new empty `## [Unreleased]` section above it.
-3. At the bottom of the file, update the reference links:
+## 3. Update CHANGELOG.md  *(before the tag — do not defer this)*
+
+This is the step most often skipped. The published npm tarball includes
+CHANGELOG.md, so if the entry isn't in the release commit, the published
+changelog is permanently stale.
+
+1. Add a new `## [X.Y.Z] - YYYY-MM-DD` section below `## [Unreleased]`
+   (leave `[Unreleased]` in place, empty, for the next cycle).
+2. At the bottom of the file, update the reference links:
    - Change `[Unreleased]: ...compare/vPREV...HEAD` to
      `[Unreleased]: ...compare/vX.Y.Z...HEAD`.
-   - Add a new `[X.Y.Z]: ...releases/tag/vX.Y.Z` line directly below the
-     `[Unreleased]` line.
+   - Add `[X.Y.Z]: ...releases/tag/vX.Y.Z` directly below the `[Unreleased]` line.
 
-## 3. Verify the pipeline is clean
+Match the existing entry style (bold lead-in, `[#NN](...issues/NN)` links,
+contributor thanks).
+
+## 4. Update publiccode.yml  *(before the tag)*
+
+Update `softwareVersion` and `releaseDate` (today). **Never hand-edit and commit
+directly** — edit at https://editor.opencode.de, click Validate, download the
+verbatim output, replace the local file, then commit. The validator is offline
+(syntax/completeness only); it does not modify the file or contact any directory.
+
+## 5. Verify the pipeline is clean
 
 ```powershell
 npm run format:check
@@ -73,170 +110,127 @@ npm run test
 npm run validate-html
 ```
 
-All five must pass with no errors before proceeding. If `format:check`
-reports issues, run `npm run format` to fix and re-run `format:check`.
+All five must pass. If `format:check` fails, run `npm run format` then re-check.
+(This is the project's full gate. There is no separate ODF-validator step here.)
 
-## 4. Commit the release-content changes
+## 6. Commit the release content
 
-`npm version patch` (step 5) requires a fully clean working tree — it will
-refuse to run if anything is staged or modified, even if you intend those
-changes to be part of the release. So commit everything that belongs in this
-release as a regular commit first.
+`npm version patch` (step 7) refuses to run on a dirty tree, so commit everything
+that belongs in this release first.
 
-Stage everything that's part of the release content (CHANGELOG.md, any
-source/test/doc changes, README updates):
-
-```powershell
-git add CHANGELOG.md README.md src/ tests/ docs/
-git status
-```
-
-Verify only intended files are staged. Then commit:
+Stage release content **by explicit path** — do not blanket-add, or unrelated
+working-tree changes (tooling, ignores, security overrides) get swept in. Those
+belong in their own separate commit, made before or after this one.
 
 ```powershell
-git commit -m "feat(area): short description of the release"
+git add CHANGELOG.md publiccode.yml src/ tests/ docs/   # adjust to what changed
+git status                                                # verify ONLY intended files
+git commit -m "fix(area): short description of the release"
+git status                                                # must be clean before step 7
 ```
 
-Use whatever commit message convention is appropriate for the change
-(`feat`, `fix`, `chore`, etc.). This commit's message becomes the
-human-readable summary of the release in `git log`.
+Use a clear, descriptive message — it becomes the human summary in `git log` and
+feeds the GitHub release notes (step 10).
 
-Verify tree is now clean:
-
-```powershell
-git status
-```
-
-Must show "nothing to commit, working tree clean" before proceeding.
-
-## 5. Bump the version
+## 7. Bump the version  *(badge auto-syncs — no amend/retag)*
 
 ```powershell
 npm version patch -m "chore: release v%s"
 ```
 
-This updates `package.json` and `package-lock.json`, creates a commit, and
-creates a git tag.
+This bumps `package.json`/`package-lock.json`, then runs the `version` npm hook
+(`node scripts/sync-version.js && git add docs/index.html`) which writes the new
+version into the landing-page badge and stages it **before** the commit and tag.
+So the version commit and tag already contain the correct badge — the old manual
+`docs/index.html` sync/amend/retag dance is gone.
 
-Note: `npm version` does **NOT** run the `prepare` hook, so
-`docs/index.html` is NOT bumped by this step. The next step fixes that.
-
-## 6. Sync docs/index.html and amend the release commit
-
-`scripts/sync-version.js` writes the current version into `docs/index.html`
-(the landing-page badge) and `src/version.ts` (gitignored, runtime). Run it
-now, fold the result into the release commit via amend, and re-tag:
-
-```powershell
-node scripts\sync-version.js
-git add docs/index.html
-git commit --amend --no-edit
-git tag -d vX.Y.Z
-git tag vX.Y.Z
-```
-
-Replace `vX.Y.Z` with the version just bumped (e.g. `v0.13.7`). The
-re-tag step is required because amending changes the commit SHA, leaving
-the original tag pointing at an orphaned commit.
-
-Verify:
+Verify the badge landed in the commit:
 
 ```powershell
 git show HEAD --stat
 ```
 
-The release commit must list three files: `docs/index.html`,
-`package-lock.json`, `package.json`. If `docs/index.html` is missing, the
-amend did not capture it — diagnose before continuing.
+Should list `docs/index.html`, `package.json`, `package-lock.json`. If
+`docs/index.html` is missing, the `version` hook didn't fire — stop and diagnose
+(`src/version.ts` is gitignored and won't appear; that's expected).
 
-## 7. Push the commits and tag
+## 8. Push the commits and tag
 
 ```powershell
-git push origin main
-git push origin --tags
+git push origin main --follow-tags
 ```
 
-## 8. Publish to npm
+`--follow-tags` pushes main and only the annotated tags reachable from it (not
+all local tags — safer than `--tags`). The push to main triggers the GitLab
+mirror sync; the tag triggers downstream release automation.
+
+## 9. Publish to npm
 
 ```powershell
 npm publish
 ```
 
-A browser window will open asking you to approve the publish via 2FA. This
-is expected behavior — granular tokens without Bypass 2FA require
-interactive confirmation per publish. Complete the prompt in the browser;
-the CLI waits and then proceeds.
-
-Verify the new version appears at https://www.npmjs.com/package/odf-kit:
+A browser window opens for 2FA approval — this is expected (granular tokens
+without Bypass 2FA require interactive confirmation per publish). Complete it.
 
 ```powershell
-npm view odf-kit version
+npm view odf-kit version          # may take ~30s to propagate
 ```
 
-May take 30 seconds for the registry to propagate.
-
-## 9. Update publiccode.yml
-
-Update `softwareVersion` and `releaseDate` in `publiccode.yml` to the new
-version and today's date. Validate at https://editor.opencode.de, download
-the verbatim output, and save to the repo root. Never commit a hand-edited
-version — always use the validator's output.
-
-```powershell
-git add publiccode.yml
-git commit -m "chore: update publiccode.yml to vX.Y.Z"
-git push origin main
-```
-
-The GitLab sync will push the updated `publiccode.yml` to the mirror, where
-the openCode.de indexer will pick it up (allow 24–48 hours for re-indexing).
-
-## 10. Create the GitHub release
+## 10. Create the GitHub release — then EDIT the notes
 
 ```powershell
 gh release create vX.Y.Z --generate-notes
 ```
 
-Replace `vX.Y.Z` with the version tag just pushed (e.g. `v0.13.7`).
-`--generate-notes` populates the release body from commits since the last
-release. Review the generated notes in the browser after creation; edit
-via the "Edit release" button if needed.
+**`--generate-notes` only captures merged-PR commits.** Direct pushes to main
+(typical for your fixes) are **invisible** to it — so the auto-generated body will
+list only Dependabot PRs and miss the actual headline change. **Edit the release
+body** (browser "Edit release", or `gh release edit`) to add the real change:
+lead with the fix, keep the dependency list below it, keep the Full Changelog link.
 
-Creating the GitHub release triggers the `Create GitLab release` workflow
-automatically, which pushes the tag to the GitLab mirror and creates a
-matching release there. No manual GitLab steps required.
+Creating the GitHub release triggers the `Create GitLab release` workflow, which
+mirrors the tag and creates the matching GitLab release. No manual GitLab steps.
 
 ## 11. Verify
 
-- [ ] npm: https://www.npmjs.com/package/odf-kit shows the new version
-- [ ] GitHub: Releases page shows the new release with notes
-- [ ] GitHub Actions: `Create GitLab release` workflow run completed green
-- [ ] GitLab: https://gitlab.opencode.de/oc00013173229/odf-kit/-/releases shows the new release
-- [ ] openCode: https://gitlab.opencode.de/oc00013173229/odf-kit shows updated softwareVersion (allow 24–48 hours)
+```
+[ ] npm:    npmjs.com/package/odf-kit shows the new version
+[ ] GitHub: Releases page shows the release, notes edited to lead with the fix
+[ ] Actions: "Create GitLab release" workflow run is green
+[ ] GitLab:  gitlab.opencode.de/.../odf-kit/-/releases shows the release
+[ ] openCode: project still appears in the directory after the mirror push
+```
+
+**openCode / EU directory notes** (see `opencode-eu-directory-investigation.md`):
+- **openCode.de** re-indexes **on each mirror push** (near-instant), not on a
+  timer. If the project drops from the directory after a push, that is the known
+  intermittent issue — the documented probe is an empty commit
+  (`git commit --allow-empty`) to re-trigger evaluation.
+- **EU Interoperable** catalogue is a **separate** pipeline: a weekly batch crawler
+  with a 60-day vitality score, likely fed from openCode. It does **not** react to
+  individual pushes; its drops/adds are slow and unrelated to release timing. Do
+  not conflate the two.
 
 ---
 
 ## Troubleshooting
 
-**`npm version patch` errors with "Git working directory not clean"**
-Step 4 was skipped or didn't fully commit. `npm version` refuses to run on
-a dirty tree even if changes are staged. Commit (or stash) everything before
-running step 5.
+**`npm version` errors "Git working directory not clean"** — step 6 didn't fully
+commit. `npm version` refuses a dirty tree. Commit or stash everything first.
 
-**`npm publish` errors with `E404 — Not Found - PUT https://registry.npmjs.org/odf-kit`**
-The npm token is missing, expired, or revoked. The 404 (rather than 401) is
-npm's way of refusing the publish without leaking package-name existence to
-unauthorized callers. Go back to step 0 and restore the token.
+**`npm publish` errors `E404 PUT .../odf-kit`** — token missing/expired/revoked
+(npm returns 404, not 401, to avoid leaking package existence). Restore via step 0.
 
-**`docs/index.html` shows the previous version's badge after release**
-Step 6 was skipped. The landing page still shows the old version. Run step
-6 manually now and amend (or, if the release commit has already been
-pushed, commit the sync as a follow-up `chore: catch up docs/index.html
-badge to vX.Y.Z`).
+**Badge still shows the previous version after release** — the `version` hook
+didn't run (check it exists in `package.json` scripts:
+`"version": "node scripts/sync-version.js && git add docs/index.html"`). As a
+one-off recovery: `node scripts\sync-version.js`, commit
+`chore: catch up docs/index.html badge to vX.Y.Z`, push.
 
-**GitHub release notes look thin or wrong**
-`gh release create --generate-notes` reads commit messages between the
-previous tag and the new tag. If your feature commit has a clear,
-descriptive message (as in step 4), the notes will reflect it. If they
-don't, edit via the "Edit release" button on the release page in the
-browser.
+**GitHub release notes look thin / miss the fix** — expected from
+`--generate-notes` on direct-push changes (step 10). Edit the body manually.
+
+**Project dropped from openCode directory** — push an empty commit to re-trigger
+the indexer; see the investigation doc. Do not confuse with the EU catalogue,
+which updates weekly on its own cycle.
