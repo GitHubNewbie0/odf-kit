@@ -1,13 +1,10 @@
-# This repository adheres to the publiccode.yml standard by including this 
-# metadata file that makes public software easily discoverable.
-# More info at https://github.com/italia/publiccode.yml
-
-publiccodeYmlVersion: '0.2'
+publiccodeYmlVersion: 0.5.0
 name: odf-kit
-url: 'https://github.com/GitHubNewbie0/odf-kit'
-landingURL: 'https://githubnewbie0.github.io/odf-kit'
+url: https://github.com/GitHubNewbie0/odf-kit
+landingURL: https://githubnewbie0.github.io/odf-kit
 softwareVersion: 0.13.8
-releaseDate: '2026-06-17'
+releaseDate: 2026-06-17
+logo: logo.svg
 platforms:
   - web
 categories:
@@ -16,46 +13,18 @@ categories:
   - it-development
 developmentStatus: stable
 softwareType: library
-inputTypes:
-  - application/vnd.oasis.opendocument.text
-  - application/vnd.oasis.opendocument.spreadsheet
-  - application/vnd.openxmlformats-officedocument.wordprocessingml.document
-  - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-  - text/html
-  - text/markdown
-  - application/json
-outputTypes:
-  - application/vnd.oasis.opendocument.text
-  - application/vnd.oasis.opendocument.spreadsheet
-  - text/html
-  - text/markdown
-logo: logo.svg
-maintenance:
-  type: community
-  contacts:
-    - name: Scott Wirth
-      email: scott@wirthmgt.com
-legal:
-  license: Apache-2.0
-  mainCopyrightOwner: odf-kit contributors
-  repoOwner: odf-kit contributors
 intendedAudience:
   scope:
     - education
     - government
     - local-authorities
     - science-and-technology
-localisation:
-  localisationReady: false
-  availableLanguages:
-    - en
 description:
   en:
-    localisedName: odf-kit
     genericName: JavaScript OpenDocument ODF Library
-    shortDescription: >-
-      Library to generate, fill, read, and convert OpenDocument (.odt, .ods)
-      files in Node.js and browsers using JavaScript or TypeScript.
+    localisedName: odf-kit
+    shortDescription: Library to generate, fill, read, and convert OpenDocument
+      (.odt, .ods) files in Node.js and browsers using JavaScript or TypeScript.
     longDescription: >-
       odf-kit is an open-source TypeScript library for working with OpenDocument
       Format (ODF) documents programmatically. It provides thirteen distinct
@@ -113,21 +82,18 @@ description:
       long-term document accessibility. Every generated file is validated
       against the official OASIS ODF validator in CI. The library has zero
       transitive runtime dependencies beyond fflate for ZIP packaging.
-    documentation: 'https://github.com/GitHubNewbie0/odf-kit#readme'
+    documentation: https://github.com/GitHubNewbie0/odf-kit#readme
+    apiDocumentation: https://githubnewbie0.github.io/odf-kit/api/
     features:
-      - >-
-        Generate text documents (.odt) compatible with LibreOffice, Microsoft
+      - Generate text documents (.odt) compatible with LibreOffice, Microsoft
         Word, and Google Docs
-      - >-
-        Generate spreadsheets (.ods) compatible with LibreOffice Calc and
+      - Generate spreadsheets (.ods) compatible with LibreOffice Calc and
         Microsoft Excel
       - Fill existing LibreOffice template documents with custom data
-      - >-
-        Repeating sections, optional sections, and nested data substitutions in
+      - Repeating sections, optional sections, and nested data substitutions in
         templates
       - Convert Microsoft Word (.docx) documents to OpenDocument (.odt) format
-      - >-
-        Convert Microsoft Excel (.xlsx) spreadsheets to OpenDocument (.ods)
+      - Convert Microsoft Excel (.xlsx) spreadsheets to OpenDocument (.ods)
         format
       - Convert HTML web content to OpenDocument (.odt) text documents
       - Convert Markdown content to OpenDocument (.odt) text documents
@@ -135,12 +101,22 @@ description:
       - Convert OpenDocument (.odt) to Markdown for documentation systems
       - Convert OpenDocument (.odt) to PDF without requiring LibreOffice
       - Read and extract content from existing .odt and .ods files
-      - 'Rich text formatting, tables, lists, and embedded images'
-      - 'Headers, footers, page numbers, hyperlinks, and full page layout control'
-      - >-
-        Compliant with the ISO/IEC 26300 OpenDocument standard — every file
+      - Rich text formatting, tables, lists, and embedded images
+      - Headers, footers, page numbers, hyperlinks, and full page layout control
+      - Compliant with the ISO/IEC 26300 OpenDocument standard — every file
         validated automatically
-      - >-
-        Runs in web browsers and on servers — no separate document conversion
+      - Runs in web browsers and on servers — no separate document conversion
         service required
-    apiDocumentation: 'https://githubnewbie0.github.io/odf-kit/api/'
+legal:
+  license: Apache-2.0
+  mainCopyrightOwner: odf-kit contributors
+  repoOwner: odf-kit contributors
+maintenance:
+  type: community
+  contacts:
+    - name: Scott Wirth
+      email: scott@wirthmgt.com
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
