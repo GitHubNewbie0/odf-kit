@@ -1031,97 +1031,166 @@ function deriveCellSpans(body: BodyNode[]): InlineNode[] {
   return spans;
 }
 
+/**
+ * Recursively collect column style names from a table:table container,
+ * descending into ODF column grouping wrappers (table:table-column-group,
+ * table:table-columns, table:table-header-columns) so that grouped column
+ * definitions are not missed. Handles table:number-columns-repeated for
+ * compact column definitions.
+ */
+function collectColumnStyles(container: XmlElementNode, out: string[]): void {
+  for (const child of container.children) {
+    if (child.type !== "element") continue;
+    switch (child.tag) {
+      case "table:table-column": {
+        const colStyleName = child.attrs["table:style-name"] ?? "";
+        const repeated = parseInt(child.attrs["table:number-columns-repeated"] ?? "1", 10);
+        for (let i = 0; i < repeated; i++) out.push(colStyleName);
+        break;
+      }
+      case "table:table-column-group":
+      case "table:table-columns":
+      case "table:table-header-columns":
+        collectColumnStyles(child, out);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+/**
+ * Parse a single table:table-row element into a TableRowNode.
+ *
+ * @param isHeader - True when the row originates from a
+ *   table:table-header-rows wrapper.
+ */
+function parseRow(
+  rowEl: XmlElementNode,
+  ctx: ParseContext,
+  columnStyleNames: string[],
+  isHeader: boolean,
+): TableRowNode {
+  // Resolve row style
+  let rowStyle: RowStyle | undefined;
+  const rowStyleName = rowEl.attrs["table:style-name"];
+  if (rowStyleName) {
+    const resolved = resolve(ctx.registry, "table-row", rowStyleName);
+    const bg = resolved.cellProps.get("fo:background-color");
+    if (bg && bg !== "transparent") rowStyle = { backgroundColor: bg };
+  }
+
+  const cells: TableCellNode[] = [];
+  let colIndex = 0;
+
+  for (const cellEl of rowEl.children) {
+    if (cellEl.type !== "element") continue;
+    // Skip covered cells — they are placeholders for merged cell spans
+    if (cellEl.tag === "table:covered-table-cell") {
+      colIndex++;
+      continue;
+    }
+    if (cellEl.tag !== "table:table-cell") continue;
+
+    const colSpan = parseInt(cellEl.attrs["table:number-columns-spanned"] ?? "1", 10);
+    const rowSpan = parseInt(cellEl.attrs["table:number-rows-spanned"] ?? "1", 10);
+
+    // Resolve cell style
+    const cellStyleName = cellEl.attrs["table:style-name"];
+    let cellStyle: CellStyle | undefined;
+    let cellTextStyle: SpanStyle | undefined;
+
+    if (cellStyleName) {
+      const resolved = resolve(ctx.registry, "table-cell", cellStyleName);
+      cellStyle = buildCellStyle(resolved.cellProps);
+      cellTextStyle = extractSpanStyle(resolved.textProps, ctx.registry);
+    }
+
+    // Merge column width from the matching table:table-column style if not
+    // already set by the cell style itself
+    if (!cellStyle?.columnWidth && colIndex < columnStyleNames.length) {
+      const colStyleName = columnStyleNames[colIndex];
+      if (colStyleName) {
+        const colResolved = resolve(ctx.registry, "table-column", colStyleName);
+        const cw = colResolved.cellProps.get("style:column-width");
+        if (cw) {
+          cellStyle = cellStyle ?? {};
+          cellStyle.columnWidth = cw;
+        }
+      }
+    }
+
+    // Parse cell content as full block content using the same walker as the
+    // document body, so a cell can hold paragraphs, headings, lists, nested
+    // tables, and sections. spans is derived for backward compatibility.
+    const cellBody = parseBodyNodes(cellEl, ctx);
+    const spans = deriveCellSpans(cellBody);
+
+    const cell: TableCellNode = { spans, body: cellBody };
+    if (colSpan > 1) cell.colSpan = colSpan;
+    if (rowSpan > 1) cell.rowSpan = rowSpan;
+    if (cellStyleName) cell.styleName = cellStyleName;
+    if (cellTextStyle) cell.textStyle = cellTextStyle;
+    if (cellStyle) cell.cellStyle = cellStyle;
+
+    cells.push(cell);
+    colIndex += colSpan;
+  }
+
+  const row: TableRowNode = { cells, isHeader };
+  if (rowStyle) row.rowStyle = rowStyle;
+  return row;
+}
+
+/**
+ * Recursively collect table rows from a table:table container, descending
+ * into ODF row grouping wrappers. Rows inside table:table-header-rows are
+ * flagged isHeader; table:table-row-group and table:table-rows are
+ * transparent groupings that preserve the inherited header state.
+ *
+ * Without this descent, heading rows (LibreOffice "Repeat heading rows after
+ * page break") are silently dropped, since they are not direct children of
+ * table:table. See issue #51.
+ */
+function collectRows(
+  container: XmlElementNode,
+  ctx: ParseContext,
+  columnStyleNames: string[],
+  inHeader: boolean,
+  out: TableRowNode[],
+): void {
+  for (const child of container.children) {
+    if (child.type !== "element") continue;
+    switch (child.tag) {
+      case "table:table-row":
+        out.push(parseRow(child, ctx, columnStyleNames, inHeader));
+        break;
+      case "table:table-header-rows":
+        collectRows(child, ctx, columnStyleNames, true, out);
+        break;
+      case "table:table-row-group":
+      case "table:table-rows":
+        collectRows(child, ctx, columnStyleNames, inHeader, out);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
 /** Parse a <table:table> element into a TableNode. */
 function parseTable(tableEl: XmlElementNode, ctx: ParseContext): TableNode {
   const tableStyleName = tableEl.attrs["table:style-name"];
 
-  // Build column index → style name map from table:table-column elements.
-  // Handles table:number-columns-repeated for compact column definitions.
+  // Build column index → style name map, descending into column grouping
+  // wrappers. Handles table:number-columns-repeated for compact definitions.
   const columnStyleNames: string[] = [];
-  for (const child of tableEl.children) {
-    if (child.type !== "element" || child.tag !== "table:table-column") continue;
-    const colStyleName = child.attrs["table:style-name"] ?? "";
-    const repeated = parseInt(child.attrs["table:number-columns-repeated"] ?? "1", 10);
-    for (let i = 0; i < repeated; i++) {
-      columnStyleNames.push(colStyleName);
-    }
-  }
+  collectColumnStyles(tableEl, columnStyleNames);
 
+  // Collect rows, descending into header-rows and row-group wrappers so that
+  // heading rows are not dropped (issue #51).
   const rows: TableRowNode[] = [];
-
-  for (const child of tableEl.children) {
-    if (child.type !== "element" || child.tag !== "table:table-row") continue;
-
-    // Resolve row style
-    let rowStyle: RowStyle | undefined;
-    const rowStyleName = child.attrs["table:style-name"];
-    if (rowStyleName) {
-      const resolved = resolve(ctx.registry, "table-row", rowStyleName);
-      const bg = resolved.cellProps.get("fo:background-color");
-      if (bg && bg !== "transparent") rowStyle = { backgroundColor: bg };
-    }
-
-    const cells: TableCellNode[] = [];
-    let colIndex = 0;
-
-    for (const cellEl of child.children) {
-      if (cellEl.type !== "element") continue;
-      // Skip covered cells — they are placeholders for merged cell spans
-      if (cellEl.tag === "table:covered-table-cell") {
-        colIndex++;
-        continue;
-      }
-      if (cellEl.tag !== "table:table-cell") continue;
-
-      const colSpan = parseInt(cellEl.attrs["table:number-columns-spanned"] ?? "1", 10);
-      const rowSpan = parseInt(cellEl.attrs["table:number-rows-spanned"] ?? "1", 10);
-
-      // Resolve cell style
-      const cellStyleName = cellEl.attrs["table:style-name"];
-      let cellStyle: CellStyle | undefined;
-      let cellTextStyle: SpanStyle | undefined;
-
-      if (cellStyleName) {
-        const resolved = resolve(ctx.registry, "table-cell", cellStyleName);
-        cellStyle = buildCellStyle(resolved.cellProps);
-        cellTextStyle = extractSpanStyle(resolved.textProps, ctx.registry);
-      }
-
-      // Merge column width from the matching table:table-column style if not
-      // already set by the cell style itself
-      if (!cellStyle?.columnWidth && colIndex < columnStyleNames.length) {
-        const colStyleName = columnStyleNames[colIndex];
-        if (colStyleName) {
-          const colResolved = resolve(ctx.registry, "table-column", colStyleName);
-          const cw = colResolved.cellProps.get("style:column-width");
-          if (cw) {
-            cellStyle = cellStyle ?? {};
-            cellStyle.columnWidth = cw;
-          }
-        }
-      }
-
-      // Parse cell content as full block content using the same walker as the
-      // document body, so a cell can hold paragraphs, headings, lists, nested
-      // tables, and sections. spans is derived for backward compatibility.
-      const cellBody = parseBodyNodes(cellEl, ctx);
-      const spans = deriveCellSpans(cellBody);
-
-      const cell: TableCellNode = { spans, body: cellBody };
-      if (colSpan > 1) cell.colSpan = colSpan;
-      if (rowSpan > 1) cell.rowSpan = rowSpan;
-      if (cellStyleName) cell.styleName = cellStyleName;
-      if (cellTextStyle) cell.textStyle = cellTextStyle;
-      if (cellStyle) cell.cellStyle = cellStyle;
-
-      cells.push(cell);
-      colIndex += colSpan;
-    }
-
-    const row: TableRowNode = { cells };
-    if (rowStyle) row.rowStyle = rowStyle;
-    rows.push(row);
-  }
+  collectRows(tableEl, ctx, columnStyleNames, false, rows);
 
   const tableNode: TableNode = { kind: "table", rows };
   if (tableStyleName) tableNode.styleName = tableStyleName;

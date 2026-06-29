@@ -5,6 +5,7 @@ import type {
   HeadingNode,
   SectionNode,
   TrackedChangeNode,
+  TableNode,
 } from "../../src/reader/types.js";
 
 // ============================================================
@@ -851,5 +852,117 @@ describe("buildRegistry Tier 3 — graphicProps", () => {
     const registry = buildRegistry(root);
     const resolved = resolve(registry, "graphic", "fr1");
     expect(resolved.graphicProps.get("style:wrap")).toBe("none");
+  });
+});
+
+// ============================================================
+// Table header rows (#51) — table:table-header-rows and row /
+// column grouping wrappers
+// ============================================================
+
+describe("readOdt — table header rows (#51)", () => {
+  // Read the first inline span's text from a cell, or undefined.
+  const cellText = (table: TableNode | undefined, r: number, c: number): string | undefined => {
+    const span = table?.rows?.[r]?.cells?.[c]?.spans?.[0];
+    return span && "text" in span ? span.text : undefined;
+  };
+
+  const findTable = (content: string): TableNode | undefined =>
+    readOdt(makeOdt(content)).body.find((n) => n.kind === "table") as TableNode | undefined;
+
+  test("rows inside table:table-header-rows are flagged isHeader; following rows are not", () => {
+    // Before #51, the wrapped heading row was dropped entirely (rows.length === 1).
+    const content = contentXml(
+      "",
+      '<table:table table:name="T1">' +
+        "<table:table-column/>" +
+        "<table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>Head</text:p></table:table-cell></table:table-row>" +
+        "</table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>Body</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows).toHaveLength(2);
+    expect(table?.rows?.[0]?.isHeader).toBe(true);
+    expect(table?.rows?.[1]?.isHeader).toBe(false);
+    expect(cellText(table, 0, 0)).toBe("Head");
+    expect(cellText(table, 1, 0)).toBe("Body");
+  });
+
+  test("multiple rows in a single header-rows wrapper are all flagged", () => {
+    const content = contentXml(
+      "",
+      "<table:table>" +
+        "<table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>H1</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>H2</text:p></table:table-cell></table:table-row>" +
+        "</table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>B</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows?.map((r) => r.isHeader)).toEqual([true, true, false]);
+  });
+
+  test("plain tables with no header-rows wrapper have all rows isHeader=false", () => {
+    const content = contentXml(
+      "",
+      "<table:table>" +
+        "<table:table-row><table:table-cell><text:p>A</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>B</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows?.map((r) => r.isHeader)).toEqual([false, false]);
+  });
+
+  test("table:table-row-group is a transparent wrapper: rows parsed, not flagged", () => {
+    const content = contentXml(
+      "",
+      "<table:table>" +
+        "<table:table-row-group>" +
+        "<table:table-row><table:table-cell><text:p>G</text:p></table:table-cell></table:table-row>" +
+        "</table:table-row-group>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows).toHaveLength(1);
+    expect(table?.rows?.[0]?.isHeader).toBe(false);
+    expect(cellText(table, 0, 0)).toBe("G");
+  });
+
+  test("header-rows nested inside a row-group are still flagged isHeader", () => {
+    const content = contentXml(
+      "",
+      "<table:table>" +
+        "<table:table-row-group>" +
+        "<table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>NestedHead</text:p></table:table-cell></table:table-row>" +
+        "</table:table-header-rows>" +
+        "<table:table-row><table:table-cell><text:p>NestedBody</text:p></table:table-cell></table:table-row>" +
+        "</table:table-row-group>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows?.map((r) => r.isHeader)).toEqual([true, false]);
+    expect(cellText(table, 0, 0)).toBe("NestedHead");
+    expect(cellText(table, 1, 0)).toBe("NestedBody");
+  });
+
+  test("columns wrapped in table:table-columns still resolve column width onto cells", () => {
+    const content = contentXml(
+      '<style:style style:name="co1" style:family="table-column">' +
+        '<style:table-column-properties style:column-width="5cm"/>' +
+        "</style:style>",
+      "<table:table>" +
+        "<table:table-columns>" +
+        '<table:table-column table:style-name="co1"/>' +
+        "</table:table-columns>" +
+        "<table:table-row><table:table-cell><text:p>X</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+    const table = findTable(content);
+    expect(table?.rows?.[0]?.cells?.[0]?.cellStyle?.columnWidth).toBe("5cm");
   });
 });

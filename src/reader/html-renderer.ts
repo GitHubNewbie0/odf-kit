@@ -53,6 +53,7 @@ import type {
   FieldNode,
   ListNode,
   TableNode,
+  TableRowNode,
   SectionNode,
   TrackedChangeNode,
   CellStyle,
@@ -354,6 +355,43 @@ function renderCellContent(cell: TableCellNode, options?: HtmlOptions): string {
 }
 
 /**
+ * Render a single table row. Header rows (from table:table-header-rows) emit
+ * <th scope="col"> cells; body rows emit <td>. Body-cell attribute order
+ * (colspan, rowspan, style) is preserved so non-header table output is
+ * unchanged from before header-row support.
+ */
+function renderRow(
+  row: TableRowNode,
+  options: HtmlOptions | undefined,
+  headerCells: boolean,
+): string {
+  const rowCss = row.rowStyle !== undefined ? rowStyleToCss(row.rowStyle) : "";
+  const rowAttrs = rowCss ? ` style="${rowCss}"` : "";
+  const tag = headerCells ? "th" : "td";
+
+  const cells = row.cells
+    .map((cell) => {
+      const attrParts: string[] = [];
+      if (headerCells) attrParts.push(`scope="col"`);
+      if (cell.colSpan !== undefined && cell.colSpan > 1) {
+        attrParts.push(`colspan="${cell.colSpan}"`);
+      }
+      if (cell.rowSpan !== undefined && cell.rowSpan > 1) {
+        attrParts.push(`rowspan="${cell.rowSpan}"`);
+      }
+      if (cell.cellStyle !== undefined) {
+        const css = cellStyleToCss(cell.cellStyle);
+        if (css) attrParts.push(`style="${css}"`);
+      }
+      const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
+      return `<${tag}${attrs}>${renderCellContent(cell, options)}</${tag}>`;
+    })
+    .join("");
+
+  return `<tr${rowAttrs}>${cells}</tr>`;
+}
+
+/**
  * Render a TableNode to an HTML <table> string with Tier 2 inline styles
  * and Tier 3 column width layout via <colgroup>.
  *
@@ -361,6 +399,11 @@ function renderCellContent(cell: TableCellNode, options?: HtmlOptions): string {
  * (where columnWidth values are stored after Tier 2 column style
  * resolution). A <colgroup> is emitted only when at least one cell
  * carries a columnWidth value.
+ *
+ * Rows from table:table-header-rows are rendered inside <thead> with <th>
+ * cells; the remaining rows go in <tbody> with <td> cells. When a table has
+ * no header rows the output is unchanged: bare <tr> rows with no thead/tbody
+ * wrapper.
  */
 function renderTable(table: TableNode, options?: HtmlOptions): string {
   // Build <colgroup> from the first row that has cells with columnWidth
@@ -377,34 +420,21 @@ function renderTable(table: TableNode, options?: HtmlOptions): string {
     break; // Use only the first row for column width information
   }
 
-  const rows = table.rows
-    .map((row) => {
-      const rowCss = row.rowStyle !== undefined ? rowStyleToCss(row.rowStyle) : "";
-      const rowAttrs = rowCss ? ` style="${rowCss}"` : "";
+  const headerRows = table.rows.filter((row) => row.isHeader);
+  const bodyRows = table.rows.filter((row) => !row.isHeader);
 
-      const cells = row.cells
-        .map((cell) => {
-          const attrParts: string[] = [];
-          if (cell.colSpan !== undefined && cell.colSpan > 1) {
-            attrParts.push(`colspan="${cell.colSpan}"`);
-          }
-          if (cell.rowSpan !== undefined && cell.rowSpan > 1) {
-            attrParts.push(`rowspan="${cell.rowSpan}"`);
-          }
-          if (cell.cellStyle !== undefined) {
-            const css = cellStyleToCss(cell.cellStyle);
-            if (css) attrParts.push(`style="${css}"`);
-          }
-          const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
-          return `<td${attrs}>${renderCellContent(cell, options)}</td>`;
-        })
-        .join("");
+  // No header rows: preserve the original flat output exactly.
+  if (headerRows.length === 0) {
+    const rows = bodyRows.map((row) => renderRow(row, options, false)).join("");
+    return `<table>${colgroup}${rows}</table>`;
+  }
 
-      return `<tr${rowAttrs}>${cells}</tr>`;
-    })
-    .join("");
-
-  return `<table>${colgroup}${rows}</table>`;
+  const thead = `<thead>${headerRows.map((row) => renderRow(row, options, true)).join("")}</thead>`;
+  const tbody =
+    bodyRows.length > 0
+      ? `<tbody>${bodyRows.map((row) => renderRow(row, options, false)).join("")}</tbody>`
+      : "";
+  return `<table>${colgroup}${thead}${tbody}</table>`;
 }
 
 /**

@@ -411,3 +411,90 @@ describe("renderHtml — output wrapper", () => {
     expect(html.indexOf("<head>")).toBeLessThan(html.indexOf("<body>"));
   });
 });
+
+// ============================================================
+// Table header rows (#51) — thead / th rendering
+// ============================================================
+
+describe("renderHtml — table header rows", () => {
+  test('header rows render in <thead> with <th scope="col">, body rows in <tbody>', () => {
+    const body: BodyNode[] = [
+      {
+        kind: "table",
+        rows: [
+          {
+            isHeader: true,
+            cells: [{ spans: [{ text: "H1" }] }, { spans: [{ text: "H2" }] }],
+          },
+          {
+            isHeader: false,
+            cells: [{ spans: [{ text: "A" }] }, { spans: [{ text: "B" }] }],
+          },
+        ],
+      },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe(
+      "<table>" +
+        "<thead>" +
+        '<tr><th scope="col"><p style="margin-top:0;margin-bottom:0">H1</p></th>' +
+        '<th scope="col"><p style="margin-top:0;margin-bottom:0">H2</p></th></tr>' +
+        "</thead>" +
+        "<tbody>" +
+        '<tr><td><p style="margin-top:0;margin-bottom:0">A</p></td>' +
+        '<td><p style="margin-top:0;margin-bottom:0">B</p></td></tr>' +
+        "</tbody>" +
+        "</table>",
+    );
+  });
+
+  test("a table with no header rows renders bare <tr> rows, no thead/th wrapper", () => {
+    const body: BodyNode[] = [
+      {
+        kind: "table",
+        rows: [
+          { isHeader: false, cells: [{ spans: [{ text: "A" }] }] },
+          { isHeader: false, cells: [{ spans: [{ text: "B" }] }] },
+        ],
+      },
+    ];
+    const html = renderHtml(body, { fragment: true });
+    expect(html).toBe(
+      "<table>" +
+        '<tr><td><p style="margin-top:0;margin-bottom:0">A</p></td></tr>' +
+        '<tr><td><p style="margin-top:0;margin-bottom:0">B</p></td></tr>' +
+        "</table>",
+    );
+    expect(html).not.toContain("<thead>");
+    expect(html).not.toContain("<th");
+  });
+
+  test("a header-only table emits <thead> with no empty <tbody>", () => {
+    const body: BodyNode[] = [
+      {
+        kind: "table",
+        rows: [{ isHeader: true, cells: [{ spans: [{ text: "Only" }] }] }],
+      },
+    ];
+    const html = renderHtml(body, { fragment: true });
+    expect(html).toBe(
+      "<table><thead>" +
+        '<tr><th scope="col"><p style="margin-top:0;margin-bottom:0">Only</p></th></tr>' +
+        "</thead></table>",
+    );
+    expect(html).not.toContain("<tbody>");
+  });
+
+  test("header cell preserves colspan, with scope before colspan", () => {
+    const body: BodyNode[] = [
+      {
+        kind: "table",
+        rows: [{ isHeader: true, cells: [{ spans: [{ text: "Wide" }], colSpan: 2 }] }],
+      },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe(
+      "<table><thead>" +
+        '<tr><th scope="col" colspan="2"><p style="margin-top:0;margin-bottom:0">Wide</p></th></tr>' +
+        "</thead></table>",
+    );
+  });
+});

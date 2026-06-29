@@ -486,6 +486,12 @@ export interface TableRowNode {
   cells: TableCellNode[];
   /** Row visual properties: background color. */
   rowStyle?: RowStyle;
+  /**
+   * True when this row originates from a table:table-header-rows wrapper
+   * (LibreOffice's "Repeat heading rows after page break"). Always present,
+   * mirroring DocxTableRow.isHeader for cross-reader consistency.
+   */
+  isHeader: boolean;
 }
 
 /** A table. */

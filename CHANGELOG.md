@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.9] - 2026-06-29
+
+### Fixed
+
+- **Table heading rows dropped on read** — when reading ODT, `readOdt()` and `odtToHtml()` silently discarded table heading rows (the rows marked by LibreOffice Writer's "Repeat heading rows after page break", stored in ODF as `<table:table-header-rows>`). The same table converted correctly when the heading row was left unmarked, but vanished entirely once it was marked. The reader's table parser only iterated `<table:table-row>` elements that were direct children of `<table:table>`, so rows nested inside the `<table:table-header-rows>` wrapper were never visited and were dropped. The parser now collects rows recursively, descending through `table:table-header-rows`, `table:table-row-group`, and `table:table-rows`, and column definitions through `table:table-columns`, `table:table-column-group`, and `table:table-header-columns`. Heading rows are flagged and rendered into `<thead>` with `<th scope="col">` cells; tables with no heading rows render exactly as before. Covered by parser and renderer regression tests. Fixes [#51](https://github.com/GitHubNewbie0/odf-kit/issues/51). Thanks to [@wheymann](https://github.com/wheymann) for the report.
+
+### Added
+
+- **`isHeader` field on `TableRowNode`** — the reader's table row model gains `isHeader: boolean`, true for rows originating from a `<table:table-header-rows>` wrapper, mirroring `DocxTableRow.isHeader` in the DOCX reader. Additive for consumers reading the model — no breaking changes.
+
 ## [0.13.8] - 2026-06-17
 
 ### Fixed
@@ -459,7 +469,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.8...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.9...HEAD
+[0.13.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.9
 [0.13.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.8
 [0.13.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.7
 [0.13.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.6
