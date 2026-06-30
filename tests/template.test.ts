@@ -447,8 +447,7 @@ describe("fillTemplate — meta.xml processing", () => {
   test("replaces placeholders in meta.xml", () => {
     let fflate: typeof import("fflate") | undefined;
     let fillTemplate:
-      | ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array)
-      | undefined;
+      ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array) | undefined;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       fflate = require("fflate");
@@ -510,8 +509,7 @@ describe("fillTemplate — meta.xml processing", () => {
   test("fillTemplate works normally when meta.xml is absent", () => {
     let fflate: typeof import("fflate") | undefined;
     let fillTemplate:
-      | ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array)
-      | undefined;
+      ((bytes: Uint8Array, data: Record<string, unknown>) => Uint8Array) | undefined;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       fflate = require("fflate");

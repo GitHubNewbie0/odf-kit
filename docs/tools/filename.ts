@@ -30,8 +30,7 @@ export type OutputFormat = "odt" | "ods" | "html" | "markdown" | "typst";
  * that the caller maps to a specific error popup.
  */
 export type ParsedFilename =
-  | { ok: true; stem: string; ext: string }
-  | { ok: false; reason: "no-extension" | "empty-stem" };
+  { ok: true; stem: string; ext: string } | { ok: false; reason: "no-extension" | "empty-stem" };
 
 /**
  * Split a filename on the LAST dot. Extension is lowercased for matching;

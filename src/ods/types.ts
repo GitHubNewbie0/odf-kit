@@ -2,13 +2,7 @@
 
 /** Recognized cell types in ODS. */
 export type OdsCellType =
-  | "string"
-  | "float"
-  | "date"
-  | "boolean"
-  | "formula"
-  | "percentage"
-  | "currency";
+  "string" | "float" | "date" | "boolean" | "formula" | "percentage" | "currency";
 
 /** Built-in date display formats. */
 export type OdsDateFormat = "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY";

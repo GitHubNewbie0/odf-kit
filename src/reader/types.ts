@@ -578,12 +578,7 @@ export interface TrackedChangeNode {
  * Exhaustive switches on BodyNode must handle all six members.
  */
 export type BodyNode =
-  | ParagraphNode
-  | HeadingNode
-  | ListNode
-  | TableNode
-  | SectionNode
-  | TrackedChangeNode;
+  ParagraphNode | HeadingNode | ListNode | TableNode | SectionNode | TrackedChangeNode;
 
 /** Document metadata extracted from meta.xml. */
 export interface OdtMetadata {
