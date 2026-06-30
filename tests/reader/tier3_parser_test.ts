@@ -421,11 +421,9 @@ describe("readOdt Tier 3 — headers and footers", () => {
     expect(doc.header).toBeDefined();
     expect(doc.footer).toBeDefined();
     const headerText = (doc.header![0] as ParagraphNode).spans.find((s) => !("kind" in s)) as
-      | { text: string }
-      | undefined;
+      { text: string } | undefined;
     const footerText = (doc.footer![0] as ParagraphNode).spans.find((s) => !("kind" in s)) as
-      | { text: string }
-      | undefined;
+      { text: string } | undefined;
     expect(headerText?.text).toBe("the header");
     expect(footerText?.text).toBe("the footer");
   });
