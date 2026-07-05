@@ -238,6 +238,46 @@ Template filling and reading work the same way — pass `Uint8Array` bytes from 
 
 ---
 
+## Using odf-kit with Claude
+
+odf-kit ships an [Agent Skill](https://github.com/anthropics/skills) (`SKILL.md`) that teaches Claude how to generate, fill, and read `.odt`/`.ods` files correctly — current API, correct options, no guessing. Once it's loaded, you can just ask Claude for an OpenDocument file in plain English and it writes working odf-kit code itself.
+
+### One-off, inside a single chat
+
+Paste the contents of [`SKILL.md`](./SKILL.md) into the conversation (or link to the raw file) and ask Claude to use it for the task. This works in any Claude surface but only lasts for that conversation.
+
+### Persistent, every session — claude.ai / Cowork
+
+1. Download this repo's `SKILL.md` (and package it as a `.zip` if you want to bundle extra reference files).
+2. In Claude.ai, go to **Settings → Customize → Skills → "+" → Create skill**, and upload it.
+3. Requires a Pro, Max, Team, or Enterprise plan with code execution enabled.
+
+Once installed, Claude loads it automatically whenever you ask for an ODT/ODS file, a LibreOffice-compatible document, or mention OpenDocument — no need to re-explain the API each session.
+
+### Persistent, every session — Claude Code
+
+Skills in Claude Code are just files on disk, no upload step:
+
+```bash
+# Personal skill (available in all your projects)
+mkdir -p ~/.claude/skills/odt
+cp SKILL.md ~/.claude/skills/odt/SKILL.md
+
+# OR project skill (this repo/project only)
+mkdir -p .claude/skills/odt
+cp SKILL.md .claude/skills/odt/SKILL.md
+```
+
+Claude Code picks it up automatically the next time you ask it to create or fill an ODT/ODS file.
+
+### Persistent — Claude API / Claude Platform
+
+Upload it once via the Skills API and reference it by `skill_id` in the `container` parameter alongside the `code_execution` tool. See [Anthropic's Skills API guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide) for the exact request shape.
+
+Try it: *"Create an ODT invoice with a line-item table and a bold total row"* — with the skill installed, Claude reaches for odf-kit and writes the code directly instead of improvising XML by hand.
+
+---
+
 ## Build: ODT documents
 
 ### Text and formatting
