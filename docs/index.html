@@ -107,6 +107,14 @@
               "@type": "Answer",
               "text": "Yes. odf-kit generates ODF 1.2+ compliant documents per ISO/IEC 26300, the international standard mandated by many governments, the EU, and public sector organizations. Documents open in LibreOffice and other open-source office suites."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use odf-kit with Claude or other AI coding assistants?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. odf-kit ships a SKILL.md file — an Agent Skill that documents the current API so Claude writes correct odf-kit code instead of guessing at method names. Load it for a single conversation by pasting its contents, or install it persistently in Claude.ai, Claude Code, or via the Claude API so it's applied automatically every time you ask for an ODT or ODS file."
+            }
           }
         ]
       }
@@ -1482,6 +1490,19 @@ console.<span class="fn">log</span>(doc.metadata.title);
           </p>
         </div>
         <div class="faq-item">
+          <h3>Can I use odf-kit with Claude or other AI coding assistants?</h3>
+          <p>
+            Yes. odf-kit ships a <code>SKILL.md</code> file — an
+            <a href="https://github.com/anthropics/skills" rel="noopener">Agent Skill</a> that
+            documents the current API so Claude writes correct odf-kit code on the first try
+            instead of guessing at method names. Paste it into a single conversation for a one-off
+            task, or install it persistently in Claude.ai, Claude Code, or via the Claude API so
+            it loads automatically whenever you ask for an ODT or ODS file. See the
+            <a href="guides/using-with-claude.html">using odf-kit with Claude guide</a> for setup
+            steps and example prompts.
+          </p>
+        </div>
+        <div class="faq-item">
           <h3>Where can I find step-by-step tutorials?</h3>
           <p>We have detailed guides for common tasks:</p>
           <ul
@@ -1559,6 +1580,10 @@ console.<span class="fn">log</span>(doc.metadata.title);
               <a href="guides/lexical-to-odt.html">Lexical JSON to ODT</a> — convert Lexical
               SerializedEditorState to .odt, with Proton Docs integration
             </li>
+            <li>
+              <a href="guides/using-with-claude.html">Using odf-kit with Claude</a> — install the
+              SKILL.md Agent Skill so Claude writes odf-kit code for you
+            </li>
           </ul>
         </div>
       </div>
@@ -1612,6 +1637,7 @@ console.<span class="fn">log</span>(doc.metadata.title);
           <a href="guides/odt-javascript-ecosystem.html">ODT Ecosystem</a> ·
           <a href="guides/odt-to-html-javascript.html">ODT to HTML</a>
           <a href="guides/lexical-to-odt.html">Lexical to ODT Guide</a> ·
+          <a href="guides/using-with-claude.html">Using odf-kit with Claude</a> ·
           <a href="tools/odt-to-html.html">Free ODT → HTML Tool</a> ·
           <a href="tools/odt-to-pdf.html">Free ODT → PDF Tool</a> ·
           <a href="tools/docx-to-odt.html">Free DOCX → ODT Tool</a> ·
