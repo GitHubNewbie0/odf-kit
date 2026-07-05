@@ -409,8 +409,8 @@
         <p>
           Without the skill, asking an AI assistant to "make an ODT file with odf-kit" is a coin
           flip — it may invent methods that don't exist, or write raw ODF XML by hand instead of
-          calling the library. With the skill loaded, Claude reads the real, current API reference
-          — tables, lists, images, headers and footers, template filling, the reader, and every
+          calling the library. With the skill loaded, Claude reads the real, current API reference —
+          tables, lists, images, headers and footers, template filling, the reader, and every
           conversion pathway — before it writes anything.
         </p>
 
@@ -427,7 +427,10 @@
         <h2>Option B — every conversation, Claude.ai or Cowork</h2>
         <ol>
           <li>Download <code>SKILL.md</code> from the repo.</li>
-          <li>Open <strong>Settings → Customize → Skills</strong> in Claude.ai (or Customize in Cowork).</li>
+          <li>
+            Open <strong>Settings → Customize → Skills</strong> in Claude.ai (or Customize in
+            Cowork).
+          </li>
           <li>
             Click <strong>"+" → Create skill</strong>, and upload the file — zip it first if you
             want to bundle extra reference material alongside it.
@@ -463,7 +466,9 @@
           Upload the skill once through the Skills API, then reference its <code>skill_id</code> in
           the <code>container</code> parameter alongside the <code>code_execution</code> tool on any
           Messages API call. Full request shape is in
-          <a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" rel="noopener"
+          <a
+            href="https://platform.claude.com/docs/en/build-with-claude/skills-guide"
+            rel="noopener"
             >Anthropic's Skills API guide</a
           >.
         </p>
@@ -517,7 +522,8 @@
         <p>
           The skill tracks odf-kit's public API, not internal maintainer workflow — it travels with
           the library. If you spot it lagging behind a new release,
-          <a href="https://github.com/GitHubNewbie0/odf-kit/issues" rel="noopener">open an issue</a>.
+          <a href="https://github.com/GitHubNewbie0/odf-kit/issues" rel="noopener">open an issue</a
+          >.
         </p>
       </div>
     </section>
