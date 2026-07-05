@@ -2,102 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-07-05</lastmod>
   </url>
 
   <!-- Guides -->
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-nodejs.html</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-browser.html</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/fill-odt-template-javascript.html</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/simple-odf-alternative.html</loc>
-    <lastmod>2026-02-23</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/odf-government-compliance.html</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-06-11</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/docxtemplater-odf-alternative.html</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/generate-odt-without-libreoffice.html</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/odt-javascript-ecosystem.html</loc>
-    <lastmod>2026-03-05</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/libreoffice-headless-alternative.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/sheetjs-alternative.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/odt-to-html-javascript.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/odt-to-typst-pdf.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/docx-to-odt.html</loc>
-    <lastmod>2026-04-10</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/guides/lexical-to-odt.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
+  </url>
+  <url>
+    <loc>https://githubnewbie0.github.io/odf-kit/guides/using-with-claude.html</loc>
+    <lastmod>2026-07-05</lastmod>
   </url>
 
   <!-- Tools -->
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/odt-to-html.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-27</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/odt-to-pdf.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-27</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/odt-to-markdown.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-27</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/html-to-odt.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/markdown-to-odt.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/docx-to-odt.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/xlsx-to-ods.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-27</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/ods-to-html.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-27</lastmod>
   </url>
   <url>
     <loc>https://githubnewbie0.github.io/odf-kit/tools/lexical-to-odt.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-05-10</lastmod>
   </url>
 </urlset>
