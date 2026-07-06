@@ -1645,11 +1645,26 @@
           saveBtn.disabled = false;
           showStatus("success", 'Preview ready. Click "Save" to download the file.');
         } catch (err) {
-          reportError("html-to-odt", err);
+          const message = err && err.message ? err.message : String(err);
+          const malformedHtmlPattern =
+            /parseXml: (mismatched closing tag|unclosed elements|malformed attribute syntax|unescaped '&')/;
+          if (malformedHtmlPattern.test(message)) {
+            // This is a structural problem in the pasted/dropped HTML itself
+            // (e.g. a tag that was never closed, or closes the wrong element) —
+            // not an odf-kit bug, so we explain it plainly and don't file a
+            // GitHub issue for it.
+            showStatus(
+              "error",
+              "This HTML has a structural problem this converter can't recover from — most likely a tag that isn't closed, or is closed in the wrong place. Try pasting it through an HTML validator or formatter (for example validator.w3.org) to find and fix the exact spot, then try again. Details: " +
+                message,
+            );
+          } else {
+            reportError("html-to-odt", err);
+            showStatus("error", "Generation failed: " + message);
+          }
           renderEmptyPreview();
           generatedBytes = null;
           saveBtn.disabled = true;
-          showStatus("error", "Generation failed: " + (err.message || "unknown error."));
         } finally {
           generateBtn.disabled = false;
         }

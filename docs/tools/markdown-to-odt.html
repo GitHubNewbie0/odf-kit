@@ -972,8 +972,23 @@ Paste or type your **Markdown** here.
             statusMsg.style.display = "none";
           }, 3000);
         } catch (err) {
-          reportError("markdown-to-odt", err);
-          showStatus("error", "Conversion failed: " + (err.message || "unknown error."));
+          const message = err && err.message ? err.message : String(err);
+          const malformedHtmlPattern =
+            /parseXml: (mismatched closing tag|unclosed elements|malformed attribute syntax|unescaped '&')/;
+          if (malformedHtmlPattern.test(message)) {
+            // Markdown is rendered to HTML internally before conversion, so raw
+            // HTML embedded in the Markdown can carry the same structural
+            // problems (an unclosed or mismatched tag) that this simple parser
+            // can't recover from. Not an odf-kit bug, so no GitHub issue filed.
+            showStatus(
+              "error",
+              "The HTML embedded in this Markdown has a structural problem this converter can't recover from — most likely a tag that isn't closed, or is closed in the wrong place. Try pasting the embedded HTML through a validator (for example validator.w3.org) to find and fix the exact spot, then try again. Details: " +
+                message,
+            );
+          } else {
+            reportError("markdown-to-odt", err);
+            showStatus("error", "Conversion failed: " + message);
+          }
         } finally {
           convertBtn.disabled = false;
         }
