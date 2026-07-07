@@ -2,8 +2,8 @@ publiccodeYmlVersion: 0.5.0
 name: odf-kit
 url: https://github.com/GitHubNewbie0/odf-kit
 landingURL: https://githubnewbie0.github.io/odf-kit
-softwareVersion: 0.13.9
-releaseDate: 2026-06-29
+softwareVersion: 0.13.10
+releaseDate: 2026-07-07
 logo: logo.svg
 platforms:
   - web

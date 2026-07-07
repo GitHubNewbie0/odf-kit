@@ -332,6 +332,149 @@ describe("replaceAll — loops", () => {
 });
 
 // ============================================================
+// Table row loops (#112) — markers typed inside table cells
+// ============================================================
+
+describe("replaceAll — table row loops (#112)", () => {
+  const rows = {
+    rows: [
+      { product: "Widget", qty: 5 },
+      { product: "Gadget", qty: 3 },
+    ],
+  };
+
+  test("in-cell markers repeat the whole row (open in cell 1, close in cell 2)", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row>" +
+          "<table:table-cell><text:p>{#rows}{product}</text:p></table:table-cell>" +
+          "<table:table-cell><text:p>{qty}{/rows}</text:p></table:table-cell>" +
+          "</table:table-row>" +
+          "</table:table>",
+        rows,
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Widget</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>5</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Gadget</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>3</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "</table:table>",
+    );
+  });
+
+  test("header row is preserved and static cell text repeats with the row", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row><table:table-cell><text:p>Product</text:p></table:table-cell><table:table-cell><text:p>Qty</text:p></table:table-cell></table:table-row>" +
+          "<table:table-row>" +
+          "<table:table-cell><text:p>Item: {#rows}{product}</text:p></table:table-cell>" +
+          "<table:table-cell><text:p>{qty}{/rows}</text:p></table:table-cell>" +
+          "</table:table-row>" +
+          "</table:table>",
+        rows,
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row><table:table-cell><text:p>Product</text:p></table:table-cell><table:table-cell><text:p>Qty</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>Item: Widget</text:p></table:table-cell><table:table-cell><text:p>5</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>Item: Gadget</text:p></table:table-cell><table:table-cell><text:p>3</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+  });
+
+  test("markers straddling two rows repeat the whole row span as a unit", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row><table:table-cell><text:p>{#rows}{product}</text:p></table:table-cell></table:table-row>" +
+          "<table:table-row><table:table-cell><text:p>{qty}{/rows}</text:p></table:table-cell></table:table-row>" +
+          "</table:table>",
+        rows,
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row><table:table-cell><text:p>Widget</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>5</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>Gadget</text:p></table:table-cell></table:table-row>" +
+        "<table:table-row><table:table-cell><text:p>3</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+  });
+
+  test("a nested table inside a loop-row cell does not fool the row boundary", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row>" +
+          "<table:table-cell><text:p>{#rows}{product}</text:p></table:table-cell>" +
+          "<table:table-cell>" +
+          "<table:table><table:table-row><table:table-cell><text:p>x</text:p></table:table-cell></table:table-row></table:table>" +
+          "<text:p>{qty}{/rows}</text:p>" +
+          "</table:table-cell>" +
+          "</table:table-row>" +
+          "</table:table>",
+        rows,
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Widget</text:p></table:table-cell>" +
+        "<table:table-cell><table:table><table:table-row><table:table-cell><text:p>x</text:p></table:table-cell></table:table-row></table:table><text:p>5</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>Gadget</text:p></table:table-cell>" +
+        "<table:table-cell><table:table><table:table-row><table:table-cell><text:p>x</text:p></table:table-cell></table:table-row></table:table><text:p>3</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "</table:table>",
+    );
+  });
+
+  test("falsy value drops the whole loop row, leaving other rows intact", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row><table:table-cell><text:p>keep</text:p></table:table-cell></table:table-row>" +
+          "<table:table-row><table:table-cell><text:p>{#rows}{product}</text:p></table:table-cell><table:table-cell><text:p>{qty}{/rows}</text:p></table:table-cell></table:table-row>" +
+          "</table:table>",
+        { rows: [] },
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row><table:table-cell><text:p>keep</text:p></table:table-cell></table:table-row>" +
+        "</table:table>",
+    );
+  });
+
+  test("nested same-name section inside a row loop strips only the outer markers", () => {
+    expect(
+      replaceAll(
+        "<table:table>" +
+          "<table:table-row>" +
+          "<table:table-cell><text:p>{#rows}{product}: {#rows}[{qty}]{/rows}</text:p></table:table-cell>" +
+          "<table:table-cell><text:p>end{/rows}</text:p></table:table-cell>" +
+          "</table:table-row>" +
+          "</table:table>",
+        { rows: [{ product: "W", rows: [{ qty: 1 }, { qty: 2 }] }] },
+      ),
+    ).toBe(
+      "<table:table>" +
+        "<table:table-row>" +
+        "<table:table-cell><text:p>W: [1][2]</text:p></table:table-cell>" +
+        "<table:table-cell><text:p>end</text:p></table:table-cell>" +
+        "</table:table-row>" +
+        "</table:table>",
+    );
+  });
+});
+
+// ============================================================
 // Nested sections
 // ============================================================
 

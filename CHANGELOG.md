@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.10] - 2026-07-07
+
+### Fixed
+
+- **Table row loops authored inside table cells now repeat the whole row** — when a template's loop markers were typed the natural way, with `{#tag}` in one cell and `{/tag}` in another cell of a table row, the engine repeated the raw text between the markers instead of the row, corrupting the table (a spurious extra cell, merged values). This was the only authorable placement in LibreOffice, since table text always lives inside a cell's paragraph — the previously-working placement (bare markers flanking a whole `<table:table-row>`) cannot be typed in Writer. The replacer now detects when a section's markers straddle table structure and repeats the enclosing `<table:table-row>` instead, stripping the markers; loops whose markers span several rows repeat the whole row span. Nested tables inside a loop row are handled via depth-counted row matching. Previously-supported placements (inline, whole-paragraph, and markers flanking a whole row) render exactly as before. Resolves the odf-kit side of [nextcloud/formvox#112](https://github.com/nextcloud/formvox/issues/112) (follow-up from [nextcloud/formvox#111](https://github.com/nextcloud/formvox/issues/111)). Thanks to [@Sam428-png](https://github.com/Sam428-png) for the diagnosis and upstream report.
+
 ## [0.13.9] - 2026-06-29
 
 ### Fixed
@@ -469,7 +475,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.9...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.10...HEAD
+[0.13.10]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.10
 [0.13.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.9
 [0.13.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.8
 [0.13.7]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.7

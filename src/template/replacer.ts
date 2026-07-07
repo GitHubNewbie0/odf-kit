@@ -15,8 +15,106 @@
  * Loop items inherit parent data, with item properties taking precedence.
  */
 
+import { tokenize } from "./healer.js";
+
 /** Template data — string-keyed, values can be anything. */
 export type TemplateData = Record<string, unknown>;
+
+/**
+ * Classify an XML tag string as opening/closing a <table:table-row>, or
+ * neither. Operates on a whole tag (including angle brackets) as produced by
+ * tokenize(), so attribute values containing '>' are already handled.
+ */
+function classifyRowTag(tag: string): "open" | "close" | "other" {
+  if (tag.startsWith("</")) {
+    return /^<\/table:table-row\s*>$/.test(tag) ? "close" : "other";
+  }
+  if (tag.endsWith("/>")) return "other"; // self-closing (empty) row holds no marker
+  return /^<table:table-row[\s>]/.test(tag) ? "open" : "other";
+}
+
+/**
+ * Is `fragment` a balanced run of complete sibling nodes — i.e. every element
+ * opened within it is also closed within it, with no unmatched closing tag?
+ *
+ * This is the discriminator between the two section paths. When the region
+ * between {#tag} and {/tag} is balanced, it is already a clean repeatable unit
+ * (inline text, a whole paragraph, or a whole bare row) and the existing path
+ * handles it. When it is unbalanced, the markers straddle a structural
+ * boundary (e.g. sit in different table cells) and we promote to whole rows.
+ *
+ * Uses tokenize() so '>' inside quoted attribute values never miscounts.
+ */
+function isBalancedSiblingRun(fragment: string): boolean {
+  let depth = 0;
+  for (const seg of tokenize(fragment)) {
+    if (seg.type !== "tag") continue;
+    const t = seg.content;
+    if (t.startsWith("<?") || t.startsWith("<!")) continue; // decl / comment / doctype
+    if (t.startsWith("</")) {
+      depth--;
+      if (depth < 0) return false; // unmatched close — straddles a boundary
+    } else if (!t.endsWith("/>")) {
+      depth++; // opening tag (self-closing tags do not change depth)
+    }
+  }
+  return depth === 0;
+}
+
+/**
+ * Find the innermost <table:table-row>…</table:table-row> span that encloses
+ * the character position `target`. Depth-counted, so a nested table inside a
+ * cell does not fool the boundary (its inner rows push and pop symmetrically).
+ *
+ * `target` is expected to fall inside a text segment (a placeholder literal
+ * always sits in text between tags). Returns null if the position is not
+ * inside any table row.
+ */
+function innermostRowSpan(xml: string, target: number): { start: number; end: number } | null {
+  const segs = tokenize(xml);
+  let offset = 0;
+  const stack: number[] = []; // start offsets of currently-open rows
+  let found: number | null = null; // enclosing row start, once target is located
+
+  for (const seg of segs) {
+    const segStart = offset;
+    const segEnd = offset + seg.content.length;
+
+    if (seg.type === "tag") {
+      const c = classifyRowTag(seg.content);
+      if (c === "open") {
+        stack.push(segStart);
+      } else if (c === "close") {
+        const s = stack.pop();
+        if (found !== null && s === found) return { start: found, end: segEnd };
+      }
+    } else if (found === null && segStart <= target && target < segEnd) {
+      if (stack.length === 0) return null; // target not inside any row
+      found = stack[stack.length - 1];
+    }
+
+    offset = segEnd;
+  }
+
+  return null;
+}
+
+/**
+ * The span of complete table rows to repeat when a section's markers straddle
+ * table structure: from the start of the row containing the open marker to the
+ * end of the row containing the close marker (one row if the same, a run of
+ * whole rows if they differ). Null if either marker is not inside a table row.
+ */
+function enclosingRowSpan(
+  xml: string,
+  openIdx: number,
+  closeIdx: number,
+): { start: number; end: number } | null {
+  const openRow = innermostRowSpan(xml, openIdx);
+  const closeRow = innermostRowSpan(xml, closeIdx);
+  if (!openRow || !closeRow) return null;
+  return { start: openRow.start, end: closeRow.end };
+}
 
 /**
  * Valid placeholder identifier: letter or underscore, then letters,
@@ -184,6 +282,58 @@ function replaceSections(xml: string, data: TemplateData): string {
     const rawCloseStart = findMatchingClose(result, tag, rawOpenEnd);
     if (rawCloseStart === -1) break; // Malformed — no matching close tag
     const rawCloseEnd = rawCloseStart + closeTag.length;
+
+    // Structural promotion: if the region between the markers is not a balanced
+    // run of complete siblings, the markers straddle a structural boundary
+    // (typically {#tag} in one table cell and {/tag} in another). Repeating the
+    // raw text run would corrupt the table; instead repeat the whole enclosing
+    // <table:table-row>(s). See table-row-loop-plan.md / FormVox #112.
+    const rawInner = result.slice(rawOpenEnd, rawCloseStart);
+    if (!isBalancedSiblingRun(rawInner)) {
+      const span = enclosingRowSpan(result, rawOpenStart, rawCloseStart);
+      if (span) {
+        const unit = result.slice(span.start, span.end);
+        // Strip exactly the outer markers by their known positions within the
+        // unit (close first, so the open offset stays valid). Any nested
+        // same-name section markers are preserved for the recursive pass.
+        const relOpen = rawOpenStart - span.start;
+        const relClose = rawCloseStart - span.start;
+        const stripped =
+          unit.slice(0, relOpen) +
+          unit.slice(relOpen + openTag.length, relClose) +
+          unit.slice(relClose + closeTag.length);
+
+        const before = result.slice(0, span.start);
+        const after = result.slice(span.end);
+        const value = resolveValue(data, tag);
+
+        let expansion: string;
+        if (Array.isArray(value)) {
+          expansion = value
+            .map((item) => {
+              const itemData =
+                typeof item === "object" && item !== null
+                  ? { ...data, ...(item as TemplateData) }
+                  : data;
+              return replaceAll(stripped, itemData);
+            })
+            .join("");
+        } else if (value) {
+          const sectionData =
+            typeof value === "object" && value !== null
+              ? { ...data, ...(value as TemplateData) }
+              : data;
+          expansion = replaceAll(stripped, sectionData);
+        } else {
+          expansion = "";
+        }
+
+        result = before + expansion + after;
+        continue; // rescan from the top, as the balanced path does
+      }
+      // Unbalanced but not inside table rows: fall through to the existing
+      // boundary-expansion path (best-effort, unchanged from prior behavior).
+    }
 
     // Expand boundaries outward through wrapping XML elements
     const openBound = expandBoundary(result, rawOpenStart, rawOpenEnd);
