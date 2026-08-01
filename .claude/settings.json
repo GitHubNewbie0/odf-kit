@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "../odf-kit-internal"
+    ],
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run format:check)",
+      "Bash(npm run format)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run validate-html)",
+      "Bash(npm run test:*)",
+      "Bash(npm ci)",
+      "Bash(node tools/*)",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm version:*)",
+      "Bash(npm install:*)",
+      "Bash(gh release:*)"
+    ],
+    "deny": [
+      "Bash(git add .)",
+      "Bash(git add -A)",
+      "Bash(git add --all)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  }
+}
