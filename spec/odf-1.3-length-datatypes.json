@@ -1,0 +1,3195 @@
+{
+  "source": "OpenDocument-v1.3-schema.rng (OASIS Standard, 2021-04-27)",
+  "datatypes": [
+    {
+      "name": "clipShape",
+      "units": [
+        "cm",
+        "mm",
+        "in",
+        "pt",
+        "pc"
+      ],
+      "percent": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "pattern": "rect\\([ ]*((-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc)))|(auto))([ ]*,[ ]*((-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc))))|(auto)){3}[ ]*\\)"
+    },
+    {
+      "name": "length",
+      "units": [
+        "cm",
+        "mm",
+        "in",
+        "pt",
+        "pc",
+        "px"
+      ],
+      "percent": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "pattern": "-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc)|(px))"
+    },
+    {
+      "name": "nonNegativeLength",
+      "units": [
+        "cm",
+        "mm",
+        "in",
+        "pt",
+        "pc",
+        "px"
+      ],
+      "percent": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "pattern": "([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc)|(px))"
+    },
+    {
+      "name": "nonNegativePixelLength",
+      "units": [
+        "px"
+      ],
+      "percent": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "pattern": "([0-9]+(\\.[0-9]*)?|\\.[0-9]+)(px)"
+    },
+    {
+      "name": "percent",
+      "units": [],
+      "percent": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "pattern": "-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)%"
+    },
+    {
+      "name": "point3D",
+      "units": [
+        "cm",
+        "mm",
+        "in",
+        "pt",
+        "pc"
+      ],
+      "percent": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "pattern": "\\([ ]*-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc))([ ]+-?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc))){2}[ ]*\\)"
+    },
+    {
+      "name": "positiveLength",
+      "units": [
+        "cm",
+        "mm",
+        "in",
+        "pt",
+        "pc",
+        "px"
+      ],
+      "percent": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "pattern": "([0-9]*[1-9][0-9]*(\\.[0-9]*)?|0+\\.[0-9]*[1-9][0-9]*|\\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px))"
+    },
+    {
+      "name": "signedZeroToHundredPercent",
+      "units": [],
+      "percent": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "pattern": "-?([0-9]?[0-9](\\.[0-9]*)?|100(\\.0*)?|\\.[0-9]+)%"
+    },
+    {
+      "name": "zeroToHundredPercent",
+      "units": [],
+      "percent": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "pattern": "([0-9]?[0-9](\\.[0-9]*)?|100(\\.0*)?|\\.[0-9]+)%"
+    }
+  ],
+  "attributes": [
+    {
+      "attribute": "chart:hole-size",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "chart:symbol-height",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "chart:symbol-width",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:back-scale",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:depth",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:distance",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:edge-rounding",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:focal-length",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "dr3d:shininess",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:blue",
+      "datatypes": [
+        "signedZeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:border",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:caption-escape",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:caption-gap",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:caption-line-length",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:caption-point-x",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:caption-point-y",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:contrast",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:corner-radius",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "draw:cx",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:cy",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:distance",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "draw:dots1-length",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:dots2-length",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:end",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:end-guide",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:end-intensity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:end-line-spacing-horizontal",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:end-line-spacing-vertical",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-brightness",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-depth",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [
+        "double"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-diffusion",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-first-light-level",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-second-light-level",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-shininess",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-specularity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:extrusion-viewpoint",
+      "datatypes": [
+        "point3D"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:fill-image-height",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:fill-image-ref-point-x",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:fill-image-ref-point-y",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:fill-image-width",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:frame-margin-horizontal",
+      "datatypes": [
+        "nonNegativePixelLength"
+      ],
+      "units": [
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:frame-margin-vertical",
+      "datatypes": [
+        "nonNegativePixelLength"
+      ],
+      "units": [
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:gamma",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:green",
+      "datatypes": [
+        "signedZeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:guide-distance",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:guide-overhang",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:image-opacity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:line-distance",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:line-skew",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:luminance",
+      "datatypes": [
+        "signedZeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:marker-end-width",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:marker-start-width",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:opacity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "draw:red",
+      "datatypes": [
+        "signedZeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:shadow-offset-x",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:shadow-offset-y",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:shadow-opacity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:sharpness",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:start",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:start-guide",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:start-intensity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:start-line-spacing-horizontal",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:start-line-spacing-vertical",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:tile-repeat-offset",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [
+        "horizontal",
+        "vertical"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:visible-area-height",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:visible-area-left",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:visible-area-top",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "draw:visible-area-width",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:clip",
+      "datatypes": [
+        "clipShape"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "auto"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:column-gap",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:end-indent",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:font-size",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:height",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:letter-spacing",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "normal"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:line-height",
+      "datatypes": [
+        "nonNegativeLength",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "normal"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:margin",
+      "datatypes": [
+        "nonNegativeLength",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:margin-bottom",
+      "datatypes": [
+        "nonNegativeLength",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:margin-left",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "fo:margin-right",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:margin-top",
+      "datatypes": [
+        "nonNegativeLength",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:max-height",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "fo:max-width",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "fo:min-height",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "fo:min-width",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "fo:padding",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:padding-bottom",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:padding-left",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:padding-right",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:padding-top",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:page-height",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:page-width",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:space-after",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:space-before",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:start-indent",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "fo:text-indent",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "fo:width",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "presentation:start-scale",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "style:background-transparency",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:border-line-width",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:border-line-width-bottom",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:border-line-width-left",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:border-line-width-right",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:border-line-width-top",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:column-width",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:diagonal-bl-tr-widths",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:diagonal-tl-br-widths",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:distance",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:distance-after-sep",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:distance-before-sep",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:font-size-asian",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:font-size-complex",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:font-size-rel",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:font-size-rel-asian",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:font-size-rel-complex",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:footnote-max-height",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:height",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:layout-grid-base-height",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:layout-grid-base-width",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:layout-grid-ruby-height",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:leader-width",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "auto",
+        "bold",
+        "medium",
+        "normal",
+        "thick",
+        "thin"
+      ],
+      "otherTypes": [
+        "positiveInteger"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:line-height-at-least",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:line-spacing",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:min-row-height",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:position",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "style:rel-height",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "scale",
+        "scale-min"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:rel-width",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "scale",
+        "scale-min"
+      ],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "style:row-height",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:scale-to",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:tab-stop-distance",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:text-line-through-width",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "auto",
+        "bold",
+        "medium",
+        "normal",
+        "thick",
+        "thin"
+      ],
+      "otherTypes": [
+        "positiveInteger"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:text-overline-width",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "auto",
+        "bold",
+        "medium",
+        "normal",
+        "thick",
+        "thin"
+      ],
+      "otherTypes": [
+        "positiveInteger"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:text-position",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "sub",
+        "super"
+      ],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:text-scale",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:text-underline-width",
+      "datatypes": [
+        "percent",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [
+        "auto",
+        "bold",
+        "medium",
+        "normal",
+        "thick",
+        "thin"
+      ],
+      "otherTypes": [
+        "positiveInteger"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "style:width",
+      "datatypes": [
+        "length",
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "style:wrap-dynamic-threshold",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:cx",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "svg:cy",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "svg:font-size",
+      "datatypes": [
+        "positiveLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": true,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:fx",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:fy",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:height",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 6
+    },
+    {
+      "attribute": "svg:offset",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [
+        "double"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:r",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 3
+    },
+    {
+      "attribute": "svg:rx",
+      "datatypes": [
+        "length",
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "svg:ry",
+      "datatypes": [
+        "length",
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 2
+    },
+    {
+      "attribute": "svg:stroke-opacity",
+      "datatypes": [
+        "zeroToHundredPercent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [
+        "double"
+      ],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:stroke-width",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "svg:width",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 7
+    },
+    {
+      "attribute": "svg:x",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 6
+    },
+    {
+      "attribute": "svg:x1",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 4
+    },
+    {
+      "attribute": "svg:x2",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 4
+    },
+    {
+      "attribute": "svg:y",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 7
+    },
+    {
+      "attribute": "svg:y1",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 4
+    },
+    {
+      "attribute": "svg:y2",
+      "datatypes": [
+        "length",
+        "percent"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 4
+    },
+    {
+      "attribute": "table:end-x",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "table:end-y",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:animation-steps",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:bullet-relative-size",
+      "datatypes": [
+        "percent"
+      ],
+      "units": [],
+      "percentAllowed": true,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:list-tab-stop-position",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:min-label-distance",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:min-label-width",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:offset",
+      "datatypes": [
+        "nonNegativeLength"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": false,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    },
+    {
+      "attribute": "text:space-before",
+      "datatypes": [
+        "length"
+      ],
+      "units": [
+        "cm",
+        "in",
+        "mm",
+        "pc",
+        "pt",
+        "px"
+      ],
+      "percentAllowed": false,
+      "negativeAllowed": true,
+      "zeroExcluded": false,
+      "keywords": [],
+      "otherTypes": [],
+      "declarations": 1
+    }
+  ]
+}

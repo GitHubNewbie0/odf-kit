@@ -1,0 +1,79 @@
+# P2 — style:master-page-name attribute
+# Source: OpenDocument-v1.3-os-part3-schema.html (OASIS Standard 2021-04-27)
+
+--- match at extracted-line 1615 ---
+19.499 style:list-level
+19.500 style:list-style-name
+19.501 style:master-page-name
+19.502 style:name
+19.502.1 General
+19.502.2 <number:boolean-style>, <number:currency-style>, <number:date-style>, <number:number-style>, <number:percentage-style>, <number:text-style>, <number:time-style>, <style:master-page>, <style:page-layout>, <style:presentation-page-layout>, <style:style>, <text:list-style>, <text:outline-style>
+19.502.3 <style:font-face>
+19.503 style:next-style-name
+19.503.1 General
+19.503.2 <style:master-page>
+19.503.3 <style:style>
+19.504 style:num-format
+19.505 style:num-letter-sync
+19.506 style:num-prefix
+19.507 style:num-suffix
+19.508 style:page-layout-name
+19.509 style:page-usage
+
+--- match at extracted-line 11619 ---
+The style:list-style-name attribute is usable with the following element: <style:style> 16.2.
+The values of the style:list-style-name attribute are a value of type styleName 18.3.31 or an empty string.
+19.501 style:master-page-name
+The style:master-page-name attribute defines a master page for a paragraph or table style. This applies to automatic and common styles. <style:master-page> 16.9.
+If this attribute is associated with a style, a page break is inserted when the style is applied and the specified master page is applied to the resulting page.
+This attribute is ignored if it is associated with a paragraph style that is applied to a paragraph within a table.
+The style:master-page-name attribute is usable with the following element: <style:style> 16.2.
+The style:master-page-name attribute has the data type styleNameRef 18.3.32.
+19.502 style:name
+19.502.1 General
+The style:name attribute specifies names that reference style mechanisms.
+19.502.2 <number:boolean-style>, <number:currency-style>, <number:date-style>, <number:number-style>, <number:percentage-style>, <number:text-style>, <number:time-style>, <style:master-page>, <style:page-layout>, <style:presentation-page-layout>, <style:style>, <text:list-style>, <text:outline-style>
+The style:name attribute specifies the name of a:
+•data style - It can be used with all data style elements.
+•list style
+•master page - Each master page is referenced using the page name. The name specified shall be unique to the document instance.
+•outline style - The outline style as a list style can be referenced by the style:list-style-name 19.500 attribute.
+
+--- match at extracted-line 6528 ---
+In all other cases, or if a value for the formatting property has not been found by any of the family specific rules, a default style 16.4 that has the same family as the style initially declared sets the value. If a value has not been found by these steps, but this specification defines a default value, then this default value is used. In all remaining cases an implementation-dependent value is used.
+The <style:style> element is usable within the following elements: <office:automatic-styles> 3.15.3 and <office:styles> 3.15.2.
+The <style:style> element has the following attributes: style:auto-update 19.467, style:class 19.470, style:data-style-name 19.473, style:default-outline-level 19.474, style:display-name 19.476, style:family 19.480, style:list-level 19.499, style:list-style-name 19.500, style:master-page-name 19.501, style:name 19.502, style:next-style-name 19.503, style:parent-style-name 19.510 and style:percentage-data-style-name 19.511.
+The <style:style> element has the following child elements: <style:chart-properties> 17.22, <style:drawing-page-properties> 17.25, <style:graphic-properties> 17.21, <style:map> 16.3, <style:paragraph-properties> 17.6, <style:ruby-properties> 17.10, <style:section-properties> 17.11, <style:table-cell-properties> 17.18, <style:table-column-properties> 17.16, <style:table-properties> 17.15, <style:table-row-properties> 17.17, <style:text-properties> 16.29.29.
+16.3 <style:map>
+The <style:map> element represents a condition, which if met, results in the mapping of a style. A style that contains one or more mappings is called a conditional style. Each condition is represented by a unique <style:map> element.
+Conditional styles are supported by:
+•paragraph styles contained in text documents
+•table cell styles contained in spreadsheets
+•data styles
+The <style:map> element is usable within the following elements: <number:boolean-style> 16.29.24, <number:currency-style> 16.29.8, <number:date-style> 16.29.11, <number:number-style> 16.29.2, <number:percentage-style> 16.29.10, <number:text-style> 16.29.26, <number:time-style> 16.29.19 and <style:style> 16.2.
+The <style:map> element has the following attributes: style:apply-style-name 19.466, style:base-cell-address 19.468 and style:condition 19.472.
+The <style:map> element has no child elements.
+16.4 <style:default-style>
+The <style:default-style> element represents default styles. A default style specifies default formatting properties for a style family. These defaults are used if a formatting property is neither specified by an automatic nor a common style. Default styles exist for all style families that are represented by the <style:style> element specified by the style:family attribute 19.480.
+An OpenDocument document should contain the default styles of the style families for which are used in common or automatic styles in the document.
+The <style:default-style> element is usable within the following element: <office:styles> 3.15.2.
+
+--- match at extracted-line 6571 ---
+All documents shall contain at least one master page element.
+If a text or spreadsheet document is displayed in a paged layout, master pages are used to generate a sequence of pages containing the document content. When a page is created, an empty page is generated with the properties of the master page and the static content of the master page. The body of the page is then filled with content. A single master page can be used to created multiple pages within a document.
+In text and spreadsheet documents, a master page can be assigned to paragraph and table styles using a style:master-page-name attribute. Each time the paragraph or table style is applied to text, a page break is inserted before the paragraph or table. A page that starts at the page break position uses the specified master page.
+Note: The OpenDocument paging methodology differs significantly from the methodology used in [XSL]. In XSL, headers and footers are contained within page sequences that also contain the document content. In the OpenDocument format, headers and footers are contained in page styles. With either approach, the content of headers and footers can be changed or omitted without affecting the document content.
+The <style:master-page> element is usable within the following element: <office:master-styles> 3.15.4.
+The <style:master-page> element has the following attributes: draw:style-name 19.219, style:display-name 19.476, style:name 19.502, style:next-style-name 19.503 and style:page-layout-name 19.508.
+The <style:master-page> element has the following child elements: <anim:animate> 15.2.2, <anim:animateColor> 15.2.6, <anim:animateMotion> 15.2.5, <anim:animateTransform> 15.2.3, <anim:audio> 15.5, <anim:command> 15.6.1, <anim:iterate> 15.4.4, <anim:par> 15.4.2, <anim:seq> 15.4.3, <anim:set> 15.2.4, <anim:transitionFilter> 15.2.7, <dr3d:scene> 10.5.2, <draw:a> 10.4.12, <draw:caption> 10.3.11, <draw:circle> 10.3.8, <draw:connector> 10.3.10, <draw:control> 10.3.13, <draw:custom-shape> 10.6.1, <draw:ellipse> 10.3.9, <draw:frame> 10.4.2, <draw:g> 10.3.15, <draw:layer-set> 10.2.2, <draw:line> 10.3.3, <draw:measure> 10.3.12, <draw:page-thumbnail> 10.3.14, <draw:path> 10.3.7, <draw:polygon> 10.3.5, <draw:polyline> 10.3.4, <draw:rect> 10.3.2, <draw:regular-polygon> 10.3.6, <office:forms> 13.2, <presentation:notes> 16.19, <style:footer> 16.12, <style:footer-first> 16.13, <style:footer-left> 16.15, <style:header> 16.10, <style:header-first> 16.11 and <style:header-left> 16.14.
+16.10 <style:header>
+The <style:header> element represents the content of a header in a <style:master-page> element.
+The <style:header> element is usable within the following element: <style:master-page> 16.9.
+The <style:header> element has the following attribute: style:display 19.475.
+The <style:header> element has the following child elements: <style:region-center> 16.17, <style:region-left> 16.16, <style:region-right> 16.18, <table:table> 9.1.2, <text:alphabetical-index> 8.8, <text:alphabetical-index-auto-mark-file> 8.8.3, <text:bibliography> 8.9, <text:change> 5.5.8.4, <text:change-end> 5.5.8.3, <text:change-start> 5.5.8.2, <text:dde-connection-decls> 14.7.2, <text:h> 5.1.2, <text:illustration-index> 8.4, <text:index-title> 8.2.3, <text:list> 5.3.1, <text:object-index> 8.6, <text:p> 5.1.3, <text:section> 5.4, <text:sequence-decls> 7.4.11, <text:table-index> 8.5, <text:table-of-content> 8.3, <text:tracked-changes> 5.5.2, <text:user-field-decls> 7.4.7, <text:user-index> 8.7 and <text:variable-decls> 7.4.2.
+16.11 <style:header-first>
+The <style:header-first> element represents the content of a header for a first page, if different from the left/right page in a <style:master-page> element.
+The term "first page" means the first page to which the page style is applied, regardless of any numbering. If a different page style is applied in between two applications of a page style that has the <style:header-first> element, each of the applications of the page style has its own first page.
+The <style:header-first> element is usable within the following element: <style:master-page> 16.9.
+The <style:header-first> element has the following attribute: style:display 19.475.
+

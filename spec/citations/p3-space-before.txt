@@ -1,0 +1,29 @@
+
+  spec\OpenDocument-v1.3-schema.rng:10173:        </rng:attribute>
+  spec\OpenDocument-v1.3-schema.rng:10174:      </rng:optional>
+  spec\OpenDocument-v1.3-schema.rng:10175:      <rng:optional>
+  spec\OpenDocument-v1.3-schema.rng:10176:        <rng:attribute name="fo:end-indent">
+  spec\OpenDocument-v1.3-schema.rng:10177:          <rng:ref name="length"/>
+  spec\OpenDocument-v1.3-schema.rng:10178:        </rng:attribute>
+  spec\OpenDocument-v1.3-schema.rng:10179:      </rng:optional>
+  spec\OpenDocument-v1.3-schema.rng:10180:      <rng:optional>
+> spec\OpenDocument-v1.3-schema.rng:10181:        <rng:attribute name="fo:space-before">
+  spec\OpenDocument-v1.3-schema.rng:10182:          <rng:ref name="length"/>
+  spec\OpenDocument-v1.3-schema.rng:10183:        </rng:attribute>
+  spec\OpenDocument-v1.3-schema.rng:10184:      </rng:optional>
+  spec\OpenDocument-v1.3-schema.rng:10185:      <rng:optional>
+> spec\OpenDocument-v1.3-schema.rng:10186:        <rng:attribute name="fo:space-after">
+  spec\OpenDocument-v1.3-schema.rng:10187:          <rng:ref name="length"/>
+  spec\OpenDocument-v1.3-schema.rng:10188:        </rng:attribute>
+  spec\OpenDocument-v1.3-schema.rng:11890:    <rng:element name="style:list-level-properties">
+  spec\OpenDocument-v1.3-schema.rng:11891:      <rng:ref name="style-list-level-properties-content-strict"/>
+  spec\OpenDocument-v1.3-schema.rng:11892:    </rng:element>
+  spec\OpenDocument-v1.3-schema.rng:11893:  </rng:define>
+  spec\OpenDocument-v1.3-schema.rng:11894:  <rng:define name="style-list-level-properties-attlist">
+  spec\OpenDocument-v1.3-schema.rng:11895:    <rng:interleave>
+  spec\OpenDocument-v1.3-schema.rng:11896:      <rng:ref name="common-text-align"/>
+  spec\OpenDocument-v1.3-schema.rng:11897:      <rng:optional>
+> spec\OpenDocument-v1.3-schema.rng:11898:        <rng:attribute name="text:space-before">
+  spec\OpenDocument-v1.3-schema.rng:11899:          <rng:ref name="length"/>
+  spec\OpenDocument-v1.3-schema.rng:11900:        </rng:attribute>
+

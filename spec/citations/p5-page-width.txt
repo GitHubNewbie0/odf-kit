@@ -1,0 +1,75 @@
+# P5 — fo:page-width positivity
+# Source: OpenDocument-v1.3-os-part3-schema.html (OASIS Standard 2021-04-27)
+
+--- match at extracted-line 2595 ---
+20.215 fo:page-height
+20.216 fo:page-width
+20.217 fo:padding
+20.218 fo:padding-bottom
+20.219 fo:padding-left
+20.220 fo:padding-right
+20.221 fo:padding-top
+20.222 fo:script
+20.223 fo:text-align
+20.223.1 <style:paragraph-properties>
+20.223.2 <style:list-level-properties>
+20.224 fo:text-align-last
+20.225 fo:text-indent
+20.226 fo:text-shadow
+20.227 fo:text-transform
+20.228 fo:widows
+
+--- match at extracted-line 18952 ---
+The fo:page-height attribute has the data type length 18.3.18.
+20.216 fo:page-width
+See §7.25.15 of [XSL].
+The fo:page-width attribute is usable with the following element: <style:page-layout-properties> 17.2.
+The fo:page-width attribute has the data type length 18.3.18.
+20.217 fo:padding
+See §7.29.15 of [XSL].
+The fo:padding attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding attribute has the data type nonNegativeLength 18.3.20.
+20.218 fo:padding-bottom
+See §7.7.36 of [XSL].
+The fo:padding-bottom attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding-bottom attribute has the data type nonNegativeLength 18.3.20.
+20.219 fo:padding-left
+See §7.7.37 of [XSL].
+The fo:padding-left attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+
+--- match at extracted-line 18954 ---
+See §7.25.15 of [XSL].
+The fo:page-width attribute is usable with the following element: <style:page-layout-properties> 17.2.
+The fo:page-width attribute has the data type length 18.3.18.
+20.217 fo:padding
+See §7.29.15 of [XSL].
+The fo:padding attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding attribute has the data type nonNegativeLength 18.3.20.
+20.218 fo:padding-bottom
+See §7.7.36 of [XSL].
+The fo:padding-bottom attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding-bottom attribute has the data type nonNegativeLength 18.3.20.
+20.219 fo:padding-left
+See §7.7.37 of [XSL].
+The fo:padding-left attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding-left attribute has the data type nonNegativeLength 18.3.20.
+20.220 fo:padding-right
+
+--- match at extracted-line 18955 ---
+The fo:page-width attribute is usable with the following element: <style:page-layout-properties> 17.2.
+The fo:page-width attribute has the data type length 18.3.18.
+20.217 fo:padding
+See §7.29.15 of [XSL].
+The fo:padding attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding attribute has the data type nonNegativeLength 18.3.20.
+20.218 fo:padding-bottom
+See §7.7.36 of [XSL].
+The fo:padding-bottom attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding-bottom attribute has the data type nonNegativeLength 18.3.20.
+20.219 fo:padding-left
+See §7.7.37 of [XSL].
+The fo:padding-left attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-cell-properties> 17.18.
+The fo:padding-left attribute has the data type nonNegativeLength 18.3.20.
+20.220 fo:padding-right
+See §7.7.38 of [XSL].
+

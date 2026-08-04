@@ -1,0 +1,119 @@
+# P1 — style:default-style semantics
+# Source: OpenDocument-v1.3-os-part3-schema.html (OASIS Standard 2021-04-27)
+
+--- match at extracted-line 6539 ---
+The <style:map> element has the following attributes: style:apply-style-name 19.466, style:base-cell-address 19.468 and style:condition 19.472.
+The <style:map> element has no child elements.
+16.4 <style:default-style>
+The <style:default-style> element represents default styles. A default style specifies default formatting properties for a style family. These defaults are used if a formatting property is neither specified by an automatic nor a common style. Default styles exist for all style families that are represented by the <style:style> element specified by the style:family attribute 19.480.
+An OpenDocument document should contain the default styles of the style families for which are used in common or automatic styles in the document.
+The <style:default-style> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-style> element has the following attributes: style:family 19.480.
+The <style:default-style> element has the following child elements: <style:chart-properties> 17.22, <style:drawing-page-properties> 17.25, <style:graphic-properties> 17.21, <style:paragraph-properties> 17.6, <style:ruby-properties> 17.10, <style:section-properties> 17.11, <style:table-cell-properties> 17.18, <style:table-column-properties> 17.16, <style:table-properties> 17.15, <style:table-row-properties> 17.17, <style:text-properties> 16.29.29.
+16.5 <style:page-layout>
+The <style:page-layout> element represents the styles that specify the formatting properties of a page.
+The <style:page-layout> element is usable within the following element: <office:automatic-styles> 3.15.3.
+The <style:page-layout> element has the following attributes: style:name 19.502 and style:page-usage 19.509.
+The <style:page-layout> element has the following child elements: <style:footer-style> 16.7, <style:header-style> 16.6 and <style:page-layout-properties> 17.2.
+16.6 <style:header-style>
+The <style:header-style> element specifies the formatting properties for a header element.
+The <style:header-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:header-style> element has no attributes.
+The <style:header-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.7 <style:footer-style>
+The <style:footer-style> element specifies the formatting properties for a footer element.
+The <style:footer-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:footer-style> element has no attributes.
+The <style:footer-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.8 <style:default-page-layout>
+The <style:default-page-layout> element specifies default formatting properties for page layouts. These defaults are used if a formatting property is not specified in a <style:page-layout> 16.5 element. The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element has no attributes.
+
+--- match at extracted-line 3330 ---
+The <office:styles> element is usable within the following elements: <office:document> 3.1.2 and <office:document-styles> 3.1.3.3.
+The <office:styles> element has no attributes.
+The <office:styles> element has the following child elements: <draw:fill-image> 16.42.6, <draw:gradient> 16.42.1, <draw:hatch> 16.42.5, <draw:marker> 16.42.8, <draw:opacity> 16.42.7, <draw:stroke-dash> 16.42.9, <number:boolean-style> 16.29.24, <number:currency-style> 16.29.8, <number:date-style> 16.29.11, <number:number-style> 16.29.2, <number:percentage-style> 16.29.10, <number:text-style> 16.29.26, <number:time-style> 16.29.19, <style:default-page-layout> 16.8, <style:default-style> 16.4, <style:presentation-page-layout> 16.43, <style:style> 16.2, <svg:linearGradient> 16.42.2, <svg:radialGradient> 16.42.3, <table:table-template> 16.20, <text:bibliography-configuration> 16.31.6, <text:linenumbering-configuration> 16.31.1, <text:list-style> 16.32, <text:notes-configuration> 16.31.3 and <text:outline-style> 16.36.
+3.15.3 <office:automatic-styles>
+The <office:automatic-styles> element contains automatic styles used in a document.
+An automatic style is a set of formatting properties treated as properties of the object to which the style is assigned.
+Note: Common and automatic styles behave differently in OpenDocument editing consumers. Common styles present to a user as a named set of formatting properties. The formatting properties of an automatic style present to a user as properties of the object to which the style is applied.
+The <office:automatic-styles> element is usable within the following elements: <office:document> 3.1.2, <office:document-content> 3.1.3.2 and <office:document-styles> 3.1.3.3.
+The <office:automatic-styles> element has no attributes.
+The <office:automatic-styles> element has the following child elements: <number:boolean-style> 16.29.24, <number:currency-style> 16.29.8, <number:date-style> 16.29.11, <number:number-style> 16.29.2, <number:percentage-style> 16.29.10, <number:text-style> 16.29.26, <number:time-style> 16.29.19, <style:page-layout> 16.5, <style:style> 16.2 and <text:list-style> 16.32.
+3.15.4 <office:master-styles>
+The <office:master-styles> element contains master styles that are used in a document. A master style contains formatting and other content that is displayed with document content when the style is used.
+The <office:master-styles> element is usable within the following elements: <office:document> 3.1.2 and <office:document-styles> 3.1.3.3.
+The <office:master-styles> element has no attributes.
+The <office:master-styles> element has the following child elements: <draw:layer-set> 10.2.2, <style:handout-master> 10.2.1 and <style:master-page> 16.9.
+3.16 Document Signatures
+An OpenDocument document that is stored in a package may have one or more digital signatures applied to the package.
+Document signatures are stored in a file called META-INF/documentsignatures.xml in the package as described in section 3.5 of the OpenDocument specification Part2. Document signatures shall contain a <ds:Reference> element for each file within the package, with the exception that <ds:Reference> elements for the META-INF/documentsignatures.xml file containing the signature, and any files contained in the package whose relative path starts with "external-data/" should be omitted.
+Signatures other than document signatures are implementation-defined.
+3.17 Foreign Elements and Attributes
+OpenDocument extended documents may contain elements and attributes not defined by the OpenDocument schema. Elements and attributes not defined by the OpenDocument schema are called foreign elements and attributes. Foreign elements and attributes shall not use a namespace listed in tables 1, 2 or 3 of section 1.5.
+If a foreign element has a <text:h> 5.1.2 or <text:p> 5.1.3 ancestor element, and is a child element of an element for which the OpenDocument schema permits the inclusion of character data, and if the OpenDocument schema permits the inclusion of character data for all its ancestors up to the <text:p> or <text:h> element ancestor element, or a <text:ruby-base> 6.4.2 ancestor element, then the element's content may be interpreted by conforming OpenDocument consumers, and the document itself shall be valid against the OpenDocument schema as if the foreign element's start- and end-tags or its empty-element-tag are removed.
+For a foreign element that occurs at another location, conforming consumers should not interpret but may preserve the element’s content.
+Conforming extended producers should not use foreign elements and attributes for features defined in the OpenDocument specification.
+When a conforming consumer encounters an OpenDocument defined attribute that has a value that is not defined by OpenDocument, it should:
+1)If the attribute has a specified default value, use its default value, or
+2)If the attribute does not have a specified default value, ignore the attribute.
+
+--- match at extracted-line 6540 ---
+The <style:map> element has no child elements.
+16.4 <style:default-style>
+The <style:default-style> element represents default styles. A default style specifies default formatting properties for a style family. These defaults are used if a formatting property is neither specified by an automatic nor a common style. Default styles exist for all style families that are represented by the <style:style> element specified by the style:family attribute 19.480.
+An OpenDocument document should contain the default styles of the style families for which are used in common or automatic styles in the document.
+The <style:default-style> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-style> element has the following attributes: style:family 19.480.
+The <style:default-style> element has the following child elements: <style:chart-properties> 17.22, <style:drawing-page-properties> 17.25, <style:graphic-properties> 17.21, <style:paragraph-properties> 17.6, <style:ruby-properties> 17.10, <style:section-properties> 17.11, <style:table-cell-properties> 17.18, <style:table-column-properties> 17.16, <style:table-properties> 17.15, <style:table-row-properties> 17.17, <style:text-properties> 16.29.29.
+16.5 <style:page-layout>
+The <style:page-layout> element represents the styles that specify the formatting properties of a page.
+The <style:page-layout> element is usable within the following element: <office:automatic-styles> 3.15.3.
+The <style:page-layout> element has the following attributes: style:name 19.502 and style:page-usage 19.509.
+The <style:page-layout> element has the following child elements: <style:footer-style> 16.7, <style:header-style> 16.6 and <style:page-layout-properties> 17.2.
+16.6 <style:header-style>
+The <style:header-style> element specifies the formatting properties for a header element.
+The <style:header-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:header-style> element has no attributes.
+The <style:header-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.7 <style:footer-style>
+The <style:footer-style> element specifies the formatting properties for a footer element.
+The <style:footer-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:footer-style> element has no attributes.
+The <style:footer-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.8 <style:default-page-layout>
+The <style:default-page-layout> element specifies default formatting properties for page layouts. These defaults are used if a formatting property is not specified in a <style:page-layout> 16.5 element. The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element has no attributes.
+The <style:default-page-layout> element has the following child elements: <style:footer-style> 16.7, <style:header-style> 16.6 and <style:page-layout-properties> 17.2.
+
+--- match at extracted-line 6542 ---
+The <style:default-style> element represents default styles. A default style specifies default formatting properties for a style family. These defaults are used if a formatting property is neither specified by an automatic nor a common style. Default styles exist for all style families that are represented by the <style:style> element specified by the style:family attribute 19.480.
+An OpenDocument document should contain the default styles of the style families for which are used in common or automatic styles in the document.
+The <style:default-style> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-style> element has the following attributes: style:family 19.480.
+The <style:default-style> element has the following child elements: <style:chart-properties> 17.22, <style:drawing-page-properties> 17.25, <style:graphic-properties> 17.21, <style:paragraph-properties> 17.6, <style:ruby-properties> 17.10, <style:section-properties> 17.11, <style:table-cell-properties> 17.18, <style:table-column-properties> 17.16, <style:table-properties> 17.15, <style:table-row-properties> 17.17, <style:text-properties> 16.29.29.
+16.5 <style:page-layout>
+The <style:page-layout> element represents the styles that specify the formatting properties of a page.
+The <style:page-layout> element is usable within the following element: <office:automatic-styles> 3.15.3.
+The <style:page-layout> element has the following attributes: style:name 19.502 and style:page-usage 19.509.
+The <style:page-layout> element has the following child elements: <style:footer-style> 16.7, <style:header-style> 16.6 and <style:page-layout-properties> 17.2.
+16.6 <style:header-style>
+The <style:header-style> element specifies the formatting properties for a header element.
+The <style:header-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:header-style> element has no attributes.
+The <style:header-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.7 <style:footer-style>
+The <style:footer-style> element specifies the formatting properties for a footer element.
+The <style:footer-style> element is usable within the following elements: <style:default-page-layout> 16.8 and <style:page-layout> 16.5.
+The <style:footer-style> element has no attributes.
+The <style:footer-style> element has the following child element: <style:header-footer-properties> 17.5.
+16.8 <style:default-page-layout>
+The <style:default-page-layout> element specifies default formatting properties for page layouts. These defaults are used if a formatting property is not specified in a <style:page-layout> 16.5 element. The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element is usable within the following element: <office:styles> 3.15.2.
+The <style:default-page-layout> element has no attributes.
+The <style:default-page-layout> element has the following child elements: <style:footer-style> 16.7, <style:header-style> 16.6 and <style:page-layout-properties> 17.2.
+16.9 <style:master-page>
+In text and spreadsheet documents, the <style:master-page> element contains the content of headers and footers. For these types of documents, consumers may generate a sequence of pages by making use of a single master page or a set of master pages.
+

@@ -1,0 +1,48 @@
+--- 20.205 fo:margin ---
+20.205 fo:margin
+See §7.29.14 of [XSL].
+In the OpenDocument XSL-compatible namespace, the fo:margin attribute does not support auto and inherit values.
+The fo:margin attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-properties> 17.15.
+The values of the fo:margin attribute are a value of type nonNegativeLength 18.3.20 or a value of type percent 18.3.23.
+20.206 fo:margin-bottom
+See §7.10.2 of [XSL].
+If this attribute is contained in a <style:paragraph-properties> 17.6 element, its value may be a percentage that refers to the corresponding margin of a parent style.
+In the OpenDocument XSL-compatible namespace, the fo:margin-bottom attribute does not support the auto and inherit values.
+The fo:margin-bottom attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-properties> 17.15.
+The values of the fo:margin-bottom attribute are a value of type nonNegativeLength 18.3.20 or a value of type percent 18.3.23.
+20.207 fo:margin-left
+See §7.10.3 of [XSL].
+If this attribute is contained in a <style:paragraph-properties> 17.6 element, its value may be a percentage that refers to the corresponding margin of a parent style.
+
+--- 20.206 fo:margin-bottom ---
+20.206 fo:margin-bottom
+See §7.10.2 of [XSL].
+If this attribute is contained in a <style:paragraph-properties> 17.6 element, its value may be a percentage that refers to the corresponding margin of a parent style.
+In the OpenDocument XSL-compatible namespace, the fo:margin-bottom attribute does not support the auto and inherit values.
+The fo:margin-bottom attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-properties> 17.15.
+The values of the fo:margin-bottom attribute are a value of type nonNegativeLength 18.3.20 or a value of type percent 18.3.23.
+20.207 fo:margin-left
+See §7.10.3 of [XSL].
+If this attribute is contained in a <style:paragraph-properties> 17.6 element, its value may be a percentage that refers to the corresponding margin of a parent style.
+Tables that align to the left or to the center ignore right margins, and tables that align to the right or to the center ignore left margins.
+The fo:margin-left attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6, <style:section-properties> 17.11 and <style:table-properties> 17.15.
+The values of the fo:margin-left attribute are a value of type length 18.3.18 or a value of type percent 18.3.23.
+20.208 fo:margin-right
+See §7.10.4 of [XSL].
+
+--- 20.209 fo:margin-top ---
+20.209 fo:margin-top
+See §7.10.1 of [XSL].
+If this attribute is contained in a <style:paragraph-properties> 17.6 element, its value may be a percentage that refers to the corresponding margin of a parent style.
+In the OpenDocument XSL-compatible namespace, the fo:margin-top attribute does not support the inherit value.
+The fo:margin-top attribute is usable with the following elements: <style:graphic-properties> 17.21, <style:header-footer-properties> 17.5, <style:page-layout-properties> 17.2, <style:paragraph-properties> 17.6 and <style:table-properties> 17.15.
+The values of the fo:margin-top attribute are a value of type nonNegativeLength 18.3.20 or a value of type percent 18.3.23.
+20.210 fo:max-height
+The fo:max-height attribute specifies a default maximum height for new frames that are created using a graphics style. See 19.238.
+The fo:max-height attribute is usable with the following element: <style:graphic-properties> 17.21.
+The values of the fo:max-height attribute are a value of type length 18.3.18 or a value of type percent 18.3.23.
+20.211 fo:max-width
+The fo:max-width attribute specifies a default maximum width for new frames that are created using a graphics style. See 19.239.
+The fo:max-width attribute is usable with the following element: <style:graphic-properties> 17.21.
+The values of the fo:max-width attribute are a value of type length 18.3.18 or a value of type percent 18.3.23.
+
