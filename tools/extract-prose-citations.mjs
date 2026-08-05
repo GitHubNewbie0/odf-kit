@@ -37,8 +37,8 @@ let html = readFileSync(HTML_PATH, "utf8");
 // they are the megabyte lines.
 html = html
   .replace(/<img\b[^>]*>/gi, " ")
-  .replace(/<script\b[\s\S]*?<\/script\s*>/gi, " ")
-  .replace(/<style\b[\s\S]*?<\/style\s*>/gi, " ");
+  .replace(/<script\b[\s\S]*?<\/script\s*[^>]*>/gi, " ")
+  .replace(/<style\b[\s\S]*?<\/style\s*[^>]*>/gi, " ");
 
 // Block-level closers become newlines so headings/paragraphs separate.
 html = html.replace(/<\/(p|div|h[1-6]|li|tr|td|th|dt|dd)>/gi, "\n");
