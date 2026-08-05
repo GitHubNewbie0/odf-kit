@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.11] - 2026-08-05
+
+### Fixed
+
+- **Paragraph alignment dropped when expressed as an `align` attribute** — when converting HTML, `htmlToOdt()` silently discarded alignment on any element that used the presentational `align` attribute (`<p align="right">`) rather than inline CSS (`<p style="text-align: right">`). Qt's `QTextDocument` and other editors emitting HTML 4 style markup use the attribute form, so entire documents converted with every paragraph flattened to the default alignment. The parser read alignment only from the inline `style` attribute; it now falls back to the `align` attribute when no inline `text-align` is present, with inline CSS taking precedence where both appear, matching browser resolution order. Attribute and CSS values are now compared case-insensitively. Separately, headings never received paragraph options at all, so alignment on `<h1>`–`<h6>` was dropped regardless of how it was expressed; headings now carry alignment through the same path as paragraphs. Verified against a real Qt-authored document, with the generated file passing the OASIS ODF validator without errors or warnings. Fixes [#81](https://github.com/GitHubNewbie0/odf-kit/issues/81) and, as a consequence of the same defect, [#82](https://github.com/GitHubNewbie0/odf-kit/issues/82) — the ODT reported there was odf-kit output that had already lost its alignment on the way in, so `odtToHtml()` was reading a document with no alignment to find. Thanks to [@abdulrahman-103](https://github.com/abdulrahman-103) for both reports and the reproduction files.
+
 ## [0.13.10] - 2026-07-07
 
 ### Fixed
@@ -475,7 +481,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.10...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.11...HEAD
+[0.13.11]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.11
 [0.13.10]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.10
 [0.13.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.9
 [0.13.8]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.8
