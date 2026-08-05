@@ -114,6 +114,32 @@ describe("htmlToOdt — paragraphs", () => {
     const content = await getContent('<p style="text-align: right">Right</p>');
     expect(content).toContain('fo:text-align="right"');
   });
+
+  test("p with align attribute applies alignment", async () => {
+    const content = await getContent('<p align="right">Right</p>');
+    expect(content).toContain('fo:text-align="right"');
+  });
+
+  test("p with align attribute center applies alignment", async () => {
+    const content = await getContent('<p align="center">Centered</p>');
+    expect(content).toContain('fo:text-align="center"');
+  });
+
+  test("align attribute value is case-insensitive", async () => {
+    const content = await getContent('<p align="RIGHT">Right</p>');
+    expect(content).toContain('fo:text-align="right"');
+  });
+
+  test("inline text-align wins over align attribute", async () => {
+    const content = await getContent('<p align="left" style="text-align: center">X</p>');
+    expect(content).toContain('fo:text-align="center"');
+    expect(content).not.toContain('fo:text-align="left"');
+  });
+
+  test("heading carries alignment", async () => {
+    const content = await getContent('<h2 align="center">Title</h2>');
+    expect(content).toContain('fo:text-align="center"');
+  });
 });
 
 // ─── Inline Formatting ────────────────────────────────────────────────

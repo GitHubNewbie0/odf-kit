@@ -311,7 +311,8 @@ async function walkBlockElement(
     case "h6": {
       const level = parseInt(tag[1], 10);
       const runs = await extractInline(node.children, {}, ctx);
-      doc.addHeading((p) => applyRunsToBuilder(p, runs), level);
+      const headingOpts = mergeParagraphOptions(defaultParaOpts, parseParagraphOptions(node));
+      doc.addHeading((p) => applyRunsToBuilder(p, runs), level, headingOpts);
       break;
     }
 
@@ -837,11 +838,20 @@ function extractCssProperty(style: string, property: string): string | undefined
 
 /**
  * Parse paragraph-level options from a block element's attributes.
- * Currently extracts text-align from the element's inline style.
+ *
+ * Extracts alignment from the element's inline style, falling back to the
+ * presentational `align` attribute. Inline CSS wins, matching how browsers
+ * resolve the two. Qt's QTextDocument (and other editors that emit HTML 4
+ * style markup) use `align` rather than CSS, so both forms must be honored.
+ *
+ * Values are lowercased before comparison: CSS keywords and HTML attribute
+ * values are both case-insensitive.
  */
 function parseParagraphOptions(node: XmlElementNode): ParagraphOptions | undefined {
   const style = node.attrs["style"] ?? "";
-  const align = extractCssProperty(style, "text-align");
+  const align = (extractCssProperty(style, "text-align") ?? node.attrs["align"] ?? "")
+    .trim()
+    .toLowerCase();
   if (align === "left" || align === "center" || align === "right" || align === "justify") {
     return { align };
   }
