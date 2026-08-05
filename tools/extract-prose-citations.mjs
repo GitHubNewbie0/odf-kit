@@ -36,16 +36,25 @@ let html = readFileSync(HTML_PATH, "utf8");
 // Drop embedded images/scripts/styles wholesale before anything else —
 // they are the megabyte lines.
 html = html
-  .replace(/<img[^>]*>/gis, " ")
-  .replace(/<script[\s\S]*?<\/script>/gi, " ")
-  .replace(/<style[\s\S]*?<\/style>/gi, " ");
+  .replace(/<img\b[^>]*>/gi, " ")
+  .replace(/<script\b[\s\S]*?<\/script\s*>/gi, " ")
+  .replace(/<style\b[\s\S]*?<\/style\s*>/gi, " ");
 
 // Block-level closers become newlines so headings/paragraphs separate.
 html = html.replace(/<\/(p|div|h[1-6]|li|tr|td|th|dt|dd)>/gi, "\n");
 html = html.replace(/<(br|hr)\s*\/?>/gi, "\n");
 
-// Strip all remaining tags.
-let text = html.replace(/<[^>]+>/g, "");
+// Strip all remaining tags. Repeat until stable: a single pass can leave a
+// tag behind by reassembling one from fragments (`<<a>b>` -> `<b>`).
+// Safe only because entity decoding happens below, not above — the spec prose
+// is full of `&lt;text:p&gt;`, which a second pass would eat as a tag if it
+// had already been decoded. Do not reorder these two blocks.
+let text = html;
+let prev;
+do {
+  prev = text;
+  text = text.replace(/<[^>]+>/g, "");
+} while (text !== prev);
 
 // Decode the entities the spec actually uses.
 text = text
