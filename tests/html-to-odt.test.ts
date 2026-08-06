@@ -140,6 +140,60 @@ describe("htmlToOdt — paragraphs", () => {
     const content = await getContent('<h2 align="center">Title</h2>');
     expect(content).toContain('fo:text-align="center"');
   });
+
+  test("margin-top in px converts to pt via the length core", async () => {
+    const content = await getContent('<p style="margin-top: 12px">X</p>');
+    expect(content).toContain('fo:margin-top="9pt"');
+  });
+
+  test("margin-bottom with ODF unit passes through lexically", async () => {
+    const content = await getContent('<p style="margin-bottom: 0.5cm">X</p>');
+    expect(content).toContain('fo:margin-bottom="0.5cm"');
+  });
+
+  test("line-height in fractional px converts via D8c quantum", async () => {
+    const content = await getContent('<p style="line-height: 21.6533px">X</p>');
+    expect(content).toContain('fo:line-height="16.24pt"');
+  });
+
+  test("unitless line-height becomes a percentage multiplier", async () => {
+    const content = await getContent('<p style="line-height: 1.5">X</p>');
+    expect(content).toContain('fo:line-height="150%"');
+  });
+
+  test("percentage line-height passes through", async () => {
+    const content = await getContent('<p style="line-height: 150%">X</p>');
+    expect(content).toContain('fo:line-height="150%"');
+  });
+
+  test("line-height normal emits nothing", async () => {
+    const content = await getContent('<p style="line-height: normal">X</p>');
+    expect(content).not.toContain("fo:line-height");
+  });
+
+  test("percentage margins are dropped (CSS/ODF semantics differ)", async () => {
+    const content = await getContent('<p style="margin-top: 50%">X</p>');
+    expect(content).not.toContain("fo:margin-top");
+  });
+
+  test("negative margins are dropped (nonNegativeLength grammar)", async () => {
+    const content = await getContent('<p style="margin-top: -6pt">X</p>');
+    expect(content).not.toContain("fo:margin-top");
+  });
+
+  test("spacing and alignment combine on one paragraph", async () => {
+    const content = await getContent(
+      '<p align="right" style="margin-top: 12px; line-height: 1.5">X</p>',
+    );
+    expect(content).toContain('fo:text-align="right"');
+    expect(content).toContain('fo:margin-top="9pt"');
+    expect(content).toContain('fo:line-height="150%"');
+  });
+
+  test("headings carry spacing too", async () => {
+    const content = await getContent('<h2 style="margin-top: 12px">Title</h2>');
+    expect(content).toContain('fo:margin-top="9pt"');
+  });
 });
 
 // ─── Inline Formatting ────────────────────────────────────────────────

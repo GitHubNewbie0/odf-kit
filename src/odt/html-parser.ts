@@ -30,6 +30,7 @@ import { ParagraphBuilder } from "./paragraph-builder.js";
 import { ListBuilder } from "./list-builder.js";
 import type { TextRun, TextFormatting, ParagraphOptions, CellOptions } from "./types.js";
 import { detectMime, isBase64Image, base64ToUint8Array } from "../lexical/util/detect-mime.js";
+import { convertDecimal, parseOdfValue } from "../core/length.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 
@@ -837,6 +838,59 @@ function extractCssProperty(style: string, property: string): string | undefined
 // ─── Paragraph Option Parsing ─────────────────────────────────────────
 
 /**
+ * Convert a CSS length from an inline style into an ODF length string.
+ *
+ * px values are quantized-source conversions (length core Case 2 / D8c):
+ * the quantum derives from the value's last significant digit, and the
+ * result is the shortest decimal in the implied interval — expressed in
+ * pt, the typographic-domain unit (D8a), since px is never emitted.
+ * Values already carrying an ODF unit (pt, cm, mm, in, pc) are handed
+ * truth (Case 1) and pass through lexically unchanged.
+ *
+ * Returns undefined for percents, keywords, negatives, and anything
+ * unparseable — callers treat undefined as "property not extracted".
+ * Negatives are rejected because the callers map to fo:margin-top /
+ * fo:margin-bottom / fo:line-height, all nonNegativeLength in the ODF
+ * grammar (vertical margins are non-negative; horizontal are signed —
+ * the sign asymmetry from the schema extraction).
+ */
+function cssLengthToOdf(raw: string): string | undefined {
+  const value = raw.trim().toLowerCase();
+  const px = /^([-+]?(?:\d+\.?\d*|\.\d+))px$/.exec(value);
+  if (px) {
+    if (px[1].startsWith("-")) return undefined;
+    return convertDecimal(px[1], "px", "pt");
+  }
+  const parsed = parseOdfValue(value);
+  if (!parsed || parsed.kind !== "length") return undefined;
+  if (parsed.lexical !== undefined && parsed.lexical.startsWith("-")) return undefined;
+  return parsed.lexical;
+}
+
+/**
+ * Parse a CSS line-height value into the ParagraphOptions form.
+ *
+ * CSS line-height has four forms, mapped as follows:
+ *  - "normal"        → undefined (ODF's default; nothing emitted)
+ *  - unitless number → the number itself; the writer's existing
+ *                      multiplier path turns 1.5 into "150%"
+ *  - percentage      → passed through ("150%" is legal fo:line-height)
+ *  - length          → via cssLengthToOdf (px converted to pt, others
+ *                      lexical). fo:line-height is nonNegativeLength;
+ *                      negatives are dropped.
+ */
+function parseCssLineHeight(raw: string): number | string | undefined {
+  const value = raw.trim().toLowerCase();
+  if (value === "normal") return undefined;
+  if (/^\d+\.?\d*$|^\.\d+$/.test(value)) return Number(value);
+  const parsed = parseOdfValue(value);
+  if (parsed?.kind === "percent") {
+    return parsed.lexical!.startsWith("-") ? undefined : parsed.lexical;
+  }
+  return cssLengthToOdf(value);
+}
+
+/**
  * Parse paragraph-level options from a block element's attributes.
  *
  * Extracts alignment from the element's inline style, falling back to the
@@ -844,18 +898,47 @@ function extractCssProperty(style: string, property: string): string | undefined
  * resolve the two. Qt's QTextDocument (and other editors that emit HTML 4
  * style markup) use `align` rather than CSS, so both forms must be honored.
  *
+ * Also extracts margin-top / margin-bottom (→ spaceBefore / spaceAfter,
+ * i.e. fo:margin-top / fo:margin-bottom) and line-height. Percentage
+ * margins are dropped deliberately: CSS resolves vertical margin
+ * percentages against the container's WIDTH, ODF against the parent
+ * style's margin — the same lexical value means two different things,
+ * and passing it through would be silently wrong. Wrong beats absent,
+ * so the value is not extracted.
+ *
  * Values are lowercased before comparison: CSS keywords and HTML attribute
  * values are both case-insensitive.
  */
 function parseParagraphOptions(node: XmlElementNode): ParagraphOptions | undefined {
   const style = node.attrs["style"] ?? "";
+  const opts: ParagraphOptions = {};
+
   const align = (extractCssProperty(style, "text-align") ?? node.attrs["align"] ?? "")
     .trim()
     .toLowerCase();
   if (align === "left" || align === "center" || align === "right" || align === "justify") {
-    return { align };
+    opts.align = align;
   }
-  return undefined;
+
+  const marginTop = extractCssProperty(style, "margin-top");
+  if (marginTop !== undefined) {
+    const v = cssLengthToOdf(marginTop);
+    if (v !== undefined) opts.spaceBefore = v;
+  }
+
+  const marginBottom = extractCssProperty(style, "margin-bottom");
+  if (marginBottom !== undefined) {
+    const v = cssLengthToOdf(marginBottom);
+    if (v !== undefined) opts.spaceAfter = v;
+  }
+
+  const lineHeight = extractCssProperty(style, "line-height");
+  if (lineHeight !== undefined) {
+    const v = parseCssLineHeight(lineHeight);
+    if (v !== undefined) opts.lineHeight = v;
+  }
+
+  return Object.keys(opts).length > 0 ? opts : undefined;
 }
 
 /**
