@@ -8,6 +8,7 @@ import { generateContent, buildHeaderFooterContent } from "./content.js";
 import type { ContentElement } from "./content.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 import { HeaderFooterBuilder } from "./header-footer-builder.js";
+import { compareLengths } from "../core/length.js";
 import { TableBuilder } from "./table-builder.js";
 import { ListBuilder } from "./list-builder.js";
 import { generateOdtSettings } from "./settings.js";
@@ -461,20 +462,17 @@ export class OdtDocument {
       // and Word would open it portrait. Bug reported by the community
       // against v0.13.4; fix shipped in v0.13.5.
       //
-      // parseFloat compares correctly only when both dimensions share a
-      // unit. All current callers (the four public converters and the
-      // hardcoded preset table) use cm, so this is safe today. Mixed-unit
-      // inputs (e.g. width:"8.5in" + height:"10cm") would compare bare
-      // numbers and could swap incorrectly. The unit-normalization layer
-      // planned for v0.14.0 (alongside the explicit-dimensions public API)
-      // will close this hole; see the v0.14.0 plan for the validation
-      // approach modeled on the Mars Climate Orbiter lesson — never let
-      // values of different units flow through arithmetic comparisons
-      // without explicit conversion or rejection.
+      // The comparison is unit-aware and exact (compareLengths, length
+      // core) — this closed the hole the previous parseFloat version
+      // documented: mixed-unit dimensions (e.g. width:"8.5in" +
+      // height:"10cm") compared bare numbers and could swap incorrectly.
+      // The Mars Climate Orbiter rule now holds: values of different
+      // units never flow through an arithmetic comparison without exact
+      // conversion. Unparseable dimensions are left untouched rather
+      // than swapped on garbage.
       if (isLandscape) {
-        const w = parseFloat(resolvedWidth);
-        const h = parseFloat(resolvedHeight);
-        if (Number.isFinite(w) && Number.isFinite(h) && w < h) {
+        const cmp = compareLengths(resolvedWidth, resolvedHeight);
+        if (cmp !== undefined && cmp < 0) {
           [resolvedWidth, resolvedHeight] = [resolvedHeight, resolvedWidth];
         }
       }

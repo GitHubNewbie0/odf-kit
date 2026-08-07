@@ -616,6 +616,34 @@ describe("htmlToOdt — page format", () => {
     expect(styles).toContain('style:print-orientation="landscape"');
   });
 
+  test("custom pageWidth/pageHeight override the preset", async () => {
+    const styles = await getStyles("<p>X</p>", { pageWidth: "210mm", pageHeight: "297mm" });
+    expect(styles).toContain('fo:page-width="210mm"');
+    expect(styles).toContain('fo:page-height="297mm"');
+  });
+
+  test("landscape swaps mixed-unit custom dimensions correctly", async () => {
+    // 10cm < 8.5in physically; bare-number comparison would say 10 > 8.5
+    // and skip the swap. Exact comparison swaps to landscape order.
+    const styles = await getStyles("<p>X</p>", {
+      orientation: "landscape",
+      pageWidth: "10cm",
+      pageHeight: "8.5in",
+    });
+    expect(styles).toContain('fo:page-width="8.5in"');
+    expect(styles).toContain('fo:page-height="10cm"');
+  });
+
+  test("landscape leaves already-landscape custom dimensions alone", async () => {
+    const styles = await getStyles("<p>X</p>", {
+      orientation: "landscape",
+      pageWidth: "20cm",
+      pageHeight: "10cm",
+    });
+    expect(styles).toContain('fo:page-width="20cm"');
+    expect(styles).toContain('fo:page-height="10cm"');
+  });
+
   test("custom margin overrides preset default", async () => {
     const styles = await getStyles("<p>Hello</p>", {
       pageFormat: "A4",

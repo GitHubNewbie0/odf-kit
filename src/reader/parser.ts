@@ -38,6 +38,7 @@ import type { XmlElementNode, XmlNode } from "./xml-parser.js";
 import { buildRegistry, resolve, resolveFontFamily } from "./registry.js";
 import type { StyleRegistry } from "./registry.js";
 import { renderHtml } from "./html-renderer.js";
+import { compareLengths } from "../core/length.js";
 import type {
   OdtDocumentModel,
   OdtMetadata,
@@ -1511,12 +1512,17 @@ function parsePageLayout(stylesRoot: XmlElementNode): PageLayout | undefined {
     hasAny = true;
   }
 
-  // Derive orientation by comparing dimensions
+  // Derive orientation by comparing dimensions. compareLengths is
+  // unit-aware and exact (length core): "11in" × "21cm" correctly
+  // reports landscape, where a bare parseFloat comparison read 11 < 21
+  // and reported portrait for a physically landscape page (B1).
+  // Equal dimensions (square page) report portrait, preserving the
+  // strict-inequality behavior. Unparseable dimensions yield no
+  // orientation rather than one derived from garbage.
   if (layout.width && layout.height) {
-    const w = parseFloat(layout.width);
-    const h = parseFloat(layout.height);
-    if (!isNaN(w) && !isNaN(h)) {
-      layout.orientation = w > h ? "landscape" : "portrait";
+    const cmp = compareLengths(layout.width, layout.height);
+    if (cmp !== undefined) {
+      layout.orientation = cmp > 0 ? "landscape" : "portrait";
       hasAny = true;
     }
   }

@@ -49,8 +49,26 @@ export interface OdtBaseOptions {
   pageFormat?: "A4" | "letter" | "legal" | "A3" | "A5";
 
   /**
+   * Custom page width with units (e.g. `"210mm"`, `"8.5in"`, `"21cm"`).
+   * Overrides the `pageFormat` preset's width.
+   */
+  pageWidth?: string;
+
+  /**
+   * Custom page height with units (e.g. `"297mm"`, `"11in"`).
+   * Overrides the `pageFormat` preset's height.
+   */
+  pageHeight?: string;
+
+  /**
    * Page orientation. Defaults to `"portrait"`.
-   * Swaps page width and height when set to `"landscape"`.
+   *
+   * `"landscape"` guarantees landscape-ordered page dimensions: if the
+   * resolved width and height (preset or custom) are in portrait order,
+   * they are swapped. The comparison is unit-aware, so mixed-unit custom
+   * dimensions swap correctly. Callers who want exact dimensions written
+   * as given should pass `pageWidth`/`pageHeight` without a contradicting
+   * orientation.
    */
   orientation?: "portrait" | "landscape";
 
@@ -263,6 +281,13 @@ export interface HtmlToOdtOptions extends OdtBaseOptions {
  * const bytes = await htmlToOdt(html, { pageFormat: "letter" });
  *
  * @example
+ * // Custom page size (overrides any preset)
+ * const bytes = await htmlToOdt(html, {
+ *   pageWidth: "210mm",
+ *   pageHeight: "297mm",
+ * });
+ *
+ * @example
  * // With image fetching
  * const bytes = await htmlToOdt(html, {
  *   fetchImage: async (src) => {
@@ -291,10 +316,14 @@ export async function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promi
   // Resolve page format preset
   const format = PAGE_FORMATS[options?.pageFormat ?? "A4"];
 
-  // Build page layout — individual margin overrides apply on top of preset defaults
+  // Build page layout — custom pageWidth/pageHeight override the preset;
+  // individual margin overrides apply on top of preset defaults. The
+  // landscape dimension swap is NOT done here: setPageLayout() performs
+  // it uniformly for all callers (the v0.13.5 fix), using an exact
+  // unit-aware comparison.
   const layout: PageLayout = {
-    width: format.width,
-    height: format.height,
+    width: options?.pageWidth ?? format.width,
+    height: options?.pageHeight ?? format.height,
     orientation: options?.orientation,
     marginTop: options?.marginTop ?? format.margin,
     marginBottom: options?.marginBottom ?? format.margin,

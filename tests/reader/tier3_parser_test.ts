@@ -320,6 +320,38 @@ describe("readOdt Tier 3 — page layout", () => {
     expect(doc.pageLayout?.marginTop).toBe("2.54cm");
     expect(doc.pageLayout?.orientation).toBe("portrait");
   });
+
+  test("orientation is unit-aware: 11in wide × 21cm high is landscape (B1)", () => {
+    // parseFloat compared bare numbers: 11 < 21 → portrait, for a page
+    // that is physically 27.94cm wide × 21cm high. compareLengths is exact.
+    const doc = readOdt(
+      makeOdt(
+        contentXml("", "<text:p>x</text:p>"),
+        stylesXml('fo:page-width="11in" fo:page-height="21cm"'),
+      ),
+    );
+    expect(doc.pageLayout?.orientation).toBe("landscape");
+  });
+
+  test("orientation: mixed units the other way is portrait", () => {
+    const doc = readOdt(
+      makeOdt(
+        contentXml("", "<text:p>x</text:p>"),
+        stylesXml('fo:page-width="21cm" fo:page-height="11in"'),
+      ),
+    );
+    expect(doc.pageLayout?.orientation).toBe("portrait");
+  });
+
+  test("square page reports portrait (equal dimensions)", () => {
+    const doc = readOdt(
+      makeOdt(
+        contentXml("", "<text:p>x</text:p>"),
+        stylesXml('fo:page-width="21cm" fo:page-height="21cm"'),
+      ),
+    );
+    expect(doc.pageLayout?.orientation).toBe("portrait");
+  });
 });
 
 // ============================================================
