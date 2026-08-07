@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.13] - 2026-08-07
+
+### Added
+
+- **Custom page dimensions in the HTML, Markdown, Lexical, and TipTap converters** — `pageWidth` and `pageHeight` options accept any ODF length (`"215.9mm"`, `"8.5in"`, `"21cm"`) and override the `pageFormat` preset. Values are written to the document exactly as given, including mixed units across dimensions and margins — a page can be sized in millimetres with inch margins and every value survives verbatim. Completes the page-size half of [#76](https://github.com/GitHubNewbie0/odf-kit/issues/76); custom margins were already supported. Thanks to [@abdulrahman-103](https://github.com/abdulrahman-103) for the request.
+
+### Fixed
+
+- **Orientation detection and the landscape swap are now unit-aware** — both the reader (deriving portrait/landscape from page dimensions) and the writer (swapping dimensions into landscape order when `orientation: "landscape"` is set) previously compared bare numbers with the units stripped, so a page 11 inches wide by 21 centimetres high compared as 11 < 21 and was reported portrait despite being physically landscape. Both sites now compare through the exact-rational length core, so mixed-unit dimensions resolve correctly; dimensions that cannot be parsed yield no derived orientation rather than one computed from garbage. Documents whose dimensions share a unit — every document produced by the converters' presets — were unaffected.
+
 ## [0.13.12] - 2026-08-06
 
 ### Added
@@ -488,7 +498,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.12...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.13...HEAD
+[0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.13
 [0.13.12]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.12
 [0.13.11]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.11
 [0.13.10]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.10
