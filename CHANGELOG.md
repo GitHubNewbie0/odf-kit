@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.12] - 2026-08-06
+
+### Added
+
+- **Paragraph spacing and line height in `htmlToOdt()`** — the HTML parser now extracts `margin-top`, `margin-bottom`, and `line-height` from inline styles and carries them into the generated ODT as `fo:margin-top`, `fo:margin-bottom`, and `fo:line-height`. All CSS line-height forms are handled: unitless multipliers (`1.5` → `150%`), percentages, and lengths; `normal` maps to the ODF default. Pixel values are converted through the new exact-rational length core rather than floating-point arithmetic — the conversion treats the source's precision as its tolerance and emits the shortest decimal within it, so Qt's `line-height:21.6533px` (a rounding artifact of 16.24pt) is recovered as exactly `fo:line-height="16.24pt"`, and `margin-top:12px` becomes `9pt`. Pixel units are never emitted. Percentage margins are deliberately not extracted: CSS resolves vertical margin percentages against container width while ODF resolves them against the parent style's margin, so the same value means different things in the two systems and passing it through would be silently wrong. Negative values for these properties are dropped as the ODF grammar requires non-negative lengths there. The reading direction already existed: `odtToHtml()` returns these properties as inline CSS, so they now round-trip. Addresses the paragraph-spacing and line-spacing half of [#76](https://github.com/GitHubNewbie0/odf-kit/issues/76); page size and page margins remain in progress. Thanks to [@abdulrahman-103](https://github.com/abdulrahman-103) for the request and the real-world documents used to verify.
+- **Exact-rational length core (`src/core/length.ts`)** — internal foundation for unit handling: BigInt-rational arithmetic with no floating point, byte-exact preservation of values read from documents, interval-based shortest-decimal conversion for quantized sources (px, twips, EMU), and exact cross-unit comparison. Not yet exposed as public API.
+
 ## [0.13.11] - 2026-08-05
 
 ### Fixed
@@ -481,7 +488,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.11...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.12...HEAD
+[0.13.12]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.12
 [0.13.11]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.11
 [0.13.10]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.10
 [0.13.9]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.9
