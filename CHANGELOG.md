@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.14] - 2026-08-07
+
+### Fixed
+
+- **Paragraph direction is now modelled in both conversion directions** — odf-kit did not represent `style:writing-mode` anywhere: `htmlToOdt()` discarded the `dir` attribute, and `odtToHtml()` never read the ODF attribute back. Because a right-to-left paragraph is right-aligned by default, editors write no explicit alignment for it at all — so a document whose alignment was carried by its direction arrived left-aligned, with no alignment value having been lost. `htmlToOdt()` now maps the `dir` attribute and the CSS `direction` property onto `style:writing-mode` (inline CSS takes precedence, matching browser resolution; `dir="auto"` has no ODF equivalent and is not emitted), and `odtToHtml()` renders right-to-left modes as a `dir` attribute on the paragraph or heading. Vertical writing modes are carried in the reader's model but not rendered. Direction and alignment are handled independently, so a right-to-left paragraph with explicit left alignment round-trips correctly. `ParagraphOptions` gains `writingMode`, and its `align` option now also accepts the direction-relative `start` and `end` values that the ODF grammar permits and that Word writes on export. Verified against a real Qt-authored Arabic document: 14 right-to-left paragraphs survive HTML → ODT → HTML intact, with the generated file passing the OASIS validator. Fixes [#81](https://github.com/GitHubNewbie0/odf-kit/issues/81) and [#82](https://github.com/GitHubNewbie0/odf-kit/issues/82) — the same missing concept at opposite ends of the pipeline. Thanks to [@abdulrahman-103](https://github.com/abdulrahman-103) for both reports and the documents used to verify.
+
+### Added
+
+- **Reader fixture corpus** — `tests/reader/fixtures/` gains its first committed documents, `alignment-ltr.odt` and `alignment-rtl.odt`, authored in LibreOffice Writer with full provenance and regeneration recipes.
+
 ## [0.13.13] - 2026-08-07
 
 ### Added
@@ -498,7 +508,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.13...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.14...HEAD
+[0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.14
 [0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.13
 [0.13.12]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.12
 [0.13.11]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.11
