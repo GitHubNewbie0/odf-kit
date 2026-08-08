@@ -6,6 +6,12 @@ The goal is that a reviewer — or a bug reporter reading the test that closes t
 
 ## The three fixture tiers
 
+> **Superseded in part.** The "pick the lowest tier" hierarchy below is
+> replaced by the fit-for-purpose criteria in `test-fixture-strategy-plan.md`:
+> each test uses the input type that actually tests what it claims to test,
+> with no type ranked above another. The rules for real `.odt` fixtures
+> (minimal, named producer, index row, recipe) are unchanged and still apply.
+
 Reader tests draw their input from one of three sources. Pick the **lowest tier** **that faithfully exercises the behavior under test** — real documents first.
 
 ### 1. Real `.odt` files — the default for parser and reader behavior
@@ -72,9 +78,32 @@ Each index entry records:
 
 ## Fixture index
 
-| File                                                                        | Producer | Contents | Type |
-| --------------------------------------------------------------------------- | -------- | -------- | ---- |
-| _(none committed yet — first entry lands with the list-in-cell regression)_ |          |          |      |
+| File                | Producer                             | Contents                                                                                                          | Type       |
+| ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------- |
+| `alignment-ltr.odt` | LibreOffice Writer 26.2.5.2 (x86_64) | Three paragraphs, left / centre / right aligned, default direction.                                               | regression |
+| `alignment-rtl.odt` | LibreOffice Writer 26.2.5.2 (x86_64) | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left. | regression |
+
+**`alignment-ltr.odt`**
+
+- **Producer:** LibreOffice Writer 26.2.5.2 (x86_64)
+
+- **Contents:** Three single-line paragraphs, aligned left, centre, and right respectively. Establishes what LibreOffice writes for explicit alignment in a left-to-right document — `fo:text-align="left" | "center" | "right"`, never `start`/`end`.
+
+- **Recipe:** New Writer document → type three short lines → select each in turn and apply Left / Centre / Right alignment from the Formatting toolbar → Save As `.odt`.
+
+- **Type:** regression
+
+**`alignment-rtl.odt`**
+
+- **Producer:** LibreOffice Writer 26.2.5.2 (x86_64)
+
+- **Contents:** Four right-to-left paragraphs (one blank) — the first at default alignment, the second explicitly right-aligned, the third explicitly left-aligned. The first is the load-bearing case: LibreOffice writes `style:writing-mode="rl-tb"` and _no_ `fo:text-align` at all, so direction alone carries the alignment. A reader that ignores writing-mode renders it left-aligned without having dropped any alignment value. The third proves direction and alignment are orthogonal.
+
+- **Recipe:** Tools → Options → Language Settings → Languages → enable **Complex text layout** (this is what exposes the paragraph direction controls; without it the case cannot be authored). New Writer document → type three short lines → set each to right-to-left via Format → Paragraph → Alignment tab → Text direction → _Right-to-left_ → leave the first paragraph's alignment untouched, set the second to Right and the third to Left → Save As `.odt`.
+
+- **Type:** regression
+
+**Smoke fixtures — abdulrahman-103's `khutba.html` / `khutba.odt`** (issue reporter's files from #81/#82): kept for end-to-end confirmation that the reported documents now convert with direction preserved. Smoke only; `alignment-rtl.odt` backs the assertions.
 
 **Planned inaugural fixture — `list-in-cell.odt`**
 

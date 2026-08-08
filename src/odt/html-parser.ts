@@ -906,6 +906,12 @@ function parseCssLineHeight(raw: string): number | string | undefined {
  * and passing it through would be silently wrong. Wrong beats absent,
  * so the value is not extracted.
  *
+ * Also extracts paragraph direction from CSS `direction` or the `dir`
+ * attribute (→ style:writing-mode). Direction matters independently of
+ * alignment: in a right-to-left paragraph, right alignment is the default
+ * and editors write no explicit alignment at all, so dropping direction
+ * silently left-aligns the paragraph even though nothing was "lost".
+ *
  * Values are lowercased before comparison: CSS keywords and HTML attribute
  * values are both case-insensitive.
  */
@@ -916,9 +922,27 @@ function parseParagraphOptions(node: XmlElementNode): ParagraphOptions | undefin
   const align = (extractCssProperty(style, "text-align") ?? node.attrs["align"] ?? "")
     .trim()
     .toLowerCase();
-  if (align === "left" || align === "center" || align === "right" || align === "justify") {
+  if (
+    align === "left" ||
+    align === "center" ||
+    align === "right" ||
+    align === "justify" ||
+    align === "start" ||
+    align === "end"
+  ) {
     opts.align = align;
   }
+
+  // Paragraph direction. CSS `direction` wins over the presentational `dir`
+  // attribute, matching browser resolution and the precedence used for
+  // alignment above. `dir="auto"` has no ODF equivalent — it asks the
+  // renderer to sniff the content's first strong character, which is a
+  // rendering behavior rather than a document property — so it is dropped.
+  const direction = (extractCssProperty(style, "direction") ?? node.attrs["dir"] ?? "")
+    .trim()
+    .toLowerCase();
+  if (direction === "rtl") opts.writingMode = "rl-tb";
+  else if (direction === "ltr") opts.writingMode = "lr-tb";
 
   const marginTop = extractCssProperty(style, "margin-top");
   if (marginTop !== undefined) {

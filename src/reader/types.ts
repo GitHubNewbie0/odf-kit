@@ -108,6 +108,17 @@ export interface ParagraphStyle {
    * ODF accepts both percentage and length values; stored as-is.
    */
   lineHeight?: string;
+  /**
+   * style:writing-mode → "rl-tb", "lr-tb", "tb-rl", "tb-lr", "lr", "rl",
+   * "tb", or "page". Stored verbatim.
+   *
+   * Direction is independent of alignment and carries meaning on its own:
+   * a right-to-left paragraph is right-aligned by default, so producers
+   * (LibreOffice among them) write no fo:text-align at all in that case.
+   * The HTML renderer maps the rl-* modes onto the dir attribute; vertical
+   * modes are carried here but not rendered.
+   */
+  writingMode?: string;
 }
 
 // ============================================================

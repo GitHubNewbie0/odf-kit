@@ -33,6 +33,38 @@ describe("renderHtml — paragraphs", () => {
     ];
     expect(renderHtml(body, { fragment: true })).toBe("<p>Line one<br>Line two</p>");
   });
+
+  test("rl-tb writing mode renders dir=rtl", () => {
+    const body: BodyNode[] = [
+      { kind: "paragraph", paragraphStyle: { writingMode: "rl-tb" }, spans: [{ text: "نص" }] },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe('<p dir="rtl">نص</p>');
+  });
+
+  test("lr-tb writing mode renders no dir attribute", () => {
+    const body: BodyNode[] = [
+      { kind: "paragraph", paragraphStyle: { writingMode: "lr-tb" }, spans: [{ text: "text" }] },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe("<p>text</p>");
+  });
+
+  test("vertical writing modes are carried in the model but not rendered", () => {
+    const body: BodyNode[] = [
+      { kind: "paragraph", paragraphStyle: { writingMode: "tb-rl" }, spans: [{ text: "text" }] },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe("<p>text</p>");
+  });
+
+  test("dir attribute follows the style attribute", () => {
+    const body: BodyNode[] = [
+      {
+        kind: "paragraph",
+        paragraphStyle: { writingMode: "rl-tb", textAlign: "left" },
+        spans: [{ text: "x" }],
+      },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe('<p style="text-align:left" dir="rtl">x</p>');
+  });
 });
 
 // ============================================================
@@ -64,6 +96,18 @@ describe("renderHtml — headings", () => {
       },
     ];
     expect(renderHtml(body, { fragment: true })).toBe("<h1><strong>Bold</strong> heading</h1>");
+  });
+
+  test("heading with rl-tb renders dir=rtl", () => {
+    const body: BodyNode[] = [
+      {
+        kind: "heading",
+        level: 2,
+        paragraphStyle: { writingMode: "rl-tb" },
+        spans: [{ text: "عنوان" }],
+      },
+    ];
+    expect(renderHtml(body, { fragment: true })).toBe('<h2 dir="rtl">عنوان</h2>');
   });
 });
 

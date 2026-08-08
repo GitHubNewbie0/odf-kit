@@ -194,6 +194,43 @@ describe("htmlToOdt — paragraphs", () => {
     const content = await getContent('<h2 style="margin-top: 12px">Title</h2>');
     expect(content).toContain('fo:margin-top="9pt"');
   });
+
+  test("dir=rtl becomes style:writing-mode rl-tb", async () => {
+    const content = await getContent('<p dir="rtl">X</p>');
+    expect(content).toContain('style:writing-mode="rl-tb"');
+  });
+
+  test("dir=ltr becomes style:writing-mode lr-tb", async () => {
+    const content = await getContent('<p dir="ltr">X</p>');
+    expect(content).toContain('style:writing-mode="lr-tb"');
+  });
+
+  test("CSS direction wins over the dir attribute", async () => {
+    const content = await getContent('<p dir="ltr" style="direction: rtl">X</p>');
+    expect(content).toContain('style:writing-mode="rl-tb"');
+    expect(content).not.toContain('style:writing-mode="lr-tb"');
+  });
+
+  test("dir=auto emits no writing-mode", async () => {
+    const content = await getContent('<p dir="auto">X</p>');
+    expect(content).not.toContain("style:writing-mode");
+  });
+
+  test("direction and alignment are independent", async () => {
+    const content = await getContent('<p dir="rtl" align="left">X</p>');
+    expect(content).toContain('style:writing-mode="rl-tb"');
+    expect(content).toContain('fo:text-align="left"');
+  });
+
+  test("headings carry direction", async () => {
+    const content = await getContent('<h2 dir="rtl">Title</h2>');
+    expect(content).toContain('style:writing-mode="rl-tb"');
+  });
+
+  test("text-align end passes through", async () => {
+    const content = await getContent('<p style="text-align: end">X</p>');
+    expect(content).toContain('fo:text-align="end"');
+  });
 });
 
 // ─── Inline Formatting ────────────────────────────────────────────────

@@ -486,6 +486,24 @@ function renderTrackedChange(node: TrackedChangeNode, options?: HtmlOptions): st
   }
 }
 
+/**
+ * Map an ODF style:writing-mode value to an HTML `dir` attribute.
+ *
+ * Only the right-to-left modes produce output: left-to-right is the HTML
+ * default, so emitting dir="ltr" on every paragraph would be noise. The
+ * vertical modes (tb-rl, tb-lr, tb) have no `dir` equivalent — they need
+ * CSS writing-mode plus layout consequences this renderer does not attempt
+ * — so they are carried in the model and not rendered here.
+ *
+ * `dir` is emitted as an attribute rather than CSS `direction` because it
+ * is the HTML-native mechanism, and because it is what makes any
+ * direction-relative alignment value (text-align: start/end, which Word
+ * writes on ODF export) resolve correctly in the consumer.
+ */
+function dirAttr(writingMode: string | undefined): string {
+  return writingMode === "rl-tb" || writingMode === "rl" ? ` dir="rtl"` : "";
+}
+
 /** Render a single BodyNode to an HTML string. */
 function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): string {
   switch (node.kind) {
@@ -494,7 +512,7 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const sourceCss =
         node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
-      const attrs = css ? ` style="${css}"` : "";
+      const attrs = (css ? ` style="${css}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
       return `<p${attrs}>${renderSpans(node.spans, options)}</p>`;
     }
     case "heading": {
@@ -502,7 +520,7 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const sourceCss =
         node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
-      const attrs = css ? ` style="${css}"` : "";
+      const attrs = (css ? ` style="${css}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
       return `<h${node.level}${attrs}>${renderSpans(node.spans, options)}</h${node.level}>`;
     }
     case "list":

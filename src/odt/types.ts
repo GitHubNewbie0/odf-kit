@@ -192,8 +192,33 @@ export interface TabStop {
 export interface ParagraphOptions {
   /**
    * Horizontal text alignment. Defaults to the parent style's alignment (left).
+   *
+   * `"start"` and `"end"` are direction-relative: in a left-to-right
+   * paragraph `"end"` is the right side, in a right-to-left paragraph it is
+   * the left. Both are legal ODF and are what Word writes when exporting a
+   * right-aligned paragraph to ODF. Set `writingMode` alongside them so the
+   * value resolves against the paragraph's own direction rather than the
+   * consumer's default.
    */
-  align?: "left" | "center" | "right" | "justify";
+  align?: "left" | "center" | "right" | "justify" | "start" | "end";
+
+  /**
+   * Paragraph writing direction — `style:writing-mode`.
+   *
+   * - `"lr-tb"` — left-to-right, top-to-bottom (the usual Latin default)
+   * - `"rl-tb"` — right-to-left, top-to-bottom (Arabic, Hebrew)
+   * - `"tb-rl"`, `"tb-lr"`, `"lr"`, `"rl"`, `"tb"`, `"page"` — also legal
+   *   ODF values; emitted verbatim
+   *
+   * Direction is independent of `align`: a right-to-left paragraph may be
+   * explicitly left-aligned. It also carries meaning on its own, because
+   * right-to-left paragraphs are right-aligned by default and need no
+   * explicit alignment at all.
+   *
+   * @example
+   * { writingMode: "rl-tb" }
+   */
+  writingMode?: string;
 
   /**
    * Space above the paragraph with units (e.g. `"0.4cm"`, `"6pt"`).

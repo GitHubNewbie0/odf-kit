@@ -618,6 +618,17 @@ function extractParagraphStyle(paragraphProps: Map<string, string>): ParagraphSt
     hasAny = true;
   }
 
+  // Paragraph direction. Carried verbatim; the renderer maps rl-* modes to
+  // the HTML dir attribute. This matters even when no alignment attribute
+  // is present: LibreOffice omits fo:text-align at default alignment and
+  // lets direction imply it, so a right-to-left paragraph with no explicit
+  // alignment renders left-aligned unless direction travels with it.
+  const writingMode = paragraphProps.get("style:writing-mode");
+  if (writingMode) {
+    style.writingMode = writingMode;
+    hasAny = true;
+  }
+
   return hasAny ? style : undefined;
 }
 

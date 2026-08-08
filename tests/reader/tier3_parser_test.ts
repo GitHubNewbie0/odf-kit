@@ -1,4 +1,5 @@
 import { zipSync, strToU8 } from "fflate";
+import { readFileSync } from "node:fs";
 import { readOdt } from "../../src/reader/parser.js";
 import type {
   ParagraphNode,
@@ -243,6 +244,70 @@ describe("readOdt Tier 3 — ParagraphStyle extraction", () => {
     const doc = readOdt(makeOdt(content));
     const heading = doc.body.find((n) => n.kind === "heading") as HeadingNode | undefined;
     expect(heading?.paragraphStyle?.textAlign).toBe("center");
+  });
+
+  test("style:writing-mode is extracted into paragraphStyle.writingMode", () => {
+    const content = contentXml(
+      '<style:style style:name="P1" style:family="paragraph">' +
+        '<style:paragraph-properties style:writing-mode="rl-tb"/>' +
+        "</style:style>",
+      '<text:p text:style-name="P1">rtl</text:p>',
+    );
+    const doc = readOdt(makeOdt(content));
+    const para = doc.body.find((n) => n.kind === "paragraph") as ParagraphNode | undefined;
+    expect(para?.paragraphStyle?.writingMode).toBe("rl-tb");
+  });
+
+  test("writing-mode is read when no alignment is present (the RTL default case)", () => {
+    // LibreOffice omits fo:text-align entirely at default alignment and lets
+    // direction imply it. Dropping writing-mode here left-aligns the paragraph
+    // even though no alignment value was lost, because none existed.
+    const content = contentXml(
+      '<style:style style:name="P1" style:family="paragraph">' +
+        '<style:paragraph-properties style:writing-mode="rl-tb"/>' +
+        "</style:style>",
+      '<text:p text:style-name="P1">rtl</text:p>',
+    );
+    const doc = readOdt(makeOdt(content));
+    const para = doc.body.find((n) => n.kind === "paragraph") as ParagraphNode | undefined;
+    expect(para?.paragraphStyle?.textAlign).toBeUndefined();
+    expect(para?.paragraphStyle?.writingMode).toBe("rl-tb");
+  });
+
+  test("writing-mode and alignment are independent", () => {
+    const content = contentXml(
+      '<style:style style:name="P1" style:family="paragraph">' +
+        '<style:paragraph-properties style:writing-mode="rl-tb" fo:text-align="left"/>' +
+        "</style:style>",
+      '<text:p text:style-name="P1">rtl but left</text:p>',
+    );
+    const doc = readOdt(makeOdt(content));
+    const para = doc.body.find((n) => n.kind === "paragraph") as ParagraphNode | undefined;
+    expect(para?.paragraphStyle?.writingMode).toBe("rl-tb");
+    expect(para?.paragraphStyle?.textAlign).toBe("left");
+  });
+
+  test("writing-mode from a real LibreOffice RTL document", () => {
+    // Tier 1: a real LibreOffice file, not reconstructed XML. The inline
+    // tests above assert what we believe LibreOffice writes; this one
+    // asserts what it actually wrote.
+    const bytes = readFileSync(new URL("./fixtures/alignment-rtl.odt", import.meta.url));
+    const doc = readOdt(new Uint8Array(bytes));
+    const paras = (doc.body.filter((n) => n.kind === "paragraph") as ParagraphNode[]).filter(
+      (p) => p.spans.length > 0,
+    );
+    // Every paragraph in the document is right-to-left.
+    for (const p of paras) {
+      expect(p.paragraphStyle?.writingMode).toBe("rl-tb");
+    }
+    // First: default alignment — LibreOffice writes NO fo:text-align at all
+    // and lets direction imply it. This is the case behind #82: a reader that
+    // ignores writing-mode left-aligns it without any alignment having been lost.
+    expect(paras[0]?.paragraphStyle?.textAlign).toBeUndefined();
+    // Second and third: explicit right and left, proving direction and
+    // alignment are orthogonal.
+    expect(paras[1]?.paragraphStyle?.textAlign).toBe("right");
+    expect(paras[2]?.paragraphStyle?.textAlign).toBe("left");
   });
 });
 

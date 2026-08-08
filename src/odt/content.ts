@@ -1075,6 +1075,7 @@ function hasParagraphOptions(opts: ParagraphOptions | undefined): boolean {
     opts.spaceBefore ||
     opts.spaceAfter ||
     opts.lineHeight !== undefined ||
+    opts.writingMode ||
     opts.indentLeft ||
     opts.indentFirst ||
     opts.borderBottom ||
@@ -1093,6 +1094,7 @@ function paragraphOptionsKey(opts: ParagraphOptions): string {
   if (opts.spaceBefore) parts.push(`sb:${opts.spaceBefore}`);
   if (opts.spaceAfter) parts.push(`sa:${opts.spaceAfter}`);
   if (opts.lineHeight !== undefined) parts.push(`lh:${opts.lineHeight}`);
+  if (opts.writingMode) parts.push(`wm:${opts.writingMode}`);
   if (opts.indentLeft) parts.push(`il:${opts.indentLeft}`);
   if (opts.indentFirst) parts.push(`if:${opts.indentFirst}`);
   if (opts.borderBottom) parts.push(`bdb:${opts.borderBottom}`);
@@ -1182,6 +1184,10 @@ function buildParagraphStyle(
   }
   if (opts.lineHeight !== undefined) {
     paraProps.attr("fo:line-height", normalizeLineHeight(opts.lineHeight));
+    hasParaProps = true;
+  }
+  if (opts.writingMode) {
+    paraProps.attr("style:writing-mode", opts.writingMode);
     hasParaProps = true;
   }
   if (opts.indentLeft) {
