@@ -205,10 +205,10 @@ export interface ParagraphOptions {
   /**
    * Paragraph writing direction — `style:writing-mode`.
    *
-   * - `"lr-tb"` — left-to-right, top-to-bottom (the usual Latin default)
-   * - `"rl-tb"` — right-to-left, top-to-bottom (Arabic, Hebrew)
-   * - `"tb-rl"`, `"tb-lr"`, `"lr"`, `"rl"`, `"tb"`, `"page"` — also legal
-   *   ODF values; emitted verbatim
+   * `"lr-tb"` is the usual Latin default; `"rl-tb"` is Arabic and Hebrew.
+   * The two-part values give inline direction then block progression; the
+   * one-part values (`"lr"`, `"rl"`, `"tb"`) specify inline direction only,
+   * and `"page"` inherits from the page layout.
    *
    * Direction is independent of `align`: a right-to-left paragraph may be
    * explicitly left-aligned. It also carries meaning on its own, because
@@ -218,7 +218,7 @@ export interface ParagraphOptions {
    * @example
    * { writingMode: "rl-tb" }
    */
-  writingMode?: string;
+  writingMode?: "lr-tb" | "rl-tb" | "tb-rl" | "tb-lr" | "lr" | "rl" | "tb" | "page";
 
   /**
    * Space above the paragraph with units (e.g. `"0.4cm"`, `"6pt"`).
