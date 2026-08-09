@@ -13,21 +13,42 @@
  * MUST run against emitted output: `npm run build` first.
  *
  *   node tools/export-census.mjs
+ *   node tools/export-census.mjs --out-dir <dir>
  *
  * Outputs (committed; the v0.14.0 before-picture):
  *   tools/export-census.json  — machine-readable, deterministic, diffable
  *   tools/export-census.md    — human summary
+ *
+ * --out-dir writes both files under <dir> instead of the repo root, keeping
+ * the same tools/ prefix. It exists so verification runs cannot address the
+ * committed before-picture: regenerating in place during the v0.14.0
+ * restructure would overwrite the one artifact Phases 4 and 8 diff against,
+ * and there is no redo. Omit the flag only when deliberately regenerating
+ * the committed baseline.
  *
  * No timestamp is embedded, deliberately: before/after diffs must show only
  * real surface change. Git records when.
  */
 
 import ts from "typescript";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+/**
+ * Directory the two output files are written under. Defaults to the repo
+ * root, so the committed before-picture is only ever rewritten by a bare,
+ * deliberate invocation.
+ */
+const outDirFlag = process.argv.indexOf("--out-dir");
+if (outDirFlag !== -1 && !process.argv[outDirFlag + 1]) {
+  console.error("export-census: --out-dir requires a directory argument");
+  process.exit(1);
+}
+const outDir =
+  outDirFlag === -1 ? repoRoot : resolve(process.argv[outDirFlag + 1]);
 
 // ---------------------------------------------------------------- exports map
 
@@ -257,8 +278,10 @@ const census = {
   modules,
 };
 
+mkdirSync(resolve(outDir, "tools"), { recursive: true });
+
 writeFileSync(
-  resolve(repoRoot, "tools/export-census.json"),
+  resolve(outDir, "tools/export-census.json"),
   JSON.stringify(census, null, 2) + "\n",
 );
 
@@ -306,13 +329,17 @@ const md = [
   "",
 ].join("\n");
 
-writeFileSync(resolve(repoRoot, "tools/export-census.md"), md);
+writeFileSync(resolve(outDir, "tools/export-census.md"), md);
 
 console.log(
   `export-census: ${modules.length} entry files, ${totalSymbols} symbols, ` +
     `${unions.length} literal unions, ${noDoc.length} symbols without JSDoc.`,
 );
-console.log("Wrote tools/export-census.json and tools/export-census.md");
+console.log(
+  `Wrote ${resolve(outDir, "tools/export-census.json")} and ` +
+    `${resolve(outDir, "tools/export-census.md")}` +
+    (outDir === repoRoot ? " (committed before-picture)" : ""),
+);
 if (census.entryPointErrors.length) {
   console.warn("Entry-point warnings:");
   for (const e of census.entryPointErrors)
