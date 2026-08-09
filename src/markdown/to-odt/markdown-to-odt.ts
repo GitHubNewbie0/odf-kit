@@ -1,6 +1,6 @@
 import { marked } from "marked";
-import { htmlToOdt } from "../html/to-odt/html-to-odt.js";
-import type { HtmlToOdtOptions } from "../html/to-odt/html-to-odt.js";
+import { htmlToOdt } from "../../html/to-odt/html-to-odt.js";
+import type { HtmlToOdtOptions } from "../../html/to-odt/html-to-odt.js";
 
 /**
  * Convert a Markdown string to an ODT file.

@@ -1,3 +1,12 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for converting Markdown to ODT.
+ *
+ * Import from "odf-kit/markdown/to-odt":
+ *
+ * ```typescript
+ * import { markdownToOdt } from "odf-kit/markdown/to-odt";
+ * ```
+ */
+export { VERSION } from "../../version.js";
+
+export { markdownToOdt } from "./markdown-to-odt.js";
