@@ -1,4 +1,4 @@
-import { modelToTypst } from "../../src/typst/emitter.js";
+import { modelToTypst } from "../../src/odt/to-typst/emitter.js";
 import type {
   OdtDocumentModel,
   BodyNode,

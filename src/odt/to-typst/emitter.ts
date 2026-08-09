@@ -59,9 +59,9 @@ import type {
   TableNode,
   SectionNode,
   TrackedChangeNode,
-} from "../odt/read/types.js";
-import { readOdt } from "../odt/read/parser.js";
-import type { ReadOdtOptions } from "../odt/read/types.js";
+} from "../read/types.js";
+import { readOdt } from "../read/parser.js";
+import type { ReadOdtOptions } from "../read/types.js";
 
 // ============================================================
 // Public options type

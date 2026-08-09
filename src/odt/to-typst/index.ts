@@ -1,3 +1,26 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Typst emitter for odf-kit.
+ *
+ * Converts ODT documents to Typst markup (.typ), which can then be compiled
+ * to PDF by any Typst 0.11+ installation:
+ *
+ *   typst compile document.typ document.pdf
+ *
+ * Import from "odf-kit/odt/to-typst":
+ *
+ * ```typescript
+ * import { modelToTypst, odtToTypst } from "odf-kit/odt/to-typst";
+ * ```
+ *
+ * modelToTypst() accepts a pre-parsed OdtDocumentModel and is the primary
+ * function. odtToTypst() is a convenience wrapper that calls readOdt() +
+ * modelToTypst() in a single step.
+ *
+ * Both functions are zero-dependency pure functions — no filesystem access,
+ * no child process spawning, no Typst installation required at import time.
+ * The consumer decides how to use the returned .typ string.
+ */
+export { VERSION } from "../../version.js";
+
+export { modelToTypst, odtToTypst } from "./emitter.js";
+export type { TypstEmitOptions } from "./emitter.js";
