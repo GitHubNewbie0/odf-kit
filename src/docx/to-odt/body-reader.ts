@@ -23,8 +23,8 @@
  *    CT_Body child elements validated against §17.2.2.
  */
 
-import { parseXml } from "../odt/read/xml-parser.js";
-import type { XmlElementNode } from "../odt/read/xml-parser.js";
+import { parseXml } from "../../odt/read/xml-parser.js";
+import type { XmlElementNode } from "../../odt/read/xml-parser.js";
 import { parseRPr, parsePPr } from "./styles.js";
 import type { PPrResult } from "./styles.js";
 import type {

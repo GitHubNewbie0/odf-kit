@@ -13,8 +13,8 @@
  * document-level overrides cleanly.
  */
 
-import { parseXml } from "../odt/read/xml-parser.js";
-import type { XmlElementNode } from "../odt/read/xml-parser.js";
+import { parseXml } from "../../odt/read/xml-parser.js";
+import type { XmlElementNode } from "../../odt/read/xml-parser.js";
 import type { StyleMap, StyleEntry, RunProps, ParaProps } from "./types.js";
 import { DEFAULT_RUN_PROPS, DEFAULT_PARA_PROPS } from "./types.js";
 

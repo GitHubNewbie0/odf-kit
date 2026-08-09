@@ -32,8 +32,8 @@
  *   </w:numbering>
  */
 
-import { parseXml } from "../odt/read/xml-parser.js";
-import type { XmlElementNode } from "../odt/read/xml-parser.js";
+import { parseXml } from "../../odt/read/xml-parser.js";
+import type { XmlElementNode } from "../../odt/read/xml-parser.js";
 import type { NumberingMap, NumberingLevel } from "./types.js";
 
 // ---------------------------------------------------------------------------

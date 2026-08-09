@@ -17,7 +17,7 @@
  *   </Relationships>
  */
 
-import { parseXml } from "../odt/read/xml-parser.js";
+import { parseXml } from "../../odt/read/xml-parser.js";
 import type { RelationshipMap, RelationshipEntry } from "./types.js";
 
 /**

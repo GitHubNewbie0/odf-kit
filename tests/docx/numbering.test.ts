@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
-import { parseNumbering } from "../../src/docx/numbering.js";
+import { parseNumbering } from "../../src/docx/to-odt/numbering.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
