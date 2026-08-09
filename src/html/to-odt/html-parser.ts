@@ -21,21 +21,21 @@
  * if no resolution method is available or returns undefined.
  */
 
-import { odfKitParser } from "./read/xml-parser.js";
-import type { XmlElementNode, XmlNode } from "./read/xml-parser.js";
-import { odfKitNormalizer } from "../html-normalizer/index.js";
-import type { Normalizer, Parser } from "../types/public.js";
-import type { OdtDocument } from "../build-or-fill/build-odt/document.js";
-import { ParagraphBuilder } from "../build-or-fill/build-odt/paragraph-builder.js";
-import { ListBuilder } from "../build-or-fill/build-odt/list-builder.js";
+import { odfKitParser } from "../../odt/read/xml-parser.js";
+import type { XmlElementNode, XmlNode } from "../../odt/read/xml-parser.js";
+import { odfKitNormalizer } from "../../html-normalizer/index.js";
+import type { Normalizer, Parser } from "../../types/public.js";
+import type { OdtDocument } from "../../build-or-fill/build-odt/document.js";
+import { ParagraphBuilder } from "../../build-or-fill/build-odt/paragraph-builder.js";
+import { ListBuilder } from "../../build-or-fill/build-odt/list-builder.js";
 import type {
   TextRun,
   TextFormatting,
   ParagraphOptions,
   CellOptions,
-} from "../build-or-fill/build-odt/types.js";
-import { detectMime, isBase64Image, base64ToUint8Array } from "../lexical/util/detect-mime.js";
-import { convertDecimal, parseOdfValue } from "../core/length.js";
+} from "../../build-or-fill/build-odt/types.js";
+import { detectMime, isBase64Image, base64ToUint8Array } from "../../lexical/util/detect-mime.js";
+import { convertDecimal, parseOdfValue } from "../../core/length.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 

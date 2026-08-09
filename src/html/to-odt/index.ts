@@ -1,3 +1,13 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for converting HTML to ODT.
+ *
+ * Import from "odf-kit/html/to-odt":
+ *
+ * ```typescript
+ * import { htmlToOdt } from "odf-kit/html/to-odt";
+ * ```
+ */
+export { VERSION } from "../../version.js";
+
+export { htmlToOdt } from "./html-to-odt.js";
+export type { HtmlToOdtOptions } from "./html-to-odt.js";

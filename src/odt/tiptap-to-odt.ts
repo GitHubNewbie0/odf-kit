@@ -19,7 +19,7 @@
 import type { OdtDocument } from "../build-or-fill/build-odt/document.js";
 import { ParagraphBuilder } from "../build-or-fill/build-odt/paragraph-builder.js";
 import { ListBuilder } from "../build-or-fill/build-odt/list-builder.js";
-import type { OdtBaseOptions } from "./html-to-odt.js";
+import type { OdtBaseOptions } from "../html/to-odt/html-to-odt.js";
 import type {
   TextFormatting,
   TextRun,
