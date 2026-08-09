@@ -14,8 +14,8 @@
  */
 
 import { unzipSync, strFromU8 } from "fflate";
-import { parseXml } from "../odt/read/xml-parser.js";
-import type { XmlElementNode } from "../odt/read/xml-parser.js";
+import { parseXml } from "../../odt/read/xml-parser.js";
+import type { XmlElementNode } from "../../odt/read/xml-parser.js";
 import type {
   OdsDocumentModel,
   OdsMetadata,

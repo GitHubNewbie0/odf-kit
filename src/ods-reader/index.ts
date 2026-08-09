@@ -1,9 +1,9 @@
 export { VERSION } from "../version.js";
-import { readOds } from "./parser.js";
+import { readOds } from "../ods/read/parser.js";
 import { renderOdsHtml } from "./html-renderer.js";
-import type { ReadOdsOptions, OdsHtmlOptions } from "./types.js";
+import type { ReadOdsOptions, OdsHtmlOptions } from "../ods/read/types.js";
 
-export { readOds } from "./parser.js";
+export { readOds } from "../ods/read/parser.js";
 export type {
   OdsDocumentModel,
   OdsMetadata,
@@ -13,7 +13,7 @@ export type {
   OdsCellFormatting,
   ReadOdsOptions,
   OdsHtmlOptions,
-} from "./types.js";
+} from "../ods/read/types.js";
 
 /**
  * Convert an ODS file directly to an HTML string.

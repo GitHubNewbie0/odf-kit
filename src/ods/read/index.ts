@@ -1,3 +1,25 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for reading ODS files into a spreadsheet model.
+ *
+ * Import from "odf-kit/ods/read":
+ *
+ * ```typescript
+ * import { readOds } from "odf-kit/ods/read";
+ * ```
+ *
+ * readOds() returns an OdsDocumentModel with one sheet model per sheet. To
+ * render HTML, see "odf-kit/ods/to-html".
+ */
+export { VERSION } from "../../version.js";
+
+export { readOds } from "./parser.js";
+export type {
+  OdsDocumentModel,
+  OdsMetadata,
+  OdsSheetModel,
+  OdsRowModel,
+  OdsCellModel,
+  OdsCellFormatting,
+  ReadOdsOptions,
+  OdsHtmlOptions,
+} from "./types.js";
