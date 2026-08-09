@@ -37,7 +37,7 @@ import { parseXml } from "./xml-parser.js";
 import type { XmlElementNode, XmlNode } from "./xml-parser.js";
 import { buildRegistry, resolve, resolveFontFamily } from "./registry.js";
 import type { StyleRegistry } from "./registry.js";
-import { renderHtml } from "../../reader/html-renderer.js";
+import { renderOdtHtml } from "../to-html/html-renderer.js";
 import { compareLengths } from "../../core/length.js";
 import type {
   OdtDocumentModel,
@@ -1769,7 +1769,7 @@ export function readOdt(bytes: Uint8Array, options?: ReadOdtOptions): OdtDocumen
       firstPageFooter: masterPageContent.firstPageFooter,
     }),
     toHtml(htmlOptions?: HtmlOptions): string {
-      return renderHtml(body, htmlOptions);
+      return renderOdtHtml(body, htmlOptions);
     },
   };
 }

@@ -36,7 +36,7 @@
  * data-*, and id are also HTML-escaped so the output is safe to embed
  * in any context.
  *
- * By default renderHtml() returns a complete HTML document with a
+ * By default renderOdtHtml() returns a complete HTML document with a
  * <!DOCTYPE html> declaration. Pass { fragment: true } to receive only
  * the inner body content, suitable for embedding in an existing page.
  */
@@ -60,7 +60,7 @@ import type {
   RowStyle,
   HtmlOptions,
   TableCellNode,
-} from "../odt/read/types.js";
+} from "../read/types.js";
 
 // ============================================================
 // HTML escaping
@@ -548,10 +548,10 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
  *
  * @example
  * ```typescript
- * const html = renderHtml(doc.body, { fragment: true });
+ * const html = renderOdtHtml(doc.body, { fragment: true });
  * ```
  */
-export function renderHtml(body: BodyNode[], options?: HtmlOptions): string {
+export function renderOdtHtml(body: BodyNode[], options?: HtmlOptions): string {
   const inner = body.map((n) => renderBodyNode(n, options)).join("\n");
   if (options?.fragment === true) return inner;
   return `<!DOCTYPE html>\n<html>\n<head><meta charset="utf-8"></head>\n<body>\n${inner}\n</body>\n</html>`;
