@@ -4,8 +4,8 @@
  * Maps an XlsxWorkbook intermediate model to an OdsDocument and saves it.
  */
 
-import { OdsDocument } from "../build-or-fill/build-ods/document.js";
-import type { OdsCellObject, OdsDateFormat } from "../build-or-fill/build-ods/types.js";
+import { OdsDocument } from "../../build-or-fill/build-ods/document.js";
+import type { OdsCellObject, OdsDateFormat } from "../../build-or-fill/build-ods/types.js";
 import type { XlsxWorkbook, XlsxSheet, XlsxCell } from "./reader.js";
 
 export interface XlsxToOdsOptions {

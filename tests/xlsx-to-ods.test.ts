@@ -7,8 +7,8 @@ import {
   isDateFormatCode,
   isDateStyle,
   readXlsx,
-} from "../src/xlsx/reader.js";
-import { xlsxToOds } from "../src/xlsx/index.js";
+} from "../src/xlsx/to-ods/reader.js";
+import { xlsxToOds } from "../src/xlsx/to-ods/index.js";
 import { readOds } from "../src/ods-reader/index.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
