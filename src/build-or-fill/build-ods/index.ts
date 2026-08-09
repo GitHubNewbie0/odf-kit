@@ -1,3 +1,21 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for ODS construction from JavaScript-side inputs.
+ *
+ * Import from "odf-kit/build-or-fill/build-ods":
+ *
+ * ```typescript
+ * import { OdsDocument, OdsSheet } from "odf-kit/build-or-fill/build-ods";
+ * ```
+ */
+
+export { VERSION } from "../../version.js";
+export { OdsDocument } from "./document.js";
+export { OdsSheet } from "./sheet-builder.js";
+export type {
+  OdsCellValue,
+  OdsCellObject,
+  OdsCellOptions,
+  OdsCellType,
+  OdsRowOptions,
+  OdsDateFormat,
+} from "./types.js";

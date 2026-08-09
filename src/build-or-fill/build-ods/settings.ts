@@ -1,5 +1,5 @@
-import { ODF_NS, ODF_VERSION } from "../core/namespaces.js";
-import { el, xmlDocumentCompact } from "../core/xml.js";
+import { ODF_NS, ODF_VERSION } from "../../core/namespaces.js";
+import { el, xmlDocumentCompact } from "../../core/xml.js";
 import type { OdsSheetData } from "./types.js";
 
 /**

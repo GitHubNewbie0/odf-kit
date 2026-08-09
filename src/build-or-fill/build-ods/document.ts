@@ -1,7 +1,7 @@
-import { assemblePackage } from "../core/packaging.js";
-import type { PackageFile } from "../core/packaging.js";
-import { generateMeta } from "../core/metadata.js";
-import type { MetadataOptions } from "../core/metadata.js";
+import { assemblePackage } from "../../core/packaging.js";
+import type { PackageFile } from "../../core/packaging.js";
+import { generateMeta } from "../../core/metadata.js";
+import type { MetadataOptions } from "../../core/metadata.js";
 import { generateOdsContent, generateOdsStyles } from "./content.js";
 import { generateOdsSettings } from "./settings.js";
 import { OdsSheet } from "./sheet-builder.js";
