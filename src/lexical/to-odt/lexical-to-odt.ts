@@ -1,4 +1,4 @@
-import { OdtDocument } from "../build-or-fill/build-odt/document.js";
+import { OdtDocument } from "../../build-or-fill/build-odt/document.js";
 import type { LexicalSerializedEditorState, LexicalToOdtOptions } from "./types.js";
 import { walkRoot } from "./walker/walk-root.js";
 

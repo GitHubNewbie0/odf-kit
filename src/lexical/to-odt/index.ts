@@ -1,3 +1,17 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for converting Lexical editor state to ODT.
+ *
+ * Import from "odf-kit/lexical/to-odt":
+ *
+ * ```typescript
+ * import { lexicalToOdt } from "odf-kit/lexical/to-odt";
+ * ```
+ */
+export { VERSION } from "../../version.js";
+
+export { lexicalToOdt } from "./lexical-to-odt.js";
+export type {
+  LexicalToOdtOptions,
+  LexicalSerializedEditorState,
+  LexicalSerializedNode,
+} from "./types.js";

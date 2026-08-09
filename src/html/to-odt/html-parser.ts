@@ -34,7 +34,11 @@ import type {
   ParagraphOptions,
   CellOptions,
 } from "../../build-or-fill/build-odt/types.js";
-import { detectMime, isBase64Image, base64ToUint8Array } from "../../lexical/util/detect-mime.js";
+import {
+  detectMime,
+  isBase64Image,
+  base64ToUint8Array,
+} from "../../lexical/to-odt/util/detect-mime.js";
 import { convertDecimal, parseOdfValue } from "../../core/length.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
