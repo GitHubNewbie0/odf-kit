@@ -16,15 +16,15 @@
  * provided in options.
  */
 
-import type { OdtDocument } from "../build-or-fill/build-odt/document.js";
-import { ParagraphBuilder } from "../build-or-fill/build-odt/paragraph-builder.js";
-import { ListBuilder } from "../build-or-fill/build-odt/list-builder.js";
-import type { OdtBaseOptions } from "../html/to-odt/html-to-odt.js";
+import type { OdtDocument } from "../../build-or-fill/build-odt/document.js";
+import { ParagraphBuilder } from "../../build-or-fill/build-odt/paragraph-builder.js";
+import { ListBuilder } from "../../build-or-fill/build-odt/list-builder.js";
+import type { OdtBaseOptions } from "../../html/to-odt/html-to-odt.js";
 import type {
   TextFormatting,
   TextRun,
   ParagraphOptions,
-} from "../build-or-fill/build-odt/types.js";
+} from "../../build-or-fill/build-odt/types.js";
 
 // ─── Public Types ─────────────────────────────────────────────────────
 
@@ -153,7 +153,7 @@ export async function tiptapToOdt(
   // we duplicate the page setup logic here for a clean implementation.
 
   // Import OdtDocument dynamically to avoid circular dependency issues
-  const { OdtDocument } = await import("../build-or-fill/build-odt/document.js");
+  const { OdtDocument } = await import("../../build-or-fill/build-odt/document.js");
   const doc = new OdtDocument();
 
   // Apply metadata
