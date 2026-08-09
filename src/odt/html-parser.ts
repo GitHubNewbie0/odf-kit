@@ -25,10 +25,15 @@ import { odfKitParser } from "../reader/xml-parser.js";
 import type { XmlElementNode, XmlNode } from "../reader/xml-parser.js";
 import { odfKitNormalizer } from "../html-normalizer/index.js";
 import type { Normalizer, Parser } from "../types/public.js";
-import type { OdtDocument } from "./document.js";
-import { ParagraphBuilder } from "./paragraph-builder.js";
-import { ListBuilder } from "./list-builder.js";
-import type { TextRun, TextFormatting, ParagraphOptions, CellOptions } from "./types.js";
+import type { OdtDocument } from "../build-or-fill/build-odt/document.js";
+import { ParagraphBuilder } from "../build-or-fill/build-odt/paragraph-builder.js";
+import { ListBuilder } from "../build-or-fill/build-odt/list-builder.js";
+import type {
+  TextRun,
+  TextFormatting,
+  ParagraphOptions,
+  CellOptions,
+} from "../build-or-fill/build-odt/types.js";
 import { detectMime, isBase64Image, base64ToUint8Array } from "../lexical/util/detect-mime.js";
 import { convertDecimal, parseOdfValue } from "../core/length.js";
 

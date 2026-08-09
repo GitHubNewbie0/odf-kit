@@ -1,13 +1,17 @@
 export { VERSION } from "../version.js";
-export { OdtDocument } from "./document.js";
-export { ParagraphBuilder } from "./paragraph-builder.js";
-export { HeaderFooterBuilder } from "./header-footer-builder.js";
-export { TableBuilder, RowBuilder, CellBuilder } from "./table-builder.js";
-export { ListBuilder } from "./list-builder.js";
+export {
+  OdtDocument,
+  ParagraphBuilder,
+  HeaderFooterBuilder,
+  TableBuilder,
+  RowBuilder,
+  CellBuilder,
+  ListBuilder,
+} from "../build-or-fill/build-odt/index.js";
 export { htmlToOdt } from "./html-to-odt.js";
 export { markdownToOdt } from "./markdown-to-odt.js";
 export { tiptapToOdt } from "./tiptap-to-odt.js";
-export type { ContentElement } from "./content.js";
+export type { ContentElement } from "../build-or-fill/build-odt/content.js";
 export type { HtmlToOdtOptions } from "./html-to-odt.js";
 export type { TiptapNode, TiptapMark, TiptapToOdtOptions } from "./tiptap-to-odt.js";
 export type {
@@ -21,4 +25,4 @@ export type {
   ListOptions,
   ImageOptions,
   ImageData,
-} from "./types.js";
+} from "../build-or-fill/build-odt/types.js";

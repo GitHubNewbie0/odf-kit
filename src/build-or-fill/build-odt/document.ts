@@ -1,14 +1,14 @@
-import { assemblePackage } from "../core/packaging.js";
-import type { PackageFile } from "../core/packaging.js";
-import { generateMeta } from "../core/metadata.js";
-import type { MetadataOptions } from "../core/metadata.js";
-import { generateStyles } from "../core/styles.js";
-import type { StylesConfig } from "../core/styles.js";
+import { assemblePackage } from "../../core/packaging.js";
+import type { PackageFile } from "../../core/packaging.js";
+import { generateMeta } from "../../core/metadata.js";
+import type { MetadataOptions } from "../../core/metadata.js";
+import { generateStyles } from "../../core/styles.js";
+import type { StylesConfig } from "../../core/styles.js";
 import { generateContent, buildHeaderFooterContent } from "./content.js";
 import type { ContentElement } from "./content.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 import { HeaderFooterBuilder } from "./header-footer-builder.js";
-import { compareLengths } from "../core/length.js";
+import { compareLengths } from "../../core/length.js";
 import { TableBuilder } from "./table-builder.js";
 import { ListBuilder } from "./list-builder.js";
 import { generateOdtSettings } from "./settings.js";
@@ -440,7 +440,7 @@ export class OdtDocument {
    */
   private buildStylesConfig(): StylesConfig {
     const config: StylesConfig = {};
-    const allStyles: import("../core/xml.js").XmlElement[] = [];
+    const allStyles: import("../../core/xml.js").XmlElement[] = [];
 
     // Page layout
     if (this.pageLayout) {

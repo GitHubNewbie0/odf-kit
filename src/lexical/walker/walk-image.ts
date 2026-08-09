@@ -1,4 +1,4 @@
-import type { OdtDocument } from "../../odt/document.js";
+import type { OdtDocument } from "../../build-or-fill/build-odt/document.js";
 import type { InlineContentBuilder } from "../types.js";
 import type { LexicalImageNode, LexicalSerializedNode, LexicalToOdtOptions } from "../types.js";
 import { isBase64Image, base64ToUint8Array, detectMime } from "../util/detect-mime.js";

@@ -1,6 +1,6 @@
-import { OdtDocument } from "./document.js";
+import { OdtDocument } from "../build-or-fill/build-odt/document.js";
 import { parseHtml } from "./html-parser.js";
-import type { PageLayout } from "./types.js";
+import type { PageLayout } from "../build-or-fill/build-odt/types.js";
 import type { Normalizer, Parser } from "../types/public.js";
 
 // ─── Page Format Presets ──────────────────────────────────────────────

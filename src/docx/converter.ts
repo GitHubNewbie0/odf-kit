@@ -19,8 +19,8 @@
  *    EMU→cm conversion already done by the reader.
  */
 
-import { OdtDocument } from "../odt/document.js";
-import { ParagraphBuilder } from "../odt/paragraph-builder.js";
+import { OdtDocument } from "../build-or-fill/build-odt/document.js";
+import { ParagraphBuilder } from "../build-or-fill/build-odt/paragraph-builder.js";
 import type {
   TextFormatting,
   ParagraphOptions,
@@ -30,7 +30,7 @@ import type {
   ListData,
   ListItemData,
   PageLayout,
-} from "../odt/types.js";
+} from "../build-or-fill/build-odt/types.js";
 import type {
   DocxDocument,
   DocxBodyElement,
@@ -676,7 +676,7 @@ function buildCellOptions(cell: DocxTableCell): CellOptions {
 function buildCellContent(
   cell: DocxTableCell,
   ctx: ConversionContext,
-): (builder: import("../odt/table-builder.js").CellBuilder) => void {
+): (builder: import("../build-or-fill/build-odt/table-builder.js").CellBuilder) => void {
   return (c) => {
     // Collect all text from all paragraphs in the cell
     let first = true;
@@ -846,8 +846,8 @@ function advancePastLevel(items: ListGroupItem[], startIdx: number, level: numbe
 function buildListItemRuns(
   inlines: DocxInlineElement[],
   ctx: ConversionContext,
-): import("../odt/types.js").TextRun[] {
-  const runs: import("../odt/types.js").TextRun[] = [];
+): import("../build-or-fill/build-odt/types.js").TextRun[] {
+  const runs: import("../build-or-fill/build-odt/types.js").TextRun[] = [];
   for (const el of inlines) {
     if (el.type === "run" && el.text) {
       const fmt = resolveRunFormatting(el, ctx);
@@ -865,7 +865,7 @@ function buildListItemRuns(
 }
 
 function populateListBuilder(
-  builder: import("../odt/list-builder.js").ListBuilder,
+  builder: import("../build-or-fill/build-odt/list-builder.js").ListBuilder,
   listData: ListData,
   ctx: ConversionContext,
 ): void {

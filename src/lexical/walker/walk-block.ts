@@ -1,4 +1,4 @@
-import type { OdtDocument } from "../../odt/document.js";
+import type { OdtDocument } from "../../build-or-fill/build-odt/document.js";
 import type {
   LexicalParagraphNode,
   LexicalHeadingNode,

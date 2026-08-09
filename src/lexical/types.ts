@@ -237,8 +237,18 @@ export interface LexicalToOdtOptions {
  * contexts without a type cast. TypeScript resolves this structurally.
  */
 export interface InlineContentBuilder {
-  addText(text: string, formatting?: import("../odt/types.js").TextFormatting): this;
-  addLink(text: string, url: string, formatting?: import("../odt/types.js").TextFormatting): this;
+  addText(
+    text: string,
+    formatting?: import("../build-or-fill/build-odt/types.js").TextFormatting,
+  ): this;
+  addLink(
+    text: string,
+    url: string,
+    formatting?: import("../build-or-fill/build-odt/types.js").TextFormatting,
+  ): this;
   addLineBreak(): this;
-  addImage(data: Uint8Array, options: import("../odt/types.js").ImageOptions): this;
+  addImage(
+    data: Uint8Array,
+    options: import("../build-or-fill/build-odt/types.js").ImageOptions,
+  ): this;
 }
