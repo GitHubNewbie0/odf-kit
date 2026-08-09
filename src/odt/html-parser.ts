@@ -21,8 +21,8 @@
  * if no resolution method is available or returns undefined.
  */
 
-import { odfKitParser } from "../reader/xml-parser.js";
-import type { XmlElementNode, XmlNode } from "../reader/xml-parser.js";
+import { odfKitParser } from "./read/xml-parser.js";
+import type { XmlElementNode, XmlNode } from "./read/xml-parser.js";
 import { odfKitNormalizer } from "../html-normalizer/index.js";
 import type { Normalizer, Parser } from "../types/public.js";
 import type { OdtDocument } from "../build-or-fill/build-odt/document.js";

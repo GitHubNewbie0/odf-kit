@@ -1,5 +1,5 @@
 import { renderHtml } from "../../src/reader/html-renderer.js";
-import type { BodyNode } from "../../src/reader/types.js";
+import type { BodyNode } from "../../src/odt/read/types.js";
 
 // ============================================================
 // Paragraphs

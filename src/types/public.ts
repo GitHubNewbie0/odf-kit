@@ -11,7 +11,7 @@
  * @module
  */
 
-import type { XmlElementNode } from "../reader/xml-parser.js";
+import type { XmlElementNode } from "../odt/read/xml-parser.js";
 
 /**
  * The canonical parsed-tree shape that any HTML/XML parser must return.

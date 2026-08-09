@@ -28,8 +28,8 @@
  */
 
 import { unzipSync } from "fflate";
-import { parseXml } from "../reader/xml-parser.js";
-import type { XmlElementNode } from "../reader/xml-parser.js";
+import { parseXml } from "../odt/read/xml-parser.js";
+import type { XmlElementNode } from "../odt/read/xml-parser.js";
 import { parseRelationships } from "./relationships.js";
 import { parseStyles } from "./styles.js";
 import { parseNumbering } from "./numbering.js";

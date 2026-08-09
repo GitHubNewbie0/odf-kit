@@ -37,8 +37,8 @@ import { parseXml } from "./xml-parser.js";
 import type { XmlElementNode, XmlNode } from "./xml-parser.js";
 import { buildRegistry, resolve, resolveFontFamily } from "./registry.js";
 import type { StyleRegistry } from "./registry.js";
-import { renderHtml } from "./html-renderer.js";
-import { compareLengths } from "../core/length.js";
+import { renderHtml } from "../../reader/html-renderer.js";
+import { compareLengths } from "../../core/length.js";
 import type {
   OdtDocumentModel,
   OdtMetadata,

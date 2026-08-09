@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import { parseStyles, parseRPr, parsePPr } from "../../src/docx/styles.js";
-import { parseXml } from "../../src/reader/xml-parser.js";
+import { parseXml } from "../../src/odt/read/xml-parser.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 

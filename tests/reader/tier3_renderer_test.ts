@@ -4,7 +4,7 @@ import type {
   ParagraphStyle,
   SectionNode,
   TrackedChangeNode,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 
 // ============================================================
 // Helpers

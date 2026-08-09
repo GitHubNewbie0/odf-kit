@@ -1,6 +1,6 @@
-import { parseXml } from "../../src/reader/xml-parser.js";
-import { buildRegistry, resolve, resolveFontFamily } from "../../src/reader/registry.js";
-import type { StyleRegistry } from "../../src/reader/registry.js";
+import { parseXml } from "../../src/odt/read/xml-parser.js";
+import { buildRegistry, resolve, resolveFontFamily } from "../../src/odt/read/registry.js";
+import type { StyleRegistry } from "../../src/odt/read/registry.js";
 
 // ============================================================
 // Helpers

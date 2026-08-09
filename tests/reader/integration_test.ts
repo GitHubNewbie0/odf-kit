@@ -1,5 +1,5 @@
-import { parseMetaXml } from "../../src/reader/parser.js";
-import { readOdt } from "../../src/reader/parser.js";
+import { parseMetaXml } from "../../src/odt/read/parser.js";
+import { readOdt } from "../../src/odt/read/parser.js";
 import { OdtDocument } from "../../src/index.js";
 import type {
   ParagraphNode,
@@ -8,7 +8,7 @@ import type {
   TableNode,
   InlineNode,
   TextSpan,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 
 // ============================================================
 // Type helper

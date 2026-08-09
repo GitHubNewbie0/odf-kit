@@ -16,7 +16,7 @@
  * @module
  */
 
-import { odfKitParser } from "../../src/reader/xml-parser.js";
+import { odfKitParser } from "../../src/odt/read/xml-parser.js";
 import type { Parser } from "../../src/types/public.js";
 
 /**

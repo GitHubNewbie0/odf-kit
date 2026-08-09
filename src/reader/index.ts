@@ -14,7 +14,7 @@
  */
 export { VERSION } from "../version.js";
 
-export { readOdt } from "./parser.js";
+export { readOdt } from "../odt/read/parser.js";
 export type {
   // Document root and metadata
   OdtDocumentModel,
@@ -53,10 +53,10 @@ export type {
   // Tier 3 style and layout types
   ParagraphStyle,
   PageLayout,
-} from "./types.js";
+} from "../odt/read/types.js";
 
-import { readOdt } from "./parser.js";
-import type { HtmlOptions, ReadOdtOptions } from "./types.js";
+import { readOdt } from "../odt/read/parser.js";
+import type { HtmlOptions, ReadOdtOptions } from "../odt/read/types.js";
 
 /**
  * Convert an .odt file directly to an HTML string.

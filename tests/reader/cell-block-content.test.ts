@@ -1,4 +1,4 @@
-import { readOdt } from "../../src/reader/parser.js";
+import { readOdt } from "../../src/odt/read/parser.js";
 import { renderHtml } from "../../src/reader/html-renderer.js";
 import type {
   ParagraphNode,
@@ -8,7 +8,7 @@ import type {
   TableCellNode,
   InlineNode,
   TextSpan,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";

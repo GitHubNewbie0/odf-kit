@@ -15,7 +15,7 @@
  * Exported for unit testing and for use by the ODT parser.
  */
 
-import type { Parser } from "../types/public.js";
+import type { Parser } from "../../types/public.js";
 
 /** An element node in the XML tree. */
 export interface XmlElementNode {

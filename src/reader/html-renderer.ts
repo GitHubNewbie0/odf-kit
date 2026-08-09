@@ -60,7 +60,7 @@ import type {
   RowStyle,
   HtmlOptions,
   TableCellNode,
-} from "./types.js";
+} from "../odt/read/types.js";
 
 // ============================================================
 // HTML escaping

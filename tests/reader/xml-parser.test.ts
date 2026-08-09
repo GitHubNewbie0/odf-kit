@@ -1,5 +1,5 @@
-import { parseXml } from "../../src/reader/xml-parser.js";
-import type { XmlElementNode } from "../../src/reader/xml-parser.js";
+import { parseXml } from "../../src/odt/read/xml-parser.js";
+import type { XmlElementNode } from "../../src/odt/read/xml-parser.js";
 
 // ============================================================
 // Basic structure

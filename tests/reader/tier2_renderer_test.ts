@@ -6,7 +6,7 @@ import type {
   NoteNode,
   BookmarkNode,
   FieldNode,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 
 // ============================================================
 // Helpers
