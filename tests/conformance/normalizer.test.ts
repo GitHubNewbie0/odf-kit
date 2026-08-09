@@ -16,7 +16,7 @@
  * @module
  */
 
-import { odfKitNormalizer } from "../../src/html-normalizer/index.js";
+import { odfKitNormalizer } from "../../src/html/normalize/index.js";
 import type { Normalizer } from "../../src/types/public.js";
 
 /**

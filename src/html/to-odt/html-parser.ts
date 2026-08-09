@@ -23,7 +23,7 @@
 
 import { odfKitParser } from "../../odt/read/xml-parser.js";
 import type { XmlElementNode, XmlNode } from "../../odt/read/xml-parser.js";
-import { odfKitNormalizer } from "../../html-normalizer/index.js";
+import { odfKitNormalizer } from "../normalize/index.js";
 import type { Normalizer, Parser } from "../../types/public.js";
 import type { OdtDocument } from "../../build-or-fill/build-odt/document.js";
 import { ParagraphBuilder } from "../../build-or-fill/build-odt/paragraph-builder.js";

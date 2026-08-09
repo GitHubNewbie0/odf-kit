@@ -8,7 +8,7 @@ export { ListBuilder } from "./odt/index.js";
 export { htmlToOdt } from "./odt/index.js";
 export { markdownToOdt } from "./odt/index.js";
 export { tiptapToOdt } from "./odt/index.js";
-export { odfKitNormalizer } from "./html-normalizer/index.js";
+export { odfKitNormalizer } from "./html/normalize/index.js";
 export { odfKitParser } from "./odt/read/xml-parser.js";
 export { VERSION } from "./version.js";
 export type {
