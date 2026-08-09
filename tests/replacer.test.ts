@@ -1,4 +1,4 @@
-import { replaceAll } from "../src/template/replacer.js";
+import { replaceAll } from "../src/build-or-fill/fill-odt/replacer.js";
 
 // ============================================================
 // Simple replacement

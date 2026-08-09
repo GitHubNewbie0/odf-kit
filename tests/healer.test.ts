@@ -1,4 +1,4 @@
-import { healPlaceholders, tokenize } from "../src/template/healer.js";
+import { healPlaceholders, tokenize } from "../src/build-or-fill/fill-odt/healer.js";
 
 // ============================================================
 // Tokenizer tests

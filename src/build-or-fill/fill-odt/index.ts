@@ -1,3 +1,14 @@
-// Phase 1 scaffold (v0.14.0 restructure). Populated in Phase 2 (moves)
-// and Phase 3 (aliases). `export {}` satisfies isolatedModules.
-export {};
+/**
+ * Public API for filling ODT templates with JavaScript data.
+ *
+ * Import from "odf-kit/build-or-fill/fill-odt":
+ *
+ * ```typescript
+ * import { fillTemplate } from "odf-kit/build-or-fill/fill-odt";
+ * ```
+ */
+
+export { VERSION } from "../../version.js";
+export { fillTemplate } from "./template.js";
+export { healPlaceholders } from "./healer.js";
+export { replaceAll, type TemplateData } from "./replacer.js";
