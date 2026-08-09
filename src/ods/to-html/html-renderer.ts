@@ -12,7 +12,7 @@ import type {
   OdsCellModel,
   OdsCellFormatting,
   OdsHtmlOptions,
-} from "../ods/read/types.js";
+} from "../read/types.js";
 
 // â”€â”€â”€ Style Building â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
