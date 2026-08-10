@@ -1,0 +1,120 @@
+# odf-kit Architecture
+
+How the source tree, the published sub-exports, and the documentation fit
+together, as of v0.14.0. For API details see the generated reference
+(`docs/reference/`) and the guide (`docs/guides/`).
+
+## The organizing principle
+
+Every conversion pathway lives in a directory named for the format it
+**consumes**, with a leaf named for what it **produces**:
+
+```
+src/
+├── index.ts                # root convenience surface (curated, 47 symbols)
+├── version.ts              # VERSION, synced from package.json
+├── build-or-fill/          # construct ODF from JavaScript
+│   ├── index.ts            #   convenience umbrella over all three leaves
+│   ├── build-odt/          #   OdtDocument + builders
+│   ├── build-ods/          #   OdsDocument, OdsSheet
+│   └── fill-odt/           #   fillTemplate, healPlaceholders, replaceAll
+├── odt/                    # ODT as input
+│   ├── read/               #   readOdt → document model
+│   ├── to-html/            #   odtToHtml, renderOdtHtml
+│   ├── to-markdown/        #   odtToMarkdown, modelToMarkdown
+│   └── to-typst/           #   odtToTypst, modelToTypst
+├── ods/                    # ODS as input
+│   ├── read/               #   readOds → spreadsheet model
+│   └── to-html/            #   odsToHtml, renderOdsHtml
+├── html/                   # HTML as input
+│   ├── to-odt/             #   htmlToOdt (+ the HTML parser)
+│   └── normalize/          #   odfKitNormalizer + the seven rules
+├── markdown/to-odt/        # markdownToOdt
+├── tiptap/to-odt/          # tiptapToOdt
+├── lexical/to-odt/         # lexicalToOdt (+ walker/, util/, css/)
+├── docx/to-odt/            # docxToOdt (+ the DOCX reader)
+├── xlsx/to-ods/            # xlsxToOds, readXlsx
+├── length/                 # ODF length utilities (public shim over core)
+├── types/                  # adapter contract types (public shim + public.ts)
+│
+├── core/                   # INTERNAL: packaging, styles, xml, metadata,
+│                           # and the exact-rational length engine
+└── adapters/parser/        # INTERNAL: skeletal home for future adapters
+```
+
+Reading the tree answers "where does X live?" mechanically: converting
+HTML? — `html/`. Producing Typst from ODT? — `odt/to-typst/`.
+
+Five further directories exist and hold nothing but a single `index.ts`
+re-export shim. They are the pre-v0.14.0 paths, kept working forever:
+
+```
+src/reader/  src/ods-reader/  src/template/  src/typst/  src/html-normalizer/
+```
+
+The directories that both host canonical leaves and answer to a legacy path
+carry an alias `index.ts` alongside their leaves — `odt/`, `ods/`,
+`markdown/`, `lexical/`, `docx/`, `xlsx/`.
+
+## Canonical paths and legacy aliases
+
+The package publishes **32 sub-export paths**. Each is defined by an
+`index.ts`; the converse does not hold — `core/` has an `index.ts` too and
+is deliberately unpublished. The 32 come in two kinds:
+
+- **Canonical paths** (`odf-kit/odt/read`, `odf-kit/html/to-odt`, …) — the
+  primary import surface, matching the tree exactly. New code should use
+  these.
+- **Legacy aliases** (`odf-kit/reader`, `odf-kit/template`,
+  `odf-kit/html-normalizer`, …) — the pre-v0.14.0 paths, preserved forever
+  as thin re-export shims over the canonical modules. **No published path
+  is ever removed.** The v0.13.x import you wrote keeps working, verbatim,
+  indefinitely.
+
+The root (`odf-kit`) is a **curated** convenience surface — the builders,
+converters, and their option types (47 symbols) — not a re-export of
+everything. Reader model types and per-pathway details import from their
+sub-paths.
+
+Every published path exports `VERSION` (the package version, since
+v0.13.4), so any consumer can check what it is running against.
+
+## Compatibility guarantee
+
+The v0.14.0 restructure was **strictly additive**, verified mechanically:
+every symbol published by v0.13.14 resolves identically from its original
+path, proven by diffing the machine-generated export census
+(`tools/export-census.mjs`) before and after, and enforced continuously by
+`tests/legacy-aliases.test.ts` (runtime) and the `typecheck:aliases` gate
+step (types). Aliases are not deprecated and carry no removal timeline.
+
+## Internal modules
+
+`src/core/` is deliberately unpublished: packaging, style synthesis, XML
+helpers, metadata, and the exact-rational length engine (BigInt rationals
+and intervals — no floating point anywhere in length arithmetic). The
+user-shaped layer of the length engine is published as `odf-kit/length`;
+the rational/interval machinery underneath is not, so it can evolve
+freely. `src/adapters/` holds the (currently skeletal) home for future
+parser adapters; the adapter *contract types* are published via
+`odf-kit/types`.
+
+## Documentation map
+
+- **Guide** (`docs/guides/`) — task-oriented, hand-written: building
+  documents, filling templates, each conversion pathway, critical rules.
+- **Reference** (`docs/reference/`) — generated by TypeDoc from the
+  canonical entry points; exhaustive symbols, options, and value sets.
+  JSDoc in source is the single source of truth for reference content.
+- **ADAPTERS.md** — the substitution architecture (parser/normalizer
+  hooks) and its contract types.
+- **CHANGELOG.md** — every release, including behavioral output changes.
+
+## Design lineage
+
+Decisions are recorded, not folklore: the restructure was specified in a
+ruled plan with a strict-additive contract, executed move-by-move with a
+full pipeline gate and census diff at every commit, and every deviation
+from the plan is written down. The library is ESM-only (Node 22+), with
+two runtime dependencies (`fflate`, `marked`). Values derived from the
+ODF 1.3 schema cite it; values we chose cite the decision.
