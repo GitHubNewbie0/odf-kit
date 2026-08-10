@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-08-10
+
+**Strictly-additive package restructure: 19 new canonical sub-export
+paths, a generated API reference, and permanent legacy aliases.**
+
+Every conversion pathway now lives at a path named for the format it
+consumes (`odf-kit/html/to-odt`, `odf-kit/odt/to-markdown`,
+`odf-kit/xlsx/to-ods`, …). The exports map grows from 13 to 32 paths.
+
+- **Nothing breaks.** Every pre-0.14 import path is preserved forever as
+  a legacy alias (`odf-kit/reader`, `odf-kit/template`, …) — verified
+  mechanically: every symbol published by 0.13.14 resolves identically
+  from its original path, enforced by a dedicated test suite and a
+  type-level gate check.
+- New paths: `odf-kit/length` (exact-rational ODF length utilities),
+  `odf-kit/types` (adapter contract types — resolves the `odf-kit/types`
+  import documented in the 0.13.2 changelog), and an
+  `odf-kit/build-or-fill` convenience umbrella.
+- `odf-kit/markdown` additively gains `markdownToOdt` alongside the
+  emitter functions.
+- New generated API reference at `docs/reference/` (TypeDoc); the API
+  page became the guide at `docs/guides/`, with corrected value sets for
+  `align` (6 values), image `anchor` (3 values), and `BodyNode.kind`
+  (all 6 kinds).
+- New `ARCHITECTURE.md` documenting the tree, the alias policy, and the
+  compatibility guarantee.
+
 ## [0.13.14] - 2026-08-07
 
 ### Fixed
@@ -508,7 +535,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.13.14...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.0...HEAD
+[0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.0
 [0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.14
 [0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.13
 [0.13.12]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.12

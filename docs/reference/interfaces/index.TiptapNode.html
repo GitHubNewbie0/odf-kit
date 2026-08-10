@@ -16,7 +16,7 @@
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">TiptapNode</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#attrs">attrs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#content">content</a><span class="tsd-signature-symbol">?:</span> <a href="" class="tsd-signature-type tsd-kind-interface">TiptapNode</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#marks">marks</a><span class="tsd-signature-symbol">?:</span> <a href="index.TiptapMark.html" class="tsd-signature-type tsd-kind-interface">TiptapMark</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#text">text</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#type">type</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L32">tiptap/to-odt/tiptap-to-odt.ts:32</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L32">tiptap/to-odt/tiptap-to-odt.ts:32</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -39,35 +39,35 @@
 <div class="tsd-comment tsd-typography"><p>Node attributes (e.g. { level: 1 } for headings, { href: &quot;...&quot; } for links).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L38">tiptap/to-odt/tiptap-to-odt.ts:38</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L38">tiptap/to-odt/tiptap-to-odt.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="content"><code class="tsd-tag">Optional</code><span>content</span><a href="#content" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">content</span><span class="tsd-signature-symbol">?:</span> <a href="" class="tsd-signature-type tsd-kind-interface">TiptapNode</a><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>Child nodes — present on block and inline container nodes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L40">tiptap/to-odt/tiptap-to-odt.ts:40</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L40">tiptap/to-odt/tiptap-to-odt.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="marks"><code class="tsd-tag">Optional</code><span>marks</span><a href="#marks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">marks</span><span class="tsd-signature-symbol">?:</span> <a href="index.TiptapMark.html" class="tsd-signature-type tsd-kind-interface">TiptapMark</a><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>Inline formatting marks — present on text nodes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L42">tiptap/to-odt/tiptap-to-odt.ts:42</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L42">tiptap/to-odt/tiptap-to-odt.ts:42</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="text"><code class="tsd-tag">Optional</code><span>text</span><a href="#text" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">text</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Text content — present only on text nodes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L36">tiptap/to-odt/tiptap-to-odt.ts:36</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L36">tiptap/to-odt/tiptap-to-odt.ts:36</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="type"><span>type</span><a href="#type" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Node type name (e.g. &quot;doc&quot;, &quot;paragraph&quot;, &quot;heading&quot;, &quot;text&quot;).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/tiptap/to-odt/tiptap-to-odt.ts#L34">tiptap/to-odt/tiptap-to-odt.ts:34</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/81098c1e0bd306dd0e5c614b72fa3719db8db5a6/src/tiptap/to-odt/tiptap-to-odt.ts#L34">tiptap/to-odt/tiptap-to-odt.ts:34</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
