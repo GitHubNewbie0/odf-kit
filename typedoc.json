@@ -1,0 +1,32 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPointStrategy": "resolve",
+  "entryPoints": [
+    "src/index.ts",
+    "src/build-or-fill/index.ts",
+    "src/build-or-fill/build-odt/index.ts",
+    "src/build-or-fill/build-ods/index.ts",
+    "src/build-or-fill/fill-odt/index.ts",
+    "src/odt/read/index.ts",
+    "src/odt/to-html/index.ts",
+    "src/odt/to-markdown/index.ts",
+    "src/odt/to-typst/index.ts",
+    "src/ods/read/index.ts",
+    "src/ods/to-html/index.ts",
+    "src/html/to-odt/index.ts",
+    "src/html/normalize/index.ts",
+    "src/markdown/to-odt/index.ts",
+    "src/tiptap/to-odt/index.ts",
+    "src/lexical/to-odt/index.ts",
+    "src/docx/to-odt/index.ts",
+    "src/xlsx/to-ods/index.ts",
+    "src/length/index.ts",
+    "src/types/index.ts"
+  ],
+  "out": "docs/reference",
+  "tsconfig": "tsconfig.json",
+  "excludeInternal": true,
+  "readme": "none",
+  "githubPages": true,
+  "name": "odf-kit API reference"
+}

@@ -278,6 +278,7 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests docs/tools/**/*.ts",
     "typecheck:aliases": "tsc -p tsconfig.aliases.json",
+    "docs:reference": "typedoc",
     "format": "prettier --write src tests docs",
     "format:check": "prettier --check src tests docs",
     "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools docs/api",
@@ -335,6 +336,7 @@
     "jest": "^30.3.0",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.21.0",
     "vnu-jar": "^26.5.2"
