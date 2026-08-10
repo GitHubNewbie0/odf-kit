@@ -125,6 +125,7 @@
     "build:tool-page": "node scripts/build-tool-page.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests docs/tools/**/*.ts",
+    "typecheck:aliases": "tsc -p tsconfig.aliases.json",
     "format": "prettier --write src tests docs",
     "format:check": "prettier --check src tests docs",
     "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools docs/api",

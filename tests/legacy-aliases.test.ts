@@ -30,27 +30,27 @@
  * Type-only exports cannot be asserted at runtime, so they are pinned by the
  * `import type` block and exported type aliases at the foot of this file.
  *
- * KNOWN LIMITATION — READ BEFORE RELYING ON THE TYPE HALF. Those type pins
- * are NOT currently enforced by the gate. Verified empirically 2026-08-09 by
- * deleting readXlsx and the four Xlsx model types from src/xlsx/index.ts:
- *   - the runtime assertions FAILED, as intended (readXlsx caught);
- *   - `npx tsc -p tsconfig.test.json --noEmit` reported TS2305 for all four
- *     missing types, so the pins do work;
- *   - but `npm test` PASSED them, because ts-jest runs transpile-only under
- *     this project's `isolatedModules: true`, and `npm run lint` does not do
- *     type-aware checking, and `npm run build` type-checks only src/
- *     (tsconfig.json excludes tests/).
- * So nothing in format:check → lint → build → test currently type-checks
- * tests/. Adding a step is blocked on ~20 pre-existing type errors in other
- * test files (TableRowNode.isHeader omissions, an OdfValue `lexical` literal)
- * that transpile-only mode has always tolerated. Recorded in state73's doc-
- * debt queue for Scott's ruling; until then the type half is documentation
- * plus a manual `tsc -p tsconfig.test.json` check, not an automated guard.
+ * THE TYPE PINS ARE GATE-ENFORCED — but NOT by `npm test`. Run
+ * `npm run typecheck:aliases` (tsc over tsconfig.aliases.json); it is a
+ * mandatory gate step. `npm test` alone is BLIND to type-only regressions
+ * here, because ts-jest runs transpile-only under this project's
+ * `isolatedModules: true`, `npm run lint` is not type-aware, and
+ * `npm run build` type-checks only src/ (tsconfig.json excludes tests/).
+ * Never conclude "the alias surface is intact" from a green test run alone.
  *
- * Partial protection does exist meanwhile: `npm run build` type-checks src/,
- * so if a type is deleted at its DEFINING module the alias's `export type`
- * line fails the build. What is unguarded is a type quietly dropped from an
- * alias file's re-export list — precisely the amendments-2 item 1 defect.
+ * Demonstrated 2026-08-09, dropping ONLY the four Xlsx type re-exports from
+ * src/xlsx/index.ts while leaving every runtime export in place:
+ *   - `npm test` PASSED, all 13 green — completely blind;
+ *   - `npm run typecheck:aliases` FAILED with TS2305 x4.
+ * That is exactly the amendments-2 item 1 defect class — a type quietly
+ * dropped from an alias's re-export list — and the runtime half of this
+ * suite cannot see it by construction.
+ *
+ * The scope is deliberately one file. A project-wide test type-check is
+ * blocked on ~20 pre-existing type errors elsewhere in tests/ (queued as
+ * separate 0.14.x cleanup); widen tsconfig.aliases.json's `include` once
+ * that lands. `npm run build` additionally covers the easier case: a type
+ * deleted at its DEFINING module fails the build regardless.
  */
 
 import { readFileSync } from "node:fs";
