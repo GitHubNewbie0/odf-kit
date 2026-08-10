@@ -1,5 +1,5 @@
-import { readOdt } from "../../src/reader/parser.js";
-import { renderHtml } from "../../src/reader/html-renderer.js";
+import { readOdt } from "../../src/odt/read/parser.js";
+import { renderOdtHtml } from "../../src/odt/to-html/html-renderer.js";
 import type {
   ParagraphNode,
   HeadingNode,
@@ -8,7 +8,7 @@ import type {
   TableCellNode,
   InlineNode,
   TextSpan,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -120,11 +120,11 @@ describe("readOdt — block content inside table cells", () => {
   });
 
   // ----------------------------------------------------------
-  // End-to-end render (readOdt -> renderHtml, the odtToHtml pipeline).
+  // End-to-end render (readOdt -> renderOdtHtml, the odtToHtml pipeline).
   // ----------------------------------------------------------
 
   test("renders the cell list to HTML end-to-end", () => {
-    const html = renderHtml(doc.body, { fragment: true });
+    const html = renderOdtHtml(doc.body, { fragment: true });
     // The list survives conversion. Item text is wrapped in a <span> carrying
     // the fixture's font, so match the ul>li structure around the text rather
     // than pinning the system-dependent span attributes.
@@ -132,7 +132,7 @@ describe("readOdt — block content inside table cells", () => {
   });
 
   test("renders the paragraph-then-list cell in order, with the margin reset", () => {
-    const html = renderHtml(doc.body, { fragment: true });
+    const html = renderOdtHtml(doc.body, { fragment: true });
     // Paragraph carries the cell margin reset and is immediately followed by the
     // list in the same cell. Tolerant of the inner <span> and the <td>'s own
     // border style.

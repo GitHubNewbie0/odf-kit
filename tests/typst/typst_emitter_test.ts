@@ -1,11 +1,11 @@
-import { modelToTypst } from "../../src/typst/emitter.js";
+import { modelToTypst } from "../../src/odt/to-typst/emitter.js";
 import type {
   OdtDocumentModel,
   BodyNode,
   SectionNode,
   TrackedChangeNode,
   PageLayout,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 
 // ============================================================
 // Helpers

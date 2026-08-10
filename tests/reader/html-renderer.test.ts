@@ -1,19 +1,19 @@
-import { renderHtml } from "../../src/reader/html-renderer.js";
-import type { BodyNode } from "../../src/reader/types.js";
+import { renderOdtHtml } from "../../src/odt/to-html/html-renderer.js";
+import type { BodyNode } from "../../src/odt/read/types.js";
 
 // ============================================================
 // Paragraphs
 // ============================================================
 
-describe("renderHtml — paragraphs", () => {
+describe("renderOdtHtml — paragraphs", () => {
   test("renders a plain paragraph", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hello world" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>Hello world</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>Hello world</p>");
   });
 
   test("renders an empty paragraph", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p></p>");
   });
 
   test("renders multiple paragraphs separated by newlines", () => {
@@ -21,7 +21,7 @@ describe("renderHtml — paragraphs", () => {
       { kind: "paragraph", spans: [{ text: "First" }] },
       { kind: "paragraph", spans: [{ text: "Second" }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>First</p>\n<p>Second</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>First</p>\n<p>Second</p>");
   });
 
   test("renders a paragraph with a line break span", () => {
@@ -31,28 +31,28 @@ describe("renderHtml — paragraphs", () => {
         spans: [{ text: "Line one" }, { text: "", lineBreak: true }, { text: "Line two" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>Line one<br>Line two</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>Line one<br>Line two</p>");
   });
 
   test("rl-tb writing mode renders dir=rtl", () => {
     const body: BodyNode[] = [
       { kind: "paragraph", paragraphStyle: { writingMode: "rl-tb" }, spans: [{ text: "نص" }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe('<p dir="rtl">نص</p>');
+    expect(renderOdtHtml(body, { fragment: true })).toBe('<p dir="rtl">نص</p>');
   });
 
   test("lr-tb writing mode renders no dir attribute", () => {
     const body: BodyNode[] = [
       { kind: "paragraph", paragraphStyle: { writingMode: "lr-tb" }, spans: [{ text: "text" }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>text</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>text</p>");
   });
 
   test("vertical writing modes are carried in the model but not rendered", () => {
     const body: BodyNode[] = [
       { kind: "paragraph", paragraphStyle: { writingMode: "tb-rl" }, spans: [{ text: "text" }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>text</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>text</p>");
   });
 
   test("dir attribute follows the style attribute", () => {
@@ -63,7 +63,9 @@ describe("renderHtml — paragraphs", () => {
         spans: [{ text: "x" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe('<p style="text-align:left" dir="rtl">x</p>');
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
+      '<p style="text-align:left" dir="rtl">x</p>',
+    );
   });
 });
 
@@ -71,20 +73,20 @@ describe("renderHtml — paragraphs", () => {
 // Headings
 // ============================================================
 
-describe("renderHtml — headings", () => {
+describe("renderOdtHtml — headings", () => {
   test("renders heading level 1", () => {
     const body: BodyNode[] = [{ kind: "heading", level: 1, spans: [{ text: "Title" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<h1>Title</h1>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<h1>Title</h1>");
   });
 
   test("renders heading level 2", () => {
     const body: BodyNode[] = [{ kind: "heading", level: 2, spans: [{ text: "Section" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<h2>Section</h2>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<h2>Section</h2>");
   });
 
   test("renders heading level 6", () => {
     const body: BodyNode[] = [{ kind: "heading", level: 6, spans: [{ text: "Deep" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<h6>Deep</h6>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<h6>Deep</h6>");
   });
 
   test("renders a heading with formatted spans", () => {
@@ -95,7 +97,7 @@ describe("renderHtml — headings", () => {
         spans: [{ text: "Bold", bold: true }, { text: " heading" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<h1><strong>Bold</strong> heading</h1>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<h1><strong>Bold</strong> heading</h1>");
   });
 
   test("heading with rl-tb renders dir=rtl", () => {
@@ -107,7 +109,7 @@ describe("renderHtml — headings", () => {
         spans: [{ text: "عنوان" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe('<h2 dir="rtl">عنوان</h2>');
+    expect(renderOdtHtml(body, { fragment: true })).toBe('<h2 dir="rtl">عنوان</h2>');
   });
 });
 
@@ -115,44 +117,44 @@ describe("renderHtml — headings", () => {
 // Character formatting
 // ============================================================
 
-describe("renderHtml — character formatting", () => {
+describe("renderOdtHtml — character formatting", () => {
   test("renders bold text", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "hello", bold: true }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><strong>hello</strong></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><strong>hello</strong></p>");
   });
 
   test("renders italic text", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "hello", italic: true }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><em>hello</em></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><em>hello</em></p>");
   });
 
   test("renders underline text", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "hello", underline: true }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><u>hello</u></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><u>hello</u></p>");
   });
 
   test("renders strikethrough text", () => {
     const body: BodyNode[] = [
       { kind: "paragraph", spans: [{ text: "hello", strikethrough: true }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><s>hello</s></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><s>hello</s></p>");
   });
 
   test("renders superscript text", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "2", superscript: true }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><sup>2</sup></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><sup>2</sup></p>");
   });
 
   test("renders subscript text", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "2", subscript: true }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><sub>2</sub></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><sub>2</sub></p>");
   });
 
   test("renders bold and italic together (nesting order: italic wraps bold)", () => {
     const body: BodyNode[] = [
       { kind: "paragraph", spans: [{ text: "hi", bold: true, italic: true }] },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<p><em><strong>hi</strong></em></p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p><em><strong>hi</strong></em></p>");
   });
 
   test("renders mixed plain and formatted spans in one paragraph", () => {
@@ -168,7 +170,7 @@ describe("renderHtml — character formatting", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<p>This is <strong>bold</strong> and <em>italic</em>.</p>",
     );
   });
@@ -178,7 +180,7 @@ describe("renderHtml — character formatting", () => {
 // Hyperlinks
 // ============================================================
 
-describe("renderHtml — hyperlinks", () => {
+describe("renderOdtHtml — hyperlinks", () => {
   test("renders a hyperlink", () => {
     const body: BodyNode[] = [
       {
@@ -186,7 +188,7 @@ describe("renderHtml — hyperlinks", () => {
         spans: [{ text: "click here", href: "https://example.com" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<p><a href="https://example.com">click here</a></p>',
     );
   });
@@ -198,7 +200,7 @@ describe("renderHtml — hyperlinks", () => {
         spans: [{ text: "link", bold: true, href: "https://example.com" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<p><a href="https://example.com"><strong>link</strong></a></p>',
     );
   });
@@ -210,7 +212,7 @@ describe("renderHtml — hyperlinks", () => {
         spans: [{ text: "link", href: "https://example.com?q=a&b=1" }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<p><a href="https://example.com?q=a&amp;b=1">link</a></p>',
     );
   });
@@ -220,20 +222,20 @@ describe("renderHtml — hyperlinks", () => {
 // HTML escaping
 // ============================================================
 
-describe("renderHtml — HTML escaping", () => {
+describe("renderOdtHtml — HTML escaping", () => {
   test("escapes & in text content", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Smith & Co" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>Smith &amp; Co</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>Smith &amp; Co</p>");
   });
 
   test("escapes < and > in text content", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "a < b > c" }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>a &lt; b &gt; c</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>a &lt; b &gt; c</p>");
   });
 
   test("escapes double quotes in text content", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: 'say "hello"' }] }];
-    expect(renderHtml(body, { fragment: true })).toBe("<p>say &quot;hello&quot;</p>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<p>say &quot;hello&quot;</p>");
   });
 });
 
@@ -241,7 +243,7 @@ describe("renderHtml — HTML escaping", () => {
 // Lists
 // ============================================================
 
-describe("renderHtml — lists", () => {
+describe("renderOdtHtml — lists", () => {
   test("renders an unordered list", () => {
     const body: BodyNode[] = [
       {
@@ -250,7 +252,7 @@ describe("renderHtml — lists", () => {
         items: [{ spans: [{ text: "Apple" }] }, { spans: [{ text: "Banana" }] }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<ul><li>Apple</li><li>Banana</li></ul>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<ul><li>Apple</li><li>Banana</li></ul>");
   });
 
   test("renders an ordered list", () => {
@@ -261,7 +263,7 @@ describe("renderHtml — lists", () => {
         items: [{ spans: [{ text: "Step 1" }] }, { spans: [{ text: "Step 2" }] }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe("<ol><li>Step 1</li><li>Step 2</li></ol>");
+    expect(renderOdtHtml(body, { fragment: true })).toBe("<ol><li>Step 1</li><li>Step 2</li></ol>");
   });
 
   test("renders a nested list", () => {
@@ -281,7 +283,7 @@ describe("renderHtml — lists", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<ul><li>Parent<ul><li>Child</li></ul></li></ul>",
     );
   });
@@ -294,7 +296,7 @@ describe("renderHtml — lists", () => {
         items: [{ spans: [{ text: "Bold item", bold: true }] }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<ul><li><strong>Bold item</strong></li></ul>",
     );
   });
@@ -304,7 +306,7 @@ describe("renderHtml — lists", () => {
 // Tables
 // ============================================================
 
-describe("renderHtml — tables", () => {
+describe("renderOdtHtml — tables", () => {
   test("renders a simple two-column table", () => {
     const body: BodyNode[] = [
       {
@@ -319,7 +321,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<table>" +
         '<tr><td><p style="margin-top:0;margin-bottom:0">A</p></td><td><p style="margin-top:0;margin-bottom:0">B</p></td></tr>' +
         '<tr><td><p style="margin-top:0;margin-bottom:0">C</p></td><td><p style="margin-top:0;margin-bottom:0">D</p></td></tr>' +
@@ -338,7 +340,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<table><tr><td colspan="2"><p style="margin-top:0;margin-bottom:0">Merged</p></td></tr></table>',
     );
   });
@@ -354,7 +356,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<table><tr><td rowspan="3"><p style="margin-top:0;margin-bottom:0">Tall</p></td></tr></table>',
     );
   });
@@ -370,7 +372,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<table><tr><td colspan="2" rowspan="2"><p style="margin-top:0;margin-bottom:0">Big</p></td></tr></table>',
     );
   });
@@ -386,7 +388,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<table><tr><td><p style="margin-top:0;margin-bottom:0">Normal</p></td></tr></table>',
     );
   });
@@ -402,7 +404,7 @@ describe("renderHtml — tables", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       '<table><tr><td><p style="margin-top:0;margin-bottom:0"><strong>Bold</strong></p></td></tr></table>',
     );
   });
@@ -412,17 +414,17 @@ describe("renderHtml — tables", () => {
 // Fragment vs full document wrapper
 // ============================================================
 
-describe("renderHtml — output wrapper", () => {
+describe("renderOdtHtml — output wrapper", () => {
   test("returns a fragment when fragment is true", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
-    const html = renderHtml(body, { fragment: true });
+    const html = renderOdtHtml(body, { fragment: true });
     expect(html).toBe("<p>Hi</p>");
     expect(html).not.toContain("<!DOCTYPE");
   });
 
   test("returns a full HTML document by default", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
-    const html = renderHtml(body);
+    const html = renderOdtHtml(body);
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("<html>");
     expect(html).toContain("<body>");
@@ -433,17 +435,17 @@ describe("renderHtml — output wrapper", () => {
 
   test("returns a full HTML document when fragment is false", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
-    const html = renderHtml(body, { fragment: false });
+    const html = renderOdtHtml(body, { fragment: false });
     expect(html).toContain("<!DOCTYPE html>");
   });
 
   test("returns empty fragment for empty body", () => {
-    expect(renderHtml([], { fragment: true })).toBe("");
+    expect(renderOdtHtml([], { fragment: true })).toBe("");
   });
 
   test("full document includes charset meta tag in head", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
-    const html = renderHtml(body);
+    const html = renderOdtHtml(body);
     expect(html).toContain("<head>");
     expect(html).toContain('<meta charset="utf-8">');
     expect(html).toContain("</head>");
@@ -451,7 +453,7 @@ describe("renderHtml — output wrapper", () => {
 
   test("head appears before body in full document", () => {
     const body: BodyNode[] = [{ kind: "paragraph", spans: [{ text: "Hi" }] }];
-    const html = renderHtml(body);
+    const html = renderOdtHtml(body);
     expect(html.indexOf("<head>")).toBeLessThan(html.indexOf("<body>"));
   });
 });
@@ -460,7 +462,7 @@ describe("renderHtml — output wrapper", () => {
 // Table header rows (#51) — thead / th rendering
 // ============================================================
 
-describe("renderHtml — table header rows", () => {
+describe("renderOdtHtml — table header rows", () => {
   test('header rows render in <thead> with <th scope="col">, body rows in <tbody>', () => {
     const body: BodyNode[] = [
       {
@@ -477,7 +479,7 @@ describe("renderHtml — table header rows", () => {
         ],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<table>" +
         "<thead>" +
         '<tr><th scope="col"><p style="margin-top:0;margin-bottom:0">H1</p></th>' +
@@ -501,7 +503,7 @@ describe("renderHtml — table header rows", () => {
         ],
       },
     ];
-    const html = renderHtml(body, { fragment: true });
+    const html = renderOdtHtml(body, { fragment: true });
     expect(html).toBe(
       "<table>" +
         '<tr><td><p style="margin-top:0;margin-bottom:0">A</p></td></tr>' +
@@ -519,7 +521,7 @@ describe("renderHtml — table header rows", () => {
         rows: [{ isHeader: true, cells: [{ spans: [{ text: "Only" }] }] }],
       },
     ];
-    const html = renderHtml(body, { fragment: true });
+    const html = renderOdtHtml(body, { fragment: true });
     expect(html).toBe(
       "<table><thead>" +
         '<tr><th scope="col"><p style="margin-top:0;margin-bottom:0">Only</p></th></tr>' +
@@ -535,7 +537,7 @@ describe("renderHtml — table header rows", () => {
         rows: [{ isHeader: true, cells: [{ spans: [{ text: "Wide" }], colSpan: 2 }] }],
       },
     ];
-    expect(renderHtml(body, { fragment: true })).toBe(
+    expect(renderOdtHtml(body, { fragment: true })).toBe(
       "<table><thead>" +
         '<tr><th scope="col" colspan="2"><p style="margin-top:0;margin-bottom:0">Wide</p></th></tr>' +
         "</thead></table>",

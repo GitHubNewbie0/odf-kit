@@ -1,5 +1,5 @@
-import { healPlaceholders } from "../src/template/healer.js";
-import { replaceAll } from "../src/template/replacer.js";
+import { healPlaceholders } from "../src/build-or-fill/fill-odt/healer.js";
+import { replaceAll } from "../src/build-or-fill/fill-odt/replacer.js";
 
 /**
  * Pipeline test: heal → replace, end to end.
@@ -270,12 +270,13 @@ describe("pipeline — realistic document", () => {
 
 describe("fillTemplate — integration", () => {
   let fflate: typeof import("fflate") | null = null;
-  let fillTemplate: typeof import("../src/template/template.js").fillTemplate | null = null;
+  let fillTemplate: typeof import("../src/build-or-fill/fill-odt/template.js").fillTemplate | null =
+    null;
 
   beforeAll(async () => {
     try {
       fflate = await import("fflate");
-      const mod = await import("../src/template/template.js");
+      const mod = await import("../src/build-or-fill/fill-odt/template.js");
       fillTemplate = mod.fillTemplate;
     } catch {
       // fflate not installed — tests will be skipped
@@ -452,7 +453,7 @@ describe("fillTemplate — meta.xml processing", () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       fflate = require("fflate");
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      fillTemplate = require("../src/template/template.js").fillTemplate;
+      fillTemplate = require("../src/build-or-fill/fill-odt/template.js").fillTemplate;
     } catch {
       return;
     }
@@ -514,7 +515,7 @@ describe("fillTemplate — meta.xml processing", () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       fflate = require("fflate");
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      fillTemplate = require("../src/template/template.js").fillTemplate;
+      fillTemplate = require("../src/build-or-fill/fill-odt/template.js").fillTemplate;
     } catch {
       return;
     }

@@ -12,30 +12,120 @@
       "import": "./dist/index.js",
       "module-sync": "./dist/index.js"
     },
+    "./build-or-fill": {
+      "types": "./dist/build-or-fill/index.d.ts",
+      "import": "./dist/build-or-fill/index.js",
+      "module-sync": "./dist/build-or-fill/index.js"
+    },
+    "./build-or-fill/build-odt": {
+      "types": "./dist/build-or-fill/build-odt/index.d.ts",
+      "import": "./dist/build-or-fill/build-odt/index.js",
+      "module-sync": "./dist/build-or-fill/build-odt/index.js"
+    },
+    "./build-or-fill/build-ods": {
+      "types": "./dist/build-or-fill/build-ods/index.d.ts",
+      "import": "./dist/build-or-fill/build-ods/index.js",
+      "module-sync": "./dist/build-or-fill/build-ods/index.js"
+    },
+    "./build-or-fill/fill-odt": {
+      "types": "./dist/build-or-fill/fill-odt/index.d.ts",
+      "import": "./dist/build-or-fill/fill-odt/index.js",
+      "module-sync": "./dist/build-or-fill/fill-odt/index.js"
+    },
     "./odt": {
       "types": "./dist/odt/index.d.ts",
       "import": "./dist/odt/index.js",
       "module-sync": "./dist/odt/index.js"
     },
-    "./odt-reader": {
-      "types": "./dist/reader/index.d.ts",
-      "import": "./dist/reader/index.js",
-      "module-sync": "./dist/reader/index.js"
+    "./odt/read": {
+      "types": "./dist/odt/read/index.d.ts",
+      "import": "./dist/odt/read/index.js",
+      "module-sync": "./dist/odt/read/index.js"
+    },
+    "./odt/to-html": {
+      "types": "./dist/odt/to-html/index.d.ts",
+      "import": "./dist/odt/to-html/index.js",
+      "module-sync": "./dist/odt/to-html/index.js"
+    },
+    "./odt/to-markdown": {
+      "types": "./dist/odt/to-markdown/index.d.ts",
+      "import": "./dist/odt/to-markdown/index.js",
+      "module-sync": "./dist/odt/to-markdown/index.js"
+    },
+    "./odt/to-typst": {
+      "types": "./dist/odt/to-typst/index.d.ts",
+      "import": "./dist/odt/to-typst/index.js",
+      "module-sync": "./dist/odt/to-typst/index.js"
     },
     "./ods": {
       "types": "./dist/ods/index.d.ts",
       "import": "./dist/ods/index.js",
       "module-sync": "./dist/ods/index.js"
     },
-    "./ods-reader": {
-      "types": "./dist/ods-reader/index.d.ts",
-      "import": "./dist/ods-reader/index.js",
-      "module-sync": "./dist/ods-reader/index.js"
+    "./ods/read": {
+      "types": "./dist/ods/read/index.d.ts",
+      "import": "./dist/ods/read/index.js",
+      "module-sync": "./dist/ods/read/index.js"
+    },
+    "./ods/to-html": {
+      "types": "./dist/ods/to-html/index.d.ts",
+      "import": "./dist/ods/to-html/index.js",
+      "module-sync": "./dist/ods/to-html/index.js"
+    },
+    "./html/to-odt": {
+      "types": "./dist/html/to-odt/index.d.ts",
+      "import": "./dist/html/to-odt/index.js",
+      "module-sync": "./dist/html/to-odt/index.js"
+    },
+    "./html/normalize": {
+      "types": "./dist/html/normalize/index.d.ts",
+      "import": "./dist/html/normalize/index.js",
+      "module-sync": "./dist/html/normalize/index.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown/index.d.ts",
+      "import": "./dist/markdown/index.js",
+      "module-sync": "./dist/markdown/index.js"
+    },
+    "./markdown/to-odt": {
+      "types": "./dist/markdown/to-odt/index.d.ts",
+      "import": "./dist/markdown/to-odt/index.js",
+      "module-sync": "./dist/markdown/to-odt/index.js"
+    },
+    "./tiptap/to-odt": {
+      "types": "./dist/tiptap/to-odt/index.d.ts",
+      "import": "./dist/tiptap/to-odt/index.js",
+      "module-sync": "./dist/tiptap/to-odt/index.js"
+    },
+    "./lexical": {
+      "types": "./dist/lexical/index.d.ts",
+      "import": "./dist/lexical/index.js",
+      "module-sync": "./dist/lexical/index.js"
+    },
+    "./lexical/to-odt": {
+      "types": "./dist/lexical/to-odt/index.d.ts",
+      "import": "./dist/lexical/to-odt/index.js",
+      "module-sync": "./dist/lexical/to-odt/index.js"
+    },
+    "./docx": {
+      "types": "./dist/docx/index.d.ts",
+      "import": "./dist/docx/index.js",
+      "module-sync": "./dist/docx/index.js"
+    },
+    "./docx/to-odt": {
+      "types": "./dist/docx/to-odt/index.d.ts",
+      "import": "./dist/docx/to-odt/index.js",
+      "module-sync": "./dist/docx/to-odt/index.js"
     },
     "./xlsx": {
       "types": "./dist/xlsx/index.d.ts",
       "import": "./dist/xlsx/index.js",
       "module-sync": "./dist/xlsx/index.js"
+    },
+    "./xlsx/to-ods": {
+      "types": "./dist/xlsx/to-ods/index.d.ts",
+      "import": "./dist/xlsx/to-ods/index.js",
+      "module-sync": "./dist/xlsx/to-ods/index.js"
     },
     "./template": {
       "types": "./dist/template/index.d.ts",
@@ -47,48 +137,107 @@
       "import": "./dist/reader/index.js",
       "module-sync": "./dist/reader/index.js"
     },
+    "./odt-reader": {
+      "types": "./dist/reader/index.d.ts",
+      "import": "./dist/reader/index.js",
+      "module-sync": "./dist/reader/index.js"
+    },
+    "./ods-reader": {
+      "types": "./dist/ods-reader/index.d.ts",
+      "import": "./dist/ods-reader/index.js",
+      "module-sync": "./dist/ods-reader/index.js"
+    },
     "./typst": {
       "types": "./dist/typst/index.d.ts",
       "import": "./dist/typst/index.js",
       "module-sync": "./dist/typst/index.js"
     },
-    "./docx": {
-      "types": "./dist/docx/index.d.ts",
-      "import": "./dist/docx/index.js",
-      "module-sync": "./dist/docx/index.js"
-    },
-    "./markdown": {
-      "types": "./dist/markdown/index.d.ts",
-      "import": "./dist/markdown/index.js",
-      "module-sync": "./dist/markdown/index.js"
-    },
-    "./lexical": {
-      "types": "./dist/lexical/index.d.ts",
-      "import": "./dist/lexical/index.js",
-      "module-sync": "./dist/lexical/index.js"
-    },
     "./html-normalizer": {
       "types": "./dist/html-normalizer/index.d.ts",
       "import": "./dist/html-normalizer/index.js",
       "module-sync": "./dist/html-normalizer/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "module-sync": "./dist/types/index.js"
+    },
+    "./length": {
+      "types": "./dist/length/index.d.ts",
+      "import": "./dist/length/index.js",
+      "module-sync": "./dist/length/index.js"
     }
   },
   "typesVersions": {
     "*": {
+      "build-or-fill": [
+        "./dist/build-or-fill/index.d.ts"
+      ],
+      "build-or-fill/build-odt": [
+        "./dist/build-or-fill/build-odt/index.d.ts"
+      ],
+      "build-or-fill/build-ods": [
+        "./dist/build-or-fill/build-ods/index.d.ts"
+      ],
+      "build-or-fill/fill-odt": [
+        "./dist/build-or-fill/fill-odt/index.d.ts"
+      ],
       "odt": [
         "./dist/odt/index.d.ts"
       ],
-      "odt-reader": [
-        "./dist/reader/index.d.ts"
+      "odt/read": [
+        "./dist/odt/read/index.d.ts"
+      ],
+      "odt/to-html": [
+        "./dist/odt/to-html/index.d.ts"
+      ],
+      "odt/to-markdown": [
+        "./dist/odt/to-markdown/index.d.ts"
+      ],
+      "odt/to-typst": [
+        "./dist/odt/to-typst/index.d.ts"
       ],
       "ods": [
         "./dist/ods/index.d.ts"
       ],
-      "ods-reader": [
-        "./dist/ods-reader/index.d.ts"
+      "ods/read": [
+        "./dist/ods/read/index.d.ts"
+      ],
+      "ods/to-html": [
+        "./dist/ods/to-html/index.d.ts"
+      ],
+      "html/to-odt": [
+        "./dist/html/to-odt/index.d.ts"
+      ],
+      "html/normalize": [
+        "./dist/html/normalize/index.d.ts"
+      ],
+      "markdown": [
+        "./dist/markdown/index.d.ts"
+      ],
+      "markdown/to-odt": [
+        "./dist/markdown/to-odt/index.d.ts"
+      ],
+      "tiptap/to-odt": [
+        "./dist/tiptap/to-odt/index.d.ts"
+      ],
+      "lexical": [
+        "./dist/lexical/index.d.ts"
+      ],
+      "lexical/to-odt": [
+        "./dist/lexical/to-odt/index.d.ts"
+      ],
+      "docx": [
+        "./dist/docx/index.d.ts"
+      ],
+      "docx/to-odt": [
+        "./dist/docx/to-odt/index.d.ts"
       ],
       "xlsx": [
         "./dist/xlsx/index.d.ts"
+      ],
+      "xlsx/to-ods": [
+        "./dist/xlsx/to-ods/index.d.ts"
       ],
       "template": [
         "./dist/template/index.d.ts"
@@ -96,20 +245,23 @@
       "reader": [
         "./dist/reader/index.d.ts"
       ],
+      "odt-reader": [
+        "./dist/reader/index.d.ts"
+      ],
+      "ods-reader": [
+        "./dist/ods-reader/index.d.ts"
+      ],
       "typst": [
         "./dist/typst/index.d.ts"
       ],
-      "docx": [
-        "./dist/docx/index.d.ts"
-      ],
-      "markdown": [
-        "./dist/markdown/index.d.ts"
-      ],
-      "lexical": [
-        "./dist/lexical/index.d.ts"
-      ],
       "html-normalizer": [
         "./dist/html-normalizer/index.d.ts"
+      ],
+      "types": [
+        "./dist/types/index.d.ts"
+      ],
+      "length": [
+        "./dist/length/index.d.ts"
       ]
     }
   },
@@ -125,6 +277,8 @@
     "build:tool-page": "node scripts/build-tool-page.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint src tests docs/tools/**/*.ts",
+    "typecheck:aliases": "tsc -p tsconfig.aliases.json",
+    "docs:reference": "typedoc",
     "format": "prettier --write src tests docs",
     "format:check": "prettier --check src tests docs",
     "validate-html": "java -jar node_modules/vnu-jar/build/dist/vnu.jar --skip-non-html --skip-info-messages --format gnu docs/index.html docs/guides docs/tools docs/api",
@@ -182,6 +336,7 @@
     "jest": "^30.3.0",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.21.0",
     "vnu-jar": "^26.5.2"

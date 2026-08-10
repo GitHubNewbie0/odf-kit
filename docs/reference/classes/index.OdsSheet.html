@@ -1,0 +1,255 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>OdsSheet | odf-kit API reference</title><meta name="description" content="Documentation for odf-kit API reference"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">odf-kit API reference</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="../modules/index.html">index</a></li>
+<li><a href="" aria-current="page">OdsSheet</a></li></ul>
+<h1>Class OdsSheet</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>Builder for an ODS sheet (tab).</p>
+<p>Returned by <a href="index.OdsDocument.html#addsheet" class="tsd-kind-method">OdsDocument.addSheet</a>. Not constructed directly.
+All methods return <code>this</code> for chaining.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">sheet</span><span class="hl-1"> = </span><span class="hl-2">doc</span><span class="hl-1">.</span><span class="hl-6">addSheet</span><span class="hl-1">(</span><span class="hl-3">&quot;Sales&quot;</span><span class="hl-1">);</span><br/><span class="hl-2">sheet</span><br/><span class="hl-1">  .</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;Month&quot;</span><span class="hl-1">, </span><span class="hl-3">&quot;Revenue&quot;</span><span class="hl-1">], { </span><span class="hl-2">bold:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1">, </span><span class="hl-2">backgroundColor:</span><span class="hl-1"> </span><span class="hl-3">&quot;#DDDDDD&quot;</span><span class="hl-1"> })</span><br/><span class="hl-1">  .</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;January&quot;</span><span class="hl-1">, </span><span class="hl-7">12500.00</span><span class="hl-1">])</span><br/><span class="hl-1">  .</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;February&quot;</span><span class="hl-1">, </span><span class="hl-7">14200.00</span><span class="hl-1">])</span><br/><span class="hl-1">  .</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;Total&quot;</span><span class="hl-1">, { </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-3">&quot;=SUM(B2:B3)&quot;</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;formula&quot;</span><span class="hl-1"> }])</span><br/><span class="hl-1">  .</span><span class="hl-6">setColumnWidth</span><span class="hl-1">(</span><span class="hl-7">0</span><span class="hl-1">, </span><span class="hl-3">&quot;4cm&quot;</span><span class="hl-1">)</span><br/><span class="hl-1">  .</span><span class="hl-6">setColumnWidth</span><span class="hl-1">(</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-3">&quot;5cm&quot;</span><span class="hl-1">)</span><br/><span class="hl-1">  .</span><span class="hl-6">freezeRows</span><span class="hl-1">(</span><span class="hl-7">1</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div></section><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L27">build-or-fill/build-ods/sheet-builder.ts:27</a></li></ul></aside>
+<section class="tsd-panel-group tsd-index-group">
+<section class="tsd-panel tsd-index-panel">
+<details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h5 class="tsd-index-heading uppercase">Index</h5></summary>
+<div class="tsd-accordion-details">
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="constructors">Constructors<a href="#constructors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#data" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>data</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#addrow" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Row</span></a>
+<a href="#freezecolumns" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>freeze<wbr/>Columns</span></a>
+<a href="#freezerows" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>freeze<wbr/>Rows</span></a>
+<a href="#setcolumnwidth" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Column<wbr/>Width</span></a>
+<a href="#setrowheight" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Row<wbr/>Height</span></a>
+<a href="#settabcolor" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Tab<wbr/>Color</span></a>
+</div></section></div></details></section></section>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="constructors-1">Constructors<a href="#constructors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="constructorodssheet"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">OdsSheet</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">OdsSheet</a><a href="#constructorodssheet" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">OdsSheet</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L31">build-or-fill/build-ods/sheet-builder.ts:31</a></li></ul></aside></div></li></ul></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="data"><code class="tsd-tag">Readonly</code><span>data</span><a href="#data" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">data</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">OdsSheetData</span></div>
+<div class="tsd-comment tsd-typography"><p>Internal sheet data — used by OdsDocument.save().</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L29">build-or-fill/build-ods/sheet-builder.ts:29</a></li></ul></aside></section></section></details>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="addrow"><span>add<wbr/>Row</span><a href="#addrow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="addrow-1"><span class="tsd-kind-call-signature">addRow</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">values</span><span class="tsd-signature-symbol">:</span> <a href="../types/index.OdsCellValue.html" class="tsd-signature-type tsd-kind-type-alias">OdsCellValue</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/index.OdsCellOptions.html" class="tsd-signature-type tsd-kind-interface">OdsCellOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#addrow-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Add a row of values to the sheet.</p>
+<p>Values are auto-typed:</p>
+<ul>
+<li><code>number</code> → float</li>
+<li><code>Date</code> → date</li>
+<li><code>boolean</code> → boolean</li>
+<li><code>string</code> → string (never auto-detected as formula)</li>
+<li><code>null</code> / <code>undefined</code> → empty cell</li>
+<li><a href="../interfaces/index.OdsCellObject.html" class="tsd-kind-interface">OdsCellObject</a> → explicit type (required for formulas, percentages, currencies)</li>
+</ul>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">values</span>: <a href="../types/index.OdsCellValue.html" class="tsd-signature-type tsd-kind-type-alias">OdsCellValue</a><span class="tsd-signature-symbol">[]</span></span>
+<div class="tsd-comment tsd-typography"><p>Array of cell values in column order.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/index.OdsCellOptions.html" class="tsd-signature-type tsd-kind-interface">OdsCellOptions</a></span>
+<div class="tsd-comment tsd-typography"><p>Optional formatting defaults for all cells in this row.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-1">Example<a href="#example-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;Month&quot;</span><span class="hl-1">, </span><span class="hl-3">&quot;Revenue&quot;</span><span class="hl-1">], { </span><span class="hl-2">bold:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1">, </span><span class="hl-2">backgroundColor:</span><span class="hl-1"> </span><span class="hl-3">&quot;#DDDDDD&quot;</span><span class="hl-1"> });</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;January&quot;</span><span class="hl-1">, </span><span class="hl-7">12500.00</span><span class="hl-1">]);</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;Total&quot;</span><span class="hl-1">, { </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-3">&quot;=SUM(B2:B3)&quot;</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;formula&quot;</span><span class="hl-1"> }]);</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([{ </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-7">0.1234</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;percentage&quot;</span><span class="hl-1">, </span><span class="hl-2">numberFormat:</span><span class="hl-1"> </span><span class="hl-3">&quot;percentage:1&quot;</span><span class="hl-1"> }]);</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([{ </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-7">1234.56</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;currency&quot;</span><span class="hl-1">, </span><span class="hl-2">numberFormat:</span><span class="hl-1"> </span><span class="hl-3">&quot;currency:EUR&quot;</span><span class="hl-1"> }]);</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([{ </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-3">&quot;Report&quot;</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;string&quot;</span><span class="hl-1">, </span><span class="hl-2">colSpan:</span><span class="hl-1"> </span><span class="hl-7">3</span><span class="hl-1">, </span><span class="hl-2">bold:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1"> }]);</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([{ </span><span class="hl-2">value:</span><span class="hl-1"> </span><span class="hl-3">&quot;odf-kit&quot;</span><span class="hl-1">, </span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;string&quot;</span><span class="hl-1">, </span><span class="hl-2">href:</span><span class="hl-1"> </span><span class="hl-3">&quot;https://github.com/GitHubNewbie0/odf-kit&quot;</span><span class="hl-1"> }]);</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L63">build-or-fill/build-ods/sheet-builder.ts:63</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="freezecolumns"><span>freeze<wbr/>Columns</span><a href="#freezecolumns" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="freezecolumns-1"><span class="tsd-kind-call-signature">freezeColumns</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">cols</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#freezecolumns-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Freeze the left N columns so they remain visible when scrolling right.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">cols</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></span>
+<div class="tsd-comment tsd-typography"><p>Number of columns to freeze (default 1).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-2">Example<a href="#example-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">freezeColumns</span><span class="hl-1">(</span><span class="hl-7">1</span><span class="hl-1">); </span><span class="hl-8">// freeze the first column</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L122">build-or-fill/build-ods/sheet-builder.ts:122</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="freezerows"><span>freeze<wbr/>Rows</span><a href="#freezerows" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="freezerows-1"><span class="tsd-kind-call-signature">freezeRows</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rows</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#freezerows-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Freeze the top N rows so they remain visible when scrolling down.</p>
+<p>Typically used to keep a header row visible. Call after adding rows.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">rows</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></span>
+<div class="tsd-comment tsd-typography"><p>Number of rows to freeze (default 1).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-3">Example<a href="#example-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">addRow</span><span class="hl-1">([</span><span class="hl-3">&quot;Name&quot;</span><span class="hl-1">, </span><span class="hl-3">&quot;Amount&quot;</span><span class="hl-1">, </span><span class="hl-3">&quot;Date&quot;</span><span class="hl-1">], { </span><span class="hl-2">bold:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1"> });</span><br/><span class="hl-2">sheet</span><span class="hl-1">.</span><span class="hl-6">freezeRows</span><span class="hl-1">(</span><span class="hl-7">1</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L108">build-or-fill/build-ods/sheet-builder.ts:108</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="setcolumnwidth"><span>set<wbr/>Column<wbr/>Width</span><a href="#setcolumnwidth" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="setcolumnwidth-1"><span class="tsd-kind-call-signature">setColumnWidth</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">colIndex</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#setcolumnwidth-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Set the width of a column.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">colIndex</span>: <span class="tsd-signature-type">number</span></span>
+<div class="tsd-comment tsd-typography"><p>Zero-based column index.</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">width</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>Width with units (e.g. <code>&quot;3cm&quot;</code>, <code>&quot;1.5in&quot;</code>).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L76">build-or-fill/build-ods/sheet-builder.ts:76</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="setrowheight"><span>set<wbr/>Row<wbr/>Height</span><a href="#setrowheight" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="setrowheight-1"><span class="tsd-kind-call-signature">setRowHeight</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">rowIndex</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#setrowheight-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Set the height of a row.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">rowIndex</span>: <span class="tsd-signature-type">number</span></span>
+<div class="tsd-comment tsd-typography"><p>Zero-based row index.</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">height</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>Height with units (e.g. <code>&quot;1cm&quot;</code>, <code>&quot;18pt&quot;</code>).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+<aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L88">build-or-fill/build-ods/sheet-builder.ts:88</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="settabcolor"><span>set<wbr/>Tab<wbr/>Color</span><a href="#settabcolor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="settabcolor-1"><span class="tsd-kind-call-signature">setTabColor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">color</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">this</span><a href="#settabcolor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Set the sheet tab color.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">color</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>Hex color (<code>&quot;#FF0000&quot;</code>) or CSS named color (<code>&quot;red&quot;</code>).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4><p>This sheet, for chaining.</p>
+
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-4">Example<a href="#example-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-2">doc</span><span class="hl-1">.</span><span class="hl-6">addSheet</span><span class="hl-1">(</span><span class="hl-3">&quot;Q1&quot;</span><span class="hl-1">).</span><span class="hl-6">setTabColor</span><span class="hl-1">(</span><span class="hl-3">&quot;#4CAF50&quot;</span><span class="hl-1">);</span><br/><span class="hl-2">doc</span><span class="hl-1">.</span><span class="hl-6">addSheet</span><span class="hl-1">(</span><span class="hl-3">&quot;Q2&quot;</span><span class="hl-1">).</span><span class="hl-6">setTabColor</span><span class="hl-1">(</span><span class="hl-3">&quot;#2196F3&quot;</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/GitHubNewbie0/odf-kit/blob/46fcc95ba7f312e279223c84bad2d09a2b8f6e86/src/build-or-fill/build-ods/sheet-builder.ts#L137">build-or-fill/build-ods/sheet-builder.ts:137</a></li></ul></aside></div></li></ul></section></section></details></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details">
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
+<div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
+<div><a href="#data"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>data</span></a></div></details>
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
+<div><a href="#addrow"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Row</span></a><a href="#freezecolumns"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>freeze<wbr/>Columns</span></a><a href="#freezerows"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>freeze<wbr/>Rows</span></a><a href="#setcolumnwidth"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Column<wbr/>Width</span></a><a href="#setrowheight"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Row<wbr/>Height</span></a><a href="#settabcolor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Tab<wbr/>Color</span></a></div></details></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">odf-kit API reference</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

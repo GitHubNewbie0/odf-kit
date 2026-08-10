@@ -1,13 +1,13 @@
 import { zipSync, strToU8 } from "fflate";
 import { readFileSync } from "node:fs";
-import { readOdt } from "../../src/reader/parser.js";
+import { readOdt } from "../../src/odt/read/parser.js";
 import type {
   ParagraphNode,
   HeadingNode,
   SectionNode,
   TrackedChangeNode,
   TableNode,
-} from "../../src/reader/types.js";
+} from "../../src/odt/read/types.js";
 
 // ============================================================
 // Minimal ODT builder helpers
@@ -888,8 +888,8 @@ describe("readOdt Tier 3 — tracked changes changes mode", () => {
 describe("buildRegistry Tier 3 — graphicProps", () => {
   // Import dynamically to keep the test focused on the public registry API
   test("style:graphic-properties attributes land in graphicProps", async () => {
-    const { buildRegistry, resolve } = await import("../../src/reader/registry.js");
-    const { parseXml } = await import("../../src/reader/xml-parser.js");
+    const { buildRegistry, resolve } = await import("../../src/odt/read/registry.js");
+    const { parseXml } = await import("../../src/odt/read/xml-parser.js");
 
     const root = parseXml(
       "<office:document-content>" +
@@ -908,8 +908,8 @@ describe("buildRegistry Tier 3 — graphicProps", () => {
   });
 
   test("graphicProps is empty for styles with no graphic-properties element", async () => {
-    const { buildRegistry, resolve } = await import("../../src/reader/registry.js");
-    const { parseXml } = await import("../../src/reader/xml-parser.js");
+    const { buildRegistry, resolve } = await import("../../src/odt/read/registry.js");
+    const { parseXml } = await import("../../src/odt/read/xml-parser.js");
 
     const root = parseXml(
       "<office:document-content>" +
@@ -927,8 +927,8 @@ describe("buildRegistry Tier 3 — graphicProps", () => {
   });
 
   test("graphicProps is inherited through style chain", async () => {
-    const { buildRegistry, resolve } = await import("../../src/reader/registry.js");
-    const { parseXml } = await import("../../src/reader/xml-parser.js");
+    const { buildRegistry, resolve } = await import("../../src/odt/read/registry.js");
+    const { parseXml } = await import("../../src/odt/read/xml-parser.js");
 
     const root = parseXml(
       "<office:document-content>" +

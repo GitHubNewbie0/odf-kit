@@ -656,7 +656,8 @@ For users with specific compliance or compatibility requirements, the normalizer
 import { htmlToOdt } from "odf-kit";
 
 // Use parse5 for full HTML5 spec compliance — write a small adapter
-// (see ADAPTERS.md for conventions)
+// (see ADAPTERS.md for conventions). fromParse5 is your own function,
+// not an odf-kit export.
 htmlToOdt(html, { parser: fromParse5(parse5.parse) });
 
 // Skip normalization (input is already polyglot)

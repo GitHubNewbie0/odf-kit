@@ -16,7 +16,7 @@ import {
   quoteUnquotedBooleanAttributes,
   quoteUnquotedAttributeValues,
   escapeAttributeValueAmpersands,
-} from "../../src/html-normalizer/index.js";
+} from "../../src/html/normalize/index.js";
 
 describe("selfCloseVoidElements (Rule 1)", () => {
   test("self-closes a bare void element", () => {

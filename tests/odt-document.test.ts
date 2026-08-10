@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import { OdtDocument } from "../src/odt/document.js";
+import { OdtDocument } from "../src/build-or-fill/build-odt/document.js";
 
 const decode = new TextDecoder();
 

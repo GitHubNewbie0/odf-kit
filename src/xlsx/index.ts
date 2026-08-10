@@ -1,33 +1,20 @@
-export { VERSION } from "../version.js";
-import { readXlsx } from "./reader.js";
-import { convertXlsxToOds } from "./converter.js";
-import type { XlsxToOdsOptions } from "./converter.js";
-
-export { readXlsx } from "./reader.js";
-export type { XlsxWorkbook, XlsxSheet, XlsxRow, XlsxCell } from "./reader.js";
-export type { XlsxToOdsOptions } from "./converter.js";
-
 /**
- * Convert an .xlsx file to an .ods file.
+ * Legacy alias. Preserved for backwards compatibility with callers that
+ * import from "odf-kit/xlsx". The XLSX pathway now lives at:
+ *   - "odf-kit/xlsx/to-ods"
  *
- * Parses the XLSX XML directly — no external dependencies beyond fflate.
- * Runs in Node.js and browsers.
+ * New code should import from that canonical path.
  *
- * @param bytes   - Raw .xlsx file bytes (Uint8Array or ArrayBuffer).
- * @param options - Optional conversion options.
- * @returns Promise resolving to a Uint8Array containing the .ods file.
- *
- * @example
- * import { xlsxToOds } from "odf-kit/xlsx"
- * import { readFileSync, writeFileSync } from "fs"
- *
- * const bytes = await xlsxToOds(readFileSync("report.xlsx"))
- * writeFileSync("report.ods", bytes)
+ * This alias mirrors the canonical entry point's full surface, including
+ * readXlsx and the four workbook model types (amendments-2 item 1).
  */
-export async function xlsxToOds(
-  bytes: Uint8Array | ArrayBuffer,
-  options?: XlsxToOdsOptions,
-): Promise<Uint8Array> {
-  const workbook = readXlsx(bytes);
-  return convertXlsxToOds(workbook, options);
-}
+export { VERSION } from "../version.js";
+
+export { xlsxToOds, readXlsx } from "./to-ods/index.js";
+export type {
+  XlsxToOdsOptions,
+  XlsxWorkbook,
+  XlsxSheet,
+  XlsxRow,
+  XlsxCell,
+} from "./to-ods/index.js";

@@ -20,8 +20,11 @@
  * Both functions are zero-dependency pure functions — no filesystem access,
  * no child process spawning, no Typst installation required at import time.
  * The consumer decides how to use the returned .typ string.
+ *
+ * The emitter now lives at "odf-kit/odt/to-typst"; this path is preserved
+ * for backwards compatibility and re-exports from there.
  */
 export { VERSION } from "../version.js";
 
-export { modelToTypst, odtToTypst } from "./emitter.js";
-export type { TypstEmitOptions } from "./emitter.js";
+export { modelToTypst, odtToTypst } from "../odt/to-typst/emitter.js";
+export type { TypstEmitOptions } from "../odt/to-typst/emitter.js";

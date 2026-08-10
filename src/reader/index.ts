@@ -9,12 +9,17 @@
  * ```
  *
  * readOdt() returns an OdtDocumentModel with a body array and a toHtml()
- * method. odtToHtml() is a convenience wrapper that calls readOdt().toHtml()
- * in a single step.
+ * method. odtToHtml() is a convenience wrapper that parses and renders in
+ * a single step.
+ *
+ * The implementation now lives at "odf-kit/odt/read" and
+ * "odf-kit/odt/to-html"; this path is preserved for backwards compatibility
+ * and re-exports from there.
  */
 export { VERSION } from "../version.js";
 
-export { readOdt } from "./parser.js";
+export { readOdt } from "../odt/read/parser.js";
+export { odtToHtml } from "../odt/to-html/index.js";
 export type {
   // Document root and metadata
   OdtDocumentModel,
@@ -53,38 +58,4 @@ export type {
   // Tier 3 style and layout types
   ParagraphStyle,
   PageLayout,
-} from "./types.js";
-
-import { readOdt } from "./parser.js";
-import type { HtmlOptions, ReadOdtOptions } from "./types.js";
-
-/**
- * Convert an .odt file directly to an HTML string.
- *
- * Convenience wrapper around readOdt().toHtml(). Use readOdt() directly
- * when you need access to the document model, metadata, page layout, or
- * header/footer content.
- *
- * @param bytes - The raw .odt file as a Uint8Array.
- * @param options - HTML output options.
- * @param readOptions - Options controlling how the document is parsed
- *   (e.g. tracked-changes mode). Passed to readOdt().
- * @returns HTML string. Full document by default; inner fragment when
- *   options.fragment is true.
- *
- * @example
- * ```typescript
- * import { odtToHtml } from "odf-kit/reader";
- * import { readFileSync } from "node:fs";
- *
- * const bytes = new Uint8Array(readFileSync("document.odt"));
- * const html = odtToHtml(bytes, { fragment: true });
- * ```
- */
-export function odtToHtml(
-  bytes: Uint8Array,
-  options?: HtmlOptions,
-  readOptions?: ReadOdtOptions,
-): string {
-  return readOdt(bytes, readOptions).toHtml(options);
-}
+} from "../odt/read/types.js";

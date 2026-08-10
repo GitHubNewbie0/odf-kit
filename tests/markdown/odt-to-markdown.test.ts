@@ -1,7 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import { zipSync } from "fflate";
 import { odtToMarkdown, modelToMarkdown } from "../../src/markdown/index.js";
-import { readOdt } from "../../src/reader/parser.js";
+import { readOdt } from "../../src/odt/read/parser.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
-import { readBody, readNotes } from "../../src/docx/body-reader.js";
-import type { BodyReaderContext } from "../../src/docx/body-reader.js";
+import { readBody, readNotes } from "../../src/docx/to-odt/body-reader.js";
+import type { BodyReaderContext } from "../../src/docx/to-odt/body-reader.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
@@ -44,9 +44,9 @@ describe("readBody — paragraphs", () => {
     const elements = readBody(bodyXml(para(run("Hello World"))), "body", ctx);
     expect(elements).toHaveLength(1);
     expect(elements[0].type).toBe("paragraph");
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.runs).toHaveLength(1);
-    const r = p.runs[0] as import("../../src/docx/types.js").DocxRun;
+    const r = p.runs[0] as import("../../src/docx/to-odt/types.js").DocxRun;
     expect(r.text).toBe("Hello World");
   });
 
@@ -68,7 +68,7 @@ describe("readBody — paragraphs", () => {
     const ctx = makeCtx({ styles });
     const xml = bodyXml(para(`<w:pPr><w:pStyle w:val="Heading1"/></w:pPr>${run("My Heading")}`));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.headingLevel).toBe(1);
   });
 
@@ -76,7 +76,7 @@ describe("readBody — paragraphs", () => {
     const ctx = makeCtx();
     const xml = bodyXml(para(`<w:pPr><w:outlineLvl w:val="1"/></w:pPr>${run("H2 paragraph")}`));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.headingLevel).toBe(2);
   });
 
@@ -91,8 +91,8 @@ describe("readBody — paragraphs", () => {
     const ctx = makeCtx();
     const xml = bodyXml(para(run("Bold text", "<w:b/>")));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
-    const r = p.runs[0] as import("../../src/docx/types.js").DocxRun;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
+    const r = p.runs[0] as import("../../src/docx/to-odt/types.js").DocxRun;
     expect(r.props.bold).toBe(true);
   });
 
@@ -100,7 +100,7 @@ describe("readBody — paragraphs", () => {
     const ctx = makeCtx();
     const xml = bodyXml(para(`<w:pPr><w:jc w:val="center"/></w:pPr>${run("Centered")}`));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.props.alignment).toBe("center");
   });
 });
@@ -114,8 +114,10 @@ describe("readBody — tracked changes", () => {
       para(`<w:ins w:id="1" w:author="A" w:date="2024-01-01T00:00:00Z">${run("Inserted")}</w:ins>`),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
-    const r = p.runs.find((r) => r.type === "run") as import("../../src/docx/types.js").DocxRun;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
+    const r = p.runs.find(
+      (r) => r.type === "run",
+    ) as import("../../src/docx/to-odt/types.js").DocxRun;
     expect(r.text).toBe("Inserted");
   });
 
@@ -127,10 +129,10 @@ describe("readBody — tracked changes", () => {
       ),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const texts = p.runs
       .filter((r) => r.type === "run")
-      .map((r) => (r as import("../../src/docx/types.js").DocxRun).text);
+      .map((r) => (r as import("../../src/docx/to-odt/types.js").DocxRun).text);
     expect(texts).not.toContain("Deleted");
     expect(texts).toContain("Kept");
   });
@@ -155,13 +157,13 @@ describe("readBody — page breaks", () => {
     expect(elements.some((e) => e.type === "pageBreak")).toBe(true);
     const paras = elements.filter(
       (e) => e.type === "paragraph",
-    ) as import("../../src/docx/types.js").DocxParagraph[];
+    ) as import("../../src/docx/to-odt/types.js").DocxParagraph[];
     const beforeTexts = paras[0].runs
       .filter((r) => r.type === "run")
-      .map((r) => (r as import("../../src/docx/types.js").DocxRun).text);
+      .map((r) => (r as import("../../src/docx/to-odt/types.js").DocxRun).text);
     const afterTexts = paras[paras.length - 1].runs
       .filter((r) => r.type === "run")
-      .map((r) => (r as import("../../src/docx/types.js").DocxRun).text);
+      .map((r) => (r as import("../../src/docx/to-odt/types.js").DocxRun).text);
     expect(beforeTexts).toContain("Before");
     expect(afterTexts).toContain("After");
   });
@@ -182,7 +184,7 @@ describe("readBody — inline elements", () => {
     const ctx = makeCtx();
     const xml = bodyXml(para(`<w:r><w:tab/></w:r>`));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.runs.some((r) => r.type === "tab")).toBe(true);
   });
 
@@ -190,7 +192,7 @@ describe("readBody — inline elements", () => {
     const ctx = makeCtx();
     const xml = bodyXml(para(`<w:r><w:br/></w:r>`));
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     expect(p.runs.some((r) => r.type === "lineBreak")).toBe(true);
   });
 
@@ -210,10 +212,10 @@ describe("readBody — inline elements", () => {
       para(`<w:hyperlink ${R} r:id="rId1"><w:r><w:t>Click here</w:t></w:r></w:hyperlink>`),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const link = p.runs.find(
       (r) => r.type === "hyperlink",
-    ) as import("../../src/docx/types.js").DocxHyperlink;
+    ) as import("../../src/docx/to-odt/types.js").DocxHyperlink;
     expect(link).toBeDefined();
     expect(link.url).toBe("https://example.com");
     expect(link.runs[0].text).toBe("Click here");
@@ -225,10 +227,10 @@ describe("readBody — inline elements", () => {
       para(`<w:hyperlink ${W} w:anchor="section1"><w:r><w:t>Jump</w:t></w:r></w:hyperlink>`),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const link = p.runs.find(
       (r) => r.type === "hyperlink",
-    ) as import("../../src/docx/types.js").DocxHyperlink;
+    ) as import("../../src/docx/to-odt/types.js").DocxHyperlink;
     expect(link.url).toBe("#section1");
     expect(link.internal).toBe(true);
   });
@@ -245,17 +247,17 @@ describe("readBody — bookmarks (two-pass resolution)", () => {
       ),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const start = p.runs.find(
       (r) =>
         r.type === "bookmark" &&
-        (r as import("../../src/docx/types.js").DocxBookmark).position === "start",
-    ) as import("../../src/docx/types.js").DocxBookmark;
+        (r as import("../../src/docx/to-odt/types.js").DocxBookmark).position === "start",
+    ) as import("../../src/docx/to-odt/types.js").DocxBookmark;
     const end = p.runs.find(
       (r) =>
         r.type === "bookmark" &&
-        (r as import("../../src/docx/types.js").DocxBookmark).position === "end",
-    ) as import("../../src/docx/types.js").DocxBookmark;
+        (r as import("../../src/docx/to-odt/types.js").DocxBookmark).position === "end",
+    ) as import("../../src/docx/to-odt/types.js").DocxBookmark;
     expect(start.name).toBe("myBookmark");
     expect(end.name).toBe("myBookmark");
   });
@@ -267,10 +269,10 @@ describe("readBody — bookmarks (two-pass resolution)", () => {
         para(`${run("Para 2")}<w:bookmarkEnd w:id="2"/>`),
     );
     const elements = readBody(xml, "body", ctx);
-    const p2 = elements[1] as import("../../src/docx/types.js").DocxParagraph;
+    const p2 = elements[1] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const end = p2.runs.find(
       (r) => r.type === "bookmark",
-    ) as import("../../src/docx/types.js").DocxBookmark;
+    ) as import("../../src/docx/to-odt/types.js").DocxBookmark;
     expect(end.name).toBe("crossPara");
   });
 });
@@ -288,7 +290,7 @@ describe("readBody — tables", () => {
     `);
     const elements = readBody(xml, "body", ctx);
     expect(elements[0].type).toBe("table");
-    const t = elements[0] as import("../../src/docx/types.js").DocxTable;
+    const t = elements[0] as import("../../src/docx/to-odt/types.js").DocxTable;
     expect(t.rows).toHaveLength(1);
     expect(t.rows[0].cells).toHaveLength(1);
   });
@@ -308,7 +310,7 @@ describe("readBody — tables", () => {
       </w:tbl>
     `);
     const elements = readBody(xml, "body", ctx);
-    const t = elements[0] as import("../../src/docx/types.js").DocxTable;
+    const t = elements[0] as import("../../src/docx/to-odt/types.js").DocxTable;
     expect(t.columnWidths).toHaveLength(2);
     // 2880 twips = 5.08cm
     expect(t.columnWidths[0]).toBeCloseTo(5.08, 1);
@@ -328,7 +330,7 @@ describe("readBody — tables", () => {
       </w:tbl>
     `);
     const elements = readBody(xml, "body", ctx);
-    const t = elements[0] as import("../../src/docx/types.js").DocxTable;
+    const t = elements[0] as import("../../src/docx/to-odt/types.js").DocxTable;
     expect(t.rows[0].cells[0].colSpan).toBe(2);
   });
 
@@ -342,7 +344,7 @@ describe("readBody — tables", () => {
       </w:tbl>
     `);
     const elements = readBody(xml, "body", ctx);
-    const t = elements[0] as import("../../src/docx/types.js").DocxTable;
+    const t = elements[0] as import("../../src/docx/to-odt/types.js").DocxTable;
     expect(t.rows[0].cells[0].vMerge).toBe("restart");
     expect(t.rows[1].cells[0].vMerge).toBe("continue");
   });
@@ -359,10 +361,10 @@ describe("readBody — fldSimple fields", () => {
       ),
     );
     const elements = readBody(xml, "body", ctx);
-    const p = elements[0] as import("../../src/docx/types.js").DocxParagraph;
+    const p = elements[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
     const link = p.runs.find(
       (r) => r.type === "hyperlink",
-    ) as import("../../src/docx/types.js").DocxHyperlink;
+    ) as import("../../src/docx/to-odt/types.js").DocxHyperlink;
     expect(link).toBeDefined();
     expect(link.url).toBe("https://example.com");
   });
@@ -381,8 +383,8 @@ describe("readNotes", () => {
     const notes = readNotes(xml, "footnote", ctx);
     expect(notes.has("1")).toBe(true);
     const note = notes.get("1")!;
-    const p = note.body[0] as import("../../src/docx/types.js").DocxParagraph;
-    const r = p.runs[0] as import("../../src/docx/types.js").DocxRun;
+    const p = note.body[0] as import("../../src/docx/to-odt/types.js").DocxParagraph;
+    const r = p.runs[0] as import("../../src/docx/to-odt/types.js").DocxRun;
     expect(r.text).toBe("Footnote text");
   });
 

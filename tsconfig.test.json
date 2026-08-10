@@ -5,6 +5,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
+      "odf-kit": ["./src/index.ts"],
+      "odf-kit/odt-reader": ["./src/reader/index.ts"],
       "odf-kit/*": ["./src/*/index.ts"]
     },
     "ignoreDeprecations": "6.0"

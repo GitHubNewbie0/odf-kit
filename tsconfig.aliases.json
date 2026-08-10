@@ -1,0 +1,18 @@
+{
+  // Type-checks ONLY tests/legacy-aliases.test.ts (plus whatever it imports,
+  // i.e. src/). That suite pins every type-only export of every legacy
+  // sub-export path; without a type-check those pins are inert, because
+  // ts-jest runs transpile-only under isolatedModules and tsconfig.json
+  // excludes tests/ from the build.
+  //
+  // Deliberately narrow: a project-wide test type-check is blocked on ~20
+  // pre-existing type errors in other test files (TableRowNode.isHeader
+  // omissions, an OdfValue `lexical` literal). Those queue as separate
+  // 0.14.x cleanup; this config closes the alias-surface hole now without
+  // waiting for them. Widen `include` once that cleanup lands.
+  "extends": "./tsconfig.test.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["tests/legacy-aliases.test.ts"]
+}

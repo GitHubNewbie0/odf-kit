@@ -1,6 +1,5 @@
 export { VERSION } from "../version.js";
-export { OdsDocument } from "./document.js";
-export { OdsSheet } from "./sheet-builder.js";
+export { OdsDocument, OdsSheet } from "../build-or-fill/build-ods/index.js";
 export type {
   OdsCellValue,
   OdsCellObject,
@@ -8,4 +7,4 @@ export type {
   OdsCellType,
   OdsRowOptions,
   OdsDateFormat,
-} from "./types.js";
+} from "../build-or-fill/build-ods/types.js";

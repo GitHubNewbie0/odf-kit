@@ -24,7 +24,7 @@ This is the default. If a real document can express the case, use one.
 
 ### 2. Hand-built model objects — renderer unit tests
 
-A `BodyNode\[\]` (or fragment thereof) constructed directly in the test file and passed to `renderHtml`. No parsing involved.
+A `BodyNode\[\]` (or fragment thereof) constructed directly in the test file and passed to `renderOdtHtml`. No parsing involved.
 
 Use this tier **only** to test the renderer in isolation — given a known model, assert the HTML. It is the right tool for `html-renderer.test.ts`, because it pins renderer output without dragging the parser into the assertion. It is the wrong tool for anything that claims to test _reading_, because a hand-built model can describe a structure the parser would never actually produce.
 

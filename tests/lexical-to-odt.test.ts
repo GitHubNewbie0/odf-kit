@@ -1,7 +1,10 @@
 import { describe, it, expect } from "@jest/globals";
 import { strFromU8, unzipSync } from "fflate";
-import { lexicalToOdt } from "../src/lexical/index.js";
-import type { LexicalSerializedEditorState, LexicalSerializedNode } from "../src/lexical/index.js";
+import { lexicalToOdt } from "../src/lexical/to-odt/index.js";
+import type {
+  LexicalSerializedEditorState,
+  LexicalSerializedNode,
+} from "../src/lexical/to-odt/index.js";
 
 async function getContentXml(bytes: Uint8Array): Promise<string> {
   const unzipped = unzipSync(bytes);

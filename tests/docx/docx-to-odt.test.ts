@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import { zipSync, unzipSync } from "fflate";
-import { docxToOdt } from "../../src/docx/index.js";
+import { docxToOdt } from "../../src/docx/to-odt/index.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 

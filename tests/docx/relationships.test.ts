@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
-import { parseRelationships } from "../../src/docx/relationships.js";
+import { parseRelationships } from "../../src/docx/to-odt/relationships.js";
 
 // ─── parseRelationships ───────────────────────────────────────────────
 
