@@ -1,18 +1,44 @@
 // odf-kit — OpenDocument Format file generator
 // https://github.com/GitHubNewbie0/odf-kit
-export { OdtDocument } from "./odt/index.js";
-export { ParagraphBuilder } from "./odt/index.js";
-export { HeaderFooterBuilder } from "./odt/index.js";
-export { TableBuilder, RowBuilder, CellBuilder } from "./odt/index.js";
-export { ListBuilder } from "./odt/index.js";
-export { htmlToOdt } from "./odt/index.js";
-export { markdownToOdt } from "./odt/index.js";
-export { tiptapToOdt } from "./odt/index.js";
+//
+// The root convenience export. Every symbol below is a row of the export
+// census committed at 412d584 — the v0.13.14 published root surface, 47
+// symbols. v0.14.0 repoints these imports at the canonical module locations
+// without changing the surface itself (v0_14_0-plan-v3-amendments-2.md
+// item 2: the root exports exactly its census 47; the nine additional
+// symbols v3's replacement root proposed are new surface and are deferred
+// to a separately ruled change).
+
+// ── Build / construct ────────────────────────────────────────────────────
+export {
+  OdtDocument,
+  ParagraphBuilder,
+  HeaderFooterBuilder,
+  TableBuilder,
+  RowBuilder,
+  CellBuilder,
+  ListBuilder,
+} from "./build-or-fill/build-odt/index.js";
+export { OdsDocument, OdsSheet } from "./build-or-fill/build-ods/index.js";
+
+// ── Fill templates ───────────────────────────────────────────────────────
+export { fillTemplate, healPlaceholders, replaceAll } from "./build-or-fill/fill-odt/index.js";
+
+// ── Inbound conversions ──────────────────────────────────────────────────
+export { htmlToOdt } from "./html/to-odt/index.js";
+export { markdownToOdt } from "./markdown/to-odt/index.js";
+export { tiptapToOdt } from "./tiptap/to-odt/index.js";
+export { docxToOdt } from "./docx/to-odt/index.js";
+
+// ── HTML input utilities ─────────────────────────────────────────────────
 export { odfKitNormalizer } from "./html/normalize/index.js";
 export { odfKitParser } from "./odt/read/xml-parser.js";
+
 export { VERSION } from "./version.js";
+
+// ── Types ────────────────────────────────────────────────────────────────
+export type { ContentElement } from "./build-or-fill/build-odt/content.js";
 export type {
-  ContentElement,
   TextFormatting,
   TextRun,
   TableOptions,
@@ -23,17 +49,7 @@ export type {
   ListOptions,
   ImageOptions,
   ImageData,
-  HtmlToOdtOptions,
-  TiptapNode,
-  TiptapMark,
-  TiptapToOdtOptions,
-} from "./odt/index.js";
-export type { ParsedHtmlTree, Parser, Normalizer } from "./types/public.js";
-export type { MetadataOptions } from "./core/index.js";
-export { fillTemplate, healPlaceholders, replaceAll } from "./template/index.js";
-export type { TemplateData } from "./template/index.js";
-export { OdsDocument } from "./ods/index.js";
-export { OdsSheet } from "./ods/index.js";
+} from "./build-or-fill/build-odt/types.js";
 export type {
   OdsCellValue,
   OdsCellObject,
@@ -41,6 +57,10 @@ export type {
   OdsCellType,
   OdsRowOptions,
   OdsDateFormat,
-} from "./ods/index.js";
-export { docxToOdt } from "./docx/index.js";
-export type { DocxToOdtOptions, DocxToOdtResult } from "./docx/index.js";
+} from "./build-or-fill/build-ods/index.js";
+export type { TemplateData } from "./build-or-fill/fill-odt/index.js";
+export type { HtmlToOdtOptions } from "./html/to-odt/html-to-odt.js";
+export type { TiptapNode, TiptapMark, TiptapToOdtOptions } from "./tiptap/to-odt/tiptap-to-odt.js";
+export type { DocxToOdtOptions, DocxToOdtResult } from "./docx/to-odt/index.js";
+export type { ParsedHtmlTree, Parser, Normalizer } from "./types/public.js";
+export type { MetadataOptions } from "./core/index.js";
