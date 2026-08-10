@@ -15,6 +15,7 @@ exact commands and detail.
 ```
 PRE-FLIGHT
 [ ]  0. npm auth OK (npm whoami)
+[ ]  0b. Backup pushes current (git push backup ... in both repos)
 [ ]  1. Pull latest main
 [ ]  2. No security PRs you meant to include are still open (glance)
 
@@ -22,10 +23,12 @@ PREPARE CONTENT (everything below the tag must be done BEFORE step 7)
 [ ]  3. CHANGELOG.md updated (entry + footer links)
 [ ]  4. publiccode.yml updated (softwareVersion + releaseDate, via validator)
 [ ]  5. Full pipeline green (format:check, lint, build, test, validate-html)
+[ ]  5b. Regenerate docs/reference (npm run docs:reference; commit rides step 6)
 [ ]  6. Release content committed (explicit paths; unrelated changes separate)
 
 CUT THE RELEASE
-[ ]  7. npm version patch   (badge auto-syncs into the version commit + tag)
+[ ]  7. npm version <patch|minor|major>   (badge auto-syncs into the commit + tag)
+        This release is: v_________  bump type: _________
 [ ]  8. Push commits + tag   (git push origin main --follow-tags)
 [ ]  9. npm publish   (browser 2FA expected)
 
@@ -105,13 +108,40 @@ verbatim output, replace the local file, then commit. The validator is offline
 ```powershell
 npm run format:check
 npm run lint
+npm run typecheck:aliases
 npm run build
 npm run test
 npm run validate-html
+npm run check:side-effects
+npx attw --pack . --profile esm-only          # must exit 0
+npx attw --pack .                              # DEFAULT profile — see below
 ```
 
-All five must pass. If `format:check` fails, run `npm run format` then re-check.
-(This is the project's full gate. There is no separate ODF-validator step here.)
+All must pass. If `format:check` fails, run `npm run format` then re-check.
+
+This is the project's full gate (`typecheck:aliases` joined 2026-08-09; it
+type-checks the legacy-alias suite that `npm test` alone is blind to).
+There is no separate ODF-validator step here.
+
+The DEFAULT attw profile is EXPECTED to exit non-zero: `CJSResolvesToESM`
+is the permanent, deliberate ESM-only property — never "fix" it. What
+you are checking is the node10 rows: count the greens and compare to
+the published path count (32 as of v0.14.0). Fewer greens than paths
+means an exports/typesVersions regression — stop.
+
+## 5b. Regenerate the generated API reference
+
+```powershell
+npm run docs:reference
+git status    # expect changes only under docs/reference/
+```
+
+TypeDoc output is committed (GitHub Pages serves from docs/), so the
+reference must be regenerated from the final release source or the
+published site documents the previous version. Changes ride the step 6
+release-content commit. `docs/reference` is excluded from prettier and
+validate-html by design (generated markup — see the Phase 6b commit);
+do not "fix" vnu complaints in generated files.
 
 ## 6. Commit the release content
 
@@ -135,7 +165,11 @@ feeds the GitHub release notes (step 10).
 ## 7. Bump the version  *(badge auto-syncs — no amend/retag)*
 
 ```powershell
-npm version patch -m "chore: release v%s"
+# Choose the bump that matches the release — decide this when you fill
+# in the header, not at the keyboard:
+#   patch = fixes only        minor = new features, no breaks
+#   major = breaking changes
+npm version minor -m "chore: release v%s"   # ← v0.14.0 is a MINOR
 ```
 
 This bumps `package.json`/`package-lock.json`, then runs the `version` npm hook
@@ -153,6 +187,9 @@ git show HEAD --stat
 Should list `docs/index.html`, `package.json`, `package-lock.json`. If
 `docs/index.html` is missing, the `version` hook didn't fire — stop and diagnose
 (`src/version.ts` is gitignored and won't appear; that's expected).
+
+The bump type is part of the release content review — if the CHANGELOG
+entry describes features, `patch` is wrong; stop and reconsider.
 
 ## 8. Push the commits and tag
 
