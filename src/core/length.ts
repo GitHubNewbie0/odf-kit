@@ -37,6 +37,29 @@
 // Every legal decimal input terminates in one of the two (in/mm/cm →
 // cm; pt/pc/px/twip/EMU → pt).
 
+// ─── Input bound ───────────────────────────────────────────────────────
+
+/**
+ * Maximum length of a numeric lexical accepted anywhere in this module.
+ * Derived, not chosen: shortestInUnit's emission search caps at k=25
+ * fractional digits and toNumber's float boundary is 15 significant
+ * digits — no value distinction beyond that depth survives any pathway.
+ * 64 chars holds sign + 30 integer digits + dot + 30 fractional digits
+ * + a 2-char unit: double the module's own deepest precision, orders of
+ * magnitude past any observed producer (T3 max ≈ 6 digits).
+ * Deliberate T1 deviation: the RNG's [0-9]* is unbounded; we reject
+ * grammar-legal-but-pathological input to bound parse cost. CHANGELOG'd.
+ */
+const MAX_NUMERIC_LEXICAL = 64;
+
+/**
+ * Excerpt an offending lexical for an error message. Rejected input may be
+ * arbitrarily long; never echo it back whole.
+ */
+function excerpt(s: string): string {
+  return s.length > MAX_NUMERIC_LEXICAL ? `${s.slice(0, MAX_NUMERIC_LEXICAL)}…` : s;
+}
+
 // ─── Units ─────────────────────────────────────────────────────────────
 
 /** Units that may appear in ODF length lexicals (and be emitted, except px). */
@@ -135,6 +158,9 @@ function ceilDiv(a: bigint, b: bigint): bigint {
  * This is the ONLY entry point for numeric text; no parseFloat anywhere.
  */
 function parseDecimal(raw: string): Rational | undefined {
+  // Bound before any regex or BigInt work: 10n ** BigInt(frac.length) below,
+  // and exactDecimal's repeated rat()/gcd, both grow with input length.
+  if (raw.length > MAX_NUMERIC_LEXICAL) return undefined;
   const m = /^([-+]?)(\d+)?(?:\.(\d+))?$/.exec(raw);
   if (!m || (m[2] === undefined && m[3] === undefined)) return undefined;
   const sign = m[1] === "-" ? -1n : 1n;
@@ -169,8 +195,13 @@ export type OdfValue =
   | { kind: "percent"; value: Rational; lexical?: string }
   | { kind: "keyword"; value: string };
 
-const UNIT_RE = /^([-+]?(?:\d+\.?\d*|\.\d+))(cm|mm|in|pt|pc|px)$/;
-const PERCENT_RE = /^([-+]?(?:\d+\.?\d*|\.\d+))%$/;
+// The numeric core is `\d+(?:\.\d*)?|\.\d+`, not the older `\d+\.?\d*|\.\d+`.
+// Same language — `\d+(?:\.\d*)?` accepts exactly `12`, `12.`, `12.5` — but the
+// optional `\.?` in the old form let `\d+` and `\d*` both apply to the same
+// digit run, giving ~n²/2 backtracking paths before the anchored suffix failed
+// (CodeQL js/polynomial-redos #28/#29). Now each digit run matches one way.
+const UNIT_RE = /^([-+]?(?:\d+(?:\.\d*)?|\.\d+))(cm|mm|in|pt|pc|px)$/;
+const PERCENT_RE = /^([-+]?(?:\d+(?:\.\d*)?|\.\d+))%$/;
 const KEYWORD_RE = /^[A-Za-z][A-Za-z-]*$/;
 
 /**
@@ -182,6 +213,9 @@ const KEYWORD_RE = /^[A-Za-z][A-Za-z-]*$/;
  */
 export function parseOdfValue(raw: string): OdfValue | undefined {
   const trimmed = raw.trim();
+  // Pre-regex by design: this is the document-text entry point, so the bound
+  // must be applied before any pattern touches attacker-supplied bytes.
+  if (trimmed.length > MAX_NUMERIC_LEXICAL) return undefined;
   let m = UNIT_RE.exec(trimmed);
   if (m) {
     const value = parseDecimal(m[1]);
@@ -207,7 +241,10 @@ export function parseOdfValue(raw: string): OdfValue | undefined {
 export function lengthValue(value: number | string, unit: Unit): OdfValue {
   const text = typeof value === "number" ? String(value) : value.trim();
   const dec = parseDecimal(text);
-  if (!dec) throw new Error(`length core: not a decimal value: "${text}"`);
+  if (!dec)
+    throw new Error(
+      `length core: not a decimal value or exceeds ${MAX_NUMERIC_LEXICAL} chars: "${excerpt(text)}"`,
+    );
   return { kind: "length", mm: mul(dec, FACTOR_MM[unit]), unit, lexical: `${text}${unit}` };
 }
 
@@ -244,7 +281,14 @@ function placeDecimal(m: bigint, k: bigint): string {
   if (kk > 0) {
     while (s.length <= kk) s = "0" + s;
     s = s.slice(0, s.length - kk) + "." + s.slice(s.length - kk);
-    s = s.replace(/\.?0+$/, "");
+    // Character walk, not /\.?0+$/ — that expression is unanchored at the left
+    // and backtracks quadratically on long trailing-zero runs (CodeQL #30).
+    // Output is identical: the dot was just inserted with kk ≥ 1 fractional
+    // characters after it, so the string can end in "." only once zeros go.
+    let end = s.length;
+    while (end > 0 && s[end - 1] === "0") end -= 1;
+    if (end > 0 && s[end - 1] === ".") end -= 1;
+    s = s.slice(0, end);
     if (s === "" || s === "-") s = "0";
   }
   return (neg ? "-" : "") + s;
@@ -343,7 +387,10 @@ export function intervalFromDecimal(raw: string, source: SourceUnit): Interval {
 
 function parseDecimalOrThrow(s: string): Rational {
   const r = parseDecimal(s);
-  if (!r) throw new Error(`length core: not a decimal value: "${s}"`);
+  if (!r)
+    throw new Error(
+      `length core: not a decimal value or exceeds ${MAX_NUMERIC_LEXICAL} chars: "${excerpt(s)}"`,
+    );
   return r;
 }
 
