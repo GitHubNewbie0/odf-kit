@@ -861,3 +861,134 @@ describe("htmlToOdt — substitution hooks", () => {
     expect(parserRan).toBe(true);
   });
 });
+
+// ─── CSS dimension parsing — ReDoS rewrites and the degrade contract ───
+//
+// INPUT TYPE — constructed CSS strings, per test-fixture-strategy-plan.md
+// §2. Q2 is operative: no editor emits a trailing-dot dimension, a
+// 70-digit fraction, or a 25-fractional-digit px value, and the subject is
+// an expression's accept/reject boundary plus a degrade contract, neither
+// of which is a document property. Q3 does not apply — nothing here
+// asserts what a producer emits.
+
+// DEFECTS UNDER TEST — the PRE-FIX expressions from html-parser.ts:868 and
+// :894, quoted verbatim from 30c23cb's parent as the same
+// js/polynomial-redos class as CodeQL #28/#29 (found by manual sweep, not
+// flagged by CodeQL). Control side of the differential only; never to be
+// copied back into src/.
+/** DEFECT — pre-fix cssLengthToOdf px expression. Do not reuse. */
+const OLD_CSS_PX_RE = /^([-+]?(?:\d+\.?\d*|\.\d+))px$/;
+/** DEFECT — pre-fix parseCssLineHeight unitless expression. Do not reuse. */
+const OLD_CSS_UNITLESS_RE = /^\d+\.?\d*$|^\.\d+$/;
+
+const NEW_CSS_PX_RE = /^([-+]?(?:\d+(?:\.\d*)?|\.\d+))px$/;
+const NEW_CSS_UNITLESS_RE = /^\d+(?:\.\d*)?$|^\.\d+$/;
+
+const CSS_CORPUS: string[] = [
+  "12px",
+  "12.px",
+  "12.5px",
+  ".5px",
+  "0px",
+  "-12px",
+  "+12px",
+  "12",
+  "12.",
+  "12.5",
+  ".5",
+  "1.5",
+  "normal",
+  "150%",
+  "12pt",
+  "0.5cm",
+  "",
+  ".",
+  "px",
+  "1e3px",
+  "12 px",
+];
+for (const k of [8, 16, 32, 48]) {
+  const run = "9".repeat(k);
+  CSS_CORPUS.push(`${run}px`, `${run}.px`, `${run}`, `${run}.`, `.${run}px`, `${run}x`);
+}
+
+describe("htmlToOdt — CSS dimension expressions are language-equivalent", () => {
+  test("px expression (html-parser.ts:868) matches and captures identically to the pre-fix one", () => {
+    for (const input of CSS_CORPUS) {
+      const before = OLD_CSS_PX_RE.exec(input);
+      const after = NEW_CSS_PX_RE.exec(input);
+      expect({ input, m: after && [...after] }).toEqual({ input, m: before && [...before] });
+    }
+  });
+
+  test("unitless line-height expression (html-parser.ts:894) accepts identically to the pre-fix one", () => {
+    for (const input of CSS_CORPUS) {
+      expect({ input, ok: NEW_CSS_UNITLESS_RE.test(input) }).toEqual({
+        input,
+        ok: OLD_CSS_UNITLESS_RE.test(input),
+      });
+    }
+  });
+
+  test("long digit runs still convert — the rewrite changed cost, not accepted input", async () => {
+    // Leading zeros are value-preserving, so this is 12px = 9pt (T1: px is
+    // exact in pt; D8 Case 2 via the px quantum).
+    const content = await getContent(`<p style="margin-top: ${"0".repeat(22)}12px">X</p>`);
+    expect(content).toContain('fo:margin-top="9pt"');
+  });
+});
+
+describe("htmlToOdt — cssLengthToOdf degrades rather than throwing (D-A2 contract)", () => {
+  // Ruled 2026-08-11: unconvertible input degrades to undefined, never
+  // throws. The bound throws at API boundaries, where a programmer can act
+  // on it, and degrades at document boundaries, where attacker-controlled
+  // input must not abort conversion. Three rejection classes:
+
+  test("shape — a trailing-dot lexical degrades, conversion completes", async () => {
+    // "12." matches the px expression but is not a decimal the core accepts.
+    const content = await getContent('<p style="margin-top: 12.px">X</p>');
+    expect(content).toContain("<office:document-content");
+    expect(content).not.toContain("fo:margin-top");
+  });
+
+  test("bound — a lexical past the 64-char numeric bound degrades", async () => {
+    const long = `1.${"2".repeat(70)}px`;
+    const content = await getContent(`<p style="margin-top: ${long}">X</p>`);
+    expect(content).toContain("<office:document-content");
+    expect(content).not.toContain("fo:margin-top");
+  });
+
+  test("depth — lexicals past the emission ceiling degrade", async () => {
+    // 25 fractional digits: at MAX_EMISSION_SEARCH_K = 25 the px→pt
+    // interval (width 0.75·10⁻²⁵) is narrower than the k=25 grid spacing,
+    // so no decimal is guaranteed. Both mantissas below are KNOWN-BAD —
+    // each verified fracLen-25 and verified to throw pre-fix — so this
+    // tests known-bad points on a probabilistic boundary, not lucky ones.
+    for (const mantissa of ["1.0000000000000000000000002", "1.0000000000000000000000006"]) {
+      const content = await getContent(`<p style="margin-top: ${mantissa}px">X</p>`);
+      expect(content).toContain("<office:document-content");
+      expect(content).not.toContain("fo:margin-top");
+    }
+  });
+
+  test("line-height takes the same degrade path", async () => {
+    const content = await getContent('<p style="line-height: 12.px">X</p>');
+    expect(content).toContain("<office:document-content");
+    expect(content).not.toContain("fo:line-height");
+  });
+});
+
+describe("htmlToOdt — the emission-ceiling boundary pair", () => {
+  test("24 fractional digits converts, with the derived value asserted", async () => {
+    // 1.000000000000000000000001px × 0.75 = 0.75000000000000000000000075pt;
+    // the D8c quantum 10⁻²⁴ px gives ±0.375·10⁻²⁴ pt, and the shortest
+    // decimal inside that interval is the k=24 grid point below.
+    const content = await getContent(`<p style="margin-top: 1.${"0".repeat(23)}1px">X</p>`);
+    expect(content).toContain('fo:margin-top="0.750000000000000000000001pt"');
+  });
+
+  test("25 fractional digits degrades — the guaranteed-safe threshold", async () => {
+    const content = await getContent(`<p style="margin-top: 1.${"0".repeat(24)}2px">X</p>`);
+    expect(content).not.toContain("fo:margin-top");
+  });
+});
