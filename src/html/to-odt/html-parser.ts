@@ -865,7 +865,11 @@ function extractCssProperty(style: string, property: string): string | undefined
  */
 function cssLengthToOdf(raw: string): string | undefined {
   const value = raw.trim().toLowerCase();
-  const px = /^([-+]?(?:\d+\.?\d*|\.\d+))px$/.exec(value);
+  // Numeric core is `\d+(?:\.\d*)?|\.\d+`, not `\d+\.?\d*|\.\d+`: same language,
+  // but the old optional `\.?` let `\d+` and `\d*` both apply to one digit run,
+  // backtracking quadratically before the anchored `px` failed. Same
+  // js/polynomial-redos class as CodeQL #28/#29; found by sweep, unflagged.
+  const px = /^([-+]?(?:\d+(?:\.\d*)?|\.\d+))px$/.exec(value);
   if (px) {
     if (px[1].startsWith("-")) return undefined;
     return convertDecimal(px[1], "px", "pt");
@@ -891,7 +895,8 @@ function cssLengthToOdf(raw: string): string | undefined {
 function parseCssLineHeight(raw: string): number | string | undefined {
   const value = raw.trim().toLowerCase();
   if (value === "normal") return undefined;
-  if (/^\d+\.?\d*$|^\.\d+$/.test(value)) return Number(value);
+  // Same rewrite as cssLengthToOdf above, same reason (js/polynomial-redos).
+  if (/^\d+(?:\.\d*)?$|^\.\d+$/.test(value)) return Number(value);
   const parsed = parseOdfValue(value);
   if (parsed?.kind === "percent") {
     return parsed.lexical!.startsWith("-") ? undefined : parsed.lexical;
