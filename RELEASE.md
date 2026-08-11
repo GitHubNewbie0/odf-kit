@@ -22,7 +22,7 @@ PRE-FLIGHT
 PREPARE CONTENT (everything below the tag must be done BEFORE step 7)
 [ ]  3. CHANGELOG.md updated (entry + footer links)
 [ ]  4. publiccode.yml updated (softwareVersion + releaseDate, via validator)
-[ ]  5. Full pipeline green (format:check, lint, build, test, validate-html)
+[ ]  5. Full pipeline green (format:check, lint, typecheck:aliases, build, test, validate-html, check:side-effects, attw esm-only, attw default)
 [ ]  5b. Regenerate docs/reference (npm run docs:reference; commit rides step 6)
 [ ]  6. Release content committed (explicit paths; unrelated changes separate)
 
@@ -35,6 +35,7 @@ CUT THE RELEASE
 PUBLISH METADATA
 [ ] 10. GitHub release (gh release create --generate-notes) — THEN EDIT the body
 [ ] 11. Verify everything (npm, GitHub, GitLab, openCode listing)
+[ ] 11b. Run tools/smoke.mjs against the published package (imports all subpaths, asserts census symbols + VERSION, round-trips markdown→ODT→model)
 ```
 
 ---
