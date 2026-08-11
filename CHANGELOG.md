@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-08-11
+
 ### Security
 
 - **Polynomial regular-expression backtracking in the length core is fixed** (CodeQL `js/polynomial-redos`, alerts #28 and #29 — High). The expressions matching ODF length and percentage lexicals shared the numeric core `\d+\.?\d*`: because the dot was optional, `\d+` and `\d*` were both applicable to the same run of digits, so an *n*-digit input produced on the order of *n*²/2 backtracking paths before the anchored suffix failed. Both are reachable from raw document attribute text, which makes a crafted `.odt` the direct threat model. The rewrites are language-equivalent — `\d+(?:\.\d*)?` accepts exactly the same lexicals as `\d+\.?\d*`, including the trailing-dot form — and are proven so by a differential test that compares the old and new expressions for identical accept/reject decisions and identical capture groups, and separately compares the whole pre-change parsing pipeline against the shipped one. Accepted input is unchanged.
@@ -544,9 +546,10 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.0...HEAD
-[0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.0
-[0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.14
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.1
+[0.14.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.0
+[0.13.14]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.14
 [0.13.13]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.13
 [0.13.12]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.12
 [0.13.11]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.11
