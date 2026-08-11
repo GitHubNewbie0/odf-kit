@@ -37,13 +37,35 @@
 // Every legal decimal input terminates in one of the two (in/mm/cm →
 // cm; pt/pc/px/twip/EMU → pt).
 
-// ─── Input bound ───────────────────────────────────────────────────────
+// ─── Precision ceilings and input bound ────────────────────────────────
+
+/**
+ * Ceiling on the emission search: `shortestInUnit` tests grids of spacing
+ * 10^−k for k = 0…MAX_EMISSION_SEARCH_K and throws if none admits a
+ * decimal. [T4: D8b, shortest-decimal-in-interval]
+ *
+ * Exported so callers converting document text can reject un-emittable
+ * input BEFORE calling rather than catching an exception. Internal to the
+ * repo — deliberately NOT re-exported from the public `./length` subpath.
+ *
+ * This is the SEARCH CEILING, not a safe input depth. A source of
+ * fractional depth f implies an interval of width (f_source/f_target)·10^−f
+ * in the target unit, so the guaranteed depth is pair-specific: px→pt
+ * (ratio 0.75) is safe while f < MAX_EMISSION_SEARCH_K, px→cm (ratio
+ * 127/4800) one lower. Derive the threshold at the call site from this
+ * ceiling and the unit pair; never treat this value as a safe depth.
+ */
+export const MAX_EMISSION_SEARCH_K = 25;
+
+/** BigInt mirror of MAX_EMISSION_SEARCH_K for the search loop. */
+const MAX_EMISSION_SEARCH_K_BIG = BigInt(MAX_EMISSION_SEARCH_K);
 
 /**
  * Maximum length of a numeric lexical accepted anywhere in this module.
- * Derived, not chosen: shortestInUnit's emission search caps at k=25
- * fractional digits and toNumber's float boundary is 15 significant
- * digits — no value distinction beyond that depth survives any pathway.
+ * Derived, not chosen: shortestInUnit's emission search caps at
+ * MAX_EMISSION_SEARCH_K fractional digits and toNumber's float boundary
+ * is 15 significant digits — no value distinction beyond that depth
+ * survives any pathway.
  * 64 chars holds sign + 30 integer digits + dot + 30 fractional digits
  * + a 2-char unit: double the module's own deepest precision, orders of
  * magnitude past any observed producer (T3 max ≈ 6 digits).
@@ -407,7 +429,7 @@ export function shortestInUnit(interval: Interval, unit: Unit): string {
   const lo = div(interval.lo, f);
   const hi = div(interval.hi, f);
   const nom = div(interval.nominal, f);
-  for (let k = 0n; k <= 25n; k += 1n) {
+  for (let k = 0n; k <= MAX_EMISSION_SEARCH_K_BIG; k += 1n) {
     const s = 10n ** k;
     const mMin = ceilDiv(lo.n * s, lo.d);
     // strict upper bound: largest m with m < hi·s

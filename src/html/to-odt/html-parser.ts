@@ -39,7 +39,7 @@ import {
   isBase64Image,
   base64ToUint8Array,
 } from "../../lexical/to-odt/util/detect-mime.js";
-import { convertDecimal, parseOdfValue } from "../../core/length.js";
+import { convertDecimal, parseOdfValue, MAX_EMISSION_SEARCH_K } from "../../core/length.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 
@@ -872,6 +872,26 @@ function cssLengthToOdf(raw: string): string | undefined {
   const px = /^([-+]?(?:\d+(?:\.\d*)?|\.\d+))px$/.exec(value);
   if (px) {
     if (px[1].startsWith("-")) return undefined;
+    // Ruled contract (v0.13.12, D-A2): unconvertible input degrades to
+    // undefined, never throws. The bound throws at API boundaries, where a
+    // programmer can act on it, and degrades at document boundaries, where
+    // attacker-controlled input must not abort the conversion. Three
+    // rejection classes, all PRE-checked rather than caught — a catch would
+    // swallow unrelated future throws and turn real defects into silent
+    // property drops:
+    //   shape — "12." matches the expression above but is not a decimal
+    //   bound — longer than the length core's 64-char numeric bound
+    //   depth — more fractional digits than the core can emit
+    // parseOdfValue applies the core's own gate, covering shape and bound.
+    if (!parseOdfValue(value)) return undefined;
+    // Depth: shortestInUnit searches grids of spacing 10^-k up to
+    // MAX_EMISSION_SEARCH_K, so a grid point is guaranteed only while the
+    // interval is at least that wide. A px source of depth f gives an
+    // interval of width 0.75·10^-f in pt (the px→pt factor, 0.75 < 1),
+    // hence f < MAX_EMISSION_SEARCH_K. Derived here, not exported: the safe
+    // depth is pair-specific, the ceiling is the module fact. [T4: D8b]
+    const dot = px[1].indexOf(".");
+    if (dot >= 0 && px[1].length - dot - 1 >= MAX_EMISSION_SEARCH_K) return undefined;
     return convertDecimal(px[1], "px", "pt");
   }
   const parsed = parseOdfValue(value);
