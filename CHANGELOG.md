@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Markdown parsing corrections from `marked` 18.0.9 (bumped from 18.0.7, PR #83).
+  Two default-path fixes change emitted output: an unmatched strong run before
+  emphasis now stays literal (`**foo *bar*` keeps the asterisks rather than
+  applying bold), and blockquote continuation after a blank line no longer
+  inherits spurious deeper nesting. Both move `markdownToOdt` output toward CommonMark; documents converted with these constructs will differ from 0.14.1 output.
+
 ## [0.14.1] - 2026-08-11
 
 ### Security
