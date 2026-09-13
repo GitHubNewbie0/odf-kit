@@ -41,6 +41,8 @@
  * the inner body content, suitable for embedding in an existing page.
  */
 
+import { escapeAttr } from "../../core/index.js";
+
 import type {
   BodyNode,
   InlineNode,
@@ -194,7 +196,7 @@ function renderTextSpan(span: TextSpan): string {
 
   if (span.style !== undefined) {
     const css = spanStyleToCss(span.style);
-    if (css) html = `<span style="${css}">${html}</span>`;
+    if (css) html = `<span style="${escapeAttr(css)}">${html}</span>`;
   }
 
   if (span.href !== undefined) html = `<a href="${escapeHtml(span.href)}">${html}</a>`;
@@ -224,7 +226,7 @@ function renderImage(node: ImageNode): string {
   const attrs: string[] = [];
 
   if (node.data && node.mediaType) {
-    attrs.push(`src="data:${node.mediaType};base64,${node.data}"`);
+    attrs.push(`src="data:${escapeAttr(node.mediaType)};base64,${escapeAttr(node.data)}"`);
   }
 
   attrs.push(`alt="${escapeHtml(node.title ?? "")}"`);
@@ -243,7 +245,7 @@ function renderImage(node: ImageNode): string {
   }
   // "parallel" and "run-through" have no CSS equivalent; no float added.
 
-  if (styleParts.length > 0) attrs.push(`style="${styleParts.join(";")}"`);
+  if (styleParts.length > 0) attrs.push(`style="${escapeAttr(styleParts.join(";"))}"`);
 
   if (node.description !== undefined && node.name !== undefined) {
     const descId = `odf-img-${escapeHtml(node.name)}`;
@@ -366,7 +368,7 @@ function renderRow(
   headerCells: boolean,
 ): string {
   const rowCss = row.rowStyle !== undefined ? rowStyleToCss(row.rowStyle) : "";
-  const rowAttrs = rowCss ? ` style="${rowCss}"` : "";
+  const rowAttrs = rowCss ? ` style="${escapeAttr(rowCss)}"` : "";
   const tag = headerCells ? "th" : "td";
 
   const cells = row.cells
@@ -381,7 +383,7 @@ function renderRow(
       }
       if (cell.cellStyle !== undefined) {
         const css = cellStyleToCss(cell.cellStyle);
-        if (css) attrParts.push(`style="${css}"`);
+        if (css) attrParts.push(`style="${escapeAttr(css)}"`);
       }
       const attrs = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
       return `<${tag}${attrs}>${renderCellContent(cell, options)}</${tag}>`;
@@ -411,7 +413,7 @@ function renderTable(table: TableNode, options?: HtmlOptions): string {
   for (const row of table.rows) {
     const cols = row.cells.map((cell) => {
       const cw = cell.cellStyle?.columnWidth;
-      return cw ? `<col style="width:${cw}">` : "<col>";
+      return cw ? `<col style="width:${escapeAttr(cw)}">` : "<col>";
     });
     // Only emit <colgroup> when at least one cell has an explicit width
     if (row.cells.some((cell) => cell.cellStyle?.columnWidth !== undefined)) {
@@ -512,7 +514,8 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const sourceCss =
         node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
-      const attrs = (css ? ` style="${css}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
+      const attrs =
+        (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
       return `<p${attrs}>${renderSpans(node.spans, options)}</p>`;
     }
     case "heading": {
@@ -520,7 +523,8 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const sourceCss =
         node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
-      const attrs = (css ? ` style="${css}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
+      const attrs =
+        (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
       return `<h${node.level}${attrs}>${renderSpans(node.spans, options)}</h${node.level}>`;
     }
     case "list":
