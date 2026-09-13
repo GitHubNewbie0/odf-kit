@@ -22,6 +22,7 @@ PRE-FLIGHT
 PREPARE CONTENT (everything below the tag must be done BEFORE step 7)
 [ ]  3. CHANGELOG.md updated (entry + footer links)
 [ ]  4. publiccode.yml updated (softwareVersion + releaseDate, via validator)
+[ ]  4b. SECURITY.md supported-versions line matches this release
 [ ]  5. Full pipeline green (format:check, lint, typecheck:aliases, build, test, validate-html, check:side-effects, attw esm-only, attw default)
 [ ]  5b. Regenerate docs/reference (npm run docs:reference; commit rides step 6)
 [ ]  6. Release content committed (explicit paths; unrelated changes separate)
@@ -36,6 +37,10 @@ PUBLISH METADATA
 [ ] 10. GitHub release (gh release create --generate-notes) — THEN EDIT the body
 [ ] 11. Verify everything (npm, GitHub, GitLab, openCode listing)
 [ ] 11b. Run tools/smoke.mjs against the published package (imports all subpaths, asserts census symbols + VERSION, round-trips markdown→ODT→model)
+
+SECURITY RELEASE ONLY
+[ ] 12. Request the CVE — AFTER the fix is live on npm
+[ ] 13. Publish the advisory once the CVE is assigned
 ```
 
 ---
@@ -104,6 +109,34 @@ directly** — edit at https://editor.opencode.de, click Validate, download the
 verbatim output, replace the local file, then commit. The validator is offline
 (syntax/completeness only); it does not modify the file or contact any directory.
 
+## 4b. Check SECURITY.md supported versions  *(before the tag)*
+
+SECURITY.md declares which release line receives security patches. It ships in
+the npm tarball, so a stale line is published and permanent for that version.
+
+```powershell
+Select-String -Path SECURITY.md -Pattern "currently"
+```
+
+Confirm the stated line matches the line this release is on. If it doesn't,
+update the prose sentence and both table rows:
+
+| Version    | Supported          |
+| ---------- | ------------------ |
+| 0.NEW.x    | ✅ Yes             |
+| < 0.NEW.0  | ❌ No              |
+
+Read the line on every release, not just minor bumps — a patch release within
+the current line needs no change, but reading it is how a stale line gets
+caught. **It read `0.13.x` from v0.14.0 through v0.14.1**, so every release in
+that window published a policy declaring the current line unsupported.
+
+Nothing catches this automatically. `doc-drift.mjs` derives truth from
+`package.json` and the filesystem but does not compare SECURITY.md's version
+claim against the version being released. Teaching it to would retire this step.
+
+If SECURITY.md changed, it rides the step 6 release-content commit.
+
 ## 5. Verify the pipeline is clean
 
 ```powershell
@@ -154,7 +187,7 @@ working-tree changes (tooling, ignores, security overrides) get swept in. Those
 belong in their own separate commit, made before or after this one.
 
 ```powershell
-git add CHANGELOG.md publiccode.yml src/ tests/ docs/   # adjust to what changed
+git add CHANGELOG.md publiccode.yml SECURITY.md src/ tests/ docs/   # adjust to what changed
 git status                                                # verify ONLY intended files
 git commit -m "fix(area): short description of the release"
 git status                                                # must be clean before step 7
@@ -250,6 +283,47 @@ mirrors the tag and creates the matching GitLab release. No manual GitLab steps.
   individual pushes; its drops/adds are slow and unrelated to release timing. Do
   not conflate the two.
 
+## 12. Request the CVE  *(security releases only — AFTER step 9)*
+
+Only applies when the release fixes a reported vulnerability.
+
+**Nothing about the advisory happens before the fix is live on npm.** Publishing
+— or doing anything that could lead to publishing — while the defect is
+unpatched tells attackers about a live vulnerability in a library people are
+using.
+
+Once `npm view odf-kit version` shows the new version:
+
+1. Go to the draft advisory on the repository's Security → Advisories page.
+2. Set **Patched versions** to the version just published.
+3. Request the CVE. GitHub acts as a CNA; review takes roughly **3 working
+   days** and **publishes nothing** — the ID stays reserved until you publish.
+
+Three separate actions, none of which discloses anything on its own: creating
+the draft, requesting the CVE, and publishing. A draft is visible only to the
+maintainer and anyone credited or added to it, and appears in no public
+repository view.
+
+Also offer the patch to the reporter for testing if they offered — their
+confirmation is worth more than your own, and it costs nothing now that the fix
+is public anyway.
+
+## 13. Publish the advisory  *(security releases only — after the CVE lands)*
+
+Once the CVE is assigned, publish the advisory.
+
+- Confirm **Patched versions** is set and correct.
+- Credit the reporter unless they asked otherwise — SECURITY.md promises this.
+- Publishing is **irreversible**.
+
+On publication the advisory enters the GitHub Advisory Database, Dependabot
+begins alerting downstream consumers automatically, and it redistributes through
+GitHub's API and Atom feed. Nothing further to do.
+
+**One advisory per release.** If several are in flight, each publishes with the
+release that fixes it — never ahead of its own fix, and never bundled with an
+advisory whose fix has not shipped.
+
 ---
 
 ## Troubleshooting
@@ -272,3 +346,7 @@ one-off recovery: `node scripts\sync-version.js`, commit
 **Project dropped from openCode directory** — push an empty commit to re-trigger
 the indexer; see the investigation doc. Do not confuse with the EU catalogue,
 which updates weekly on its own cycle.
+
+**Advisory published before the fix was live** — not recoverable. Publishing is
+irreversible and Dependabot will already have alerted consumers. This is why 12
+and 13 sit after step 9.
