@@ -78,10 +78,13 @@ Each index entry records:
 
 ## Fixture index
 
-| File                | Producer                             | Contents                                                                                                          | Type       |
-| ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------- |
-| `alignment-ltr.odt` | LibreOffice Writer 26.2.5.2 (x86_64) | Three paragraphs, left / centre / right aligned, default direction.                                               | regression |
-| `alignment-rtl.odt` | LibreOffice Writer 26.2.5.2 (x86_64) | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left. | regression |
+| File                                | Producer                                                     | Contents                                                                                                                                                                           | Type       |
+| ----------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `alignment-ltr.odt`                 | LibreOffice Writer 26.2.5.2 (x86_64)                         | Three paragraphs, left / centre / right aligned, default direction.                                                                                                                | regression |
+| `alignment-rtl.odt`                 | LibreOffice Writer 26.2.5.2 (x86_64)                         | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left.                                                                  | regression |
+| `xss-attr-breakout-ghsa3cgg.odt`    | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** A `fo:color` value carrying a `"`, which broke out of `style="…"` into an `onmouseover` handler. GHSA-3cgg-c5pp-57h6. | smoke      |
+| `xss-markup-injection-ghsa3cgg.odt` | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** Same breakout, injecting `<img src=x onerror=…>` as a sibling element. GHSA-3cgg-c5pp-57h6.                           | smoke      |
+| `xss-markup-injection-ghsa3cgg.ods` | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** The markup-injection payload through the ODS renderer's cell style attribute. GHSA-3cgg-c5pp-57h6.                    | smoke      |
 
 **`alignment-ltr.odt`**
 
@@ -116,6 +119,20 @@ Each index entry records:
 - **Type:** regression
 
 **Smoke fixture — wheymann's `Bullet-Test.odt`** (issue reporter's file): kept for end-to-end confirmation that the originally reported document now converts. Smoke only; the `list-in-cell.odt` regression fixture backs the assertions.
+
+**Smoke fixtures — Pethu Kannan G's XSS proof-of-concepts** (`xss-attr-breakout-ghsa3cgg.odt`, `xss-markup-injection-ghsa3cgg.odt`, `xss-markup-injection-ghsa3cgg.ods`)
+
+> **⚠ These three files contain live XSS payloads.** Never upload them to the OASIS ODF Toolkit online validator, or to any other hosted service — content leaves the machine. Do not pick them up for unrelated tests.
+
+- **Producer:** the reporter's Python `zipfile` generator script — **not an office suite.** The script writes `mimetype`, `META-INF/manifest.xml`, and `content.xml` into the package directly. This is recorded explicitly because a previous mislabelling of a reporter's file as office-suite output cost roughly an hour; the ZIP is hand-assembled and fails rule 2 for real fixtures by construction.
+
+- **Contents:** a single styled run per file, where the style value carries a `"`. In `xss-attr-breakout-ghsa3cgg.odt` the quote terminates `style="…"` and adds an `onmouseover` handler to the same tag. Both `xss-markup-injection-*` files escape the tag entirely and inject a sibling `<img src=x onerror=…>` — the `.odt` through the ODT renderer, the `.ods` through the ODS renderer's cell style attribute.
+
+- **Recipe:** none — not reproducible in an editor. No editor UI exposes an `fo:color` containing a quote, which is why this case cannot be authored as a real document at all (Q2, `test-fixture-strategy-plan.md` §2).
+
+- **Provenance:** reported 2026-09-06 by Pethu Kannan G under GHSA-3cgg-c5pp-57h6; files received 2026-09-12. Fixed in v0.14.2.
+
+- **Type:** smoke. **These files back no assertions.** They confirm end-to-end that the reported documents now convert safely. The assertions are carried by `tests/odt/to-html.test.ts` and `tests/ods/to-html.test.ts`, which use hand-built models per Q1 — the defect is in the renderers' string construction, downstream of parsing, so a real file would drag the parser into an assertion that is not about the parser.
 
 ## Adding a fixture — quick checklist
 
