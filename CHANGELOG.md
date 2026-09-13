@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-09-13
+
+### Security
+
+- **Document-controlled values reaching HTML attributes unescaped are fixed in both to-HTML renderers** (GHSA-3cgg-c5pp-57h6). `odtToHtml` and `odsToHtml` assembled inline CSS by string interpolation and wrote it into `style="…"` without escaping, so a value carrying a double quote terminated the attribute early. Text content and the `href`, `src`, `alt`, `id` and `data-*` attributes were already escaped; the style strings were the gap, and they carry values taken verbatim from document styles — `fo:color`, `fo:background-color`, `fo:font-family`, the margin, padding, border and line-height properties, `style:vertical-align`, and the column-width and row-height geometry. A crafted `.odt` or `.ods` could therefore inject markup into the rendered output, which both functions exist to produce for embedding. Reported by Pethu Kannan G, with reproductions and a suggested fix. These two renderers reached their current form in 0.14.0, so the style-attribute sites are affected from that release onward; the image path below is older.
+- **Every hand-built attribute in both renderers now escapes its interpolated values.** The escaper is the one the writer side has always used for XML attributes, exported internally rather than newly written — eleven interpolation sites across the two files, covering thirteen document-controlled values. The image `src` data URI is included, and it is the older half of this: its media type and payload have been interpolated unescaped since 0.10.0, four minor lines before the style-attribute sites existed. It is a different class from the style strings — a data URI rather than inline CSS — but the same defect, and it was found by auditing the surrounding code rather than by the report. Both values are now escaped unconditionally rather than on an argument about which characters base64 can contain.
+- **Accepted input is unchanged and no conversion that previously succeeded now fails.** Output differs only where a value contained a character that requires escaping — where it does, the value is preserved as an entity rather than breaking its attribute. A regression test covers each site, and the reporter's three reproductions are committed as end-to-end confirmation.
+- **The ODT renderer's file header no longer claims the output is "safe to embed in any context."** That sentence was wrong in two ways: it listed `src` among the escaped attributes when the image path escaped neither of its interpolated values, and its conclusion did not follow from its premise even for the attributes it named correctly. Escaping prevents markup breakout; it says nothing about where a URL points, what a CSS value causes a browser to fetch, or what a consumer's page permits. The replacement states the mechanism and its limits, and asks consumers embedding the output to sanitize it or render it in a sandboxed context. **This is a correction to a false assurance, not a change in behaviour** — anyone who relied on that sentence should read the new one.
+
 ### Changed
 
 - Markdown parsing corrections from `marked` 18.0.9 (bumped from 18.0.7, PR #83).
@@ -554,7 +563,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.2
 [0.14.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.1
 [0.14.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.0
 [0.13.14]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.13.14
