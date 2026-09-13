@@ -5,6 +5,8 @@
  * Covered cells are omitted. Cell formatting is applied as inline styles.
  */
 
+import { escapeAttr } from "../../core/index.js";
+
 import type {
   OdsDocumentModel,
   OdsSheetModel,
@@ -62,7 +64,7 @@ function renderCell(cell: OdsCellModel, includeStyles: boolean, prefix: string):
 
   if (includeStyles && cell.formatting) {
     const style = buildInlineStyle(cell.formatting);
-    if (style) attrs.push(`style="${style}"`);
+    if (style) attrs.push(`style="${escapeAttr(style)}"`);
   }
 
   // Right-align numbers by default if no explicit alignment
@@ -92,7 +94,7 @@ function renderRow(row: OdsRowModel, includeStyles: boolean, prefix: string): st
     .map((c: OdsCellModel) => renderCell(c, includeStyles, prefix))
     .join("");
 
-  const style = includeStyles && row.height ? ` style="height:${row.height}"` : "";
+  const style = includeStyles && row.height ? ` style="height:${escapeAttr(row.height)}"` : "";
   return `<tr class="${prefix}-row"${style}>${cells}</tr>`;
 }
 
