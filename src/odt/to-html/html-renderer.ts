@@ -32,9 +32,16 @@
  *    In "final" and "original" modes TrackedChangeNode is not emitted by
  *    the parser; if encountered, it is rendered transparently.
  *
- * Text content is HTML-escaped. Attribute values used in href, src,
- * data-*, and id are also HTML-escaped so the output is safe to embed
- * in any context.
+ * Text content and interpolated attribute values are escaped before they
+ * reach the output. That prevents markup breakout: a document-controlled
+ * value cannot terminate its attribute, introduce an element, or add an
+ * event handler.
+ *
+ * That is not a guarantee about the result. This output is HTML derived
+ * from an untrusted document, and escaping says nothing about where a URL
+ * points, what a CSS value causes the browser to fetch, or what a consumer's
+ * page permits. Consumers embedding this output should sanitize it or render
+ * it in a sandboxed context.
  *
  * By default renderOdtHtml() returns a complete HTML document with a
  * <!DOCTYPE html> declaration. Pass { fragment: true } to receive only
