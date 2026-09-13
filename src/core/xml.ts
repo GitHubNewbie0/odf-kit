@@ -12,7 +12,7 @@ export function escapeXml(text: string): string {
 }
 
 /** Escape special characters for XML attribute values. */
-function escapeAttr(value: string): string {
+export function escapeAttr(value: string): string {
   return escapeXml(value).replace(/"/g, "&quot;");
 }
 
