@@ -36,7 +36,7 @@ CUT THE RELEASE
 PUBLISH METADATA
 [ ] 10. GitHub release (gh release create --generate-notes) — THEN EDIT the body
 [ ] 11. Verify everything (npm, GitHub, GitLab, openCode listing)
-[ ] 11b. Run tools/smoke.mjs against the published package (imports all subpaths, asserts census symbols + VERSION, round-trips markdown→ODT→model)
+[ ] 11b. Smoke-test the published package from a fresh directory (see 11b below — it CANNOT run from the repo)
 
 SECURITY RELEASE ONLY
 [ ] 12. Request the CVE — AFTER the fix is live on npm
@@ -51,22 +51,52 @@ SECURITY RELEASE ONLY
 npm whoami
 ```
 
-If this errors (`E401`, `ENEEDAUTH`, anything but your username), the token is
-missing or expired — restore it before step 9.
+If this errors (`E401`, `ENEEDAUTH`, anything but your username),
+re-authenticate before step 9:
+
+```powershell
+npm login
+npm whoami
+```
+
+A browser window opens for approval. **This is the procedure — not a fallback.**
+The credential is written to `.npmrc` and persists past the terminal session,
+until revoked or until npm's account session policy expires it.
 
 Token policy (post May-2026 npm changes):
 - **Bypass-2FA tokens are permanently revoked.** Do not create one.
-- **Granular write tokens expire every 90 days.** Rotate quarterly; set a reminder.
-- Local publishes use interactive browser 2FA at publish time — that is correct.
+- Publishes use interactive browser 2FA at publish time — that is correct.
 
-To restore: npmjs.com → settings → tokens → Generate New → **Granular Access
-Token**, name `odf-kit-publish-local-YYYY-MM`, 90-day expiry, **Read and write**
-scoped to **only odf-kit**, **Bypass 2FA unchecked**. Copy it once, then:
+**Why not a granular token.** `odf-kit-publish-local-*` granular tokens were the
+documented procedure through v0.14.1. They expire on a hard 90-day clock, which
+is what failed at step 0 on the v0.14.2 release; `npm login` was used instead and
+worked. The 90-day expiry did have one virtue — it forced a failure *here*, at
+step 0, rather than at step 9 after the tag was pushed. Running `npm whoami` as
+step 0 preserves that check independently of how the credential was obtained.
+That is why this step exists and why it runs first.
+
+## 0b. Confirm backup pushes are current
+
+The bare repos under `Documents\odf-kit\backup\` are what Proton syncs offsite —
+the working directories are not synced. `odf-kit-internal` has **no origin**, so
+its bare repo is the only other copy of every brief, plan, state file, and
+evidence record.
+
+A bare repo contains only what has been pushed to it, and uncommitted work is
+outside the backup entirely. So the step is commit **then** push, in both repos:
 
 ```powershell
-npm config set //registry.npmjs.org/:_authToken "npm_paste-token-here"
-npm whoami
+cd C:\dev\odf-kit2
+git status                # must be clean
+git push backup main
+
+cd C:\dev\odf-kit-internal
+git status                # must be clean
+git push backup main
 ```
+
+A release is a bad moment to discover the only machine holding the planning
+record is ahead of its only backup.
 
 ## 1. Pull latest from origin
 
@@ -108,6 +138,12 @@ Update `softwareVersion` and `releaseDate` (today). **Never hand-edit and commit
 directly** — edit at https://editor.opencode.de, click Validate, download the
 verbatim output, replace the local file, then commit. The validator is offline
 (syntax/completeness only); it does not modify the file or contact any directory.
+
+**Check `releaseDate` in the downloaded file before committing.** The editor's
+date picker rolls the date back a day (UTC vs. CDT): entered 2026-09-13, returned
+2026-09-12 — the validator's only change to the file. Correct it by hand; the
+result is then byte-identical to what you uploaded. **This recurs on every
+evening release.**
 
 ## 4b. Check SECURITY.md supported versions  *(before the tag)*
 
@@ -163,6 +199,15 @@ you are checking is the node10 rows: count the greens and compare to
 the published path count (32 as of v0.14.0). Fewer greens than paths
 means an exports/typesVersions regression — stop.
 
+**Count mechanically, not by eye.** Eye-counting the output gave 31 on the
+v0.14.2 release — a false stop condition:
+
+```powershell
+npx attw --pack . | Select-String '^"odf-kit' | Measure-Object
+```
+
+Cross-check against the exports map in `package.json` if the numbers disagree.
+
 ## 5b. Regenerate the generated API reference
 
 ```powershell
@@ -203,7 +248,7 @@ feeds the GitHub release notes (step 10).
 # in the header, not at the keyboard:
 #   patch = fixes only        minor = new features, no breaks
 #   major = breaking changes
-npm version minor -m "chore: release v%s"   # ← v0.14.0 is a MINOR
+npm version <patch|minor|major> -m "chore: release v%s"
 ```
 
 This bumps `package.json`/`package-lock.json`, then runs the `version` npm hook
@@ -241,8 +286,8 @@ mirror sync; the tag triggers downstream release automation.
 npm publish
 ```
 
-A browser window opens for 2FA approval — this is expected (granular tokens
-without Bypass 2FA require interactive confirmation per publish). Complete it.
+A browser window opens for 2FA approval — this is expected; 2FA approval is
+required per publish. Complete it.
 
 ```powershell
 npm view odf-kit version          # may take ~30s to propagate
@@ -282,6 +327,34 @@ mirrors the tag and creates the matching GitLab release. No manual GitLab steps.
   with a 60-day vitality score, likely fed from openCode. It does **not** react to
   individual pushes; its drops/adds are slow and unrelated to release timing. Do
   not conflate the two.
+
+## 11b. Smoke-test the published package
+
+**`tools/smoke.mjs` cannot run from the repo.** It fails immediately with
+`ENOENT: tools/census.json`. It is designed to run from a **fresh project
+directory** with `odf-kit` installed from the registry — that is the point: it
+tests what consumers actually get, not the working tree.
+
+```powershell
+node tools/export-census.mjs --out-dir C:\temp\odfsmoke
+mkdir C:\temp\smoketest ; cd C:\temp\smoketest
+copy C:\temp\odfsmoke\tools\export-census.json census.json
+copy C:\dev\odf-kit2\tools\smoke.mjs smoke.mjs
+npm init -y
+npm pkg set type=module      # npm init -y writes type:commonjs; odf-kit is ESM-only
+npm install odf-kit
+node smoke.mjs
+```
+
+Omitting `npm pkg set type=module` makes every import fail.
+
+Asserts that every subpath imports, that census symbols and VERSION are present,
+and that a markdown→ODT→model round-trip works. Return to the repo directory
+afterward.
+
+`smoke.mjs` resolves `census.json` and `node_modules` relative to its own
+location, so it must sit **in** the scratch directory — not run from the repo
+with a path argument. Exit 0 = pass; exit 1 lists the failures.
 
 ## 12. Request the CVE  *(security releases only — AFTER step 9)*
 
@@ -331,8 +404,9 @@ advisory whose fix has not shipped.
 **`npm version` errors "Git working directory not clean"** — step 6 didn't fully
 commit. `npm version` refuses a dirty tree. Commit or stash everything first.
 
-**`npm publish` errors `E404 PUT .../odf-kit`** — token missing/expired/revoked
-(npm returns 404, not 401, to avoid leaking package existence). Restore via step 0.
+**`npm publish` errors `E404 PUT .../odf-kit`** — credential missing or expired
+(npm returns 404, not 401, to avoid leaking package existence). Re-authenticate
+via step 0.
 
 **Badge still shows the previous version after release** — the `version` hook
 didn't run (check it exists in `package.json` scripts:
