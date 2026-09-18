@@ -16,6 +16,7 @@ exact commands and detail.
 PRE-FLIGHT
 [ ]  0. npm auth OK (npm whoami)
 [ ]  0b. Backup pushes current (git push backup ... in both repos)
+[ ]  0c. Cross-tree document checks at or below baseline (maintainer only)
 [ ]  1. Pull latest main
 [ ]  2. No security PRs you meant to include are still open (glance)
 
@@ -97,6 +98,36 @@ git push backup main
 
 A release is a bad moment to discover the only machine holding the planning
 record is ahead of its only backup.
+
+## 0c. Cross-tree document checks  *(maintainer only)*
+
+Canon and the internal plan documents assert things about this repository —
+script names, paths, counts, the gate's own shape. Nothing in the public gate
+can check them: the gate runs here, and those documents live in the internal
+repo. `run-checks.mjs` runs from there, with truth taken from this repo.
+
+```powershell
+cd C:\dev\odf-kit-internal
+node checks\run-checks.mjs
+```
+
+Exit 0 means nothing rose above its baseline. **Exit 1 means new drift** — a
+document now claims something this repository contradicts. Read the findings
+before going further: a stale claim about a script name, a subpath count, or a
+removed file is exactly the kind of thing that makes a later step in this
+checklist wrong.
+
+Findings below the baseline are the recorded backlog, not a blocker. When one
+is fixed, lower the baseline in the same commit:
+`node checks\run-checks.mjs --update-baseline`.
+
+**This step runs early on purpose.** Its failures invalidate the checklist
+itself, so they are worth knowing before the release content is prepared. It is
+not part of the gate, which verifies the code; this verifies what the documents
+say about it.
+
+Anyone without the internal repo skips this step — the release is not blocked
+on it, but the maintainer's copy of it is.
 
 ## 1. Pull latest from origin
 
