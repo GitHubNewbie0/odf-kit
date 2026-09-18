@@ -25,10 +25,14 @@
  *   state/ and logs/ — a state file correctly describes the world on its date.
  *   Historical records are not claims about the present.
  *
+ *   Any file whose YAML front matter says `doc-status: historical`, for the
+ *   same reason. Absent or any other value means the file is checked, so a
+ *   new document is checked by default and exemption is always an act.
+ *
  * USAGE
  *   node tools/doc-drift.mjs [--repo <path>] [--also <path> ...]
  *
- * EXIT  0 = no drift   1 = drift found   2 = usage/IO error
+ * EXIT  0 = no drift   1 = drift found   2 = usage/IO error/wrong --repo
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
@@ -54,6 +58,14 @@ if (!existsSync(pkgPath)) {
   process.exit(2);
 }
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+if (pkg.name !== "odf-kit" || repoRoot.includes("node_modules")) {
+  console.error(
+    `doc-drift: ${repoRoot} is not the odf-kit repo (package.json name: ` +
+      `${pkg.name ?? "none"}). Truth must come from the library itself; pass ` +
+      `it with --repo and the prose tree with --also.`,
+  );
+  process.exit(2);
+}
 
 const truth = {
   scripts: new Set(Object.keys(pkg.scripts ?? {})),
@@ -123,10 +135,29 @@ const RE_COUNT =
 //   them: attw writes them closed up, prose writes "Node 22".
 const RE_NODE = /\bNode(?:\.js)?\s+(\d{1,2})\s*\+?/gi;
 
+// A document marked `doc-status: historical` in YAML front matter describes a
+// state of the world that has since changed. Its claims are records, not
+// assertions about the present — the same reason state/ and logs/ are skipped.
+const RE_DOC_STATUS = /^doc-status:\s*(\S+)/m;
+function isHistorical(text) {
+  if (!text.startsWith("---")) return false;
+  const end = text.indexOf("\n---", 3);
+  if (end === -1) return false;
+  const m = RE_DOC_STATUS.exec(text.slice(0, end));
+  return m !== null && m[1] === "historical";
+}
+
+let skippedHistorical = 0;
+
 for (const file of files) {
   const shown = relative(process.cwd(), file) || file;
   const here = dirname(file);
   const text = readFileSync(file, "utf8");
+
+  if (isHistorical(text)) {
+    skippedHistorical++;
+    continue;
+  }
 
   text.split(/\r?\n/).forEach((line, idx) => {
     const n = idx + 1;
@@ -192,7 +223,10 @@ for (const file of files) {
 console.log("doc-drift");
 console.log(`  repo      : ${repoRoot}`);
 for (const r of extraRoots) console.log(`  also      : ${r}`);
-console.log(`  prose files scanned: ${files.length}  (state/ and logs/ skipped)`);
+console.log(
+  `  prose files scanned: ${files.length - skippedHistorical}  ` +
+    `(state/ and logs/ skipped; ${skippedHistorical} marked doc-status: historical)`,
+);
 console.log(`  scripts (${truth.scripts.size}): ${[...truth.scripts].join(", ")}`);
 console.log(`  exports map entries: ${truth.subpaths}`);
 console.log(`  runtime deps: ${truth.runtimeDeps.join(", ") || "(none)"}`);
