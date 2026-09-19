@@ -172,10 +172,15 @@ verbatim output, replace the local file, then commit. The validator is offline
 (syntax/completeness only); it does not modify the file or contact any directory.
 
 **Check `releaseDate` in the downloaded file before committing.** The editor's
-date picker rolls the date back a day (UTC vs. CDT): entered 2026-09-13, returned
-2026-09-12 — the validator's only change to the file. Correct it by hand; the
-result is then byte-identical to what you uploaded. **This recurs on every
-evening release.**
+date picker rolls the date back a day: entered 2026-09-13, returned 2026-09-12;
+entered 2026-09-19, returned 2026-09-18. That is the validator's only change to
+the file. Correct it by hand; the result is then byte-identical to what you
+uploaded.
+
+**Cause unknown.** The first sighting looked like UTC vs. CDT, but the second
+was an afternoon release, when Central and UTC share a date — so a simple offset
+does not explain it. Observed twice, both after noon; untested before noon.
+Check the returned date on every release regardless.
 
 ## 4b. Check SECURITY.md supported versions _(before the tag)_
 
