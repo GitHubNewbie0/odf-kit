@@ -27,7 +27,7 @@ description:
       (.odt, .ods) files in Node.js and browsers using JavaScript or TypeScript.
     longDescription: >-
       odf-kit is an open-source TypeScript library for working with OpenDocument
-      Format (ODF) documents programmatically. It provides thirteen distinct
+      Format (ODF) documents programmatically. It provides fifteen distinct
       document modes in a single package: build ODT documents from scratch, fill
       existing .odt templates with data, convert DOCX to ODT, HTML to ODT,
       Markdown to ODT, TipTap JSON to ODT, Lexical editor state to ODT, build
@@ -79,9 +79,10 @@ description:
       odf-kit generates ODF 1.2+ compliant files per ISO/IEC 26300, the
       international standard mandated by the European Union, many national
       governments, and public sector organisations for vendor independence and
-      long-term document accessibility. Every generated file is validated
-      against the official OASIS ODF validator in CI. The library has zero
-      transitive runtime dependencies beyond fflate for ZIP packaging.
+      long-term document accessibility. Generated documents are validated
+      against the official OASIS ODF validator in CI. odf-kit has two runtime
+      dependencies — fflate for ZIP packaging and marked for Markdown parsing —
+      and no transitive dependencies beyond them.
     documentation: https://github.com/GitHubNewbie0/odf-kit#readme
     apiDocumentation: https://githubnewbie0.github.io/odf-kit/api/
     features:
@@ -99,7 +100,7 @@ description:
       - Convert Markdown content to OpenDocument (.odt) text documents
       - Convert OpenDocument (.odt) to HTML for web publication
       - Convert OpenDocument (.odt) to Markdown for documentation systems
-      - Convert OpenDocument (.odt) to PDF without requiring LibreOffice
+      - Export OpenDocument (.odt) to Typst markup for PDF generation
       - Read and extract content from existing .odt and .ods files
       - Rich text formatting, tables, lists, and embedded images
       - Headers, footers, page numbers, hyperlinks, and full page layout control

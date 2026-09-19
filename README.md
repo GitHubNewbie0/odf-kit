@@ -8,7 +8,7 @@ Generate, fill, read, and convert OpenDocument Format files (.odt, .ods) in Type
 npm install odf-kit
 ```
 
-## Thirteen ways to work with ODF files
+## Fifteen ways to work with ODF files
 
 ```typescript
 // 1. Build an ODT document from scratch
@@ -1053,9 +1053,9 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 **ODF is the ISO standard (ISO/IEC 26300) for documents.** It's the default format for LibreOffice, mandatory for many governments and public sector organisations, and the best choice for long-term document preservation.
 
 - **Two runtime dependencies** — fflate (ZIP) and marked (Markdown parsing). No transitive dependencies.
-- **Spec-compliant output** — every generated file passes the OASIS ODF validator. Enforced on every commit by CI.
+- **Spec-compliant output** — generated documents are validated against the OASIS ODF validator in CI on every push.
 - **Multiple ODF formats** — ODT documents and ODS spreadsheets from the same library.
-- **Nine complete capability modes** — build ODT, build ODS, convert HTML→ODT, convert Markdown→ODT, convert TipTap JSON→ODT, convert DOCX→ODT, fill templates, read, convert to Typst/PDF.
+- **Fifteen complete capability modes** — build ODT and ODS, fill ODT templates, read ODT and ODS, convert HTML/Markdown/TipTap JSON/Lexical JSON/DOCX→ODT and XLSX→ODS, and emit HTML, Markdown or Typst from ODF.
 - **TipTap/ProseMirror integration** — direct JSON→ODT conversion for any TipTap-based editor, no intermediate HTML step.
 - **Zero-dependency Typst emitter** — the only JavaScript library with built-in ODT→Typst conversion for PDF generation.
 - **TypeScript-first** — full types across all sub-exports.
