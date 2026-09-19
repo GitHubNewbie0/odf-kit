@@ -1061,3 +1061,115 @@ describe("readOdt — table header rows (#51)", () => {
     expect(table?.rows?.[0]?.cells?.[0]?.cellStyle?.columnWidth).toBe("5cm");
   });
 });
+
+// ============================================================
+// draw:frame text content (#94) — a frame with no draw:image
+// degrades to its draw:text-box's text
+// ============================================================
+
+describe("readOdt — draw:frame text content (#94)", () => {
+  // Namespaces contentXml() does not declare, put on the frame element itself
+  // (precedent: tests/markdown/odt-to-markdown.test.ts).
+  const FRAME_NS =
+    ' xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"' +
+    ' xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"' +
+    ' xmlns:xlink="http://www.w3.org/1999/xlink"';
+
+  const firstParagraph = (body: string): ParagraphNode | undefined =>
+    readOdt(makeOdt(contentXml("", body))).body.find((n) => n.kind === "paragraph") as
+      ParagraphNode | undefined;
+
+  test("text in draw:text-box reaches the paragraph's spans (#94)", () => {
+    // #94: the frame was discarded whole when it held no draw:image, so the
+    // reporter's text box rendered as an empty paragraph.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box1" svg:width="5cm" svg:height="2cm">` +
+        "<draw:text-box><text:p>Text inside a text box</text:p></draw:text-box>" +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans?.map((s) => ("text" in s ? s.text : undefined))).toEqual([
+      "Text inside a text box",
+    ]);
+  });
+
+  test("draw:image is still read as an ImageNode (#94 regression guard)", () => {
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="photo.png" svg:width="5cm" svg:height="3cm">` +
+        '<draw:image xlink:href="Pictures/photo.png"/>' +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans).toHaveLength(1);
+    const span = para?.spans?.[0];
+    expect(span && "kind" in span ? span.kind : undefined).toBe("image");
+    expect(span && "kind" in span && span.kind === "image" ? span.name : undefined).toBe(
+      "photo.png",
+    );
+  });
+
+  test("a frame holding both an image and a text box yields the image", () => {
+    // T4 (#94, parser.ts case "draw:frame"): the eight representations are an
+    // unordered T1 choice; preferring draw:image is our decision, so a frame
+    // carrying both must not also emit the text box's text.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box5">` +
+        '<draw:image xlink:href="Pictures/photo.png"/>' +
+        "<draw:text-box><text:p>Should not appear</text:p></draw:text-box>" +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans).toHaveLength(1);
+    const span = para?.spans?.[0];
+    expect(span && "kind" in span ? span.kind : undefined).toBe("image");
+  });
+
+  test("svg:title and svg:desc never become body text", () => {
+    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042 plus :5052-5057):
+    // svg:title and svg:desc are permitted children of draw:frame, and
+    // parseSpans pushes any text child as a span. Recursing the frame rather
+    // than its text box would surface accessibility metadata as document
+    // content — a silent insertion in place of a silent drop.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box2">` +
+        "<svg:title>Frame title</svg:title><svg:desc>Frame description</svg:desc>" +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans).toEqual([]);
+  });
+
+  test("a frame with a text box and an svg:title yields the text only", () => {
+    // Same T1 citation as above: the title is metadata, the text box is content.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box3">` +
+        "<draw:text-box><text:p>Visible text</text:p></draw:text-box>" +
+        "<svg:title>Frame title</svg:title>" +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans?.map((s) => ("text" in s ? s.text : undefined))).toEqual(["Visible text"]);
+  });
+
+  test("KNOWN LIMITATION: text-box paragraphs concatenate with no separator", () => {
+    // T4 (ruled 2026-09-19, reviewing #94's Move 1): a draw:text-box holds
+    // BLOCK content, but parseSpans can only return InlineNode[], so each
+    // text:p contributes its text and nothing marks the boundary between
+    // them — "First para" + "Second para" renders as "First paraSecond para".
+    // Shipped deliberately, because present-and-run-together beats absent.
+    // This test exists so the concatenation is never mistaken for intended
+    // output: pinning it is what makes a later fix a visible change rather
+    // than a silent one.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box4"><draw:text-box>` +
+        "<text:p>First para</text:p><text:p>Second para</text:p>" +
+        "</draw:text-box></draw:frame></text:p>",
+    );
+    // Two spans, and NOTHING between them: no line break, no space, no
+    // paragraph marker. That absence is the limitation.
+    expect(para?.spans).toHaveLength(2);
+    expect(para?.spans?.map((s) => ("text" in s ? s.text : undefined))).toEqual([
+      "First para",
+      "Second para",
+    ]);
+    expect(para?.spans?.some((s) => "lineBreak" in s && s.lineBreak)).toBe(false);
+    expect(para?.spans?.map((s) => ("text" in s ? s.text : "")).join("")).toBe(
+      "First paraSecond para",
+    );
+  });
+});

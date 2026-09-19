@@ -733,7 +733,8 @@ const FIELD_TYPE_MAP: Record<string, string> = {
  * cell, or note body into an array of InlineNode objects.
  *
  * Handles: text:span, text:a, text:line-break, text:tab, text:s,
- * draw:frame (images), text:note, text:bookmark, text:bookmark-start,
+ * draw:frame (images; a frame with no draw:image degrades to its
+ * draw:text-box's text — #94), text:note, text:bookmark, text:bookmark-start,
  * text:bookmark-end, text:bookmark-ref, tracked-change inline markers,
  * and all ODF text field elements.
  *
@@ -874,7 +875,30 @@ function parseSpans(
 
       case "draw:frame": {
         const imageEl = findElement(child, "draw:image");
-        if (!imageEl) break;
+        if (!imageEl) {
+          // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): draw:frame holds
+          // zero or more of eight representations — draw:text-box,
+          // draw:image, draw:object, draw:object-ole, draw:applet,
+          // draw:floating-frame, draw:plugin, table:table — as an UNORDERED
+          // choice. The grammar does not rank them and Part 3 carries no
+          // prose that does.
+          //
+          // T4 (#94): we model draw:image. Where a frame has none, degrade a
+          // draw:text-box to its text rather than discarding the frame's
+          // content. Recurse into the text box specifically, NOT the frame:
+          // svg:title and svg:desc are permitted children and parseSpans
+          // pushes any text child as a span, so recursing the frame would
+          // surface accessibility metadata as body text. table:table would
+          // be flattened, since table parsing lives in parseBodyNodes.
+          //
+          // The frame's own structure — that it was a text box, its name and
+          // dimensions — is not modeled. Coverage matrix, not here.
+          const textBoxEl = findElement(child, "draw:text-box");
+          if (textBoxEl) {
+            spans.push(...parseSpans(textBoxEl, ctx, baseStyle, href, baseVisualStyle));
+          }
+          break;
+        }
 
         const imageNode: ImageNode = { kind: "image", data: "" };
 
