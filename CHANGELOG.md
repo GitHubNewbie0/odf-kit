@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.3] - 2026-09-19
+
 ### Fixed
 
 - **Text inside a `draw:frame` is no longer dropped** (#94, reported by juongithub). A frame holding no `draw:image` was discarded whole, and silently: the paragraph containing it read as empty, with nothing in the model or the output to say content had been lost. A frame with no image now degrades to the text of its `draw:text-box`. **The producer this affects is LibreOffice Writer's own native save** — Insert → Text Box, then save as `.odt`, which writes `text:p > draw:frame > draw:text-box > text:p`. If your LibreOffice text boxes have been disappearing from `readOdt` output or rendering as empty paragraphs, this is that defect. **The `.docx` round-trip path was never affected**: a text box saved as `.docx` and converted back by LibreOffice returns as `draw:custom-shape`, whose text has always been read. The issue attributes the problem to that conversion path; the defect is real but the mechanism is the native save, and both documents are now committed as fixtures so the difference is on the record.
@@ -575,7 +577,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.3...HEAD
+[0.14.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.3
 [0.14.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.2
 [0.14.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.1
 [0.14.0]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.0
