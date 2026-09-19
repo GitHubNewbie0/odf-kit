@@ -33,10 +33,10 @@ odf-kit is pre-1.0 software under active development. Security patches are
 provided only for the **latest minor release line** (currently `0.14.x`). Users
 on older versions are encouraged to upgrade.
 
-| Version    | Supported          |
-| ---------- | ------------------ |
-| 0.14.x     | ✅ Yes             |
-| < 0.14.0   | ❌ No              |
+| Version  | Supported |
+| -------- | --------- |
+| 0.14.x   | ✅ Yes    |
+| < 0.14.0 | ❌ No     |
 
 ## In scope
 

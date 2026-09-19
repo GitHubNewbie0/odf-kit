@@ -96,7 +96,7 @@ and intervals — no floating point anywhere in length arithmetic). The
 user-shaped layer of the length engine is published as `odf-kit/length`;
 the rational/interval machinery underneath is not, so it can evolve
 freely. `src/adapters/` holds the (currently skeletal) home for future
-parser adapters; the adapter *contract types* are published via
+parser adapters; the adapter _contract types_ are published via
 `odf-kit/types`.
 
 ## Documentation map

@@ -6,6 +6,7 @@ This file is the imperative projection of `../odf-kit-internal/docs/methodology.
 ## Article One (govern every action by this)
 
 Build all work as proofs from axioms, in authority order:
+
 - **T1** grammar — `spec/odf-1.3-length-datatypes.json` and the extracted schema files. Never state spec facts from memory.
 - **T2** prose — section-cited; see `../odf-kit-internal/docs/odf-prose-constraints.md`. No section number → not a citation.
 - **T3** producer behavior — a named fixture with `meta:generator` intact. No fixture → the claim is unverified and never load-bearing.

@@ -14,19 +14,19 @@ odf-kit is the only actively maintained JavaScript/TypeScript library for ODF ge
 
 ## Quick Reference
 
-| Task | Import | Function |
-|------|--------|----------|
-| Create new ODT document | `"odf-kit"` | `new OdtDocument()` |
-| Fill existing ODT template | `"odf-kit"` | `fillTemplate(bytes, data)` |
-| HTML → ODT | `"odf-kit"` | `htmlToOdt(html, options?)` |
-| Markdown → ODT | `"odf-kit"` | `markdownToOdt(markdown, options?)` |
-| TipTap/ProseMirror JSON → ODT | `"odf-kit"` | `tiptapToOdt(json, options?)` |
-| Build ODS spreadsheet | `"odf-kit"` | `new OdsDocument()` |
-| Read ODT / convert to HTML | `"odf-kit/reader"` | `readOdt(bytes)` / `odtToHtml(bytes)` |
-| Read ODS | `"odf-kit/ods-reader"` | `readOds(bytes)` / `odsToHtml(bytes)` |
-| XLSX → ODS | `"odf-kit/xlsx"` | `xlsxToOds(bytes)` |
-| DOCX → ODT | `"odf-kit/docx"` | `docxToOdt(bytes, options?)` |
-| ODT → Typst / PDF | `"odf-kit/typst"` | `odtToTypst(bytes)` |
+| Task                          | Import                 | Function                              |
+| ----------------------------- | ---------------------- | ------------------------------------- |
+| Create new ODT document       | `"odf-kit"`            | `new OdtDocument()`                   |
+| Fill existing ODT template    | `"odf-kit"`            | `fillTemplate(bytes, data)`           |
+| HTML → ODT                    | `"odf-kit"`            | `htmlToOdt(html, options?)`           |
+| Markdown → ODT                | `"odf-kit"`            | `markdownToOdt(markdown, options?)`   |
+| TipTap/ProseMirror JSON → ODT | `"odf-kit"`            | `tiptapToOdt(json, options?)`         |
+| Build ODS spreadsheet         | `"odf-kit"`            | `new OdsDocument()`                   |
+| Read ODT / convert to HTML    | `"odf-kit/reader"`     | `readOdt(bytes)` / `odtToHtml(bytes)` |
+| Read ODS                      | `"odf-kit/ods-reader"` | `readOds(bytes)` / `odsToHtml(bytes)` |
+| XLSX → ODS                    | `"odf-kit/xlsx"`       | `xlsxToOds(bytes)`                    |
+| DOCX → ODT                    | `"odf-kit/docx"`       | `docxToOdt(bytes, options?)`          |
+| ODT → Typst / PDF             | `"odf-kit/typst"`      | `odtToTypst(bytes)`                   |
 
 ### Installation
 
@@ -70,8 +70,8 @@ doc.setMetadata({
 
 ```javascript
 doc.setPageLayout({
-  orientation: "landscape",       // or "portrait" (default)
-  width: "21cm",                  // default A4
+  orientation: "landscape", // or "portrait" (default)
+  width: "21cm", // default A4
   height: "29.7cm",
   marginTop: "2cm",
   marginBottom: "2cm",
@@ -126,23 +126,26 @@ doc.addParagraph((p) => {
 });
 
 // Builder with paragraph options
-doc.addParagraph((p) => {
-  p.addText("Indented paragraph content.");
-}, { indentLeft: "1cm", indentFirst: "0.5cm" });
+doc.addParagraph(
+  (p) => {
+    p.addText("Indented paragraph content.");
+  },
+  { indentLeft: "1cm", indentFirst: "0.5cm" },
+);
 ```
 
 **Paragraph options:**
 
-| Option | Type | Example | Description |
-|--------|------|---------|-------------|
-| `align` | string | `"left"`, `"center"`, `"right"`, `"justify"` | Text alignment |
-| `spaceBefore` | string | `"0.5cm"` | Space above paragraph |
-| `spaceAfter` | string | `"0.5cm"` | Space below paragraph |
-| `lineHeight` | number or string | `1.5` or `"150%"` | Line spacing (number = multiplier) |
-| `indentLeft` | string | `"1cm"` | Left indent |
-| `indentRight` | string | `"1cm"` | Right indent |
-| `indentFirst` | string | `"0.5cm"` | First-line indent (positive) or hanging indent (negative) |
-| `tabStops` | array | `[{ position: "6cm", type: "right" }]` | Tab stop positions |
+| Option        | Type             | Example                                      | Description                                               |
+| ------------- | ---------------- | -------------------------------------------- | --------------------------------------------------------- |
+| `align`       | string           | `"left"`, `"center"`, `"right"`, `"justify"` | Text alignment                                            |
+| `spaceBefore` | string           | `"0.5cm"`                                    | Space above paragraph                                     |
+| `spaceAfter`  | string           | `"0.5cm"`                                    | Space below paragraph                                     |
+| `lineHeight`  | number or string | `1.5` or `"150%"`                            | Line spacing (number = multiplier)                        |
+| `indentLeft`  | string           | `"1cm"`                                      | Left indent                                               |
+| `indentRight` | string           | `"1cm"`                                      | Right indent                                              |
+| `indentFirst` | string           | `"0.5cm"`                                    | First-line indent (positive) or hanging indent (negative) |
+| `tabStops`    | array            | `[{ position: "6cm", type: "right" }]`       | Tab stop positions                                        |
 
 ### Text Formatting
 
@@ -158,29 +161,29 @@ doc.addParagraph((p) => {
   p.addText("Highlighted", { highlightColor: "#FFFF00" });
   p.addText("UPPERCASE", { textTransform: "uppercase" });
   p.addText("Small Caps", { smallCaps: true });
-  p.addText("Weight 300", { fontWeight: 300 });   // numeric 100–900
+  p.addText("Weight 300", { fontWeight: 300 }); // numeric 100–900
   p.addText("Weight bold", { fontWeight: "bold" });
 });
 ```
 
 **All text formatting options:**
 
-| Option | Type | Example |
-|--------|------|---------|
-| `bold` | boolean | `true` |
-| `italic` | boolean | `true` |
-| `underline` | boolean | `true` |
-| `strikethrough` | boolean | `true` |
-| `superscript` | boolean | `true` |
-| `subscript` | boolean | `true` |
-| `fontSize` | number or string | `14` or `"14pt"` |
-| `fontFamily` | string | `"Arial"` |
-| `fontWeight` | string or number | `"bold"`, `300`, `700` |
-| `fontStyle` | string | `"normal"`, `"italic"` |
-| `color` | string | `"#FF0000"` or `"red"` |
-| `highlightColor` | string | `"#FFFF00"` or `"yellow"` |
-| `textTransform` | string | `"uppercase"`, `"lowercase"`, `"capitalize"` |
-| `smallCaps` | boolean | `true` |
+| Option           | Type             | Example                                      |
+| ---------------- | ---------------- | -------------------------------------------- |
+| `bold`           | boolean          | `true`                                       |
+| `italic`         | boolean          | `true`                                       |
+| `underline`      | boolean          | `true`                                       |
+| `strikethrough`  | boolean          | `true`                                       |
+| `superscript`    | boolean          | `true`                                       |
+| `subscript`      | boolean          | `true`                                       |
+| `fontSize`       | number or string | `14` or `"14pt"`                             |
+| `fontFamily`     | string           | `"Arial"`                                    |
+| `fontWeight`     | string or number | `"bold"`, `300`, `700`                       |
+| `fontStyle`      | string           | `"normal"`, `"italic"`                       |
+| `color`          | string           | `"#FF0000"` or `"red"`                       |
+| `highlightColor` | string           | `"#FFFF00"` or `"yellow"`                    |
+| `textTransform`  | string           | `"uppercase"`, `"lowercase"`, `"capitalize"` |
+| `smallCaps`      | boolean          | `true`                                       |
 
 ### Tables
 
@@ -193,55 +196,64 @@ doc.addTable([
 ]);
 
 // With options
-doc.addTable([
-  ["Item", "Price"],
-  ["Widget", "$9.99"],
-], { columnWidths: ["8cm", "4cm"], border: "0.5pt solid #000000" });
+doc.addTable(
+  [
+    ["Item", "Price"],
+    ["Widget", "$9.99"],
+  ],
+  { columnWidths: ["8cm", "4cm"], border: "0.5pt solid #000000" },
+);
 
 // Full control — builder callback
-doc.addTable((t) => {
-  t.addRow((r) => {
-    r.addCell("Header", {
-      bold: true,
-      backgroundColor: "#DDDDDD",
-      verticalAlign: "middle",
-      padding: "0.15cm",
-    });
-    r.addCell("Value", {
-      bold: true,
-      backgroundColor: "#DDDDDD",
-      colSpan: 2,
-    });
-  }, { backgroundColor: "#DDDDDD" });
+doc.addTable(
+  (t) => {
+    t.addRow(
+      (r) => {
+        r.addCell("Header", {
+          bold: true,
+          backgroundColor: "#DDDDDD",
+          verticalAlign: "middle",
+          padding: "0.15cm",
+        });
+        r.addCell("Value", {
+          bold: true,
+          backgroundColor: "#DDDDDD",
+          colSpan: 2,
+        });
+      },
+      { backgroundColor: "#DDDDDD" },
+    );
 
-  t.addRow((r) => {
-    r.addCell("Status");
-    r.addCell("Complete", { color: "green" });
-    r.addCell("Verified", { border: "0.5pt solid #000000" });
-  });
+    t.addRow((r) => {
+      r.addCell("Status");
+      r.addCell("Complete", { color: "green" });
+      r.addCell("Verified", { border: "0.5pt solid #000000" });
+    });
 
-  // Row spanning
-  t.addRow((r) => {
-    r.addCell("Tall", { rowSpan: 2, verticalAlign: "top" });
-    r.addCell("Normal");
-  });
-  t.addRow((r) => {
-    r.addCell("Adjacent to rowspan");
-  });
-}, { columnWidths: ["4cm", "4cm", "4cm"] });
+    // Row spanning
+    t.addRow((r) => {
+      r.addCell("Tall", { rowSpan: 2, verticalAlign: "top" });
+      r.addCell("Normal");
+    });
+    t.addRow((r) => {
+      r.addCell("Adjacent to rowspan");
+    });
+  },
+  { columnWidths: ["4cm", "4cm", "4cm"] },
+);
 ```
 
 **Cell options** (extends all text formatting options, plus):
 
-| Option | Type | Example |
-|--------|------|---------|
-| `backgroundColor` | string | `"#EEEEEE"` |
-| `border` | string | `"0.5pt solid #000000"` |
-| `borderTop` / `borderBottom` / `borderLeft` / `borderRight` | string | Per-side borders |
-| `colSpan` | number | `2` |
-| `rowSpan` | number | `3` |
-| `verticalAlign` | string | `"top"`, `"middle"`, `"bottom"` |
-| `padding` | string | `"0.15cm"` |
+| Option                                                      | Type   | Example                         |
+| ----------------------------------------------------------- | ------ | ------------------------------- |
+| `backgroundColor`                                           | string | `"#EEEEEE"`                     |
+| `border`                                                    | string | `"0.5pt solid #000000"`         |
+| `borderTop` / `borderBottom` / `borderLeft` / `borderRight` | string | Per-side borders                |
+| `colSpan`                                                   | number | `2`                             |
+| `rowSpan`                                                   | number | `3`                             |
+| `verticalAlign`                                             | string | `"top"`, `"middle"`, `"bottom"` |
+| `padding`                                                   | string | `"0.15cm"`                      |
 
 ### Lists
 
@@ -275,13 +287,13 @@ doc.addList((l) => {
 
 **List options:**
 
-| Option | Type | Example | Description |
-|--------|------|---------|-------------|
-| `type` | string | `"numbered"` | `"bullet"` (default) or `"numbered"` |
-| `numFormat` | string | `"a"`, `"A"`, `"i"`, `"I"` | Number format; default `"1"` |
-| `numPrefix` | string | `"("` | Text before number |
-| `numSuffix` | string | `")"` | Text after number; default `"."` |
-| `startValue` | number | `5` | Starting number |
+| Option       | Type   | Example                    | Description                          |
+| ------------ | ------ | -------------------------- | ------------------------------------ |
+| `type`       | string | `"numbered"`               | `"bullet"` (default) or `"numbered"` |
+| `numFormat`  | string | `"a"`, `"A"`, `"i"`, `"I"` | Number format; default `"1"`         |
+| `numPrefix`  | string | `"("`                      | Text before number                   |
+| `numSuffix`  | string | `")"`                      | Text after number; default `"."`     |
+| `startValue` | number | `5`                        | Starting number                      |
 
 ### Images
 
@@ -301,12 +313,12 @@ doc.addParagraph((p) => {
 
 **Image options:**
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `width` | string | Yes | `"10cm"`, `"4in"` |
-| `height` | string | Yes | `"6cm"`, `"3in"` |
-| `mimeType` | string | Yes | `"image/png"`, `"image/jpeg"` |
-| `anchor` | string | No | `"as-character"` or `"paragraph"` |
+| Option     | Type   | Required | Description                       |
+| ---------- | ------ | -------- | --------------------------------- |
+| `width`    | string | Yes      | `"10cm"`, `"4in"`                 |
+| `height`   | string | Yes      | `"6cm"`, `"3in"`                  |
+| `mimeType` | string | Yes      | `"image/png"`, `"image/jpeg"`     |
+| `anchor`   | string | No       | `"as-character"` or `"paragraph"` |
 
 ### Links and Bookmarks
 
@@ -332,18 +344,18 @@ doc.addParagraph((p) => {
 ### Tab Stops
 
 ```javascript
-doc.addParagraph((p) => {
-  p.addText("Item");
-  p.addTab();
-  p.addText("Qty");
-  p.addTab();
-  p.addText("$100.00");
-}, {
-  tabStops: [
-    { position: "6cm" },
-    { position: "12cm", type: "right" },
-  ],
-});
+doc.addParagraph(
+  (p) => {
+    p.addText("Item");
+    p.addTab();
+    p.addText("Qty");
+    p.addTab();
+    p.addText("$100.00");
+  },
+  {
+    tabStops: [{ position: "6cm" }, { position: "12cm", type: "right" }],
+  },
+);
 ```
 
 ### Page Breaks
@@ -364,7 +376,11 @@ const bytes = await new OdtDocument()
   .setFooter("Page ###")
   .addHeading("Summary", 1)
   .addParagraph("All systems operational.")
-  .addTable([["System", "Status"], ["API", "OK"], ["DB", "OK"]])
+  .addTable([
+    ["System", "Status"],
+    ["API", "OK"],
+    ["DB", "OK"],
+  ])
   .addList(["No incidents", "No alerts"], { type: "numbered" })
   .save();
 ```
@@ -392,12 +408,12 @@ writeFileSync("output.odt", result);
 
 ### Template Syntax
 
-| Syntax | Description | Example |
-|--------|-------------|---------|
-| `{tag}` | Simple replacement | `Dear {name},` |
-| `{object.property}` | Dot notation for nested data | `{company.address.city}` |
-| `{#tag}...{/tag}` | Loop over array | `{#items}...{/items}` |
-| `{#tag}...{/tag}` | Conditional (truthy/falsy) | `{#showNotes}...{/showNotes}` |
+| Syntax              | Description                  | Example                       |
+| ------------------- | ---------------------------- | ----------------------------- |
+| `{tag}`             | Simple replacement           | `Dear {name},`                |
+| `{object.property}` | Dot notation for nested data | `{company.address.city}`      |
+| `{#tag}...{/tag}`   | Loop over array              | `{#items}...{/items}`         |
+| `{#tag}...{/tag}`   | Conditional (truthy/falsy)   | `{#showNotes}...{/showNotes}` |
 
 Loop items inherit parent data. Item properties override parent properties of the same name. Falsy values (`false`, `null`, `undefined`, `0`, `""`, `[]`) remove conditional sections.
 
@@ -412,7 +428,8 @@ LibreOffice often fragments `{placeholder}` text across multiple XML elements du
 ```javascript
 import { htmlToOdt } from "odf-kit";
 
-const bytes = await htmlToOdt(`
+const bytes = await htmlToOdt(
+  `
   <h1>Meeting Notes</h1>
   <p>Attendees: <strong>Alice</strong>, Bob</p>
   <ul><li>Project status</li><li>Budget review</li></ul>
@@ -420,11 +437,13 @@ const bytes = await htmlToOdt(`
     <tr><th>Action</th><th>Owner</th></tr>
     <tr><td>Send report</td><td>Alice</td></tr>
   </table>
-`, {
-  pageFormat: "A4",        // "A4" | "letter" | "legal" | "A3" | "A5"
-  orientation: "portrait", // "portrait" | "landscape"
-  metadata: { title: "Meeting Notes", creator: "Alice" },
-});
+`,
+  {
+    pageFormat: "A4", // "A4" | "letter" | "legal" | "A3" | "A5"
+    orientation: "portrait", // "portrait" | "landscape"
+    metadata: { title: "Meeting Notes", creator: "Alice" },
+  },
+);
 ```
 
 Supports: headings (h1–h6), paragraphs, bold, italic, underline, lists (ordered/unordered, nested), tables, blockquotes, code blocks, horizontal rules, inline CSS (color, font-size, font-family, text-align, background-color on cells).
@@ -436,7 +455,8 @@ Supports: headings (h1–h6), paragraphs, bold, italic, underline, lists (ordere
 ```javascript
 import { markdownToOdt } from "odf-kit";
 
-const bytes = await markdownToOdt(`
+const bytes = await markdownToOdt(
+  `
 # Report Title
 
 Revenue **exceeded** expectations.
@@ -448,7 +468,9 @@ Revenue **exceeded** expectations.
 | Region | Revenue |
 |--------|---------|
 | North  | $2.1M   |
-`, { pageFormat: "A4" });
+`,
+  { pageFormat: "A4" },
+);
 ```
 
 Full CommonMark support. Accepts the same options as `htmlToOdt`.
@@ -463,8 +485,9 @@ import { tiptapToOdt } from "odf-kit";
 // editor.getJSON() returns TipTap JSONContent
 const bytes = await tiptapToOdt(editor.getJSON(), {
   pageFormat: "A4",
-  images: { [imageUrl]: imageBytes },           // pre-fetched image bytes
-  unknownNodeHandler: (node, doc) => {           // handle custom extensions
+  images: { [imageUrl]: imageBytes }, // pre-fetched image bytes
+  unknownNodeHandler: (node, doc) => {
+    // handle custom extensions
     if (node.type === "callout") doc.addParagraph(`⚠️ ${extractText(node)}`);
   },
 });
@@ -484,18 +507,20 @@ const doc = new OdsDocument();
 const sheet = doc.addSheet("Sales");
 
 sheet.addRow(["Month", "Revenue", "Growth"], { bold: true, backgroundColor: "#DDDDDD" });
-sheet.addRow(["January",  12500, 0.08]);
+sheet.addRow(["January", 12500, 0.08]);
 sheet.addRow(["February", 14200, 0.136]);
 sheet.addRow(["Total", { value: "=SUM(B2:B3)", type: "formula" }]);
 sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage:1" }]);
 sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);
-sheet.addRow([{ value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" }]);
+sheet.addRow([
+  { value: "odf-kit", type: "string", href: "https://github.com/GitHubNewbie0/odf-kit" },
+]);
 sheet.addRow([{ value: "Q1 Report", type: "string", colSpan: 3 }]);
 
 sheet.setColumnWidth(0, "4cm");
 sheet.setColumnWidth(1, "4cm");
-sheet.freezeRows(1);        // freeze top row
-sheet.freezeColumns(1);     // freeze left column
+sheet.freezeRows(1); // freeze top row
+sheet.freezeColumns(1); // freeze left column
 sheet.setTabColor("#4CAF50");
 
 const bytes = await doc.save();
@@ -518,13 +543,13 @@ const bytes = readFileSync("document.odt");
 const doc = readOdt(bytes);
 
 // Render to HTML string
-const html = odtToHtml(bytes);                         // full HTML document
+const html = odtToHtml(bytes); // full HTML document
 const fragment = odtToHtml(bytes, { fragment: true }); // body content only
 
 // Walk the structured document model
 for (const node of doc.body) {
-  if (node.kind === "heading")   console.log(`H${node.level}:`, node.spans[0].text);
-  if (node.kind === "paragraph") console.log(node.spans.map(s => s.text).join(""));
+  if (node.kind === "heading") console.log(`H${node.level}:`, node.spans[0].text);
+  if (node.kind === "paragraph") console.log(node.spans.map((s) => s.text).join(""));
 }
 console.log(doc.metadata.title);
 ```
@@ -579,13 +604,13 @@ import { docxToOdt } from "odf-kit/docx";
 import { readFileSync, writeFileSync } from "fs";
 
 const { bytes, warnings } = await docxToOdt(readFileSync("report.docx"), {
-  pageFormat: "letter",             // override page format (default: read from DOCX)
-  preservePageLayout: true,         // read size/margins from DOCX sectPr (default: true)
+  pageFormat: "letter", // override page format (default: read from DOCX)
+  preservePageLayout: true, // read size/margins from DOCX sectPr (default: true)
   styleMap: { "Section Title": 1, "Sub Title": 2 }, // custom style → heading level
   metadata: { title: "My Report" }, // override metadata
 });
 writeFileSync("report.odt", bytes);
-if (warnings.length) console.warn(warnings);  // log during development
+if (warnings.length) console.warn(warnings); // log during development
 
 // Also works in browser — pure ESM, zero new dependencies
 const { bytes: odt } = await docxToOdt(await file.arrayBuffer());
@@ -647,9 +672,12 @@ async function createReport() {
 
   doc.setMetadata({ title: "Monthly Report", creator: "Operations Team" });
   doc.setPageLayout({
-    width: "8.5in", height: "11in",
-    marginTop: "1in", marginBottom: "1in",
-    marginLeft: "1in", marginRight: "1in",
+    width: "8.5in",
+    height: "11in",
+    marginTop: "1in",
+    marginBottom: "1in",
+    marginLeft: "1in",
+    marginRight: "1in",
   });
   doc.setHeader((h) => {
     h.addText("Monthly Operations Report", { bold: true });
@@ -659,38 +687,52 @@ async function createReport() {
   doc.setFooter("© 2026 Acme Corp");
 
   doc.addHeading("Executive Summary", 1, { spaceBefore: "0.5cm" });
-  doc.addParagraph(
-    "All operations performed within expected parameters.",
-    { align: "justify", lineHeight: 1.5 }
-  );
+  doc.addParagraph("All operations performed within expected parameters.", {
+    align: "justify",
+    lineHeight: 1.5,
+  });
 
   doc.addHeading("Key Metrics", 2);
-  doc.addTable((t) => {
-    t.addRow((r) => {
-      ["Metric", "Target", "Actual", "Status"].forEach((h) =>
-        r.addCell(h, { bold: true, backgroundColor: "#DDDDDD", verticalAlign: "middle" })
+  doc.addTable(
+    (t) => {
+      t.addRow(
+        (r) => {
+          ["Metric", "Target", "Actual", "Status"].forEach((h) =>
+            r.addCell(h, { bold: true, backgroundColor: "#DDDDDD", verticalAlign: "middle" }),
+          );
+        },
+        { backgroundColor: "#DDDDDD" },
       );
-    }, { backgroundColor: "#DDDDDD" });
-    t.addRow((r) => {
-      r.addCell("Uptime"); r.addCell("99.9%"); r.addCell("99.95%");
-      r.addCell("✓", { color: "green" });
-    });
-  }, { columnWidths: ["5cm", "3cm", "3cm", "2cm"], border: "0.5pt solid #000000" });
+      t.addRow((r) => {
+        r.addCell("Uptime");
+        r.addCell("99.9%");
+        r.addCell("99.95%");
+        r.addCell("✓", { color: "green" });
+      });
+    },
+    { columnWidths: ["5cm", "3cm", "3cm", "2cm"], border: "0.5pt solid #000000" },
+  );
 
   doc.addHeading("Action Items", 2);
-  doc.addList([
-    "Complete infrastructure audit by March 15",
-    "Deploy monitoring upgrade to production",
-    "Review disaster recovery procedures",
-  ], { type: "numbered" });
+  doc.addList(
+    [
+      "Complete infrastructure audit by March 15",
+      "Deploy monitoring upgrade to production",
+      "Review disaster recovery procedures",
+    ],
+    { type: "numbered" },
+  );
 
   doc.addHeading("Notes", 2);
-  doc.addParagraph((p) => {
-    p.addText("Priority: ", { bold: true, color: "red" });
-    p.addText("Database migration scheduled for next maintenance window. ");
-    p.addLink("See migration plan", "https://docs.example.com/migration");
-    p.addText(" for details.");
-  }, { indentLeft: "0.5cm" });
+  doc.addParagraph(
+    (p) => {
+      p.addText("Priority: ", { bold: true, color: "red" });
+      p.addText("Database migration scheduled for next maintenance window. ");
+      p.addLink("See migration plan", "https://docs.example.com/migration");
+      p.addText(" for details.");
+    },
+    { indentLeft: "0.5cm" },
+  );
 
   const bytes = await doc.save();
   writeFileSync("report.odt", bytes);

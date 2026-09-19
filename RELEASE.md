@@ -10,7 +10,7 @@ exact commands and detail.
 
 ---
 
-## Release: v_________   Date: 20___-___-___
+## Release: v_________ Date: 20___-_**-**_
 
 ```
 PRE-FLIGHT
@@ -65,13 +65,14 @@ The credential is written to `.npmrc` and persists past the terminal session,
 until revoked or until npm's account session policy expires it.
 
 Token policy (post May-2026 npm changes):
+
 - **Bypass-2FA tokens are permanently revoked.** Do not create one.
 - Publishes use interactive browser 2FA at publish time — that is correct.
 
 **Why not a granular token.** `odf-kit-publish-local-*` granular tokens were the
 documented procedure through v0.14.1. They expire on a hard 90-day clock, which
 is what failed at step 0 on the v0.14.2 release; `npm login` was used instead and
-worked. The 90-day expiry did have one virtue — it forced a failure *here*, at
+worked. The 90-day expiry did have one virtue — it forced a failure _here_, at
 step 0, rather than at step 9 after the tag was pushed. Running `npm whoami` as
 step 0 preserves that check independently of how the credential was obtained.
 That is why this step exists and why it runs first.
@@ -99,7 +100,7 @@ git push backup main
 A release is a bad moment to discover the only machine holding the planning
 record is ahead of its only backup.
 
-## 0c. Cross-tree document checks  *(maintainer only)*
+## 0c. Cross-tree document checks _(maintainer only)_
 
 Canon and the internal plan documents assert things about this repository —
 script names, paths, counts, the gate's own shape. Nothing in the public gate
@@ -143,11 +144,11 @@ rejection later.
 
 Check there are no Dependabot/CodeQL security PRs you intended to fold into this
 release still sitting open. If one should ship in this release, merge it now so
-the fix rides *in* the release rather than trailing it afterward. Dependabot
+the fix rides _in_ the release rather than trailing it afterward. Dependabot
 handles the routine updates; this is only to avoid shipping while a security fix
 you meant to include is unmerged.
 
-## 3. Update CHANGELOG.md  *(before the tag — do not defer this)*
+## 3. Update CHANGELOG.md _(before the tag — do not defer this)_
 
 This is the step most often skipped. The published npm tarball includes
 CHANGELOG.md, so if the entry isn't in the release commit, the published
@@ -163,7 +164,7 @@ changelog is permanently stale.
 Match the existing entry style (bold lead-in, `[#NN](...issues/NN)` links,
 contributor thanks).
 
-## 4. Update publiccode.yml  *(before the tag)*
+## 4. Update publiccode.yml _(before the tag)_
 
 Update `softwareVersion` and `releaseDate` (today). **Never hand-edit and commit
 directly** — edit at https://editor.opencode.de, click Validate, download the
@@ -176,7 +177,7 @@ date picker rolls the date back a day (UTC vs. CDT): entered 2026-09-13, returne
 result is then byte-identical to what you uploaded. **This recurs on every
 evening release.**
 
-## 4b. Check SECURITY.md supported versions  *(before the tag)*
+## 4b. Check SECURITY.md supported versions _(before the tag)_
 
 SECURITY.md declares which release line receives security patches. It ships in
 the npm tarball, so a stale line is published and permanent for that version.
@@ -188,10 +189,10 @@ Select-String -Path SECURITY.md -Pattern "currently"
 Confirm the stated line matches the line this release is on. If it doesn't,
 update the prose sentence and both table rows:
 
-| Version    | Supported          |
-| ---------- | ------------------ |
-| 0.NEW.x    | ✅ Yes             |
-| < 0.NEW.0  | ❌ No              |
+| Version   | Supported |
+| --------- | --------- |
+| 0.NEW.x   | ✅ Yes    |
+| < 0.NEW.0 | ❌ No     |
 
 Read the line on every release, not just minor bumps — a patch release within
 the current line needs no change, but reading it is how a stale line gets
@@ -272,7 +273,7 @@ git status                                                # must be clean before
 Use a clear, descriptive message — it becomes the human summary in `git log` and
 feeds the GitHub release notes (step 10).
 
-## 7. Bump the version  *(badge auto-syncs — no amend/retag)*
+## 7. Bump the version _(badge auto-syncs — no amend/retag)_
 
 ```powershell
 # Choose the bump that matches the release — decide this when you fill
@@ -350,6 +351,7 @@ mirrors the tag and creates the matching GitLab release. No manual GitLab steps.
 ```
 
 **openCode / EU directory notes** (see `opencode-eu-directory-investigation.md`):
+
 - **openCode.de** re-indexes **on each mirror push** (near-instant), not on a
   timer. If the project drops from the directory after a push, that is the known
   intermittent issue — the documented probe is an empty commit
@@ -387,7 +389,7 @@ afterward.
 location, so it must sit **in** the scratch directory — not run from the repo
 with a path argument. Exit 0 = pass; exit 1 lists the failures.
 
-## 12. Request the CVE  *(security releases only — AFTER step 9)*
+## 12. Request the CVE _(security releases only — AFTER step 9)_
 
 Only applies when the release fixes a reported vulnerability.
 
@@ -412,7 +414,7 @@ Also offer the patch to the reporter for testing if they offered — their
 confirmation is worth more than your own, and it costs nothing now that the fix
 is public anyway.
 
-## 13. Publish the advisory  *(security releases only — after the CVE lands)*
+## 13. Publish the advisory _(security releases only — after the CVE lands)_
 
 Once the CVE is assigned, publish the advisory.
 

@@ -114,8 +114,8 @@ writeFileSync("invoice.odt", result);
 import { readOdt, odtToHtml } from "odf-kit/reader";
 
 const bytes = readFileSync("report.odt");
-const model = readOdt(bytes);              // structured document model
-const html  = odtToHtml(bytes);            // styled HTML string
+const model = readOdt(bytes); // structured document model
+const html = odtToHtml(bytes); // styled HTML string
 ```
 
 ```typescript
@@ -123,16 +123,16 @@ const html  = odtToHtml(bytes);            // styled HTML string
 import { readOds, odsToHtml } from "odf-kit/ods-reader";
 
 const bytes = readFileSync("data.ods");
-const model = readOds(bytes);              // structured model — typed values
-const html  = odsToHtml(bytes);            // HTML table string
+const model = readOds(bytes); // structured model — typed values
+const html = odsToHtml(bytes); // HTML table string
 ```
 
 ```typescript
 // 9. Convert .xlsx to .ods — no external dependencies
-import { xlsxToOds } from "odf-kit/xlsx"
+import { xlsxToOds } from "odf-kit/xlsx";
 
-const bytes = await xlsxToOds(readFileSync("report.xlsx"))
-writeFileSync("report.ods", bytes)
+const bytes = await xlsxToOds(readFileSync("report.xlsx"));
+writeFileSync("report.ods", bytes);
 ```
 
 ```typescript
@@ -199,14 +199,21 @@ npm install odf-kit
 Node.js 22+ required. ESM only. Sub-exports:
 
 ```typescript
-import { OdtDocument, OdsDocument, htmlToOdt, markdownToOdt, tiptapToOdt, fillTemplate } from "odf-kit";
+import {
+  OdtDocument,
+  OdsDocument,
+  htmlToOdt,
+  markdownToOdt,
+  tiptapToOdt,
+  fillTemplate,
+} from "odf-kit";
 import { readOdt, odtToHtml } from "odf-kit/odt-reader";
 import { readOds, odsToHtml } from "odf-kit/ods-reader";
-import { odtToTypst, modelToTypst }          from "odf-kit/typst";
-import { docxToOdt }                         from "odf-kit/docx";
-import { odtToMarkdown, modelToMarkdown }    from "odf-kit/markdown";
-import { lexicalToOdt }                      from "odf-kit/lexical";
-import { odfKitNormalizer }                  from "odf-kit/html-normalizer";
+import { odtToTypst, modelToTypst } from "odf-kit/typst";
+import { docxToOdt } from "odf-kit/docx";
+import { odtToMarkdown, modelToMarkdown } from "odf-kit/markdown";
+import { lexicalToOdt } from "odf-kit/lexical";
+import { odfKitNormalizer } from "odf-kit/html-normalizer";
 ```
 
 Works in Node.js, browsers, Deno, Bun, and Cloudflare Workers. Runtime dependencies: [fflate](https://github.com/101arrowz/fflate) for ZIP, [marked](https://marked.js.org/) for Markdown parsing.
@@ -226,9 +233,9 @@ doc.addParagraph("Created without any server.");
 
 const bytes = await doc.save();
 const blob = new Blob([bytes], { type: "application/vnd.oasis.opendocument.text" });
-const url  = URL.createObjectURL(blob);
-const a    = document.createElement("a");
-a.href     = url;
+const url = URL.createObjectURL(blob);
+const a = document.createElement("a");
+a.href = url;
 a.download = "document.odt";
 a.click();
 URL.revokeObjectURL(url);
@@ -274,7 +281,7 @@ Claude Code picks it up automatically the next time you ask it to create or fill
 
 Upload it once via the Skills API and reference it by `skill_id` in the `container` parameter alongside the `code_execution` tool. See [Anthropic's Skills API guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide) for the exact request shape.
 
-Try it: *"Create an ODT invoice with a line-item table and a bold total row"* — with the skill installed, Claude reaches for odf-kit and writes the code directly instead of improvising XML by hand.
+Try it: _"Create an ODT invoice with a line-item table and a bold total row"_ — with the skill installed, Claude reaches for odf-kit and writes the code directly instead of improvising XML by hand.
 
 ---
 
@@ -287,11 +294,11 @@ doc.addHeading("Chapter 1", 1);
 
 doc.addParagraph((p) => {
   p.addText("This is ");
-  p.addText("bold",   { bold: true });
+  p.addText("bold", { bold: true });
   p.addText(", ");
   p.addText("italic", { italic: true });
   p.addText(", and ");
-  p.addText("red",    { color: "red", fontSize: 16 });
+  p.addText("red", { color: "red", fontSize: 16 });
   p.addText(".");
 });
 
@@ -309,28 +316,36 @@ doc.addParagraph((p) => {
 ```typescript
 // Simple
 doc.addTable([
-  ["Name",  "Age", "City"],
-  ["Alice", "30",  "Portland"],
-  ["Bob",   "25",  "Seattle"],
+  ["Name", "Age", "City"],
+  ["Alice", "30", "Portland"],
+  ["Bob", "25", "Seattle"],
 ]);
 
 // With column widths and borders
-doc.addTable([
-  ["Product", "Price"],
-  ["Widget",  "$9.99"],
-], { columnWidths: ["8cm", "4cm"], border: "0.5pt solid #000000" });
+doc.addTable(
+  [
+    ["Product", "Price"],
+    ["Widget", "$9.99"],
+  ],
+  { columnWidths: ["8cm", "4cm"], border: "0.5pt solid #000000" },
+);
 
 // Full control — builder callback
-doc.addTable((t) => {
-  t.addRow((r) => {
-    r.addCell("Name",   { bold: true, backgroundColor: "#DDDDDD" });
-    r.addCell("Status", { bold: true, backgroundColor: "#DDDDDD" });
-  });
-  t.addRow((r) => {
-    r.addCell((c) => { c.addText("Project Alpha", { bold: true }); });
-    r.addCell("Complete", { color: "green" });
-  });
-}, { columnWidths: ["8cm", "4cm"] });
+doc.addTable(
+  (t) => {
+    t.addRow((r) => {
+      r.addCell("Name", { bold: true, backgroundColor: "#DDDDDD" });
+      r.addCell("Status", { bold: true, backgroundColor: "#DDDDDD" });
+    });
+    t.addRow((r) => {
+      r.addCell((c) => {
+        c.addText("Project Alpha", { bold: true });
+      });
+      r.addCell("Complete", { color: "green" });
+    });
+  },
+  { columnWidths: ["8cm", "4cm"] },
+);
 ```
 
 ### Page layout, headers, footers
@@ -348,7 +363,7 @@ doc.setHeader((h) => {
   h.addPageNumber();
 });
 
-doc.setFooter("© 2026 Acme Corp — Page ###");  // ### = page number
+doc.setFooter("© 2026 Acme Corp — Page ###"); // ### = page number
 
 doc.addPageBreak();
 ```
@@ -407,16 +422,18 @@ doc.addParagraph((p) => {
 ### Tab stops
 
 ```typescript
-doc.addParagraph((p) => {
-  p.addText("Item");  p.addTab();
-  p.addText("Qty");   p.addTab();
-  p.addText("$100.00");
-}, {
-  tabStops: [
-    { position: "6cm" },
-    { position: "12cm", type: "right" },
-  ],
-});
+doc.addParagraph(
+  (p) => {
+    p.addText("Item");
+    p.addTab();
+    p.addText("Qty");
+    p.addTab();
+    p.addText("$100.00");
+  },
+  {
+    tabStops: [{ position: "6cm" }, { position: "12cm", type: "right" }],
+  },
+);
 ```
 
 ### Method chaining
@@ -429,7 +446,11 @@ const bytes = await new OdtDocument()
   .setFooter("Page ###")
   .addHeading("Summary", 1)
   .addParagraph("All systems operational.")
-  .addTable([["System", "Status"], ["API", "OK"], ["DB", "OK"]])
+  .addTable([
+    ["System", "Status"],
+    ["API", "OK"],
+    ["DB", "OK"],
+  ])
   .save();
 ```
 
@@ -450,12 +471,12 @@ const doc = new OdsDocument();
 const sheet = doc.addSheet("Data");
 
 sheet.addRow([
-  "Text",             // string
-  42,                 // float
-  new Date("2026-01-15"),  // date
-  true,               // boolean
-  null,               // empty cell
-  { value: "=SUM(B1:B10)", type: "formula" },  // formula — explicit required
+  "Text", // string
+  42, // float
+  new Date("2026-01-15"), // date
+  true, // boolean
+  null, // empty cell
+  { value: "=SUM(B1:B10)", type: "formula" }, // formula — explicit required
 ]);
 ```
 
@@ -470,17 +491,15 @@ sheet.addRow(["Month", "Revenue", "Notes"], {
 });
 
 // Mixed: row default + per-cell override
-sheet.addRow([
-  "January",
-  { value: 12500, type: "float", color: "#006600" },
-  "On track",
-], { italic: true });
+sheet.addRow(["January", { value: 12500, type: "float", color: "#006600" }, "On track"], {
+  italic: true,
+});
 ```
 
 ### Date formatting
 
 ```typescript
-doc.setDateFormat("DD/MM/YYYY");  // "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY"
+doc.setDateFormat("DD/MM/YYYY"); // "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY"
 sheet.addRow([{ value: new Date("2026-12-25"), type: "date", dateFormat: "MM/DD/YYYY" }]);
 ```
 
@@ -510,14 +529,14 @@ const bytes = await doc.save();
 ### Number formats
 
 ```typescript
-sheet.addRow([{ value: 9999, type: "float", numberFormat: "integer" }]);           // 9,999
-sheet.addRow([{ value: 1234.567, type: "float", numberFormat: "decimal:2" }]);     // 1,234.57
+sheet.addRow([{ value: 9999, type: "float", numberFormat: "integer" }]); // 9,999
+sheet.addRow([{ value: 1234.567, type: "float", numberFormat: "decimal:2" }]); // 1,234.57
 sheet.addRow([{ value: 0.1234, type: "percentage", numberFormat: "percentage" }]); // 12.34%
-sheet.addRow([{ value: 0.075, type: "percentage", numberFormat: "percentage:1" }]);// 7.5%
-sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]);       // €1,234.56
-sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD:0" }]);       // $100
+sheet.addRow([{ value: 0.075, type: "percentage", numberFormat: "percentage:1" }]); // 7.5%
+sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR" }]); // €1,234.56
+sheet.addRow([{ value: 99.99, type: "currency", numberFormat: "currency:USD:0" }]); // $100
 sheet.addRow([{ value: 1234.56, type: "currency", numberFormat: "currency:EUR:right" }]); // 1,234.56 €
-sheet.addRow([{ value: 1234.5, type: "currency", numberFormat: "currency:EUR:2:right" }]);// 1,234.50 €
+sheet.addRow([{ value: 1234.5, type: "currency", numberFormat: "currency:EUR:2:right" }]); // 1,234.50 €
 
 // `:right` places the symbol after the value with a non-breaking space —
 // matches European typographic convention (France, Germany, Spain, Italy, etc.)
@@ -558,19 +577,21 @@ sheet.freezeRows(1).freezeColumns(1);
 ### Hyperlinks in cells
 
 ```typescript
-sheet.addRow([{
-  value: "odf-kit on GitHub",
-  type: "string",
-  href: "https://github.com/GitHubNewbie0/odf-kit",
-}]);
+sheet.addRow([
+  {
+    value: "odf-kit on GitHub",
+    type: "string",
+    href: "https://github.com/GitHubNewbie0/odf-kit",
+  },
+]);
 ```
 
 ### Sheet tab color
 
 ```typescript
-doc.addSheet("Q1").setTabColor("#4CAF50");  // green
-doc.addSheet("Q2").setTabColor("#2196F3");  // blue
-doc.addSheet("Q3").setTabColor("#F44336");  // red
+doc.addSheet("Q1").setTabColor("#4CAF50"); // green
+doc.addSheet("Q2").setTabColor("#2196F3"); // blue
+doc.addSheet("Q3").setTabColor("#F44336"); // red
 ```
 
 ---
@@ -582,42 +603,42 @@ doc.addSheet("Q3").setTabColor("#F44336");  // red
 ```typescript
 import { htmlToOdt } from "odf-kit";
 
-const bytes = await htmlToOdt(html);                          // A4 default
+const bytes = await htmlToOdt(html); // A4 default
 const bytes = await htmlToOdt(html, { pageFormat: "letter" }); // US letter
 ```
 
 ### Page formats
 
-| Format | Dimensions | Default margins | Typical use |
-|---|---|---|---|
-| `"A4"` | 21 × 29.7 cm | 2.5 cm | Europe, ISO standard **(default)** |
-| `"letter"` | 21.59 × 27.94 cm | 2.54 cm | USA, Canada |
-| `"legal"` | 21.59 × 35.56 cm | 2.54 cm | USA legal |
-| `"A3"` | 29.7 × 42 cm | 2.5 cm | Large format |
-| `"A5"` | 14.8 × 21 cm | 2 cm | Small booklets |
+| Format     | Dimensions       | Default margins | Typical use                        |
+| ---------- | ---------------- | --------------- | ---------------------------------- |
+| `"A4"`     | 21 × 29.7 cm     | 2.5 cm          | Europe, ISO standard **(default)** |
+| `"letter"` | 21.59 × 27.94 cm | 2.54 cm         | USA, Canada                        |
+| `"legal"`  | 21.59 × 35.56 cm | 2.54 cm         | USA legal                          |
+| `"A3"`     | 29.7 × 42 cm     | 2.5 cm          | Large format                       |
+| `"A5"`     | 14.8 × 21 cm     | 2 cm            | Small booklets                     |
 
-  ### Images
+### Images
 
-  Base64 data URLs embedded in `src` attributes are decoded and embedded automatically. For remote URLs, provide pre-fetched bytes via the `images` map or an async `fetchImage` callback. Images without a resolution method are skipped silently.
+Base64 data URLs embedded in `src` attributes are decoded and embedded automatically. For remote URLs, provide pre-fetched bytes via the `images` map or an async `fetchImage` callback. Images without a resolution method are skipped silently.
 
 ```typescript
-  // Base64 data URL — embedded automatically
-  const bytes = await htmlToOdt('<img src="data:image/png;base64,..."/>');
+// Base64 data URL — embedded automatically
+const bytes = await htmlToOdt('<img src="data:image/png;base64,..."/>');
 
-  // Pre-fetched image map (e.g. from WebDAV in odf-kit-service)
-  const bytes = await htmlToOdt(html, {
-    images: {
-      "https://example.com/logo.png": pngBytes,
-    },
-  });
+// Pre-fetched image map (e.g. from WebDAV in odf-kit-service)
+const bytes = await htmlToOdt(html, {
+  images: {
+    "https://example.com/logo.png": pngBytes,
+  },
+});
 
-  // Async fetch callback (Node.js or browser)
-  const bytes = await htmlToOdt(html, {
-    fetchImage: async (src) => {
-      const res = await fetch(src);
-      return new Uint8Array(await res.arrayBuffer());
-    },
-  });
+// Async fetch callback (Node.js or browser)
+const bytes = await htmlToOdt(html, {
+  fetchImage: async (src) => {
+    const res = await fetch(src);
+    return new Uint8Array(await res.arrayBuffer());
+  },
+});
 ```
 
 ### Supported HTML elements
@@ -714,7 +735,7 @@ const bytes = await tiptapToOdt(editor.getJSON(), { images });
 const bytes = await tiptapToOdt(editor.getJSON(), {
   unknownNodeHandler: (node, doc) => {
     if (node.type === "callout") {
-      doc.addParagraph(`⚠️ ${node.content?.[0]?.content?.[0]?.text ?? ""}`)
+      doc.addParagraph(`⚠️ ${node.content?.[0]?.content?.[0]?.text ?? ""}`);
     }
   },
 });
@@ -780,12 +801,12 @@ import { readOdt, odtToHtml } from "odf-kit/odt-reader";
 
 const bytes = readFileSync("report.odt");
 const model = readOdt(bytes);
-const html  = odtToHtml(bytes);
+const html = odtToHtml(bytes);
 
 // Tracked changes
-const final    = odtToHtml(bytes, {}, { trackedChanges: "final" });
+const final = odtToHtml(bytes, {}, { trackedChanges: "final" });
 const original = odtToHtml(bytes, {}, { trackedChanges: "original" });
-const marked   = odtToHtml(bytes, {}, { trackedChanges: "changes" });
+const marked = odtToHtml(bytes, {}, { trackedChanges: "changes" });
 ```
 
 ---
@@ -825,15 +846,15 @@ const model2 = readOds(bytes, { includeFormatting: false });
 
 ### Cell types
 
-| Type | `value` | Notes |
-|------|---------|-------|
-| `"string"` | `string` | |
-| `"float"` | `number` | Includes percentage and currency cells |
-| `"date"` | `Date` (UTC) | |
-| `"boolean"` | `boolean` | |
-| `"formula"` | cached result | `cell.formula` has original string e.g. `"=SUM(A1:A10)"` |
-| `"empty"` | `null` | |
-| `"covered"` | `null` | Covered by a merge — correct `colIndex` always maintained |
+| Type        | `value`       | Notes                                                     |
+| ----------- | ------------- | --------------------------------------------------------- |
+| `"string"`  | `string`      |                                                           |
+| `"float"`   | `number`      | Includes percentage and currency cells                    |
+| `"date"`    | `Date` (UTC)  |                                                           |
+| `"boolean"` | `boolean`     |                                                           |
+| `"formula"` | cached result | `cell.formula` has original string e.g. `"=SUM(A1:A10)"`  |
+| `"empty"`   | `null`        |                                                           |
+| `"covered"` | `null`        | Covered by a merge — correct `colIndex` always maintained |
 
 ### Merged cells
 
@@ -854,24 +875,25 @@ Primary cells have `colSpan` and/or `rowSpan`. Covered cells have `type: "covere
 `odf-kit/xlsx` converts `.xlsx` spreadsheets to `.ods` with no external dependencies — parses XLSX XML directly using fflate (already in odf-kit) and our own XML parser. Supports `.xlsx` and `.xlsm`. Does not support legacy `.xls` (binary format).
 
 ```typescript
-import { xlsxToOds } from "odf-kit/xlsx"
-import { readFileSync, writeFileSync } from "fs"
+import { xlsxToOds } from "odf-kit/xlsx";
+import { readFileSync, writeFileSync } from "fs";
 
 // Simple conversion
-const bytes = await xlsxToOds(readFileSync("report.xlsx"))
-writeFileSync("report.ods", bytes)
+const bytes = await xlsxToOds(readFileSync("report.xlsx"));
+writeFileSync("report.ods", bytes);
 
 // With options
 const bytes2 = await xlsxToOds(readFileSync("report.xlsx"), {
   dateFormat: "DD/MM/YYYY",
   metadata: { title: "Q4 Report", creator: "Alice" },
-})
+});
 
 // Works with ArrayBuffer too (browser-friendly)
-const bytes3 = await xlsxToOds(arrayBuffer)
+const bytes3 = await xlsxToOds(arrayBuffer);
 ```
 
 **What is preserved:**
+
 - All sheets in tab order, with their names
 - Cell values: strings, numbers, booleans, dates, formula cached results, errors (as strings)
 - Formula strings (the original `=SUM(...)` expression alongside the cached result)
@@ -881,6 +903,7 @@ const bytes3 = await xlsxToOds(arrayBuffer)
 - Document metadata (via options)
 
 **What is not preserved:**
+
 - Cell formatting (colors, fonts, font sizes, bold/italic, alignment, borders, background colors)
 - Source number format codes (currency, decimal places, percentage formats from the XLSX)
 - Column widths and row heights
@@ -929,8 +952,8 @@ interface DocxToOdtResult {
 ### htmlToOdt / markdownToOdt
 
 ```typescript
-function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promise<Uint8Array>
-function markdownToOdt(markdown: string, options?: HtmlToOdtOptions): Promise<Uint8Array>
+function htmlToOdt(html: string, options?: HtmlToOdtOptions): Promise<Uint8Array>;
+function markdownToOdt(markdown: string, options?: HtmlToOdtOptions): Promise<Uint8Array>;
 
 interface HtmlToOdtOptions {
   pageFormat?: "A4" | "letter" | "legal" | "A3" | "A5"; // default: "A4"
@@ -942,17 +965,17 @@ interface HtmlToOdtOptions {
   metadata?: { title?: string; creator?: string; description?: string };
   images?: Record<string, Uint8Array>;
   fetchImage?: (src: string) => Promise<Uint8Array | undefined>;
-  normalizer?: Normalizer | false;  // omit for default (Tier 1 normalization);
-                                     // false to skip; or supply a custom function
-  parser?: Parser;                   // omit for default (odfKitParser);
-                                     // or supply a custom function
+  normalizer?: Normalizer | false; // omit for default (Tier 1 normalization);
+  // false to skip; or supply a custom function
+  parser?: Parser; // omit for default (odfKitParser);
+  // or supply a custom function
 }
 ```
 
 ### tiptapToOdt
 
 ```typescript
-function tiptapToOdt(json: TiptapNode, options?: TiptapToOdtOptions): Promise<Uint8Array>
+function tiptapToOdt(json: TiptapNode, options?: TiptapToOdtOptions): Promise<Uint8Array>;
 
 interface TiptapNode {
   type: string;
@@ -975,46 +998,46 @@ interface TiptapToOdtOptions extends HtmlToOdtOptions {
 
 ### OdtDocument
 
-| Method | Description |
-|--------|-------------|
-| `setMetadata(options)` | Set title, creator, description |
-| `setPageLayout(options)` | Set page size, margins, orientation |
-| `setHeader(content)` | Set page header (string or builder) |
-| `setFooter(content)` | Set page footer (string or builder) |
-| `addHeading(content, level?)` | Add heading (level 1–6) |
-| `addParagraph(content, options?)` | Add paragraph (string or builder) |
-| `addTable(content, options?)` | Add table (string[][] or builder) |
-| `addList(content, options?)` | Add list (string[] or builder) |
-| `addImage(data, options)` | Add standalone image |
-| `addPageBreak()` | Insert page break |
-| `save()` | Generate `.odt` as `Promise<Uint8Array>` |
+| Method                            | Description                              |
+| --------------------------------- | ---------------------------------------- |
+| `setMetadata(options)`            | Set title, creator, description          |
+| `setPageLayout(options)`          | Set page size, margins, orientation      |
+| `setHeader(content)`              | Set page header (string or builder)      |
+| `setFooter(content)`              | Set page footer (string or builder)      |
+| `addHeading(content, level?)`     | Add heading (level 1–6)                  |
+| `addParagraph(content, options?)` | Add paragraph (string or builder)        |
+| `addTable(content, options?)`     | Add table (string[][] or builder)        |
+| `addList(content, options?)`      | Add list (string[] or builder)           |
+| `addImage(data, options)`         | Add standalone image                     |
+| `addPageBreak()`                  | Insert page break                        |
+| `save()`                          | Generate `.odt` as `Promise<Uint8Array>` |
 
 ### OdsDocument / OdsSheet
 
-| Method | Description |
-|--------|-------------|
-| `doc.setMetadata(options)` | Set title, creator, description |
-| `doc.setDateFormat(format)` | Set default date display format |
-| `doc.addSheet(name)` | Add a sheet tab — returns `OdsSheet` |
-| `doc.save()` | Generate `.ods` as `Promise<Uint8Array>` |
-| `sheet.addRow(values, options?)` | Add a row of cells |
-| `sheet.setColumnWidth(index, width)` | Set column width |
-| `sheet.setRowHeight(index, height)` | Set row height |
-| `sheet.freezeRows(N?)` | Freeze top N rows (default 1) |
-| `sheet.freezeColumns(N?)` | Freeze left N columns (default 1) |
-| `sheet.setTabColor(color)` | Set sheet tab color |
+| Method                               | Description                              |
+| ------------------------------------ | ---------------------------------------- |
+| `doc.setMetadata(options)`           | Set title, creator, description          |
+| `doc.setDateFormat(format)`          | Set default date display format          |
+| `doc.addSheet(name)`                 | Add a sheet tab — returns `OdsSheet`     |
+| `doc.save()`                         | Generate `.ods` as `Promise<Uint8Array>` |
+| `sheet.addRow(values, options?)`     | Add a row of cells                       |
+| `sheet.setColumnWidth(index, width)` | Set column width                         |
+| `sheet.setRowHeight(index, height)`  | Set row height                           |
+| `sheet.freezeRows(N?)`               | Freeze top N rows (default 1)            |
+| `sheet.freezeColumns(N?)`            | Freeze left N columns (default 1)        |
+| `sheet.setTabColor(color)`           | Set sheet tab color                      |
 
 ### fillTemplate
 
 ```typescript
-function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array
+function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array;
 ```
 
-| Syntax | Description |
-|--------|-------------|
-| `{tag}` | Replace with value |
-| `{object.property}` | Dot notation |
-| `{#tag}...{/tag}` | Loop or conditional |
+| Syntax              | Description         |
+| ------------------- | ------------------- |
+| `{tag}`             | Replace with value  |
+| `{object.property}` | Dot notation        |
+| `{#tag}...{/tag}`   | Loop or conditional |
 
 ### TextFormatting
 
@@ -1037,12 +1060,12 @@ function fillTemplate(templateBytes: Uint8Array, data: TemplateData): Uint8Array
 
 ## Platform support
 
-| Platform | Support |
-|----------|---------|
-| Node.js 22+ | ✅ Full |
+| Platform                      | Support |
+| ----------------------------- | ------- |
+| Node.js 22+                   | ✅ Full |
 | Chrome, Firefox, Safari, Edge | ✅ Full |
-| Deno, Bun | ✅ Full |
-| Cloudflare Workers | ✅ Full |
+| Deno, Bun                     | ✅ Full |
+| Cloudflare Workers            | ✅ Full |
 
 ESM only. Zero Node-specific APIs in the library source — enforced at the TypeScript level.
 
@@ -1065,21 +1088,21 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 
 ## Comparison
 
-| Feature | odf-kit | simple-odf | docxtemplater |
-|---------|---------|------------|---------------|
-| Generate .odt from scratch | ✅ | ⚠️ flat XML only | ❌ |
-| Generate .ods from scratch | ✅ merged cells, freeze, number formats, hyperlinks | ❌ | ❌ |
-| Convert HTML → ODT | ✅ | ❌ | ❌ |
-| Convert Markdown → ODT | ✅ | ❌ | ❌ |
-| Convert TipTap JSON → ODT | ✅ | ❌ | ❌ |
-| Convert DOCX → ODT | ✅ native, browser-safe | ❌ | ❌ |
-| Fill .odt templates | ✅ | ❌ | ✅ .docx only |
-| Read .odt files | ✅ | ❌ | ❌ |
-| Convert to HTML | ✅ | ❌ | ❌ |
-| Convert to Typst / PDF | ✅ | ❌ | ❌ |
-| Browser support | ✅ | ❌ | ✅ |
-| Maintained | ✅ | ❌ abandoned 2021 | ✅ |
-| Open source | ✅ Apache 2.0 | ✅ MIT | ⚠️ paid for advanced features |
+| Feature                    | odf-kit                                             | simple-odf        | docxtemplater                 |
+| -------------------------- | --------------------------------------------------- | ----------------- | ----------------------------- |
+| Generate .odt from scratch | ✅                                                  | ⚠️ flat XML only  | ❌                            |
+| Generate .ods from scratch | ✅ merged cells, freeze, number formats, hyperlinks | ❌                | ❌                            |
+| Convert HTML → ODT         | ✅                                                  | ❌                | ❌                            |
+| Convert Markdown → ODT     | ✅                                                  | ❌                | ❌                            |
+| Convert TipTap JSON → ODT  | ✅                                                  | ❌                | ❌                            |
+| Convert DOCX → ODT         | ✅ native, browser-safe                             | ❌                | ❌                            |
+| Fill .odt templates        | ✅                                                  | ❌                | ✅ .docx only                 |
+| Read .odt files            | ✅                                                  | ❌                | ❌                            |
+| Convert to HTML            | ✅                                                  | ❌                | ❌                            |
+| Convert to Typst / PDF     | ✅                                                  | ❌                | ❌                            |
+| Browser support            | ✅                                                  | ❌                | ✅                            |
+| Maintained                 | ✅                                                  | ❌ abandoned 2021 | ✅                            |
+| Open source                | ✅ Apache 2.0                                       | ✅ MIT            | ⚠️ paid for advanced features |
 
 ---
 
@@ -1171,6 +1194,7 @@ Contributions welcome at [github.com/GitHubNewbie0/odf-kit](https://github.com/G
 For security issues, please use [private vulnerability reporting](https://github.com/GitHubNewbie0/odf-kit/security) — see [SECURITY.md](SECURITY.md).
 
 All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ```
 
 ---
@@ -1178,3 +1202,4 @@ All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE) for details.
+```
