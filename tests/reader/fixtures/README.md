@@ -78,13 +78,16 @@ Each index entry records:
 
 ## Fixture index
 
-| File                                | Producer                                                     | Contents                                                                                                                                                                           | Type       |
-| ----------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `alignment-ltr.odt`                 | LibreOffice Writer 26.2.5.2 (x86_64)                         | Three paragraphs, left / centre / right aligned, default direction.                                                                                                                | regression |
-| `alignment-rtl.odt`                 | LibreOffice Writer 26.2.5.2 (x86_64)                         | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left.                                                                  | regression |
-| `xss-attr-breakout-ghsa3cgg.odt`    | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** A `fo:color` value carrying a `"`, which broke out of `style="…"` into an `onmouseover` handler. GHSA-3cgg-c5pp-57h6. | smoke      |
-| `xss-markup-injection-ghsa3cgg.odt` | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** Same breakout, injecting `<img src=x onerror=…>` as a sibling element. GHSA-3cgg-c5pp-57h6.                           | smoke      |
-| `xss-markup-injection-ghsa3cgg.ods` | Reporter's Python `zipfile` script — **not an office suite** | **LIVE XSS PAYLOAD — never upload to the online validator.** The markup-injection payload through the ODS renderer's cell style attribute. GHSA-3cgg-c5pp-57h6.                    | smoke      |
+| File                                               | Producer                                                                | Contents                                                                                                                                                                           | Type       |
+| -------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `alignment-ltr.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Three paragraphs, left / centre / right aligned, default direction.                                                                                                                | regression |
+| `alignment-rtl.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left.                                                                  | regression |
+| `xss-attr-breakout-ghsa3cgg.odt`                   | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** A `fo:color` value carrying a `"`, which broke out of `style="…"` into an `onmouseover` handler. GHSA-3cgg-c5pp-57h6. | smoke      |
+| `xss-markup-injection-ghsa3cgg.odt`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** Same breakout, injecting `<img src=x onerror=…>` as a sibling element. GHSA-3cgg-c5pp-57h6.                           | smoke      |
+| `xss-markup-injection-ghsa3cgg.ods`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** The markup-injection payload through the ODS renderer's cell style attribute. GHSA-3cgg-c5pp-57h6.                    | smoke      |
+| `text-box-frame-libreoffice.odt`                   | LibreOffice Writer 26.2.5.2 (x86_64)                                    | One paragraph-anchored `draw:frame` wrapping a `draw:text-box`. The #94 defect case, from the producer that actually emits it.                                                     | regression |
+| `text-box-custom-shape-docx-roundtrip.odt`         | LibreOffice Writer 26.2.5.2 (x86_64), via its own `.docx` filter        | The same text box after a round trip through `.docx`, which LibreOffice brings back as `draw:custom-shape`, not `draw:frame`. Guards the path that already worked.                 | regression |
+| `text-box-custom-shape-docx-roundtrip-source.docx` | LibreOffice Writer 26.2.5.2 (x86_64), Save As → _Word 2010–365 (.docx)_ | The recorded input to the row above's recipe. **Backs no assertions; nothing reads it.** Committed because the recipe's output depends on the LibreOffice version that ran it.     | provenance |
 
 **`alignment-ltr.odt`**
 
@@ -133,6 +136,72 @@ Each index entry records:
 - **Provenance:** reported 2026-09-06 by Pethu Kannan G under GHSA-3cgg-c5pp-57h6; files received 2026-09-12. Fixed in v0.14.2.
 
 - **Type:** smoke. **These files back no assertions.** They confirm end-to-end that the reported documents now convert safely. The assertions are carried by `tests/odt/to-html.test.ts` and `tests/ods/to-html.test.ts`, which use hand-built models per Q1 — the defect is in the renderers' string construction, downstream of parsing, so a real file would drag the parser into an assertion that is not about the parser.
+
+**`text-box-frame-libreoffice.odt`** — the #94 defect case
+
+- **Producer:** LibreOffice Writer 26.2.5.2 (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.2.5.2$Windows_X86_64 LibreOffice_project/cd7284b4cbbfeb507e630c1aac019f4157393acb`.
+
+- **Contents:** A single paragraph holding one frame, and nothing else:
+
+  ```
+  text:p > draw:frame[text:anchor-type="paragraph"] > draw:text-box > text:p
+  ```
+
+  The inner text is `This is a text box saved as odt.` Before #94 the reader discarded the frame whole, because it holds no `draw:image`, and the paragraph read as empty. This fixture is the T3 evidence that a real producer emits the structure — the issue reporter attributed it to LibreOffice's DOCX import, and that attribution is wrong (see the companion fixture below); the mechanism is LibreOffice's own native save.
+
+- **Recipe:** New Writer document → Insert → Text Box → drag a box on the page → type one line inside it → Save As `.odt` (ODF Text Document). No other content, no manual styling.
+
+- **Provenance:** authored 2026-09-19 by Scott, in the course of diagnosing #94. Received as `test box saved as odt.odt`; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `a85a57e918e2e85b6483ae60a92d4621`, 9,571 bytes, verified identical to the source after copying).
+
+- **Also recorded:** the file declares `office:version="1.4"`. Current LibreOffice writes ODF 1.4 by default — a data point for the format-authority target, not for this fixture's purpose.
+
+- **Type:** regression
+
+**`text-box-custom-shape-docx-roundtrip.odt`** — the control
+
+- **Producer:** LibreOffice Writer 26.2.5.2 (x86_64), Windows — same build, same `meta:generator` string as above. The document reached `.odt` through LibreOffice's own `.docx` filter and back, so the _shape_ of its content is set by that round trip rather than by a native save.
+
+- **Contents:** A single paragraph holding one shape, and nothing else:
+
+  ```
+  text:p > draw:custom-shape[text:anchor-type="char"]
+             > text:p
+             > draw:enhanced-geometry[draw:type="ooxml-rect"]
+  ```
+
+  The inner text is `This is a text box.` This path **already worked** before #94: `draw:custom-shape` has no case in `parseSpans`, so it falls to the `default:` branch and its text is picked up by the unknown-element recursion. The fixture guards that, and it is the evidence for the correction owed to the reporter — a Word text box arriving via `.docx` does not become `draw:text-box`, so the mechanism in the issue is misattributed even though the defect is real.
+
+- **Recipe:** the same text box as the fixture above → Save As → _Word 2010–365 (.docx)_ (the filter whose name the received file carried) → convert that `.docx` back to `.odt` with LibreOffice headless:
+
+  ```powershell
+  Start-Process -FilePath "C:\Program Files\LibreOffice\program\soffice.exe" -ArgumentList @(
+    "--headless","--norestore",
+    "-env:UserInstallation=file:///C:/Temp/lo-conv",
+    "--convert-to","odt",
+    "--outdir","<outdir>",
+    "<path to .docx>"
+  ) -Wait -NoNewWindow
+  ```
+
+  **The array form is load-bearing.** The plain `& soffice --headless …` form fails _silently_ when the path contains spaces — no output, no error, no file.
+
+- **Provenance:** authored and converted 2026-09-19 by Scott, in the course of diagnosing #94. Received as `Word 2010-365.odt`; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `7fb9c4a48bbaa9e170e90f3adf6ffbf2`, 10,481 bytes, verified identical to the source after copying). The `.docx` this was converted from is committed beside it as `text-box-custom-shape-docx-roundtrip-source.docx` — see the entry below for why.
+
+- **Also recorded:** this file too declares `office:version="1.4"`.
+
+- **Type:** regression
+
+**`text-box-custom-shape-docx-roundtrip-source.docx`** — the recipe's recorded input
+
+- **This file backs no assertions and nothing reads it.** It is provenance for the `.odt` beside it, not evidence about odf-kit's DOCX reader, which is why it lives here rather than in a DOCX fixtures directory.
+
+- **Why it is committed at all:** the recipe above is **version-dependent**. Anyone can author a text box and export it, but a later LibreOffice may export differently — and then following the recipe regenerates _a_ `.docx`, not _the_ `.docx` whose conversion we cite. The claim that LibreOffice's DOCX filter brings a text box back as `draw:custom-shape` rather than `draw:text-box` is stated publicly in #94, so the input that claim rests on belongs in version control. Keeping the recipe's input next to the recipe's output is the whole point; separating them would leave a reproducible-looking recipe whose starting conditions had quietly moved.
+
+- **Producer:** LibreOffice Writer 26.2.5.2 (x86_64), Windows, via Save As → _Word 2010–365 (.docx)_ — the filter whose name the received file carried.
+
+- **Provenance:** authored 2026-09-19 by Scott. Received as `Word 2010-365.docx`; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `cde57a8a42f055b1e0d3bb405a433aeb`, 5,867 bytes, verified identical to the source after copying).
+
+- **Type:** provenance — not a fixture tier. No test loads it.
 
 ## Adding a fixture — quick checklist
 

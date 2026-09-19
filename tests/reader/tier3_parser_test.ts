@@ -1172,4 +1172,44 @@ describe("readOdt — draw:frame text content (#94)", () => {
       "First paraSecond para",
     );
   });
+
+  // ── T3: the same two cases as real producer output ──────────────────────
+  //
+  // The inline tests above assert what we believe LibreOffice writes; these
+  // two assert what it actually wrote. Both fixtures carry an intact
+  // meta:generator and are documented in fixtures/README.md.
+
+  const fixtureParagraphs = (file: string): ParagraphNode[] => {
+    const bytes = readFileSync(new URL(`./fixtures/${file}`, import.meta.url));
+    return readOdt(new Uint8Array(bytes)).body.filter(
+      (n) => n.kind === "paragraph",
+    ) as ParagraphNode[];
+  };
+
+  test("real LibreOffice text box saved natively as .odt (#94 defect case)", () => {
+    // T3: LibreOffice/26.2.5.2$Windows_X86_64 writes
+    // text:p > draw:frame[text:anchor-type="paragraph"] > draw:text-box > text:p
+    // for Insert -> Text Box followed by a native .odt save. This is the
+    // producer behind #94; before the fix this paragraph read as empty.
+    const paras = fixtureParagraphs("text-box-frame-libreoffice.odt");
+    const text = paras
+      .flatMap((p) => p.spans)
+      .map((s) => ("text" in s ? s.text : ""))
+      .join("");
+    expect(text).toBe("This is a text box saved as odt.");
+  });
+
+  test("the same text box after a .docx round trip still reads (#94 control)", () => {
+    // T3: the same box saved as .docx and converted back by LibreOffice
+    // headless returns as draw:custom-shape, NOT draw:frame — it has no case
+    // in parseSpans and its text arrives through the default: recursion.
+    // This path already worked; the fixture guards it against a regression
+    // from the frame work, and records that the two producers differ.
+    const paras = fixtureParagraphs("text-box-custom-shape-docx-roundtrip.odt");
+    const text = paras
+      .flatMap((p) => p.spans)
+      .map((s) => ("text" in s ? s.text : ""))
+      .join("");
+    expect(text).toBe("This is a text box.");
+  });
 });
