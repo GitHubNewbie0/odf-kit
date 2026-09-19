@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Public documentation corrected where it contradicted the code.** The npm package description covered `.odt` only, omitting `.ods` and every inbound converter. The README and `publiccode.yml` gave three different counts of the library's capability modes; the count is derived from the exports map and is fifteen. `publiccode.yml` claimed zero runtime dependencies beyond `fflate`, omitting `marked`; there are two. `publiccode.yml` listed ODT-to-PDF conversion as a feature — odf-kit emits Typst markup and a Typst compiler produces the PDF. `CONTRIBUTING.md` told contributors the pre-commit pipeline enforces OASIS validation; CI runs the validator on push, over the `OdtDocument` builder surface, and the local gate does not run it at all. No code changed; the claims did.
+- **Public documentation corrected where it contradicted the code.** The npm package description covered `.odt` only, omitting `.ods` and every inbound converter. The README and `publiccode.yml` gave three different counts of the library's capability modes; the count is derived from the exports map and is fifteen. `publiccode.yml` understated the runtime dependencies, naming only `fflate`; odf-kit has two, `fflate` and `marked`. `publiccode.yml` listed ODT-to-PDF conversion as a feature — odf-kit emits Typst markup and a Typst compiler produces the PDF. `CONTRIBUTING.md` told contributors the pre-commit pipeline enforces OASIS validation; CI runs the validator on push, over the `OdtDocument` builder surface, and the local gate does not run it at all. No code changed; the claims did.
 
 ## [0.14.2] - 2026-09-13
 
