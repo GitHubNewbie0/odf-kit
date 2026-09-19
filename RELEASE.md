@@ -38,6 +38,7 @@ PUBLISH METADATA
 [ ] 10. GitHub release (gh release create --generate-notes) — THEN EDIT the body
 [ ] 11. Verify everything (npm, GitHub, GitLab, openCode listing)
 [ ] 11b. Smoke-test the published package from a fresh directory (see 11b below — it CANNOT run from the repo)
+[ ] 11c. Backup pushes current again (git push backup main --follow-tags, both repos)
 
 SECURITY RELEASE ONLY
 [ ] 12. Request the CVE — AFTER the fix is live on npm
@@ -393,6 +394,29 @@ afterward.
 `smoke.mjs` resolves `census.json` and `node_modules` relative to its own
 location, so it must sit **in** the scratch directory — not run from the repo
 with a path argument. Exit 0 = pass; exit 1 lists the failures.
+
+## 11c. Bring the backups current again
+
+Step 0b confirmed the backups were current _going in_. Everything since — the
+release-content commit, the version commit, and the tag — exists only in the
+working tree and on origin until you push again.
+
+```powershell
+cd C:\dev\odf-kit2
+git push backup main --follow-tags
+
+cd C:\dev\odf-kit-internal
+git push backup main
+```
+
+**`--follow-tags` matters here.** A plain `git push backup main` sends the
+branch and not the tag, so the bare repo would hold the release commits with no
+`vX.Y.Z` to identify them. `odf-kit-internal` has no tags and needs only the
+branch.
+
+Observed on v0.14.3: the backup sat at the pre-release commit until an unrelated
+push happened to carry it forward. Nothing errors when this is skipped, which is
+why it needs a line of its own rather than trusting memory.
 
 ## 12. Request the CVE _(security releases only — AFTER step 9)_
 
