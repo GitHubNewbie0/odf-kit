@@ -1106,10 +1106,15 @@ describe("readOdt — draw:frame text content (#94)", () => {
     );
   });
 
-  test("a frame holding both an image and a text box yields the image", () => {
-    // T4 (#94, parser.ts case "draw:frame"): the eight representations are an
-    // unordered T1 choice; preferring draw:image is our decision, so a frame
-    // carrying both must not also emit the text box's text.
+  test("image before text box yields the image — the first supported child", () => {
+    // T2 (ODF 1.3 Part 3 §10.4.1): "consumers should render the first child
+    // element that they support." The image is first here, so the image is what
+    // renders — and the text box, being an alternative rendition of the same
+    // content and not additional content, must not also be emitted.
+    //
+    // This test passed before the selection rule changed, for a different
+    // reason: the reader preferred draw:image wherever it sat. The expectation
+    // is unchanged; what it proves is not.
     const para = firstParagraph(
       `<text:p><draw:frame${FRAME_NS} draw:name="Box5">` +
         '<draw:image xlink:href="Pictures/photo.png"/>' +
@@ -1121,12 +1126,90 @@ describe("readOdt — draw:frame text content (#94)", () => {
     expect(span && "kind" in span ? span.kind : undefined).toBe("image");
   });
 
+  test("text box before image yields the text — the first supported child", () => {
+    // T2 (ODF 1.3 Part 3 §10.4.1): "The order of content elements reflects the
+    // document author's preference for rendering, with the first child element
+    // being preferred. That means that consumers should render the first child
+    // element that they support."
+    //
+    // This is the case the old fixed draw:image preference got wrong, and the
+    // only behavioural change in this commit. T1 hand-built, deliberately:
+    // LibreOffice writes no frame with a draw:text-box beside a draw:image
+    // (state93 §A1), so there is no fixture to be had and none is implied.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box6">` +
+        "<draw:text-box><text:p>The author's preference</text:p></draw:text-box>" +
+        '<draw:image xlink:href="Pictures/photo.png"/>' +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans?.map((s) => ("text" in s ? s.text : undefined))).toEqual([
+      "The author's preference",
+    ]);
+    expect(para?.spans?.some((s) => "kind" in s && s.kind === "image")).toBe(false);
+  });
+
+  test("an unsupported representation is skipped to the next supported child", () => {
+    // T2 (§10.4.1): the first child element that they *support* — so a
+    // rendition we cannot render is passed over, not treated as the answer.
+    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): draw:object is one of
+    // the eight permitted representations; this reader has no branch for it.
+    //
+    // This is the shape LibreOffice writes for an embedded chart, formula or
+    // spreadsheet: the object first, its replacement image second. Evidence is
+    // the producer's export source (xmloff/.../xmltexte.cxx, state93 §A1) —
+    // read, not fixtured, so this test is T1/T2 and NOT T3. The T3 fixture is
+    // owed; see the handoff note.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Object1">` +
+        '<draw:object xlink:href="./Object 1"/>' +
+        '<draw:image xlink:href="Pictures/replacement.png"/>' +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans).toHaveLength(1);
+    const span = para?.spans?.[0];
+    expect(span && "kind" in span ? span.kind : undefined).toBe("image");
+  });
+
+  test("a frame whose only representation is unsupported yields nothing (LEAD-046)", () => {
+    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): six of the eight
+    // representations have no branch in this reader — draw:object,
+    // draw:object-ole, draw:applet, draw:floating-frame, draw:plugin and
+    // table:table. A frame holding only those yields nothing, silently, as it
+    // did before this change. Pinned so the gap stays visible: LEAD-046 is
+    // open, and this commit does not close it.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Object2">` +
+        '<draw:object-ole xlink:href="./Object 2"/>' +
+        "</draw:frame></text:p>",
+    );
+    expect(para?.spans).toEqual([]);
+  });
+
+  test("a frame with no children at all yields nothing", () => {
+    // T2 (§10.4.1): "A frame may contain multiple content elements, but shall
+    // contain at least one content element." An empty frame is therefore
+    // non-conformant input. The reader accepts it and yields nothing rather
+    // than throwing; that the `shall` is not enforced or disclosed anywhere is
+    // recorded, not fixed here.
+    const para = firstParagraph(
+      `<text:p><draw:frame${FRAME_NS} draw:name="Box7"></draw:frame></text:p>`,
+    );
+    expect(para?.spans).toEqual([]);
+  });
+
   test("svg:title and svg:desc never become body text", () => {
     // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042 plus :5052-5057):
     // svg:title and svg:desc are permitted children of draw:frame, and
     // parseSpans pushes any text child as a span. Recursing the frame rather
     // than its text box would surface accessibility metadata as document
     // content — a silent insertion in place of a silent drop.
+    //
+    // T2 (§10.4.2's child-element list): they are not among the eight content
+    // representations, so they are not candidates for "the first child element
+    // that they support" either. §10.4.1 says as much from the other side —
+    // multiple representations may *share* an svg:title and svg:desc, which
+    // only makes sense if those are metadata about the frame's content rather
+    // than renditions of it.
     const para = firstParagraph(
       `<text:p><draw:frame${FRAME_NS} draw:name="Box2">` +
         "<svg:title>Frame title</svg:title><svg:desc>Frame description</svg:desc>" +

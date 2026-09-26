@@ -79,6 +79,44 @@ function findElement(node: XmlElementNode, tag: string): XmlElementNode | undefi
   return undefined;
 }
 
+/**
+ * Return the frame's first child element that this reader can render, walking
+ * its direct children in document order.
+ *
+ * T2 (ODF 1.3 Part 3 §10.4.1): "Each child element of a frame is a different
+ * representation of the same content. The order of content elements reflects
+ * the document author's preference for rendering, with the first child element
+ * being preferred. That means that consumers should render the first child
+ * element that they support." The same section adds that a consumer "may choose
+ * the representation that it supports best" — so a fixed preference is
+ * permitted, but document order is what the spec prefers, and it is what this
+ * walk honours.
+ *
+ * T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): the eight representations —
+ * draw:text-box, draw:image, draw:object, draw:object-ole, draw:applet,
+ * draw:floating-frame, draw:plugin, table:table — are a zeroOrMore choice, so
+ * the grammar constrains neither their order nor their count. Order therefore
+ * carries no grammatical meaning; it carries the author's, per §10.4.1.
+ *
+ * Supported: draw:image and draw:text-box. The other six are skipped to the
+ * next child and stay unread — LEAD-046, still open. A frame with no supported
+ * child yields nothing, as before.
+ *
+ * T1 (§10.4.2's child-element list): a frame's other seven permitted children —
+ * svg:title, svg:desc, draw:glue-point, draw:image-map, office:event-listeners
+ * and the two draw:contour-* — are metadata and geometry, not renditions, so
+ * they are never candidates here. In a grammar-conformant file they follow the
+ * content children anyway; matching by tag rather than by position means a
+ * misordered file cannot turn accessibility metadata into a rendition.
+ */
+function firstSupportedFrameChild(frame: XmlElementNode): XmlElementNode | undefined {
+  for (const child of frame.children) {
+    if (child.type !== "element") continue;
+    if (child.tag === "draw:image" || child.tag === "draw:text-box") return child;
+  }
+  return undefined;
+}
+
 /** Return the concatenated text content of all direct text children. */
 function textContent(node: XmlElementNode): string {
   return node.children
@@ -733,8 +771,9 @@ const FIELD_TYPE_MAP: Record<string, string> = {
  * cell, or note body into an array of InlineNode objects.
  *
  * Handles: text:span, text:a, text:line-break, text:tab, text:s,
- * draw:frame (images; a frame with no draw:image degrades to its
- * draw:text-box's text — #94), text:note, text:bookmark, text:bookmark-start,
+ * draw:frame (its first supported child in document order, per ODF 1.3 Part 3
+ * §10.4.1 — an image as an ImageNode, a draw:text-box degraded to its text;
+ * #94), text:note, text:bookmark, text:bookmark-start,
  * text:bookmark-end, text:bookmark-ref, tracked-change inline markers,
  * and all ODF text field elements.
  *
@@ -874,31 +913,29 @@ function parseSpans(
       }
 
       case "draw:frame": {
-        const imageEl = findElement(child, "draw:image");
-        if (!imageEl) {
-          // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): draw:frame holds
-          // zero or more of eight representations — draw:text-box,
-          // draw:image, draw:object, draw:object-ole, draw:applet,
-          // draw:floating-frame, draw:plugin, table:table — as an UNORDERED
-          // choice. The grammar does not rank them and Part 3 carries no
-          // prose that does.
-          //
-          // T4 (#94): we model draw:image. Where a frame has none, degrade a
-          // draw:text-box to its text rather than discarding the frame's
-          // content. Recurse into the text box specifically, NOT the frame:
-          // svg:title and svg:desc are permitted children and parseSpans
-          // pushes any text child as a span, so recursing the frame would
-          // surface accessibility metadata as body text. table:table would
-          // be flattened, since table parsing lives in parseBodyNodes.
+        // T2 (ODF 1.3 Part 3 §10.4.1): a frame's children are alternative
+        // renditions of one content, ordered by the document author's
+        // preference, and "consumers should render the first child element that
+        // they support." So: take the first supported child in document order,
+        // and render only that one. See firstSupportedFrameChild for the full
+        // citation, the six representations it skips (LEAD-046) and why a
+        // frame's metadata children are never candidates.
+        const contentEl = firstSupportedFrameChild(child);
+        if (!contentEl) break;
+
+        if (contentEl.tag === "draw:text-box") {
+          // T4 (#94): degrade a text box to its text rather than discarding the
+          // frame's content. Recurse into the text box specifically, NOT the
+          // frame: parseSpans pushes any text child as a span, so recursing the
+          // frame would surface svg:title and svg:desc as body text.
           //
           // The frame's own structure — that it was a text box, its name and
           // dimensions — is not modeled. Coverage matrix, not here.
-          const textBoxEl = findElement(child, "draw:text-box");
-          if (textBoxEl) {
-            spans.push(...parseSpans(textBoxEl, ctx, baseStyle, href, baseVisualStyle));
-          }
+          spans.push(...parseSpans(contentEl, ctx, baseStyle, href, baseVisualStyle));
           break;
         }
+
+        const imageEl = contentEl;
 
         const imageNode: ImageNode = { kind: "image", data: "" };
 
