@@ -78,16 +78,17 @@ Each index entry records:
 
 ## Fixture index
 
-| File                                               | Producer                                                                | Contents                                                                                                                                                                           | Type       |
-| -------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `alignment-ltr.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Three paragraphs, left / centre / right aligned, default direction.                                                                                                                | regression |
-| `alignment-rtl.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left.                                                                  | regression |
-| `xss-attr-breakout-ghsa3cgg.odt`                   | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** A `fo:color` value carrying a `"`, which broke out of `style="…"` into an `onmouseover` handler. GHSA-3cgg-c5pp-57h6. | smoke      |
-| `xss-markup-injection-ghsa3cgg.odt`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** Same breakout, injecting `<img src=x onerror=…>` as a sibling element. GHSA-3cgg-c5pp-57h6.                           | smoke      |
-| `xss-markup-injection-ghsa3cgg.ods`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** The markup-injection payload through the ODS renderer's cell style attribute. GHSA-3cgg-c5pp-57h6.                    | smoke      |
-| `text-box-frame-libreoffice.odt`                   | LibreOffice Writer 26.2.5.2 (x86_64)                                    | One paragraph-anchored `draw:frame` wrapping a `draw:text-box`. The #94 defect case, from the producer that actually emits it.                                                     | regression |
-| `text-box-custom-shape-docx-roundtrip.odt`         | LibreOffice Writer 26.2.5.2 (x86_64), via its own `.docx` filter        | The same text box after a round trip through `.docx`, which LibreOffice brings back as `draw:custom-shape`, not `draw:frame`. Guards the path that already worked.                 | regression |
-| `text-box-custom-shape-docx-roundtrip-source.docx` | LibreOffice Writer 26.2.5.2 (x86_64), Save As → _Word 2010–365 (.docx)_ | The recorded input to the row above's recipe. **Backs no assertions; nothing reads it.** Committed because the recipe's output depends on the LibreOffice version that ran it.     | provenance |
+| File                                               | Producer                                                                | Contents                                                                                                                                                                                     | Type       |
+| -------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `alignment-ltr.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Three paragraphs, left / centre / right aligned, default direction.                                                                                                                          | regression |
+| `alignment-rtl.odt`                                | LibreOffice Writer 26.2.5.2 (x86_64)                                    | Four right-to-left paragraphs (one intentionally blank): default alignment, blank, explicit right, explicit left.                                                                            | regression |
+| `xss-attr-breakout-ghsa3cgg.odt`                   | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** A `fo:color` value carrying a `"`, which broke out of `style="…"` into an `onmouseover` handler. GHSA-3cgg-c5pp-57h6.           | smoke      |
+| `xss-markup-injection-ghsa3cgg.odt`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** Same breakout, injecting `<img src=x onerror=…>` as a sibling element. GHSA-3cgg-c5pp-57h6.                                     | smoke      |
+| `xss-markup-injection-ghsa3cgg.ods`                | Reporter's Python `zipfile` script — **not an office suite**            | **LIVE XSS PAYLOAD — never upload to the online validator.** The markup-injection payload through the ODS renderer's cell style attribute. GHSA-3cgg-c5pp-57h6.                              | smoke      |
+| `text-box-frame-libreoffice.odt`                   | LibreOffice Writer 26.2.5.2 (x86_64)                                    | One paragraph-anchored `draw:frame` wrapping a `draw:text-box`. The #94 defect case, from the producer that actually emits it.                                                               | regression |
+| `text-box-custom-shape-docx-roundtrip.odt`         | LibreOffice Writer 26.2.5.2 (x86_64), via its own `.docx` filter        | The same text box after a round trip through `.docx`, which LibreOffice brings back as `draw:custom-shape`, not `draw:frame`. Guards the path that already worked.                           | regression |
+| `text-box-custom-shape-docx-roundtrip-source.docx` | LibreOffice Writer 26.2.5.2 (x86_64), Save As → _Word 2010–365 (.docx)_ | The recorded input to the row above's recipe. **Backs no assertions; nothing reads it.** Committed because the recipe's output depends on the LibreOffice version that ran it.               | provenance |
+| `frame-embedded-object-then-image-libreoffice.odt` | LibreOffice Writer **26.8.0.3** (x86_64)                                | One `draw:frame` holding **two** content children in document order: `draw:object` (an embedded spreadsheet) then its replacement `draw:image`. The T3 evidence for §10.4.1's ordering rule. | regression |
 
 **`alignment-ltr.odt`**
 
@@ -202,6 +203,46 @@ Each index entry records:
 - **Provenance:** authored 2026-09-19 by Scott. Received as `Word 2010-365.docx`; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `cde57a8a42f055b1e0d3bb405a433aeb`, 5,867 bytes, verified identical to the source after copying).
 
 - **Type:** provenance — not a fixture tier. No test loads it.
+
+**`frame-embedded-object-then-image-libreoffice.odt`** — two renditions, preferred first
+
+- **Producer:** LibreOffice Writer **26.8.0.3** (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.8.0.3$Windows_X86_64 LibreOffice_project/bce0998afefdbc355585ca324285661a2170ba77`. **Note the version:** every other fixture here is 26.2.x. This one is a later build, and that is a feature of the evidence rather than an inconsistency — see "Why the version matters" below.
+
+- **Contents:** three empty paragraphs, then one paragraph holding one frame with **two content children**:
+
+  ```
+  text:p > draw:frame[draw:name="Object1", text:anchor-type="char",
+                      svg:width="9.033cm", svg:height="2.26cm"]
+             > draw:object[xlink:href="./Object 1"]
+             > draw:image[xlink:href="./ObjectReplacements/Object 1"]
+  ```
+
+  The body text is `Typing a line of text before the OLE object, which is a spreadsheet.`
+
+  `./Object 1` is a real ODF sub-document — manifest media type `application/vnd.oasis.opendocument.spreadsheet`, four parts (`content.xml`, `styles.xml`, `settings.xml`, `manifest.rdf`). `./ObjectReplacements/Object 1` is 409 bytes with media type `application/x-openoffice-gdimetafile;windows_formatname="GDIMetaFile"`.
+
+- **What it is evidence of.** This is the only fixture in the corpus whose frame holds more than one rendition, and the order is the point. ODF 1.3 Part 3 §10.4.1: _"The order of content elements reflects the document author's preference for rendering, with the first child element being preferred."_ LibreOffice writes the object first and the raster replacement second, deliberately — its export filter comments the decision at `xmloff/source/text/txtparae.cxx` as _"put preferred image first above, followed by fallback here"_ (fdo#62461). Before this fixture the ordering rule rested on reading that source; it now rests on a file.
+
+  It is also the T3 case for **skipping an unsupported rendition**: `draw:object` is one of the eight permitted representations and odf-kit has no branch for it, so the reader passes over child 1 and renders child 2. That path had no producer evidence at all.
+
+- **What it does NOT prove, and the two defects it found.** The fixture is evidence about _selection_, and selection is the only part that currently works. Reading it produced an `ImageNode` with the frame's geometry — and with **no bytes and no media type**:
+
+  1. `data` is empty. `readOdt` collects image bytes only from ZIP entries under `Pictures/` (`parser.ts:1777–1781`); this replacement lives at `ObjectReplacements/Object 1`, so its 409 bytes are never collected.
+  2. `mediaType` is absent. The manifest is authoritative and does carry it, but the lookup (`parser.ts:961–963`) uses the raw `xlink:href`, which LibreOffice writes as `./ObjectReplacements/Object 1`. The leading `./` is never stripped, so the manifest key misses. Ordinary images escape this because LibreOffice writes their hrefs as `Pictures/…` with no prefix — which is why it had never surfaced.
+
+  Both are **pre-existing**, neither is caused by the §10.4.1 change, and both are **recorded, not fixed** — each is an unmade decision about where href normalisation and package-entry collection belong. The T3 test pins both, so a later fix is a visible change rather than a silent one.
+
+  Separately: the replacement is a **GDI metafile**, not a PNG or JPEG. Even once the bytes and type are wired up, what a caller receives is something no browser can render. Selecting it is correct per §10.4.1 — it is the first child we support — but handing that back with nothing said about it is a disclosure gap of its own.
+
+- **Recipe** (verbatim, as run): new Writer document → type `Typing a line of text before the OLE object, which is a spreadsheet.` → Insert → OLE Object → _Create new_ → **LibreOffice Spreadsheet** → click outside the object to deselect → Save As `.odt` (ODF Text Document). No manual styling. The three empty paragraphs preceding the frame are Writer's own, not authored.
+
+- **Why the version matters.** LibreOffice's replacement-image behaviour is version-conditional. On `master` (read 2026-09-26 at `f894152`) `_exportTextGraphic` gained a `bSkipSvgFallback` guard that drops the fallback for SVG at ODF ≥ 1.4; the 26.2.5 branch has no such guard. The object-replacement path this fixture exercises is a different one and is not affected by that guard — but the general lesson holds: following this recipe on a different build may produce a different child count. The producer version is therefore load-bearing, and 26.8.0.3 is what produced these bytes.
+
+- **Provenance:** authored 2026-09-26 by Scott, to close the evidence gap that `state93` §A4 identified. Received as `ole test.odt` in the internal repo; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `fe5cffb74962ecaa6fd09f1e06a27571`, 16,062 bytes, verified identical to the source after copying). Inspected by unzipping a copy **in memory** — never opened in an editor, no `.~lock.*` present.
+
+- **Also recorded:** declares `office:version="1.4"`, and the manifest carries `manifest:version="1.4"` on the root and on `Object 1/`.
+
+- **Type:** regression
 
 ## Adding a fixture — quick checklist
 

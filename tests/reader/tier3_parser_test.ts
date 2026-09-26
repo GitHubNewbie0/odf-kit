@@ -7,6 +7,7 @@ import type {
   SectionNode,
   TrackedChangeNode,
   TableNode,
+  ImageNode,
 } from "../../src/odt/read/types.js";
 
 // ============================================================
@@ -1294,5 +1295,70 @@ describe("readOdt — draw:frame text content (#94)", () => {
       .map((s) => ("text" in s ? s.text : ""))
       .join("");
     expect(text).toBe("This is a text box.");
+  });
+
+  test("an embedded object's replacement image is selected past the object (§10.4.1)", () => {
+    // T3: LibreOffice/26.8.0.3$Windows_X86_64 writes, for
+    // Insert -> OLE Object -> Create new -> LibreOffice Spreadsheet:
+    //
+    //   text:p > draw:frame[draw:name="Object1"]
+    //              > draw:object[xlink:href="./Object 1"]
+    //              > draw:image[xlink:href="./ObjectReplacements/Object 1"]
+    //
+    // Two content children, the preferred rendition first — the producer's own
+    // export filter comments the decision as "put preferred image first above,
+    // followed by fallback here" (fdo#62461). This is the T3 evidence for
+    // §10.4.1's ordering rule, and for skipping a rendition we do not support:
+    // draw:object is one of the eight permitted representations and has no
+    // branch in parseSpans, so the reader passes over child 1 and renders
+    // child 2. Note the producer version — every other fixture here is 26.2.x.
+    //
+    // This asserts the SELECTION, not that the image is usable — and the
+    // fixture turned out to prove the selection is the only part that works.
+    //
+    // TWO PRE-EXISTING DEFECTS, found by this fixture, recorded not fixed:
+    //
+    //  1. `data` is EMPTY. readOdt collects image bytes only from ZIP entries
+    //     under "Pictures/" (parser.ts:1777-1781). This replacement lives at
+    //     "ObjectReplacements/Object 1", so its 409 bytes are never collected.
+    //  2. `mediaType` is ABSENT. The manifest is authoritative and does carry
+    //     the type — full-path "ObjectReplacements/Object 1", media-type
+    //     'application/x-openoffice-gdimetafile;windows_formatname="GDIMetaFile"'
+    //     — but the lookup (parser.ts:961-963) uses the raw xlink:href, which
+    //     LibreOffice writes as "./ObjectReplacements/Object 1". The leading
+    //     "./" is never stripped, so the key misses. Ordinary images are
+    //     unaffected because LibreOffice writes those hrefs as "Pictures/…"
+    //     with no prefix, which is why this has never surfaced.
+    //
+    // So a caller gets an image node with no bytes and no type. Both are
+    // out of scope here — each is an unmade decision about where href
+    // normalisation and package-entry collection belong — and both are
+    // pinned below so the gap is visible and a later fix is a visible change.
+    const paras = fixtureParagraphs("frame-embedded-object-then-image-libreoffice.odt");
+    const images = paras
+      .flatMap((p) => p.spans)
+      .filter((s): s is ImageNode => "kind" in s && s.kind === "image");
+
+    // THE SELECTION, which is what this commit changed and what works: exactly
+    // one rendition reaches the model, and it is an image. draw:object has no
+    // branch in parseSpans, so an ImageNode existing at all proves child 2 was
+    // selected by skipping child 1.
+    expect(images).toHaveLength(1);
+    // Frame-level attributes come through, so the frame really was read.
+    expect(images[0]?.width).toBe("9.033cm");
+    expect(images[0]?.height).toBe("2.26cm");
+    expect(images[0]?.anchorType).toBe("char");
+
+    // THE TWO DEFECTS, pinned. These assertions are expected to CHANGE when
+    // either is fixed — that is their purpose.
+    expect(images[0]?.data).toBe("");
+    expect(images[0]?.mediaType).toBeUndefined();
+
+    // The object itself contributes nothing — no text, no node. LEAD-046.
+    const text = paras
+      .flatMap((p) => p.spans)
+      .map((s) => ("text" in s ? s.text : ""))
+      .join("");
+    expect(text).toBe("Typing a line of text before the OLE object, which is a spreadsheet.");
   });
 });
