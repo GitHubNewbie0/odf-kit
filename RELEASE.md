@@ -10,7 +10,7 @@ exact commands and detail.
 
 ---
 
-## Release: v_________ Date: 20___-_**-**_
+## Release: vX.Y.Z — Date: YYYY-MM-DD
 
 ```
 PRE-FLIGHT
@@ -262,7 +262,7 @@ do not "fix" vnu complaints in generated files.
 
 ## 6. Commit the release content
 
-`npm version patch` (step 7) refuses to run on a dirty tree, so commit everything
+`npm version` (step 7) refuses to run on a dirty tree, so commit everything
 that belongs in this release first.
 
 Stage release content **by explicit path** — do not blanket-add, or unrelated
@@ -359,9 +359,10 @@ mirrors the tag and creates the matching GitLab release. No manual GitLab steps.
 **openCode / EU directory notes** (see `opencode-eu-directory-investigation.md`):
 
 - **openCode.de** re-indexes **on each mirror push** (near-instant), not on a
-  timer. If the project drops from the directory after a push, that is the known
-  intermittent issue — the documented probe is an empty commit
-  (`git commit --allow-empty`) to re-trigger evaluation.
+  timer. Delisting after a push was a known intermittent issue; it has not
+  recurred for some time and was ruled no longer a concern on 2026-09-18. The
+  empty-commit workaround is **retired** — do not push an empty commit. If the
+  project is missing from the directory, stop and investigate before acting.
 - **EU Interoperable** catalogue is a **separate** pipeline: a weekly batch crawler
   with a 60-day vitality score, likely fed from openCode. It does **not** react to
   individual pushes; its drops/adds are slow and unrelated to release timing. Do
@@ -479,9 +480,10 @@ one-off recovery: `node scripts\sync-version.js`, commit
 **GitHub release notes look thin / miss the fix** — expected from
 `--generate-notes` on direct-push changes (step 10). Edit the body manually.
 
-**Project dropped from openCode directory** — push an empty commit to re-trigger
-the indexer; see the investigation doc. Do not confuse with the EU catalogue,
-which updates weekly on its own cycle.
+**Project missing from openCode directory** — no longer an expected failure
+(ruled 2026-09-18). The empty-commit workaround is retired; do not use it. Stop
+and investigate (see the investigation doc). Do not confuse with the EU
+catalogue, which updates weekly on its own cycle.
 
 **Advisory published before the fix was live** — not recoverable. Publishing is
 irreversible and Dependabot will already have alerted consumers. This is why 12
