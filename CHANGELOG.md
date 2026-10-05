@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.4] - 2026-10-05
+
 ### Changed
 
 - **A `draw:frame`'s content is now chosen by the document author's order, not by a fixed preference for `draw:image`.** ODF 1.3 Part 3 §10.4.1: _"The order of content elements reflects the document author's preference for rendering, with the first child element being preferred. That means that consumers should render the first child element that they support."_ The reader now walks the frame's children in document order and renders the first one it supports — `draw:image` as an image, `draw:text-box` degraded to its text — skipping any representation it cannot render. Previously it took a `draw:image` wherever it sat in the frame and fell back to `draw:text-box` only when there was none. **This is a conformance change, not a bug users are hitting.** The old behaviour is permitted by the same section — a consumer _may_ choose the representation it supports best — so what changes is that the reader now does the thing the spec prefers rather than a thing the spec tolerates.
@@ -584,7 +586,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.3...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.4...HEAD
+[0.14.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.4
 [0.14.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.3
 [0.14.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.2
 [0.14.1]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.1
