@@ -82,7 +82,7 @@ Design decisions are made by Scott in chat, never improvised here. Unmade decisi
 
 ## Scope & boundaries
 
-Write scope: this repo. Additional context: `../odf-kit-internal` (read freely; write only session-handoff notes there). **Never request access beyond these two trees.**
+Write scope: this repo. Additional context: `../odf-kit-internal` — read freely. Write there without asking: state notes (`state/stateN-cc-<topic>.md`), handoffs (`docs/handoffs/`), and audit reports (`docs/`). Anything else in that repo — canon, other docs, templates, spec extracts — only when the session's opening message grants it. Commits, pushes and deletions there only when granted. Scratch work goes in `C:\dev\odf-kit-scratch\<workstream-slug>\` — create and write there freely; never delete it, Scott clears it when the workstream closes. A scratch directory that runs ESM imports needs `npm pkg set type=module` first. This line is the rule until canon carries it. **Never request access beyond these two trees and the scratch directory named above.**
 
 ## Self-correction & proportionality
 
