@@ -311,21 +311,31 @@ function renderField(node: FieldNode): string {
  *
  * TextSpan has no `kind` property; all other InlineNode types do.
  * This distinguishes them without a separate type guard import.
+ *
+ * The switch is exhaustive over the remaining kinds (T4: LEAD-044): the
+ * `never` assignment in `default` makes a new InlineNode kind a compile
+ * error here. At runtime `default` is reached only by a model built outside
+ * the type system, and throws naming the kind rather than rendering the node
+ * as text or dropping it (T4: Scott, 2026-10-15, option B).
  */
 function renderInlineNode(node: InlineNode, options?: HtmlOptions): string {
-  if ("kind" in node) {
-    switch (node.kind) {
-      case "image":
-        return renderImage(node);
-      case "note":
-        return renderNote(node, options);
-      case "bookmark":
-        return renderBookmark(node);
-      case "field":
-        return renderField(node);
+  if (!("kind" in node)) return renderTextSpan(node);
+  switch (node.kind) {
+    case "image":
+      return renderImage(node);
+    case "note":
+      return renderNote(node, options);
+    case "bookmark":
+      return renderBookmark(node);
+    case "field":
+      return renderField(node);
+    default: {
+      const unhandled: never = node;
+      throw new Error(
+        `renderOdtHtml: unknown InlineNode kind "${String((unhandled as { kind: unknown }).kind)}"`,
+      );
     }
   }
-  return renderTextSpan(node as TextSpan);
 }
 
 /** Render an array of InlineNode objects to a concatenated HTML string. */

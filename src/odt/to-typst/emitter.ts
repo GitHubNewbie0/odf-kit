@@ -272,21 +272,31 @@ function emitField(node: FieldNode): string {
  *
  * TextSpan has no `kind` property; all other InlineNode types do.
  * This mirrors the narrowing pattern used in the HTML renderer.
+ *
+ * The switch is exhaustive over the remaining kinds (T4: LEAD-044): the
+ * `never` assignment in `default` makes a new InlineNode kind a compile
+ * error here. At runtime `default` is reached only by a model built outside
+ * the type system, and throws naming the kind rather than emitting the node
+ * as text or dropping it (T4: Scott, 2026-10-15, option B).
  */
 function emitInlineNode(node: InlineNode, options?: TypstEmitOptions): string {
-  if ("kind" in node) {
-    switch (node.kind) {
-      case "image":
-        return emitImage(node);
-      case "note":
-        return emitNote(node, options);
-      case "bookmark":
-        return emitBookmark(node);
-      case "field":
-        return emitField(node);
+  if (!("kind" in node)) return emitTextSpan(node);
+  switch (node.kind) {
+    case "image":
+      return emitImage(node);
+    case "note":
+      return emitNote(node, options);
+    case "bookmark":
+      return emitBookmark(node);
+    case "field":
+      return emitField(node);
+    default: {
+      const unhandled: never = node;
+      throw new Error(
+        `modelToTypst: unknown InlineNode kind "${String((unhandled as { kind: unknown }).kind)}"`,
+      );
     }
   }
-  return emitTextSpan(node as TextSpan);
 }
 
 /** Emit an array of InlineNode objects to a concatenated Typst string. */

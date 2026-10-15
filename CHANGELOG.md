@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **The ODT emitters now reject an inline node of unknown kind with a clear error.** `renderOdtHtml`, `modelToMarkdown` and `modelToTypst` (and `odtToHtml`, `odtToMarkdown`, `odtToTypst` and `toHtml()`, which use them) previously sent any unrecognised inline node to the text renderer: one without a `text` field threw an unrelated `TypeError`, and one with a `text` field was emitted as plain text. They now throw `Error: … unknown InlineNode kind "<kind>"`. Output for every model that matches the `InlineNode` type is unchanged; only hand-built models outside the type are affected. Internally, each dispatcher is now checked by the compiler for exhaustiveness, so a future inline node kind cannot ship unhandled.
+
 ## [0.14.4] - 2026-10-05
 
 ### Changed
