@@ -344,7 +344,7 @@ describe("odtToMarkdown — images", () => {
 // Markdown authority (canon format_authorities, FA-1 §3): CommonMark, with
 // GFM for tables and strikethrough. Cited here: CommonMark 0.29 (2019-04-06),
 // https://spec.commonmark.org/0.29/, and GFM 0.29-gfm (2019-04-06),
-// https://github.github.com/gfm/. Canon's pin is "versions not yet chosen".
+// https://github.github.com/gfm/. Canon's pin: CommonMark 0.29; GFM 0.29-gfm.
 //
 // Assertions accept any spec-valid form, not one delimiter choice. Where the
 // emitter drops something it cannot represent (C-2, LEAD-070), the tests
