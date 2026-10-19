@@ -90,4 +90,4 @@ Claims about files or state not currently inspected: flag as unverified or don't
 
 ## Session end
 
-Write a handoff note (done / pending / surprises) to `../odf-kit-internal/state/` as `state<N>-cc-<topic>.md`, and remind Scott to commit + `git push backup main` in the internal repo.
+Write a handoff note (done / pending / surprises) to `../odf-kit-internal/state/` as `state<N>-cc-<topic>.md`, and remind Scott to commit + `git push backup main` in the internal repo. The backup repo's `post-receive` hook auto-refreshes the chat-read mirror at `C:\dev\odf-kit-mirror` on every push — the push output must show its refresh line; if it doesn't, flag it to Scott as a broken hook. This line is the rule until canon carries it.
