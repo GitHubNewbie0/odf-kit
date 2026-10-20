@@ -20,7 +20,7 @@
  *  - Tracked changes: final (default), original, and changes modes
  *
  * Text content is escaped for Markdown. The following characters are
- * backslash-escaped when they appear in plain text: \ ` * _ { } [ ] ( ) # + - . !
+ * backslash-escaped when they appear in plain text: \ ` * _ { } [ ] ( ) # + - . ! < &
  */
 
 import type {
@@ -37,6 +37,7 @@ import type {
   TrackedChangeNode,
 } from "../read/types.js";
 import { readOdt } from "../read/parser.js";
+import { emitLinkOrImage } from "./destination.js";
 import type { ReadOdtOptions } from "../read/types.js";
 
 // ============================================================
@@ -70,6 +71,7 @@ export interface MarkdownEmitOptions {
    * If true, images are embedded as base64 data URLs (`![alt](data:image/png;base64,...)`).
    * Produces a fully self-contained Markdown file at the cost of larger file size.
    * Defaults to false â€” images are emitted as `![alt](name)` placeholders.
+   * Only `image/png`, `image/gif`, `image/jpeg`, `image/webp`, `image/bmp` and `image/tiff` are embedded; any other media type is emitted as visible literal text, not as an image.
    */
   embedImages?: boolean;
 }
@@ -78,8 +80,13 @@ export interface MarkdownEmitOptions {
 // Markdown escaping
 // ============================================================
 
-/** Characters with special meaning in Markdown inline context. */
-const MD_ESCAPE_RE = /[\\`*_{}[\]()#+\-.!]/g;
+/**
+ * Characters with special meaning in Markdown inline context. All are ASCII
+ * punctuation, which may be backslash-escaped (T1: CommonMark 0.29 §2.1, §6.1,
+ * cm.txt l.494–499, l.7178). `<` and `&` close raw HTML and character
+ * references in text (T4: S1–S4, Scott, 2026-10-18).
+ */
+const MD_ESCAPE_RE = /[\\`*_{}[\]()#+\-.!<&]/g;
 
 /**
  * Escape characters that carry special meaning in Markdown plain text.
@@ -123,7 +130,8 @@ function emitTextSpan(span: TextSpan, options?: MarkdownEmitOptions): string {
   }
 
   if (span.href !== undefined) {
-    out = `[${out}](${span.href})`;
+    // T4: [B] (Scott, 2026-10-19): the one classifier decides; no check here.
+    out = emitLinkOrImage(out, span.href, "link");
   }
 
   return out;
@@ -137,12 +145,14 @@ function emitTextSpan(span: TextSpan, options?: MarkdownEmitOptions): string {
  * Pass `{ embedImages: true }` to embed images as base64 data URLs instead.
  */
 function emitImage(node: ImageNode, options?: MarkdownEmitOptions): string {
-  const alt = node.title ?? node.name ?? "image";
+  // Alt is text context, escaped once (T1: CommonMark 0.29 §6.1, cm.txt l.7178).
+  const alt = escapeMd(node.title ?? node.name ?? "image");
   if (options?.embedImages && node.data && node.mediaType) {
-    return `![${alt}](data:${node.mediaType};base64,${node.data})`;
+    // The data: string is assembled raw and goes through the same function
+    // unconditionally (T4: [B], [E], [H], Scott, 2026-10-19).
+    return emitLinkOrImage(alt, `data:${node.mediaType};base64,${node.data}`, "image");
   }
-  const src = node.name ?? "image";
-  return `![${alt}](${src})`;
+  return emitLinkOrImage(alt, node.name ?? "image", "image");
 }
 
 /**
@@ -160,9 +170,13 @@ function emitNote(node: NoteNode, options?: MarkdownEmitOptions): string {
 
 /** Emit a FieldNode â€” page number and page count get descriptive placeholders. */
 function emitField(node: FieldNode): string {
-  if (node.fieldType === "pageNumber") return node.value ?? "[page]";
-  if (node.fieldType === "pageCount") return node.value ?? "[pages]";
-  return node.value ?? "";
+  // A defined value is document input, escaped as text context (T4: S1–S4,
+  // Scott, 2026-10-18); the fallbacks are emitter constants.
+  if (node.fieldType === "pageNumber")
+    return node.value === undefined ? "[page]" : escapeMd(node.value);
+  if (node.fieldType === "pageCount")
+    return node.value === undefined ? "[pages]" : escapeMd(node.value);
+  return node.value === undefined ? "" : escapeMd(node.value);
 }
 
 /**
@@ -233,7 +247,10 @@ function emitList(list: ListNode, options?: MarkdownEmitOptions, depth = 0): str
  * when flavor is "commonmark".
  */
 function escapeMarkdownTableCell(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
+  // T4: S1–S4 (Scott, 2026-10-18): the cell content is already text-context
+  // escaped, so only | is added; no backslash doubling. T4: Q4 (Scott,
+  // 2026-10-20): a newline becomes a space, so the row stays on one line.
+  return s.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
 
 function emitTable(table: TableNode, options?: MarkdownEmitOptions): string {
