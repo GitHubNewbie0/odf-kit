@@ -857,6 +857,19 @@ describe('renderer: blocked destinations render as literal text (plan §9 "Block
   });
 });
 
+describe('renderer: text context in a GFM table cell (plan §9 "Text context (D, S4)", S1)', () => {
+  it("CELL-S1: the cell's Markdown, rendered by marked, contains no <script> element", () => {
+    // T4: S1–S4 (Scott, 2026-10-18): with S1, a table cell carries no live tag
+    // (plan §9 "Text context": "including in a table cell (S1): single
+    // backslash, no live tag"). T3: marked 18.0.12 at defaults passes raw HTML
+    // through (v1 §8 probe; v2 table-cell probe Part A).
+    const hasScript = (n: P5Node): boolean =>
+      n.tagName === "script" || (n.childNodes ?? []).some(hasScript);
+    const html = renderMarked(table([{ text: "<script>x</script>" }]));
+    expect(hasScript(p5.parseFragment(html))).toBe(false);
+  });
+});
+
 describe('renderer: allowed-and-inert chains (plan §9 "Classifier — ALLOWED")', () => {
   it("P1.8: each renderer's final href equals the raw model and resolves under the base with no scheme", () => {
     // T3: internal measurement B1 (both renderers emit the raw model).
