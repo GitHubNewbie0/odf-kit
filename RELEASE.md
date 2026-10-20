@@ -42,7 +42,8 @@ PUBLISH METADATA
 
 SECURITY RELEASE ONLY
 [ ] 12. Request the CVE — AFTER the fix is live on npm
-[ ] 13. Publish the advisory once the CVE is assigned
+[ ] 13. Publish the advisory once the CVE is assigned, or when step 12's 5-working-day deadline passes
+[ ] 13b. Add the published advisory ID to the GitHub release body
 ```
 
 ---
@@ -432,8 +433,14 @@ Once `npm view odf-kit version` shows the new version:
 
 1. Go to the draft advisory on the repository's Security → Advisories page.
 2. Set **Patched versions** to the version just published.
-3. Request the CVE. GitHub acts as a CNA; review takes roughly **3 working
-   days** and **publishes nothing** — the ID stays reserved until you publish.
+3. Apply any draft-advisory edits the release's own plan rules (e.g. severity,
+   scope wording) before requesting the CVE.
+4. Request the CVE. GitHub acts as a CNA and reviews the request
+   usually within 72 hours (GitHub Docs, "Repository security advisories"); the
+   review **publishes nothing** — the ID stays reserved until you publish.
+   If no CVE ID is reserved within 5 working days of the request, go to step 13
+   and publish anyway, then email security-advisories@github.com about the
+   pending request.
 
 Three separate actions, none of which discloses anything on its own: creating
 the draft, requesting the CVE, and publishing. A draft is visible only to the
@@ -444,9 +451,10 @@ Also offer the patch to the reporter for testing if they offered — their
 confirmation is worth more than your own, and it costs nothing now that the fix
 is public anyway.
 
-## 13. Publish the advisory _(security releases only — after the CVE lands)_
+## 13. Publish the advisory _(security releases only — after the CVE lands, or when step 12's 5-working-day deadline passes)_
 
-Once the CVE is assigned, publish the advisory.
+Once the CVE is assigned, or when step 12's 5-working-day deadline passes,
+publish the advisory.
 
 - Confirm **Patched versions** is set and correct.
 - Credit the reporter unless they asked otherwise — SECURITY.md promises this.
@@ -454,11 +462,30 @@ Once the CVE is assigned, publish the advisory.
 
 On publication the advisory enters the GitHub Advisory Database, Dependabot
 begins alerting downstream consumers automatically, and it redistributes through
-GitHub's API and Atom feed. Nothing further to do.
+GitHub's API and Atom feed.
+
+Then read the advisory back (read-only):
+
+    gh api repos/GitHubNewbie0/odf-kit/security-advisories/<GHSA-ID> --jq '{state, published_at, cve_id, severity, vulnerabilities}'
+
+It should show `state` as `published` and the fields as intended. If it doesn't,
+stop.
 
 **One advisory per release.** If several are in flight, each publishes with the
 release that fixes it — never ahead of its own fix, and never bundled with an
 advisory whose fix has not shipped.
+
+## 13b. Add the advisory ID to the GitHub release _(security releases only — after step 13)_
+
+Once step 13's read-back shows `published`, edit the GitHub release made at step
+10 (browser "Edit release", or `gh release edit`) and add the published advisory
+ID (`GHSA-…`) to its body.
+
+Then verify (read-only):
+
+    gh release view vX.Y.Z --json body --jq .body
+
+The body should contain the advisory ID. If it doesn't, stop.
 
 ---
 
