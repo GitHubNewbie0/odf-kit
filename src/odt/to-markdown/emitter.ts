@@ -171,12 +171,12 @@ function emitNote(node: NoteNode, options?: MarkdownEmitOptions): string {
 /** Emit a FieldNode â€” page number and page count get descriptive placeholders. */
 function emitField(node: FieldNode): string {
   // A defined value is document input, escaped as text context (T4: S1–S4,
-  // Scott, 2026-10-18); the fallbacks are emitter constants.
-  if (node.fieldType === "pageNumber")
-    return node.value === undefined ? "[page]" : escapeMd(node.value);
-  if (node.fieldType === "pageCount")
-    return node.value === undefined ? "[pages]" : escapeMd(node.value);
-  return node.value === undefined ? "" : escapeMd(node.value);
+  // Scott, 2026-10-18). A null or undefined value gets 3125d07's fallback,
+  // literal and unescaped, by the same `??` (T4: [R1-R], Scott, 2026-10-20).
+  const value: string | undefined = node.value ?? undefined;
+  if (node.fieldType === "pageNumber") return value === undefined ? "[page]" : escapeMd(value);
+  if (node.fieldType === "pageCount") return value === undefined ? "[pages]" : escapeMd(value);
+  return value === undefined ? "" : escapeMd(value);
 }
 
 /**

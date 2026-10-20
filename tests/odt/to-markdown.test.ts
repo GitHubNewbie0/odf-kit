@@ -787,6 +787,30 @@ describe('emitted: field values (plan §9 "Field values (C)")', () => {
   });
 });
 
+describe('emitted: field fallbacks for an absent value (plan §9 "Field values (C)")', () => {
+  // T4: [R1-R] (Scott, 2026-10-20): when the value is null or undefined, the
+  // emitter constant is emitted literally and unescaped, as 3125d07 did with
+  // `node.value ?? "[page]"`; nothing throws. FieldNode.value is typed string,
+  // so an absent value reaches the emitter only from a model built outside the
+  // type system.
+  it.each([
+    ["pageNumber", "[page]"],
+    ["pageCount", "[pages]"],
+    ["title", ""],
+  ])(
+    "FIELD-FALLBACK %s: an absent value emits %j, unescaped, without throwing",
+    (fieldType, fallback) => {
+      for (const value of [null, undefined]) {
+        let out: string | undefined;
+        expect(() => {
+          out = md([para({ kind: "field", fieldType, value: value as unknown as string })]);
+        }).not.toThrow();
+        expect(out).toBe(fallback);
+      }
+    },
+  );
+});
+
 describe('emitted: blocked form in a GFM table cell (plan §9 "Blocked output form", H2.3)', () => {
   it("H2.3: the whole emitted table", () => {
     // T4: R2 blocked-scheme output shape (Scott, 2026-10-18). T3: internal measurement H2.3.
