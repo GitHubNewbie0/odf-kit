@@ -44,6 +44,50 @@ the OASIS notice permits, subject to the same notice.
 The citation files contain passages quoted from the Part 3 prose, used as
 section-cited evidence (T2 in the provenance charter).
 
+## CommonMark 0.29 and GFM 0.29-gfm excerpts
+
+`citations/markdown-cm-0.29-gfm-0.29.txt` holds excerpts of two specifications
+that the Markdown emitter and its tests cite:
+
+- CommonMark Spec, Version 0.29 (2019-04-06), by John MacFarlane:
+  https://spec.commonmark.org/0.29/
+- GitHub Flavored Markdown Spec, Version 0.29-gfm (2019-04-06), based on
+  the CommonMark Spec by John MacFarlane: https://github.github.com/gfm/
+
+Both are licensed under the Creative Commons Attribution-ShareAlike 4.0
+International License (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/. Their licence statements,
+quoted verbatim from the text copies the excerpts were taken from (`cm.txt`
+l.123–135 and `gfm.txt` l.121–127), are:
+
+    <a rel="license"
+       href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative
+       Commons BY-SA" style="border-width:0"
+       src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
+       /><span xmlns:dct="http://purl.org/dc/terms/"
+       href="http://purl.org/dc/dcmitype/Text" property="dct:title"
+       rel="dct:type">CommonMark Spec by
+       <a xmlns:cc="http://creativecommons.org/ns#"
+       href="http://spec.commonmark.org" property="cc:attributionName"
+       rel="cc:attributionURL">John MacFarlane is licensed under a
+       <a rel="license"
+       href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+       Commons Attribution-ShareAlike 4.0 International License.
+
+      This formal specification is based on the
+      CommonMark Spec by
+      John MacFarlane and licensed under
+      <a rel="license"
+       href="http://creativecommons.org/licenses/by-sa/4.0/">
+        <img style="vertical-align:middle" alt="Creative Commons BY-SA" style="border-width:0"
+       src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"/>
+
+`spec/citations/markdown-cm-0.29-gfm-0.29.txt` is a verbatim, unmodified
+excerpt under CC BY-SA 4.0, not Apache-2.0. Each excerpt in it is headed by
+its section number and its line range in `cm.txt` or `gfm.txt`. It is not
+produced by `tools/extract-prose-citations.mjs`, and the `citations/*.txt`
+row under "Derived files" does not cover it.
+
 ## Trademarks
 
 "OASIS", "OpenDocument", "Open Document Format" and "ODF" are trademarks of
