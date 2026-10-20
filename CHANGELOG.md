@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.5] - 2026-10-20
+
+### Security
+
+- **Document-controlled values reaching Markdown output unescaped are fixed in `modelToMarkdown` and `odtToMarkdown`.** Link destinations, image names and alt text, field values and document text were written into the Markdown without escaping. A crafted `.odt` could therefore end a link early and start another, put a `javascript:` or `data:` URL into a link or image, or carry raw HTML such as `<script>` or an `onmouseover` attribute, which renderers that pass HTML through (including `marked` at its defaults) emit as live markup. Link and image destinations are now escaped per CommonMark, and they are classified by URL scheme after character references are decoded. `http`, `https`, `mailto`, `tel`, relative and protocol-relative (`//`) destinations are emitted. Any other scheme, `javascript:`, `vbscript:`, `file:` and `data:` among them (apart from the `embedImages` image types in the next bullet), is emitted as visible literal text such as ``\[text\]\(`javascript:…`\)``: the link text and the refused scheme are shown, the rest of the destination is omitted, and nothing is live. Leading and trailing spaces and control characters, and embedded tabs and line breaks, are now removed from destinations, as a browser's URL parser removes them. Text, alt text and field values now also escape `<` and `&`. GFM table cells no longer double the escaping backslashes. Credit: Pethu Kannan G, for the scheme finding and downstream-impact testing. Affected from 0.11.0, when the Markdown emitter was introduced.
+- **`embedImages` now embeds only six image types.** With `embedImages: true`, an image is embedded as a `data:` URL only when its media type is `image/png`, `image/gif`, `image/jpeg`, `image/webp`, `image/bmp` or `image/tiff`. The match is ASCII-case-insensitive on type and subtype, and anything after the first `;` is ignored. **Every other media type is emitted as the visible blocked form** ``!\[alt\]\(`data:…`\)`` instead of an image. That includes `image/svg+xml`, `image/wmf`, `image/emf`, other registered image types such as `image/avif` or `image/heic`, unregistered spellings such as `image/x-ms-bmp`, and a type written with a space before its `;`. Nothing throws. A `data:` URL as a link (not image) destination is always blocked.
+
 ### Changed
 
 - **The ODT emitters now reject an inline node of unknown kind with a clear error.** `renderOdtHtml`, `modelToMarkdown` and `modelToTypst` (and `odtToHtml`, `odtToMarkdown`, `odtToTypst` and `toHtml()`, which use them) previously sent any unrecognised inline node to the text renderer: one without a `text` field threw an unrelated `TypeError`, and one with a `text` field was emitted as plain text. They now throw `Error: … unknown InlineNode kind "<kind>"`. Output for every model that matches the `InlineNode` type is unchanged; only hand-built models outside the type are affected. Internally, each dispatcher is now checked by the compiler for exhaustiveness, so a future inline node kind cannot ship unhandled.
@@ -590,7 +597,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.4...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.5...HEAD
+[0.14.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.5
 [0.14.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.4
 [0.14.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.3
 [0.14.2]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.2
