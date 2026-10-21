@@ -7,7 +7,7 @@ This file is the imperative projection of `../odf-kit-internal/docs/methodology.
 
 Build all work as proofs from axioms, in authority order:
 
-- **T1** grammar — `spec/odf-1.3-length-datatypes.json` and the extracted schema files. Never state spec facts from memory.
+- **T1** grammar — ODF 1.4: `spec/odf-elements.json`, `spec/odf-attributes.json`, `spec/odf-datatypes.json` (generated from the 1.4 RNG). Still cited until the Unit C migration: `spec/odf-1.3-length-datatypes.json` and the 1.3 schema files. Never state spec facts from memory.
 - **T2** prose — section-cited; see `../odf-kit-internal/docs/odf-prose-constraints.md`. No section number → not a citation.
 - **T3** producer behavior — a named fixture with `meta:generator` intact. No fixture → the claim is unverified and never load-bearing.
 - **T4** our decisions — cite the decision ID (D8, D4, G5 …). **Never postulate arbitrarily**: before any T4 choice of weight, survey comparable software, conventions, examples, and our adopters' preferences, and record what the survey found. If you find yourself picking an answer just to keep moving — stop, that is a decision for Scott.
