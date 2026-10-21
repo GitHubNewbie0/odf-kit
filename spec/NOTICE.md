@@ -44,6 +44,22 @@ the OASIS notice permits, subject to the same notice.
 The citation files contain passages quoted from the Part 3 prose, used as
 section-cited evidence (T2 in the provenance charter).
 
+## ODF 1.4 derived files
+
+These files are generated from the three ODF 1.4 RelaxNG schemas by
+`tools/extract-odf-grammar.mjs`. Regenerate them; never edit them by hand.
+
+| File                  | Produced by                     | Derived from                               |
+| --------------------- | ------------------------------- | ------------------------------------------ |
+| `odf-elements.json`   | `tools/extract-odf-grammar.mjs` | the ODF 1.4 main, manifest and dsig `.rng` |
+| `odf-attributes.json` | `tools/extract-odf-grammar.mjs` | the ODF 1.4 main, manifest and dsig `.rng` |
+| `odf-datatypes.json`  | `tools/extract-odf-grammar.mjs` | the ODF 1.4 main, manifest and dsig `.rng` |
+
+Source: Open Document Format for Office Applications (OpenDocument) Version
+1.4, OASIS Standard, 6 October 2025, schemas at
+https://docs.oasis-open.org/office/OpenDocument/v1.4/os/schemas/. Each
+schema's header reads "Copyright (c) OASIS Open 2025. All Rights Reserved."
+
 ## CommonMark 0.29 and GFM 0.29-gfm excerpts
 
 `citations/markdown-cm-0.29-gfm-0.29.txt` holds excerpts of two specifications
@@ -98,10 +114,17 @@ tooling does. It does not denote an OASIS output.
 
 - These files stay in the repository and are not published in the npm
   package (provenance charter, DP4).
-- odf-kit's ODF target was ruled **ODF 1.4** on 2026-09-16. The files above
-  are still 1.3. When the 1.4 schema and Part 3 prose are added, each gets a
-  row in the first table with its OASIS source, and the derived files are
-  regenerated.
+- odf-kit's ODF target was ruled **ODF 1.4** on 2026-09-16. The verbatim
+  OASIS files in the first table are 1.3, together with the 1.3 derived
+  files; they stay here while code and tests still cite them.
+- The ODF 1.4 schemas are **not copied into this directory**. The verbatim
+  1.4 files live in the maintainer's internal source repository
+  (`odf-kit-internal/spec/odf-1.4/`, with its own provenance record).
+  `tools/extract-odf-grammar.mjs` reads the three schemas from
+  `../odf-kit-internal/spec/odf-1.4/schemas/` and stops if a file's sha256
+  differs from the value recorded in the script. Each generated file's
+  `_generated` header records the path and sha256 it matched. Regenerating
+  the 1.4 files therefore needs that repository checked out beside this one.
 
 ## Annotations
 
