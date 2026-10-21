@@ -19,4 +19,4 @@ export const ODF_NS = {
 } as const;
 
 /** The ODF version we target. */
-export const ODF_VERSION = "1.2";
+export const ODF_VERSION = "1.4";
