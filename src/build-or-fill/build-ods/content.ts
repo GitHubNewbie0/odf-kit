@@ -646,17 +646,18 @@ function buildCellElement(
   cellStyleMap: Map<string, [string, NormalizedCellStyle]>,
   defaultDateFormat: OdsDateFormat,
 ): XmlElement {
-  if (cell.type === "empty") {
-    return el("table:table-cell");
-  }
-
   const cellEl = el("table:table-cell");
 
-  // Column and row span
+  // Column and row span — on empty cells too: an empty cell may span
+  // (T1: rng table-table-cell-attlist-extra l.16102-16114; content optional l.16126-16138).
   const colSpan = cell.colSpan ?? 1;
   const rowSpan = cell.rowSpan ?? 1;
   if (colSpan > 1) cellEl.attr("table:number-columns-spanned", String(colSpan));
   if (rowSpan > 1) cellEl.attr("table:number-rows-spanned", String(rowSpan));
+
+  if (cell.type === "empty") {
+    return cellEl;
+  }
 
   // Effective options and style lookup
   const effective = mergeOptions(row.options, cell.options);
@@ -860,6 +861,16 @@ function buildSheetElement(
     while (coveredCells.has(`${rowIdx}:${physicalCol}`)) {
       rowEl.appendChild(el("table:covered-table-cell"));
       physicalCol++;
+    }
+
+    // A row with nothing to emit gets one empty cell repeated across the
+    // declared columns (T1: table:table-row is oneOrMore cells, rng l.16223-16231;
+    // table:number-columns-repeated, rng l.16059-16064. T4: Scott, LEAD 1
+    // decision 2; a bare cell when numCols ≤ 1, LEAD 1 N = 0 ruling).
+    if (physicalCol === 0) {
+      const emptyCell = el("table:table-cell");
+      if (numCols > 1) emptyCell.attr("table:number-columns-repeated", String(numCols));
+      rowEl.appendChild(emptyCell);
     }
 
     tableEl.appendChild(rowEl);

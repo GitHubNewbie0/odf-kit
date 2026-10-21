@@ -1,6 +1,8 @@
 import { describe, expect, test } from "@jest/globals";
 import { strFromU8, unzipSync } from "fflate";
 import { OdsDocument } from "../src/ods/index.js";
+import { parseXml } from "../src/odt/read/xml-parser.js";
+import type { XmlElementNode } from "../src/odt/read/xml-parser.js";
 
 // ─── Test Helper ──────────────────────────────────────────────────────
 
@@ -666,6 +668,87 @@ describe("OdsDocument — merged cells", () => {
     const { "content.xml": content } = await extractFiles(doc);
     expect(content).toContain('table:number-columns-spanned="3"');
     expect(content).toContain("fo:font-weight");
+  });
+});
+
+// ─── Empty Rows and Empty Spanned Cells (LEAD 1, T-4) ─────────────────
+//
+// T1 citations are to the ODF 1.4 schema, odf-kit-internal
+// spec/odf-1.4/schemas/OpenDocument-v1.4-schema.rng (l.N), and its Part 3 prose,
+// OpenDocument-v1.4-os-part3-schema.html (§N, html l.N).
+
+/** The children (tag + attributes) of each table:table-row of the first sheet. */
+async function rowChildren(
+  doc: OdsDocument,
+): Promise<{ tag: string; attrs: Record<string, string> }[][]> {
+  const { "content.xml": content } = await extractFiles(doc);
+  const elements = (n: XmlElementNode): XmlElementNode[] =>
+    n.children.filter((c): c is XmlElementNode => c.type === "element");
+  const rows: { tag: string; attrs: Record<string, string> }[][] = [];
+  const walk = (n: XmlElementNode): void => {
+    if (n.tag === "table:table-row") {
+      rows.push(elements(n).map((c) => ({ tag: c.tag, attrs: c.attrs })));
+      return;
+    }
+    elements(n).forEach(walk);
+  };
+  walk(parseXml(content));
+  return rows;
+}
+
+describe("OdsDocument — empty rows and empty spanned cells (LEAD 1, T-4)", () => {
+  test("T1 rng l.16223-16231 + l.16059-16064: addRow([]) in a 3-column table → one empty cell repeated 3 times (T4: Scott, LEAD 1 decision 2)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["A1", "B1", "C1"]);
+    sheet.addRow([]);
+    sheet.addRow(["A3"]);
+    const rows = await rowChildren(doc);
+    expect(rows[1]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-repeated": "3" } },
+    ]);
+  });
+
+  test("T1 rng l.16223-16231: addRow([]) in a 1-column table → one bare empty cell, no repeat attribute (T4: LEAD 1 decision 2)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["A1"]);
+    sheet.addRow([]);
+    const rows = await rowChildren(doc);
+    expect(rows[1]).toEqual([{ tag: "table:table-cell", attrs: {} }]);
+  });
+
+  test("T1 rng l.16223-16231: addRow([]) with 0 declared columns → one bare empty cell (T4: Scott, LEAD 1 N = 0 ruling)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([]);
+    const rows = await rowChildren(doc);
+    expect(rows[0]).toEqual([{ tag: "table:table-cell", attrs: {} }]);
+  });
+
+  test("T1 §19.680 (html l.17637) + §9.1.5 (html l.3836): { value: null, colSpan: 3 } → empty cell spanning 3 + 2 covered cells (T4: LEAD 1 decision 3)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: null, type: "string", colSpan: 3 }]);
+    const rows = await rowChildren(doc);
+    expect(rows[0]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-spanned": "3" } },
+      { tag: "table:covered-table-cell", attrs: {} },
+      { tag: "table:covered-table-cell", attrs: {} },
+    ]);
+  });
+
+  test("T1 §19.680 + §9.1.5: { value: null, rowSpan: 2 } → empty cell spanning 2 rows + a covered cell below (T4: LEAD 1 decision 3)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: null, type: "string", rowSpan: 2 }, "B1"]);
+    sheet.addRow(["B2"]);
+    const rows = await rowChildren(doc);
+    expect(rows[0][0]).toEqual({
+      tag: "table:table-cell",
+      attrs: { "table:number-rows-spanned": "2" },
+    });
+    expect(rows[1][0]).toEqual({ tag: "table:covered-table-cell", attrs: {} });
   });
 });
 
