@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Generated files now declare ODF 1.4 instead of 1.2 (office:version and manifest:version). Validators choose a schema from the declared version: OASIS odfvalidator 0.13.0 validates these files against ODF 1.4, while 0.12.0 and 1.0.0-BETA1 fall back to the ODF 1.1 schemas for a 1.4-declared file and report an error on manifest:version. fillTemplate keeps the template's own declared version.
+
 ## [0.14.5] - 2026-10-20
 
 ### Security
