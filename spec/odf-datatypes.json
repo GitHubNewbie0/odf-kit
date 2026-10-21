@@ -4,7 +4,7 @@
     "file": "odf-datatypes.json",
     "extractor": {
       "name": "tools/extract-odf-grammar.mjs",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "generated": "2026-10-21",
     "spec": {

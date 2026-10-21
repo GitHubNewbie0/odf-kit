@@ -4,7 +4,7 @@
     "file": "odf-elements.json",
     "extractor": {
       "name": "tools/extract-odf-grammar.mjs",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "generated": "2026-10-21",
     "spec": {
@@ -46173,7 +46173,7 @@
               "decl": "OpenDocument-v1.4-schema.rng:8221"
             }
           ],
-          "text": false,
+          "text": true,
           "parents": [
             {
               "element": "office:scripts",
@@ -103288,7 +103288,7 @@
           "decl": "OpenDocument-v1.4-schema.rng:323"
         }
       ],
-      "text": false,
+      "text": true,
       "parents": [
         {
           "element": "(open name class)",
@@ -103431,7 +103431,7 @@
           "decl": "OpenDocument-v1.4-manifest-schema.rng:44"
         }
       ],
-      "text": false,
+      "text": true,
       "parents": [
         {
           "element": "manifest:algorithm",

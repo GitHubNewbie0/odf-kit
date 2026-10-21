@@ -47,7 +47,7 @@ import { fileURLToPath } from "node:url";
 import { parseXml } from "../dist/odt/read/xml-parser.js";
 
 // T4: bump on any change that alters the generated output.
-const EXTRACTOR_VERSION = "1.0.0";
+const EXTRACTOR_VERSION = "1.1.0";
 const EXTRACTOR_NAME = "tools/extract-odf-grammar.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -397,15 +397,18 @@ function renderSeq(nodes, stack, schema) {
 // Reachability over rendered patterns
 // ---------------------------------------------------------------------------
 
+// Keys of a rendered node that hold patterns. Everything else (description
+// strings, data params, data <except>) is not walked: an rng:data <except>
+// lists values that are EXCLUDED, so it must never feed `values`.
+const PATTERN_KEYS = ["pattern", "choice", "group", "interleave", "optional", "zeroOrMore", "oneOrMore", "list", "mixed"];
+
 /** Walk a rendered pattern; element/attribute references are leaves. */
 function walkRendered(p, fn) {
   if (typeof p === "string") return fn(p);
   if (Array.isArray(p)) return p.forEach((q) => walkRendered(q, fn));
   fn(p);
   if (p.element !== undefined || p.attribute !== undefined) return;
-  for (const [k, v] of Object.entries(p)) {
-    if (k === "pattern" || Array.isArray(v)) walkRendered(v, fn);
-  }
+  for (const k of PATTERN_KEYS) if (p[k] !== undefined) walkRendered(p[k], fn);
 }
 
 // Datatype closure: literal values and xsd data types reachable from a value
@@ -468,7 +471,9 @@ for (const d of elementDecls.values()) {
   let textAllowed = false;
   const typed = { values: new Set(), data: new Set(), refs: new Set() };
   walkRendered(content, (q) => {
-    if (q === "text") textAllowed = true;
+    // T4: pre-merge fix 1 (Scott, 2026-10-21) — a <rng:mixed> node in the
+    // content sets text: true, as an explicit <rng:text/> does.
+    if (q === "text" || (typeof q === "object" && q.mixed !== undefined)) textAllowed = true;
     if (typeof q !== "object") return;
     if (q.element !== undefined) children.set(q.decl, q.element);
     else if (q.attribute !== undefined) {
