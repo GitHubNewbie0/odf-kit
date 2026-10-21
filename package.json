@@ -346,7 +346,7 @@
   },
   "allowScripts": {
     "unrs-resolver@1.11.1": true,
-    "vnu-jar@26.9.7": true,
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "vnu-jar@26.9.16": true
   }
 }
