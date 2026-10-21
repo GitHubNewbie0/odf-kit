@@ -442,7 +442,7 @@ function buildCellStyleMap(
   for (const sheet of sheets) {
     for (const row of sheet.rows) {
       for (const cell of row.cells) {
-        if (cell.type === "empty") continue;
+        if (cell.type === "empty" && !isSpanningEmpty(cell)) continue;
 
         const effective = mergeOptions(row.options, cell.options);
         const dataStyleName = resolveDataStyleName(cell, row, defaultDateFormat);
@@ -639,6 +639,15 @@ function getColumnCount(sheet: OdsSheetData): number {
 
 // ─── Cell and Sheet Building ──────────────────────────────────────────
 
+/**
+ * An empty cell that spans. It keeps everything its cell object specifies except a value: its
+ * own style, the row's style, its formula and its href (T4: Scott, LEAD 1 F1 ruling). A bare
+ * empty cell carries nothing.
+ */
+function isSpanningEmpty(cell: OdsCellData): boolean {
+  return cell.type === "empty" && ((cell.colSpan ?? 1) > 1 || (cell.rowSpan ?? 1) > 1);
+}
+
 /** Build a table:table-cell element for a single cell. */
 function buildCellElement(
   cell: OdsCellData,
@@ -655,7 +664,7 @@ function buildCellElement(
   if (colSpan > 1) cellEl.attr("table:number-columns-spanned", String(colSpan));
   if (rowSpan > 1) cellEl.attr("table:number-rows-spanned", String(rowSpan));
 
-  if (cell.type === "empty") {
+  if (cell.type === "empty" && !isSpanningEmpty(cell)) {
     return cellEl;
   }
 
@@ -683,6 +692,20 @@ function buildCellElement(
     }
     return p;
   };
+
+  // An empty spanning cell: style (above), formula and href, but no value. So there is no
+  // office:value-type and no cached result (T4: Scott, LEAD 1 F1 ruling, decision 2). T1:
+  // table:formula is independent of the value-type group (rng l.16076-16083). §19.389
+  // (html l.13832) "The value type of each of these elements shall be specified" is an
+  // UNRESOLVED T2 tension for every empty cell odf-kit writes (LEAD); this follows the
+  // existing practice. The href is the text:p > text:a written for an empty string, with no
+  // anchor text (T1: text:a content zeroOrMore, rng l.16458-16460; T2 §6.1.8, html l.2162,
+  // is silent on an empty anchor; T4: decision 3).
+  if (cell.type === "empty") {
+    if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
+    if (cell.href) cellEl.appendChild(buildTextP(""));
+    return cellEl;
+  }
 
   // Value type, value attributes, and display paragraph.
   // When cell.formula is set, table:formula is emitted alongside the normal

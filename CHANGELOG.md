@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `xlsxToOds` no longer writes an empty `table:table-row` for a row with no cells, such as a gap between data rows or a row that holds only an empty merged range. An empty row is invalid ODF; such a row now holds one empty cell repeated across the sheet's columns.
+- `xlsxToOds` no longer writes an empty `table:table-row`, which is invalid ODF. A row with no cells, such as a gap between data rows, now holds one empty cell repeated across the sheet's columns. A row that holds only an empty merged range now holds an empty cell spanning the range, plus its covered cells.
 - `xlsxToOds` keeps a merged range whose top-left cell is empty. Before, the merge was dropped without notice.
 - `xlsxToOds` no longer moves cells next to or below a merged range. Covered positions were written twice, which pushed later values to the right and added extra columns to the sheet.
 - `OdsDocument`: `addRow([])` now writes a valid row (one empty cell, repeated across the sheet's columns) instead of an empty `table:table-row`. A cell object with `value: null` and a `colSpan` or `rowSpan` above 1 is now written as an empty spanning cell. Before, it kept its span but was given a value from its `type`: an empty string (`"string"`), `false` (`"boolean"`), `0` (`"percentage"`), the formula `of:null` (`"formula"`), or the invalid `office:value="null"` (`"float"`, `"currency"`); `"date"` threw a TypeError.

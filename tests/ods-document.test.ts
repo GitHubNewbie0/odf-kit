@@ -752,6 +752,122 @@ describe("OdsDocument — empty rows and empty spanned cells (LEAD 1, T-4)", () 
   });
 });
 
+// ─── Empty Spanning Cells Keep Style, Formula and Href (LEAD 1 repair, F1) ─
+//
+// T4: Scott's F1 ruling (2026-10-21): an empty spanning cell keeps everything the cell object
+// specifies except a value — its own style, the row's style, its formula and its href. T1: each
+// is an optional cell attribute independent of the value-type group (rng l.16059-16101), and
+// text:a content is zeroOrMore (rng l.16458-16460). The cell carries no office:value-type: §19.389
+// (html l.13832) "The value type of each of these elements shall be specified" against §9.1.4
+// (html l.3827) "Table cells may be empty" is an UNRESOLVED T2 tension, recorded as a LEAD; this
+// follows odf-kit's existing practice for empty cells (bare, no value type).
+
+/** The first table:table-cell of the first sheet, and the parsed content.xml root. */
+async function firstCell(
+  doc: OdsDocument,
+): Promise<{ cell: XmlElementNode; root: XmlElementNode }> {
+  const { "content.xml": content } = await extractFiles(doc);
+  const root = parseXml(content);
+  const find = (n: XmlElementNode): XmlElementNode | undefined => {
+    if (n.tag === "table:table-cell") return n;
+    for (const c of n.children) {
+      if (c.type !== "element") continue;
+      const hit = find(c);
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const cell = find(root);
+  if (!cell) throw new Error("no table:table-cell in content.xml");
+  return { cell, root };
+}
+
+/** The table-cell-properties and text-properties attributes of the named automatic style. */
+function cellStyleProps(root: XmlElementNode, name: string): Record<string, string> {
+  const elements = (n: XmlElementNode): XmlElementNode[] =>
+    n.children.filter((c): c is XmlElementNode => c.type === "element");
+  const find = (n: XmlElementNode): XmlElementNode | undefined => {
+    if (n.tag === "style:style" && n.attrs["style:name"] === name) return n;
+    for (const c of elements(n)) {
+      const hit = find(c);
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const style = find(root);
+  if (!style) throw new Error(`no style:style named ${name}`);
+  expect(style.attrs["style:family"]).toBe("table-cell");
+  return Object.assign({}, ...elements(style).map((c) => c.attrs));
+}
+
+describe("OdsDocument — an empty spanning cell keeps style, formula and href (LEAD 1 repair, F1)", () => {
+  test("T4 F1 ruling + T1 rng l.16066-16070: own style on { value: null, colSpan: 2 } → table:style-name, no value type, no content", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([
+        { value: null, type: "string", colSpan: 2, backgroundColor: "#FFFF00", bold: true },
+        "C1",
+      ]);
+    const { cell, root } = await firstCell(doc);
+    const styleName = cell.attrs["table:style-name"];
+    expect(styleName).toBeDefined();
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:style-name": styleName,
+    });
+    expect(cell.children.filter((c) => c.type === "element")).toEqual([]);
+    expect(cellStyleProps(root, styleName)).toMatchObject({
+      "fo:background-color": "#FFFF00",
+      "fo:font-weight": "bold",
+    });
+  });
+
+  test("T4 F1 ruling + T1 rng l.16066-16070: row options on an empty spanning cell → the row's style on the cell", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", colSpan: 2 }, "C1"], { backgroundColor: "#00FF00" });
+    const { cell, root } = await firstCell(doc);
+    const styleName = cell.attrs["table:style-name"];
+    expect(styleName).toBeDefined();
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:style-name": styleName,
+    });
+    expect(cellStyleProps(root, styleName)).toMatchObject({ "fo:background-color": "#00FF00" });
+  });
+
+  test("T4 F1 ruling, decision 2 + T1 rng l.16076-16080, §19.646 (html l.17077): formula on an empty spanning cell → table:formula, no value type, no cached value", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", formula: "SUM(1;2)", colSpan: 2 }, "C1"]);
+    const { cell } = await firstCell(doc);
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:formula": "of:SUM(1;2)",
+    });
+    expect(cell.children.filter((c) => c.type === "element")).toEqual([]);
+  });
+
+  test("T4 F1 ruling, decision 3 + T1 rng l.16458-16480: href on an empty spanning cell → text:p > empty text:a, no value type", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", href: "https://example.org/", colSpan: 2 }, "C1"]);
+    const { cell } = await firstCell(doc);
+    expect(cell.attrs).toEqual({ "table:number-columns-spanned": "2" });
+    const kids = cell.children.filter((c): c is XmlElementNode => c.type === "element");
+    expect(kids.map((k) => k.tag)).toEqual(["text:p"]);
+    const inner = kids[0].children.filter((c): c is XmlElementNode => c.type === "element");
+    expect(inner.map((k) => [k.tag, k.attrs])).toEqual([
+      ["text:a", { "xlink:type": "simple", "xlink:href": "https://example.org/" }],
+    ]);
+    expect(inner[0].children).toEqual([]);
+  });
+});
+
 // ─── Freeze Rows/Columns ──────────────────────────────────────────────
 
 describe("OdsDocument — freeze rows/columns", () => {

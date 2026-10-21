@@ -149,9 +149,18 @@ function toCellData(value: OdsCellValue): OdsCellData {
 
   if (isOdsCellObject(value)) {
     // A spanning cell with no value is an empty cell that keeps its span
-    // (T1: §19.680, Part 3 html l.17637; T4: Scott, LEAD 1 decision 3).
+    // (T1: §19.680, Part 3 html l.17637; T4: Scott, LEAD 1 decision 3) and everything
+    // else it specifies except a value: style, formula, href (T4: Scott, LEAD 1 F1 ruling).
     if (value.value === null && ((value.colSpan ?? 1) > 1 || (value.rowSpan ?? 1) > 1)) {
-      return { value: null, type: "empty", colSpan: value.colSpan, rowSpan: value.rowSpan };
+      return {
+        value: null,
+        type: "empty",
+        options: extractCellOptions(value),
+        colSpan: value.colSpan,
+        rowSpan: value.rowSpan,
+        href: value.href,
+        formula: value.formula,
+      };
     }
     return {
       value: value.value,

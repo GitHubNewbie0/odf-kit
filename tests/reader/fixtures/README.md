@@ -89,6 +89,7 @@ Each index entry records:
 | `text-box-custom-shape-docx-roundtrip.odt`         | LibreOffice Writer 26.2.5.2 (x86_64), via its own `.docx` filter        | The same text box after a round trip through `.docx`, which LibreOffice brings back as `draw:custom-shape`, not `draw:frame`. Guards the path that already worked.                           | regression |
 | `text-box-custom-shape-docx-roundtrip-source.docx` | LibreOffice Writer 26.2.5.2 (x86_64), Save As → _Word 2010–365 (.docx)_ | The recorded input to the row above's recipe. **Backs no assertions; nothing reads it.** Committed because the recipe's output depends on the LibreOffice version that ran it.               | provenance |
 | `frame-embedded-object-then-image-libreoffice.odt` | LibreOffice Writer **26.8.0.3** (x86_64)                                | One `draw:frame` holding **two** content children in document order: `draw:object` (an embedded spreadsheet) then its replacement `draw:image`. The T3 evidence for §10.4.1's ordering rule. | regression |
+| `empty-cells-libreoffice.ods`                      | LibreOffice Calc **26.8.0.3** (x86_64)                                  | One sheet: an empty row, a data row, and a row ending in empty cells. T3 evidence that LibreOffice writes empty cells with no `office:value-type`. **No test reads it yet.**                 | regression |
 
 **`alignment-ltr.odt`**
 
@@ -243,6 +244,28 @@ Each index entry records:
 - **Also recorded:** declares `office:version="1.4"`, and the manifest carries `manifest:version="1.4"` on the root and on `Object 1/`.
 
 - **Type:** regression
+
+**`empty-cells-libreoffice.ods`** — how a real producer writes empty cells
+
+- **Producer:** LibreOffice Calc 26.8.0.3 (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.8.0.3$Windows_X86_64 LibreOffice_project/bce0998afefdbc355585ca324285661a2170ba77`.
+
+- **Contents:** `Sheet1`, four declared columns (`table:table-column table:number-columns-repeated="4"`), three rows:
+
+  ```
+  row 1  <table:table-cell table:number-columns-repeated="4"/>
+  row 2  three string cells, then one float cell (1234)
+  row 3  one string cell, then <table:table-cell table:number-columns-repeated="3"/>
+  ```
+
+- **What it is evidence of.** LibreOffice writes empty cells as `<table:table-cell table:number-columns-repeated="N"/>`, with **no `office:value-type`**, both for a whole empty row (row 1) and for empty cells after data (row 3). This is the T3 evidence for the LEAD on ODF 1.4 Part 3 §19.389 (html l.13832), _"The value type of each of these elements shall be specified"_: whether an empty cell without `office:value-type` conforms. It is evidence of producer practice only; it does not settle the T2 question. Row 1 also matches the empty-row encoding of LEAD 1 decision 2: one cell repeated across the declared columns.
+
+- **Recipe:** not recorded. The file was made by hand in LibreOffice Calc; the steps were not written down at the time.
+
+- **Provenance:** authored 2026-10-21 by Scott in LibreOffice Calc. Received as `empty cell test.ods`; renamed to the kebab-case convention on commit, bytes unchanged (MD5 `90972d500f612875870110ab15eea7fd`, 9,520 bytes, verified identical to the source after copying). Inspected by unzipping a copy **in memory**: never opened in an editor.
+
+- **Also recorded:** declares `office:version="1.4"`.
+
+- **Type:** regression. **No test reads it yet.** It is committed as evidence for the §19.389 LEAD, ahead of the tests that will use it.
 
 ## Adding a fixture — quick checklist
 

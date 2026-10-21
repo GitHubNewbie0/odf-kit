@@ -587,6 +587,30 @@ describe("xlsxToOds — covered cells keep their grid positions (LEAD 1, T-3)", 
   });
 });
 
+describe("xlsxToOds — covered-only rows and single-cell merge refs (LEAD 1 repair, F3)", () => {
+  // Inputs X2 and X4 of the LEAD 1 review (scratch odf-1.4\lead-1-review\probe-03.mjs).
+  it("T1 §9.1.5 (html l.3836) + rng l.16223-16231: row-span A1:A3 over an absent row 2 → row 2 is a covered cell then B2's empty position", async () => {
+    const sheet = `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c></row><row r="3"><c r="B3"><v>3</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A1:A3"/></mergeCells></worksheet>`;
+    const { declaredColumns, rows } = odsGrid(await xlsxToOds(buildSimpleXlsx(sheet)));
+    expect(declaredColumns).toBe(2);
+    expect(rows[1]).toEqual([
+      { tag: "table:covered-table-cell", attrs: {} },
+      { tag: "table:table-cell", attrs: {} },
+    ]);
+    expect(rowWidth(rows[1])).toBe(declaredColumns);
+  });
+
+  it("ECMA-376 Part 1 §18.3.1.55 + T1 §19.680 (html l.17637): single-cell merge ref A2:A2 over an empty cell → no span and no invented value type", async () => {
+    const sheet = `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A2:A2"/></mergeCells></worksheet>`;
+    const { rows } = odsGrid(await xlsxToOds(buildSimpleXlsx(sheet)));
+    // A2 holds no content in the source (§18.3.1.55: content is stored in the top-left cell);
+    // a one-cell ref spans nothing, so row 2 is the empty row of LEAD 1 decision 2.
+    expect(rows[1]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-repeated": "2" } },
+    ]);
+  });
+});
+
 describe("xlsxToOds — row invariants over the LEAD 1 cases (T-5)", () => {
   // T1: rng l.16223-16231 (a row is never empty); §9.1.5 (html l.3836) and
   // rng l.16059-16064 (positions occupied, counted by rowWidth) against the declared
