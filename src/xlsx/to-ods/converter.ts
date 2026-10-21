@@ -113,26 +113,35 @@ function convertSheet(xlSheet: XlsxSheet, options: XlsxToOdsOptions, doc: OdsDoc
     const xlRow = xlSheet.rows.get(r);
     const cells: (OdsCellObject | null)[] = [];
     let hasContent = false;
+    let hasCovered = false;
 
     for (let c = 0; c <= maxCol; c++) {
       const cellKey = `${c}:${r}`;
 
-      // Skip covered cells — OdsDocument handles them automatically via colSpan/rowSpan
+      // Covered cells take no entry: OdsDocument emits one table:covered-table-cell
+      // per spanned position from the top-left cell's colSpan/rowSpan
+      // (T1: §9.1.5, Part 3 html l.3836; T4: Scott, LEAD 1 decision 4).
       if (xlSheet.coveredCells.has(cellKey)) {
-        cells.push(null);
+        hasCovered = true;
         continue;
       }
 
+      const merge = xlSheet.merges.get(cellKey);
       const xlCell = xlRow?.cells.get(c);
+      let cellObj: OdsCellObject;
       if (!xlCell || xlCell.type === "empty") {
-        cells.push(null);
-        continue;
+        if (!merge || (merge.colSpan === 1 && merge.rowSpan === 1)) {
+          cells.push(null);
+          continue;
+        }
+        // A merge whose top-left cell is empty or absent is still a merge
+        // (ECMA-376 Part 1 §18.3.1.55; T4: Scott, LEAD 1 decision 3).
+        cellObj = { value: null, type: "string" };
+      } else {
+        cellObj = mapCell(xlCell, options);
       }
-
-      const cellObj = mapCell(xlCell, options);
 
       // Apply merge spans
-      const merge = xlSheet.merges.get(cellKey);
       if (merge) {
         if (merge.colSpan > 1) cellObj.colSpan = merge.colSpan;
         if (merge.rowSpan > 1) cellObj.rowSpan = merge.rowSpan;
@@ -142,7 +151,7 @@ function convertSheet(xlSheet: XlsxSheet, options: XlsxToOdsOptions, doc: OdsDoc
       hasContent = true;
     }
 
-    if (hasContent) {
+    if (hasContent || hasCovered) {
       sheet.addRow(cells);
     } else {
       // Emit an empty row to preserve row positioning

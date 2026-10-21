@@ -10,6 +10,8 @@ import {
 } from "../src/xlsx/to-ods/reader.js";
 import { xlsxToOds } from "../src/xlsx/to-ods/index.js";
 import { readOds } from "../src/ods-reader/index.js";
+import { parseXml } from "../src/odt/read/xml-parser.js";
+import type { XmlElementNode } from "../src/odt/read/xml-parser.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
@@ -419,5 +421,208 @@ describe("xlsxToOds — formula cells", () => {
     const cell = model.sheets[0].rows[0].cells[0];
     expect(cell.value).toBe(3);
     expect(cell.type).toBe("formula");
+  });
+});
+
+// ─── xlsxToOds — rows, merges and covered cells (LEAD 1) ─────────────
+//
+// T1 citations are to the ODF 1.4 schema, odf-kit-internal
+// spec/odf-1.4/schemas/OpenDocument-v1.4-schema.rng (l.N), and to its Part 3 prose,
+// OpenDocument-v1.4-os-part3-schema.html (§N, html l.N). The inputs are valid SpreadsheetML:
+// a merge range needs no row or c element under it (ECMA-376 Part 1, 5th ed., sml.xsd
+// CT_SheetData row minOccurs="0", CT_Row c minOccurs="0", CT_MergeCell ref ST_Ref;
+// §18.3.1.55: "The formatting and content for the merged range is always stored in the top
+// left cell.").
+
+const SML = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+const SST = `<?xml version="1.0"?><sst ${SML}><si><t>Hello</t></si><si><t>World</t></si></sst>`;
+
+/** One child of a table:table-row: its tag and attributes. */
+interface OdsGridCell {
+  tag: string;
+  attrs: Record<string, string>;
+}
+
+/** Parse content.xml of the first sheet into declared columns and per-row cell children. */
+function odsGrid(ods: Uint8Array): { declaredColumns: number; rows: OdsGridCell[][] } {
+  const content = new TextDecoder().decode(unzipSync(ods)["content.xml"]);
+  const elements = (n: XmlElementNode): XmlElementNode[] =>
+    n.children.filter((c): c is XmlElementNode => c.type === "element");
+  const find = (n: XmlElementNode, tag: string): XmlElementNode | undefined => {
+    if (n.tag === tag) return n;
+    for (const c of elements(n)) {
+      const hit = find(c, tag);
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const table = find(parseXml(content), "table:table");
+  if (!table) throw new Error("no table:table in content.xml");
+  const repeat = (attrs: Record<string, string>): number =>
+    Number(attrs["table:number-columns-repeated"] ?? "1");
+  let declaredColumns = 0;
+  const rows: OdsGridCell[][] = [];
+  for (const child of elements(table)) {
+    if (child.tag === "table:table-column") declaredColumns += repeat(child.attrs);
+    if (child.tag === "table:table-row") {
+      rows.push(elements(child).map((c) => ({ tag: c.tag, attrs: c.attrs })));
+    }
+  }
+  return { declaredColumns, rows };
+}
+
+/**
+ * A row's width: the grid positions its children occupy. T1 §9.1.5 (html l.3836): covered
+ * cells "occupy the same position in document order as the cells spanned. There is one
+ * <table:covered-table-cell> element for each cell that is spanned", so a column span is
+ * counted through its covered cells; table:number-columns-repeated (rng l.16059-16064)
+ * counts as that many positions.
+ */
+function rowWidth(row: OdsGridCell[]): number {
+  return row.reduce((w, c) => w + Number(c.attrs["table:number-columns-repeated"] ?? "1"), 0);
+}
+
+// Cases 1-7 of LEAD 1 step 0 (scratch odf-1.4\lead-1\probe-05.mjs and probe-06.mjs).
+const LEAD1_CASES: { name: string; sheet: string; sst?: string }[] = [
+  {
+    // validate-odf writer 9 input (odf-kit-internal checks/validate-odf.mjs:332)
+    name: "1 corpus input: merge A3:C3, data in rows 1-2, no row 3",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1"><v>42.5</v></c><c r="C1" t="b"><v>1</v></c></row><row r="2"><c r="A2"><f>SUM(1,2)</f><v>3</v></c><c r="B2" t="s"><v>1</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A3:C3"/></mergeCells></worksheet>`,
+    sst: SST,
+  },
+  {
+    name: "2 probe-04 input: merge A2:C2, data only in row 1",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A2:C2"/></mergeCells></worksheet>`,
+  },
+  {
+    name: "3 probe-04 control: no merge",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData></worksheet>`,
+  },
+  {
+    name: "4 merge A1:C1 whose top-left cell has data",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A1:C1"/></mergeCells></worksheet>`,
+  },
+  {
+    name: "5 merge A2:B2 with an empty top-left cell, data in C2",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c></row><row r="2"><c r="C2"><v>2</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A2:B2"/></mergeCells></worksheet>`,
+  },
+  {
+    name: "6 gap row, no merge: data in rows 1 and 3",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c></row><row r="3"><c r="A3"><v>3</v></c></row></sheetData></worksheet>`,
+  },
+  {
+    name: "7 row-span merge A1:A2 with data in B1 and B2",
+    sheet: `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>9</v></c></row><row r="2"><c r="B2"><v>8</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A1:A2"/></mergeCells></worksheet>`,
+  },
+];
+
+const convertCase = async (i: number): Promise<ReturnType<typeof odsGrid>> =>
+  odsGrid(await xlsxToOds(buildSimpleXlsx(LEAD1_CASES[i].sheet, LEAD1_CASES[i].sst)));
+
+describe("xlsxToOds — rows are never empty (LEAD 1, T-1)", () => {
+  // T1: rng l.16223-16231 — table:table-row content is oneOrMore of table:table-cell |
+  // table:covered-table-cell.
+  for (const i of [0, 1, 5]) {
+    it(`T1 rng l.16223-16231: every table:table-row has a cell child — case ${LEAD1_CASES[i].name}`, async () => {
+      const { rows } = await convertCase(i);
+      for (const row of rows) expect(row.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+describe("xlsxToOds — a merge over empty cells is kept (LEAD 1, T-2)", () => {
+  it("T1 §19.680 (html l.17637) + §9.1.5 (html l.3836): A2:C2 over a row with no cells → spanned empty cell + 2 covered cells", async () => {
+    const { declaredColumns, rows } = await convertCase(1);
+    expect(declaredColumns).toBe(3);
+    expect(rows[1].map((c) => c.tag)).toEqual([
+      "table:table-cell",
+      "table:covered-table-cell",
+      "table:covered-table-cell",
+    ]);
+    expect(rows[1][0].attrs["table:number-columns-spanned"]).toBe("3");
+    // The top-left cell has no value in the source (§18.3.1.55); none is invented.
+    expect(rows[1][0].attrs["office:value-type"]).toBeUndefined();
+  });
+
+  it("T1 §19.680 + §9.1.5: corpus A3:C3 → row 3 is a 3-column spanned empty cell + 2 covered cells", async () => {
+    const { rows } = await convertCase(0);
+    expect(rows[2].map((c) => c.tag)).toEqual([
+      "table:table-cell",
+      "table:covered-table-cell",
+      "table:covered-table-cell",
+    ]);
+    expect(rows[2][0].attrs["table:number-columns-spanned"]).toBe("3");
+  });
+
+  it("T1 §19.680 + §9.1.5: A2:B2 with an empty top-left cell in a row with data → span kept, C2 at position 3", async () => {
+    const { rows } = await convertCase(4);
+    expect(rows[1].map((c) => c.tag)).toEqual([
+      "table:table-cell",
+      "table:covered-table-cell",
+      "table:table-cell",
+    ]);
+    expect(rows[1][0].attrs["table:number-columns-spanned"]).toBe("2");
+    expect(rows[1][2].attrs["office:value"]).toBe("2");
+  });
+});
+
+describe("xlsxToOds — covered cells keep their grid positions (LEAD 1, T-3)", () => {
+  // T1 §9.1.5 (html l.3836): covered cells "occupy the same position in document order as
+  // the cells spanned. There is one <table:covered-table-cell> element for each cell that is
+  // spanned."
+  it("T1 §9.1.5: row-span A1:A2 → row 2 is a covered cell, then B2's value at position 2", async () => {
+    const { rows } = await convertCase(6);
+    expect(rows[1].map((c) => c.tag)).toEqual(["table:covered-table-cell", "table:table-cell"]);
+    expect(rows[1][1].attrs["office:value"]).toBe("8");
+  });
+
+  it("T1 §9.1.5: A1:C1 with data → 3 declared columns; row 1 is a spanned cell + exactly 2 covered cells", async () => {
+    const { declaredColumns, rows } = await convertCase(3);
+    expect(declaredColumns).toBe(3);
+    expect(rows[0].map((c) => c.tag)).toEqual([
+      "table:table-cell",
+      "table:covered-table-cell",
+      "table:covered-table-cell",
+    ]);
+  });
+});
+
+describe("xlsxToOds — covered-only rows and single-cell merge refs (LEAD 1 repair, F3)", () => {
+  // Inputs X2 and X4 of the LEAD 1 review (scratch odf-1.4\lead-1-review\probe-03.mjs).
+  it("T1 §9.1.5 (html l.3836) + rng l.16223-16231: row-span A1:A3 over an absent row 2 → row 2 is a covered cell then B2's empty position", async () => {
+    const sheet = `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c></row><row r="3"><c r="B3"><v>3</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A1:A3"/></mergeCells></worksheet>`;
+    const { declaredColumns, rows } = odsGrid(await xlsxToOds(buildSimpleXlsx(sheet)));
+    expect(declaredColumns).toBe(2);
+    expect(rows[1]).toEqual([
+      { tag: "table:covered-table-cell", attrs: {} },
+      { tag: "table:table-cell", attrs: {} },
+    ]);
+    expect(rowWidth(rows[1])).toBe(declaredColumns);
+  });
+
+  it("ECMA-376 Part 1 §18.3.1.55 + T1 §19.680 (html l.17637): single-cell merge ref A2:A2 over an empty cell → no span and no invented value type", async () => {
+    const sheet = `<?xml version="1.0"?><worksheet ${SML}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c></row></sheetData><mergeCells count="1"><mergeCell ref="A2:A2"/></mergeCells></worksheet>`;
+    const { rows } = odsGrid(await xlsxToOds(buildSimpleXlsx(sheet)));
+    // A2 holds no content in the source (§18.3.1.55: content is stored in the top-left cell);
+    // a one-cell ref spans nothing, so row 2 is the empty row of LEAD 1 decision 2.
+    expect(rows[1]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-repeated": "2" } },
+    ]);
+  });
+});
+
+describe("xlsxToOds — row invariants over the LEAD 1 cases (T-5)", () => {
+  // T1: rng l.16223-16231 (a row is never empty); §9.1.5 (html l.3836) and
+  // rng l.16059-16064 (positions occupied, counted by rowWidth) against the declared
+  // table:table-column count.
+  LEAD1_CASES.forEach((c, i) => {
+    it(`T1 rng l.16223-16231 + §9.1.5: rows non-empty and as wide as the declared columns — case ${c.name}`, async () => {
+      const { declaredColumns, rows } = await convertCase(i);
+      expect(rows.length).toBeGreaterThan(0);
+      for (const row of rows) {
+        expect(row.length).toBeGreaterThan(0);
+        expect(rowWidth(row)).toBe(declaredColumns);
+      }
+    });
   });
 });

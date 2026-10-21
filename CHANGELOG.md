@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Generated files now declare ODF 1.4 instead of 1.2 (office:version and manifest:version). Validators choose a schema from the declared version: OASIS odfvalidator 0.13.0 validates these files against ODF 1.4, while 0.12.0 and 1.0.0-BETA1 fall back to the ODF 1.1 schemas for a 1.4-declared file and report an error on manifest:version. fillTemplate keeps the template's own declared version.
 
+### Fixed
+
+- `xlsxToOds` no longer writes an empty `table:table-row`, which is invalid ODF. A row with no cells, such as a gap between data rows, now holds one empty cell repeated across the sheet's columns. A row that holds only an empty merged range now holds an empty cell spanning the range, plus its covered cells.
+- `xlsxToOds` keeps a merged range whose top-left cell is empty. Before, the merge was dropped without notice.
+- `xlsxToOds` no longer moves cells next to or below a merged range. Covered positions were written twice, which pushed later values to the right and added extra columns to the sheet.
+- `OdsDocument`: `addRow([])` now writes a valid row (one empty cell, repeated across the sheet's columns) instead of an empty `table:table-row`. A cell object with `value: null` and a `colSpan` or `rowSpan` above 1 is now written as an empty spanning cell. Before, it kept its span but was given a value from its `type`: an empty string (`"string"`), `false` (`"boolean"`), `0` (`"percentage"`), the formula `of:null` (`"formula"`), or the invalid `office:value="null"` (`"float"`, `"currency"`); `"date"` threw a TypeError.
+
 ## [0.14.5] - 2026-10-20
 
 ### Security

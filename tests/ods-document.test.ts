@@ -1,6 +1,8 @@
 import { describe, expect, test } from "@jest/globals";
 import { strFromU8, unzipSync } from "fflate";
 import { OdsDocument } from "../src/ods/index.js";
+import { parseXml } from "../src/odt/read/xml-parser.js";
+import type { XmlElementNode } from "../src/odt/read/xml-parser.js";
 
 // ─── Test Helper ──────────────────────────────────────────────────────
 
@@ -666,6 +668,203 @@ describe("OdsDocument — merged cells", () => {
     const { "content.xml": content } = await extractFiles(doc);
     expect(content).toContain('table:number-columns-spanned="3"');
     expect(content).toContain("fo:font-weight");
+  });
+});
+
+// ─── Empty Rows and Empty Spanned Cells (LEAD 1, T-4) ─────────────────
+//
+// T1 citations are to the ODF 1.4 schema, odf-kit-internal
+// spec/odf-1.4/schemas/OpenDocument-v1.4-schema.rng (l.N), and its Part 3 prose,
+// OpenDocument-v1.4-os-part3-schema.html (§N, html l.N).
+
+/** The children (tag + attributes) of each table:table-row of the first sheet. */
+async function rowChildren(
+  doc: OdsDocument,
+): Promise<{ tag: string; attrs: Record<string, string> }[][]> {
+  const { "content.xml": content } = await extractFiles(doc);
+  const elements = (n: XmlElementNode): XmlElementNode[] =>
+    n.children.filter((c): c is XmlElementNode => c.type === "element");
+  const rows: { tag: string; attrs: Record<string, string> }[][] = [];
+  const walk = (n: XmlElementNode): void => {
+    if (n.tag === "table:table-row") {
+      rows.push(elements(n).map((c) => ({ tag: c.tag, attrs: c.attrs })));
+      return;
+    }
+    elements(n).forEach(walk);
+  };
+  walk(parseXml(content));
+  return rows;
+}
+
+describe("OdsDocument — empty rows and empty spanned cells (LEAD 1, T-4)", () => {
+  test("T1 rng l.16223-16231 + l.16059-16064: addRow([]) in a 3-column table → one empty cell repeated 3 times (T4: Scott, LEAD 1 decision 2)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["A1", "B1", "C1"]);
+    sheet.addRow([]);
+    sheet.addRow(["A3"]);
+    const rows = await rowChildren(doc);
+    expect(rows[1]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-repeated": "3" } },
+    ]);
+  });
+
+  test("T1 rng l.16223-16231: addRow([]) in a 1-column table → one bare empty cell, no repeat attribute (T4: LEAD 1 decision 2)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow(["A1"]);
+    sheet.addRow([]);
+    const rows = await rowChildren(doc);
+    expect(rows[1]).toEqual([{ tag: "table:table-cell", attrs: {} }]);
+  });
+
+  test("T1 rng l.16223-16231: addRow([]) with 0 declared columns → one bare empty cell (T4: Scott, LEAD 1 N = 0 ruling)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([]);
+    const rows = await rowChildren(doc);
+    expect(rows[0]).toEqual([{ tag: "table:table-cell", attrs: {} }]);
+  });
+
+  test("T1 §19.680 (html l.17637) + §9.1.5 (html l.3836): { value: null, colSpan: 3 } → empty cell spanning 3 + 2 covered cells (T4: LEAD 1 decision 3)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: null, type: "string", colSpan: 3 }]);
+    const rows = await rowChildren(doc);
+    expect(rows[0]).toEqual([
+      { tag: "table:table-cell", attrs: { "table:number-columns-spanned": "3" } },
+      { tag: "table:covered-table-cell", attrs: {} },
+      { tag: "table:covered-table-cell", attrs: {} },
+    ]);
+  });
+
+  test("T1 §19.680 + §9.1.5: { value: null, rowSpan: 2 } → empty cell spanning 2 rows + a covered cell below (T4: LEAD 1 decision 3)", async () => {
+    const doc = new OdsDocument();
+    const sheet = doc.addSheet("Sheet1");
+    sheet.addRow([{ value: null, type: "string", rowSpan: 2 }, "B1"]);
+    sheet.addRow(["B2"]);
+    const rows = await rowChildren(doc);
+    expect(rows[0][0]).toEqual({
+      tag: "table:table-cell",
+      attrs: { "table:number-rows-spanned": "2" },
+    });
+    expect(rows[1][0]).toEqual({ tag: "table:covered-table-cell", attrs: {} });
+  });
+});
+
+// ─── Empty Spanning Cells Keep Style, Formula and Href (LEAD 1 repair, F1) ─
+//
+// T4: Scott's F1 ruling (2026-10-21): an empty spanning cell keeps everything the cell object
+// specifies except a value — its own style, the row's style, its formula and its href. T1: each
+// is an optional cell attribute independent of the value-type group (rng l.16059-16101), and
+// text:a content is zeroOrMore (rng l.16458-16460). The cell carries no office:value-type: §19.389
+// (html l.13832) "The value type of each of these elements shall be specified" against §9.1.4
+// (html l.3827) "Table cells may be empty" is an UNRESOLVED T2 tension, recorded as a LEAD; this
+// follows odf-kit's existing practice for empty cells (bare, no value type).
+
+/** The first table:table-cell of the first sheet, and the parsed content.xml root. */
+async function firstCell(
+  doc: OdsDocument,
+): Promise<{ cell: XmlElementNode; root: XmlElementNode }> {
+  const { "content.xml": content } = await extractFiles(doc);
+  const root = parseXml(content);
+  const find = (n: XmlElementNode): XmlElementNode | undefined => {
+    if (n.tag === "table:table-cell") return n;
+    for (const c of n.children) {
+      if (c.type !== "element") continue;
+      const hit = find(c);
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const cell = find(root);
+  if (!cell) throw new Error("no table:table-cell in content.xml");
+  return { cell, root };
+}
+
+/** The table-cell-properties and text-properties attributes of the named automatic style. */
+function cellStyleProps(root: XmlElementNode, name: string): Record<string, string> {
+  const elements = (n: XmlElementNode): XmlElementNode[] =>
+    n.children.filter((c): c is XmlElementNode => c.type === "element");
+  const find = (n: XmlElementNode): XmlElementNode | undefined => {
+    if (n.tag === "style:style" && n.attrs["style:name"] === name) return n;
+    for (const c of elements(n)) {
+      const hit = find(c);
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const style = find(root);
+  if (!style) throw new Error(`no style:style named ${name}`);
+  expect(style.attrs["style:family"]).toBe("table-cell");
+  return Object.assign({}, ...elements(style).map((c) => c.attrs));
+}
+
+describe("OdsDocument — an empty spanning cell keeps style, formula and href (LEAD 1 repair, F1)", () => {
+  test("T4 F1 ruling + T1 rng l.16066-16070: own style on { value: null, colSpan: 2 } → table:style-name, no value type, no content", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([
+        { value: null, type: "string", colSpan: 2, backgroundColor: "#FFFF00", bold: true },
+        "C1",
+      ]);
+    const { cell, root } = await firstCell(doc);
+    const styleName = cell.attrs["table:style-name"];
+    expect(styleName).toBeDefined();
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:style-name": styleName,
+    });
+    expect(cell.children.filter((c) => c.type === "element")).toEqual([]);
+    expect(cellStyleProps(root, styleName)).toMatchObject({
+      "fo:background-color": "#FFFF00",
+      "fo:font-weight": "bold",
+    });
+  });
+
+  test("T4 F1 ruling + T1 rng l.16066-16070: row options on an empty spanning cell → the row's style on the cell", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", colSpan: 2 }, "C1"], { backgroundColor: "#00FF00" });
+    const { cell, root } = await firstCell(doc);
+    const styleName = cell.attrs["table:style-name"];
+    expect(styleName).toBeDefined();
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:style-name": styleName,
+    });
+    expect(cellStyleProps(root, styleName)).toMatchObject({ "fo:background-color": "#00FF00" });
+  });
+
+  test("T4 F1 ruling, decision 2 + T1 rng l.16076-16080, §19.646 (html l.17077): formula on an empty spanning cell → table:formula, no value type, no cached value", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", formula: "SUM(1;2)", colSpan: 2 }, "C1"]);
+    const { cell } = await firstCell(doc);
+    expect(cell.attrs).toEqual({
+      "table:number-columns-spanned": "2",
+      "table:formula": "of:SUM(1;2)",
+    });
+    expect(cell.children.filter((c) => c.type === "element")).toEqual([]);
+  });
+
+  test("T4 F1 ruling, decision 3 + T1 rng l.16458-16480: href on an empty spanning cell → text:p > empty text:a, no value type", async () => {
+    const doc = new OdsDocument();
+    doc
+      .addSheet("Sheet1")
+      .addRow([{ value: null, type: "string", href: "https://example.org/", colSpan: 2 }, "C1"]);
+    const { cell } = await firstCell(doc);
+    expect(cell.attrs).toEqual({ "table:number-columns-spanned": "2" });
+    const kids = cell.children.filter((c): c is XmlElementNode => c.type === "element");
+    expect(kids.map((k) => k.tag)).toEqual(["text:p"]);
+    const inner = kids[0].children.filter((c): c is XmlElementNode => c.type === "element");
+    expect(inner.map((k) => [k.tag, k.attrs])).toEqual([
+      ["text:a", { "xlink:type": "simple", "xlink:href": "https://example.org/" }],
+    ]);
+    expect(inner[0].children).toEqual([]);
   });
 });
 
