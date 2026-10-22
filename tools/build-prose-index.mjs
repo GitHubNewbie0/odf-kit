@@ -45,7 +45,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // T4: bump on any change that alters the generated output.
-const GENERATOR_VERSION = "1.0.1";
+const GENERATOR_VERSION = "1.0.2";
 const GENERATOR_NAME = "tools/build-prose-index.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -258,6 +258,7 @@ function scan(text) {
   const tokens = [];
   let inAttrHeading = 0; // "<hN" occurrences inside attribute values
   let skippedHeading = 0; // "<hN" occurrences inside comments / script / style
+  const skipped = []; // comment and script/style-body spans [start, stop) — no tokens, but text the mentions pass must not read
   const countH = (s) => (s.match(/<h[1-6][\s>/]/g) || []).length;
   let i = 0;
   const n = text.length;
@@ -268,6 +269,7 @@ function scan(text) {
       const e = text.indexOf("-->", lt + 4);
       if (e === -1) fail("unterminated comment");
       skippedHeading += countH(text.slice(lt, e));
+      skipped.push({ start: lt, stop: e + 3 });
       i = e + 3;
       continue;
     }
@@ -303,10 +305,11 @@ function scan(text) {
       const close = text.indexOf(`</${name}`, i);
       if (close === -1) fail(`unterminated <${name}>`);
       skippedHeading += countH(text.slice(i, close));
+      if (close > i) skipped.push({ start: i, stop: close }); // an empty body has nothing to blank
       i = close;
     }
   }
-  return { tokens, inAttrHeading, skippedHeading };
+  return { tokens, inAttrHeading, skippedHeading, skipped };
 }
 
 const attr = (raw, key) => {
@@ -371,7 +374,7 @@ function buildAuthority(a) {
   const vline = cited.slice(cls[a.version.line - 1], cls[a.version.line] ?? cited.length);
   if (!textOf(vline, false).includes(a.version.text)) fail(`${a.slug}: version text "${a.version.text}" not on ${citedPath} l.${a.version.line}`);
 
-  const { tokens, inAttrHeading, skippedHeading } = scan(text);
+  const { tokens, inAttrHeading, skippedHeading, skipped } = scan(text);
   const idsIn = (from, to) => {
     const ids = [];
     for (let k = from; k <= to; k++) if (!tokens[k].end) { const id = attr(tokens[k].attrs, "id"); if (id) ids.push(id); }
@@ -552,7 +555,7 @@ function buildAuthority(a) {
     if (noRef.length) anomalies.push({ kind: "heading-without-__RefHeading-anchor", sections: noRef });
   }
 
-  return { a, text, ls, tokens, tocRange, citedPath, sections, crossChecks, anomalies };
+  return { a, text, ls, tokens, skipped, tocRange, citedPath, sections, crossChecks, anomalies };
 }
 
 // ---------------------------------------------------------------------------
@@ -603,10 +606,16 @@ function buildNames(odf) {
         else unmatchedAnchors.push({ part, id, line });
       }
     }
-    // mentions: names in the text content, outside the TOC, one per (line, name)
+    // mentions: names in the text content, outside the TOC, one per (line, name).
+    // Tags, comments and script/style bodies are blanked, keeping their newlines
+    // so line numbers are unchanged (1.0.2: comments were read as text before —
+    // LibreOffice's converter comments carry names, e.g. Part 4 l.637
+    // "<!--Next 'div' was a 'text:p'.-->").
     const keep = [];
     let at1 = 0;
-    for (const t of r.tokens) {
+    const blanked = [...r.tokens, ...r.skipped].sort((x, y) => x.start - y.start);
+    for (const t of blanked) {
+      if (t.start < at1) fail(`odf-names: overlapping blanked spans in Part ${part} at offset ${t.start}`);
       keep.push(r.text.slice(at1, t.start));
       keep.push("\n".repeat((r.text.slice(t.start, t.stop).match(/\n/g) || []).length));
       at1 = t.stop;

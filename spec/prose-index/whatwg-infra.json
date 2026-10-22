@@ -4,7 +4,7 @@
     "file": "spec/prose-index/whatwg-infra.json",
     "generator": {
       "name": "tools/build-prose-index.mjs",
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     "generated": "2026-10-22",
     "authority": {
