@@ -26,7 +26,7 @@
 // the foundation doc. The exact rational strictly contains them all.
 //
 // Per-attribute grammar (which units/forms are legal WHERE) is the
-// schema layer's job, driven by spec/odf-1.3-length-datatypes.json.
+// schema layer's job, driven by spec/odf-datatypes.json (T1: ODF 1.4).
 // This module accepts the full lexical family and validates nothing
 // attribute-specific.
 //

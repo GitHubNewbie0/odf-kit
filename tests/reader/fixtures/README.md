@@ -222,7 +222,7 @@ Each index entry records:
 
   `./Object 1` is a real ODF sub-document — manifest media type `application/vnd.oasis.opendocument.spreadsheet`, four parts (`content.xml`, `styles.xml`, `settings.xml`, `manifest.rdf`). `./ObjectReplacements/Object 1` is 409 bytes with media type `application/x-openoffice-gdimetafile;windows_formatname="GDIMetaFile"`.
 
-- **What it is evidence of.** This is the only fixture in the corpus whose frame holds more than one rendition, and the order is the point. ODF 1.3 Part 3 §10.4.1: _"The order of content elements reflects the document author's preference for rendering, with the first child element being preferred."_ LibreOffice writes the object first and the raster replacement second, deliberately — its export filter comments the decision at `xmloff/source/text/txtparae.cxx` as _"put preferred image first above, followed by fallback here"_ (fdo#62461). Before this fixture the ordering rule rested on reading that source; it now rests on a file.
+- **What it is evidence of.** This is the only fixture in the corpus whose frame holds more than one rendition, and the order is the point. ODF 1.4 Part 3 §10.4.1: _"The order of content elements reflects the document author's preference for rendering, with the first child element being preferred."_ LibreOffice writes the object first and the raster replacement second, deliberately — its export filter comments the decision at `xmloff/source/text/txtparae.cxx` as _"put preferred image first above, followed by fallback here"_ (fdo#62461). Before this fixture the ordering rule rested on reading that source; it now rests on a file.
 
   It is also the T3 case for **skipping an unsupported rendition**: `draw:object` is one of the eight permitted representations and odf-kit has no branch for it, so the reader passes over child 1 and renders child 2. That path had no producer evidence at all.
 
@@ -257,7 +257,7 @@ Each index entry records:
   row 3  one string cell, then <table:table-cell table:number-columns-repeated="3"/>
   ```
 
-- **What it is evidence of.** LibreOffice writes empty cells as `<table:table-cell table:number-columns-repeated="N"/>`, with **no `office:value-type`**, both for a whole empty row (row 1) and for empty cells after data (row 3). This is the T3 evidence for the LEAD on ODF 1.4 Part 3 §19.389 (html l.13832), _"The value type of each of these elements shall be specified"_: whether an empty cell without `office:value-type` conforms. It is evidence of producer practice only; it does not settle the T2 question. Row 1 also matches the empty-row encoding of LEAD 1 decision 2: one cell repeated across the declared columns.
+- **What it is evidence of.** LibreOffice writes empty cells as `<table:table-cell table:number-columns-repeated="N"/>`, with **no `office:value-type`**, both for a whole empty row (row 1) and for empty cells after data (row 3). This is the T3 evidence for the LEAD on ODF 1.4 Part 3 §19.389, _"The value type of each of these elements shall be specified"_: whether an empty cell without `office:value-type` conforms. It is evidence of producer practice only; it does not settle the T2 question. Row 1 also matches the empty-row encoding of LEAD 1 decision 2: one cell repeated across the declared columns.
 
 - **Recipe:** not recorded. The file was made by hand in LibreOffice Calc; the steps were not written down at the time.
 

@@ -426,9 +426,10 @@ describe("xlsxToOds — formula cells", () => {
 
 // ─── xlsxToOds — rows, merges and covered cells (LEAD 1) ─────────────
 //
-// T1 citations are to the ODF 1.4 schema, odf-kit-internal
-// spec/odf-1.4/schemas/OpenDocument-v1.4-schema.rng (l.N), and to its Part 3 prose,
-// OpenDocument-v1.4-os-part3-schema.html (§N, html l.N). The inputs are valid SpreadsheetML:
+// Citations below are to ODF 1.4. "rng l.N" is OpenDocument-v1.4-schema.rng:N; each
+// declaration it names is in spec/odf-elements.json or spec/odf-attributes.json with that
+// line. "§N" is ODF 1.4 Part 3 §N (prose); "html l.N" is the line in its HTML rendering,
+// which spec/prose-index/odf-part3.json maps to the section. The inputs are valid SpreadsheetML:
 // a merge range needs no row or c element under it (ECMA-376 Part 1, 5th ed., sml.xsd
 // CT_SheetData row minOccurs="0", CT_Row c minOccurs="0", CT_MergeCell ref ST_Ref;
 // §18.3.1.55: "The formatting and content for the merged range is always stored in the top

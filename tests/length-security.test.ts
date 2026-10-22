@@ -86,9 +86,10 @@ function actualShape(input: string): Shape | undefined {
 
 // ─── Corpus — the T1 grammar family ────────────────────────────────────
 //
-// T1 (spec/odf-1.3-length-datatypes.json): a length is a decimal followed
-// by one of cm/mm/in/pt/pc/px; the decimal admits integer, trailing-dot,
-// fractional and leading-dot forms, signed or unsigned.
+// T1 (OpenDocument-v1.4-schema.rng:6951; spec/odf-datatypes.json length): a
+// length is a decimal followed by one of cm/mm/in/pt/pc/px; the decimal admits
+// integer, trailing-dot, fractional and leading-dot forms, with an optional
+// leading "-" only. The corpus also carries "+" forms and non-lengths on purpose.
 
 const UNITS = ["cm", "mm", "in", "pt", "pc", "px"] as const;
 const SIGNS = ["", "+", "-"];

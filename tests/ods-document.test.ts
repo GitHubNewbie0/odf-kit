@@ -673,9 +673,10 @@ describe("OdsDocument — merged cells", () => {
 
 // ─── Empty Rows and Empty Spanned Cells (LEAD 1, T-4) ─────────────────
 //
-// T1 citations are to the ODF 1.4 schema, odf-kit-internal
-// spec/odf-1.4/schemas/OpenDocument-v1.4-schema.rng (l.N), and its Part 3 prose,
-// OpenDocument-v1.4-os-part3-schema.html (§N, html l.N).
+// Citations below are to ODF 1.4. "rng l.N" is OpenDocument-v1.4-schema.rng:N; each
+// declaration it names is in spec/odf-elements.json or spec/odf-attributes.json with that
+// line. "§N" is ODF 1.4 Part 3 §N (prose); "html l.N" is the line in its HTML rendering,
+// which spec/prose-index/odf-part3.json maps to the section.
 
 /** The children (tag + attributes) of each table:table-row of the first sheet. */
 async function rowChildren(
