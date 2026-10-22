@@ -76,13 +76,13 @@ description:
       ODT file to Typst markup for compilation to PDF — making it a
       zero-dependency alternative to LibreOffice headless for PDF generation.
 
-      odf-kit generates ODF 1.2+ compliant files per ISO/IEC 26300, the
-      international standard mandated by the European Union, many national
-      governments, and public sector organisations for vendor independence and
-      long-term document accessibility. Generated documents are validated
-      against the official OASIS ODF validator in CI. odf-kit has two runtime
-      dependencies — fflate for ZIP packaging and marked for Markdown parsing —
-      and no transitive dependencies beyond them.
+      odf-kit generates OASIS OpenDocument (ODF) 1.4 files. ODF is the open
+      standard mandated by the European Union, many national governments, and
+      public sector organisations for vendor independence and long-term document
+      accessibility. Generated documents are validated against the official
+      OASIS ODF validator in CI. odf-kit has two runtime dependencies — fflate
+      for ZIP packaging and marked for Markdown parsing — and no transitive
+      dependencies beyond them.
     documentation: https://github.com/GitHubNewbie0/odf-kit#readme
     apiDocumentation: https://githubnewbie0.github.io/odf-kit/api/
     features:
@@ -104,7 +104,7 @@ description:
       - Read and extract content from existing .odt and .ods files
       - Rich text formatting, tables, lists, and embedded images
       - Headers, footers, page numbers, hyperlinks, and full page layout control
-      - Compliant with the ISO/IEC 26300 OpenDocument standard — every file
+      - Compliant with the OASIS OpenDocument (ODF) 1.4 standard — every file
         validated automatically
       - Runs in web browsers and on servers — no separate document conversion
         service required
