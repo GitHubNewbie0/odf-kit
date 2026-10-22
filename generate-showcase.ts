@@ -348,7 +348,7 @@ async function main() {
   doc.addParagraph((p) => {
     p.addText("Key facts: ", { bold: true });
     p.addText(
-      "Single runtime dependency (jszip). 102 tests. Full TypeScript types with autocomplete. Node 22+, ESM-only. Targets ODF 1.2+ (ISO/IEC 26300).",
+      "Single runtime dependency (jszip). 102 tests. Full TypeScript types with autocomplete. Node 22+, ESM-only. Targets OASIS OpenDocument (ODF) 1.4.",
     );
   });
 

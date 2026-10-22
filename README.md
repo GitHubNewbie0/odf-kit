@@ -1108,7 +1108,7 @@ ESM only. Zero Node-specific APIs in the library source — enforced at the Type
 
 ## Specification compliance
 
-odf-kit targets ODF 1.2 (ISO/IEC 26300). Generated files include proper ZIP packaging, manifest, metadata, and all required namespace declarations. The OASIS ODF validator runs on every push via GitHub Actions.
+odf-kit generates OASIS OpenDocument (ODF) 1.4 files. Generated files include proper ZIP packaging, manifest, metadata, and all required namespace declarations. The OASIS ODF validator runs on every push via GitHub Actions.
 
 ---
 

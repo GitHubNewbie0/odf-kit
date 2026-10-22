@@ -74,7 +74,7 @@ export interface SpanStyle {
  * Paragraph-level layout properties from style:paragraph-properties.
  *
  * All values are CSS-ready strings (lengths include units: "1.5cm", "150%").
- * fo:text-align values are passed through verbatim per ODF 1.2 §20.216:
+ * fo:text-align values are passed through verbatim per ODF 1.4 Part 3 §20.223:
  * "start" | "end" | "left" | "right" | "center" | "justify". All six are
  * valid CSS text-align values in modern browsers; normalizing start/end to
  * left/right would break RTL documents.

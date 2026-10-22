@@ -83,7 +83,7 @@ function findElement(node: XmlElementNode, tag: string): XmlElementNode | undefi
  * Return the frame's first child element that this reader can render, walking
  * its direct children in document order.
  *
- * T2 (ODF 1.3 Part 3 §10.4.1): "Each child element of a frame is a different
+ * T2 (ODF 1.4 Part 3 §10.4.1): "Each child element of a frame is a different
  * representation of the same content. The order of content elements reflects
  * the document author's preference for rendering, with the first child element
  * being preferred. That means that consumers should render the first child
@@ -92,9 +92,10 @@ function findElement(node: XmlElementNode, tag: string): XmlElementNode | undefi
  * permitted, but document order is what the spec prefers, and it is what this
  * walk honours.
  *
- * T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): the eight representations —
- * draw:text-box, draw:image, draw:object, draw:object-ole, draw:applet,
- * draw:floating-frame, draw:plugin, table:table — are a zeroOrMore choice, so
+ * T1 (OpenDocument-v1.4-schema.rng:5096-5107; spec/odf-elements.json draw:frame):
+ * the eight representations — draw:text-box, draw:image, draw:object,
+ * draw:object-ole, draw:applet, draw:floating-frame, draw:plugin, table:table —
+ * are a zeroOrMore choice, so
  * the grammar constrains neither their order nor their count. Order therefore
  * carries no grammatical meaning; it carries the author's, per §10.4.1.
  *
@@ -593,7 +594,7 @@ function extractSpanStyle(
  * undefined when none of the supported properties are set so
  * ParagraphNode.paragraphStyle is absent entirely for unstyled paragraphs.
  *
- * fo:text-align values are passed through verbatim per ODF 1.2 §20.216
+ * fo:text-align values are passed through verbatim per ODF 1.4 Part 3 §20.223
  * ("start", "end", "left", "right", "center", "justify") — all are valid
  * CSS text-align values in modern browsers.
  *
@@ -771,7 +772,7 @@ const FIELD_TYPE_MAP: Record<string, string> = {
  * cell, or note body into an array of InlineNode objects.
  *
  * Handles: text:span, text:a, text:line-break, text:tab, text:s,
- * draw:frame (its first supported child in document order, per ODF 1.3 Part 3
+ * draw:frame (its first supported child in document order, per ODF 1.4 Part 3
  * §10.4.1 — an image as an ImageNode, a draw:text-box degraded to its text;
  * #94), text:note, text:bookmark, text:bookmark-start,
  * text:bookmark-end, text:bookmark-ref, tracked-change inline markers,
@@ -913,7 +914,7 @@ function parseSpans(
       }
 
       case "draw:frame": {
-        // T2 (ODF 1.3 Part 3 §10.4.1): a frame's children are alternative
+        // T2 (ODF 1.4 Part 3 §10.4.1): a frame's children are alternative
         // renditions of one content, ordered by the document author's
         // preference, and "consumers should render the first child element that
         // they support." So: take the first supported child in document order,

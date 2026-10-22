@@ -117,4 +117,4 @@ ruled plan with a strict-additive contract, executed move-by-move with a
 full pipeline gate and census diff at every commit, and every deviation
 from the plan is written down. The library is ESM-only (Node 22+), with
 two runtime dependencies (`fflate`, `marked`). Values derived from the
-ODF 1.3 schema cite it; values we chose cite the decision.
+ODF 1.4 grammar (`spec/odf-*.json`) cite it; values we chose cite the decision.

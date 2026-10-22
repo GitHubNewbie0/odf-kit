@@ -1,5 +1,6 @@
 /**
- * ODF XML namespace URIs (ODF 1.2 / ISO 26300).
+ * ODF XML namespace URIs (OASIS OpenDocument (ODF) 1.4; T1: each URI is declared
+ * by the ODF 1.4 schemas, spec/odf-elements.json _generated.schemas[].namespaces).
  *
  * Each key is the conventional namespace prefix used throughout ODF documents.
  */

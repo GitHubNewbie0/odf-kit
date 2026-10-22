@@ -2,7 +2,8 @@
 //
 // The ODF version odf-kit declares in every package it builds.
 //
-// T1: OASIS OpenDocument-v1.4-schema.rng l.7819-7822; OpenDocument-v1.4-manifest-schema.rng l.201-203.
+// T1: OpenDocument-v1.4-schema.rng:7819-7822 (spec/odf-attributes.json office:version);
+// OpenDocument-v1.4-manifest-schema.rng:201-203 (spec/odf-attributes.json manifest:version).
 // office:version on every office:document-* root and manifest:version on
 // manifest:manifest each have the single value "1.4".
 
@@ -55,7 +56,7 @@ describe.each([
   ["OdsDocument.save", ods],
 ])("%s declares ODF 1.4", (_name, build) => {
   test.each(Object.entries(ROOTS))(
-    // T1: OpenDocument-v1.4-schema.rng l.7819-7822
+    // T1: OpenDocument-v1.4-schema.rng:7819-7822 (spec/odf-attributes.json office:version)
     '%s root %s has office:version="1.4"',
     async (path, element) => {
       const files = streams(await build());
@@ -65,7 +66,7 @@ describe.each([
     },
   );
 
-  // T1: OpenDocument-v1.4-manifest-schema.rng l.201-203
+  // T1: OpenDocument-v1.4-manifest-schema.rng:201-203 (spec/odf-attributes.json manifest:version)
   test('META-INF/manifest.xml root manifest:manifest has manifest:version="1.4"', async () => {
     const files = streams(await build());
     const manifest = files["META-INF/manifest.xml"];

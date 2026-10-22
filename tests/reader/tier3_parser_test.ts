@@ -1108,7 +1108,7 @@ describe("readOdt — draw:frame text content (#94)", () => {
   });
 
   test("image before text box yields the image — the first supported child", () => {
-    // T2 (ODF 1.3 Part 3 §10.4.1): "consumers should render the first child
+    // T2 (ODF 1.4 Part 3 §10.4.1): "consumers should render the first child
     // element that they support." The image is first here, so the image is what
     // renders — and the text box, being an alternative rendition of the same
     // content and not additional content, must not also be emitted.
@@ -1128,7 +1128,7 @@ describe("readOdt — draw:frame text content (#94)", () => {
   });
 
   test("text box before image yields the text — the first supported child", () => {
-    // T2 (ODF 1.3 Part 3 §10.4.1): "The order of content elements reflects the
+    // T2 (ODF 1.4 Part 3 §10.4.1): "The order of content elements reflects the
     // document author's preference for rendering, with the first child element
     // being preferred. That means that consumers should render the first child
     // element that they support."
@@ -1152,8 +1152,9 @@ describe("readOdt — draw:frame text content (#94)", () => {
   test("an unsupported representation is skipped to the next supported child", () => {
     // T2 (§10.4.1): the first child element that they *support* — so a
     // rendition we cannot render is passed over, not treated as the answer.
-    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): draw:object is one of
-    // the eight permitted representations; this reader has no branch for it.
+    // T1 (OpenDocument-v1.4-schema.rng:5096-5107; spec/odf-elements.json
+    // draw:frame): draw:object is one of the eight permitted representations;
+    // this reader has no branch for it.
     //
     // This is the shape LibreOffice writes for an embedded chart, formula or
     // spreadsheet: the object first, its replacement image second. Evidence is
@@ -1172,8 +1173,9 @@ describe("readOdt — draw:frame text content (#94)", () => {
   });
 
   test("a frame whose only representation is unsupported yields nothing (LEAD-046)", () => {
-    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042): six of the eight
-    // representations have no branch in this reader — draw:object,
+    // T1 (OpenDocument-v1.4-schema.rng:5096-5107; spec/odf-elements.json
+    // draw:frame): six of the eight representations have no branch in this
+    // reader — draw:object,
     // draw:object-ole, draw:applet, draw:floating-frame, draw:plugin and
     // table:table. A frame holding only those yields nothing, silently, as it
     // did before this change. Pinned so the gap stays visible: LEAD-046 is
@@ -1199,8 +1201,10 @@ describe("readOdt — draw:frame text content (#94)", () => {
   });
 
   test("svg:title and svg:desc never become body text", () => {
-    // T1 (spec/OpenDocument-v1.3-schema.rng:5031-5042 plus :5052-5057):
-    // svg:title and svg:desc are permitted children of draw:frame, and
+    // T1 (OpenDocument-v1.4-schema.rng:5096-5107 plus :5118, which refs
+    // common-draw-shape-accessibility at :1756-1764; spec/odf-elements.json
+    // draw:frame): svg:title and svg:desc are permitted children of draw:frame
+    // through that define, outside the eight representations, and
     // parseSpans pushes any text child as a span. Recursing the frame rather
     // than its text box would surface accessibility metadata as document
     // content — a silent insertion in place of a silent drop.

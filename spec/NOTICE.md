@@ -1,48 +1,8 @@
 # spec/ — notices and provenance
 
-This directory holds OASIS OpenDocument specification files and artifacts
-derived from them. This file is the single place for notices and annotations
-about everything here.
-
-## Verbatim OASIS files
-
-These files are byte-for-byte copies of OASIS Standard deliverables. They are
-**verbatim and must remain so**: the OASIS notice prohibits modifying them.
-Anything we need to say about them is written in this file, never in them.
-
-| File                                     | OASIS source                                                                                                |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `OpenDocument-v1.3-schema.rng`           | https://docs.oasis-open.org/office/OpenDocument/v1.3/os/schemas/                                            |
-| `OpenDocument-v1.3-os-part3-schema.html` | https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html |
-
-Open Document Format for Office Applications (OpenDocument) Version 1.3,
-OASIS Standard, 27 April 2021. Copyright © OASIS Open 2021. All Rights
-Reserved.
-
-Each file carries its own copyright notice, which is the authoritative text:
-
-- the `.rng` in its opening comment block (copyright, source URL, and the
-  TC IPR statement at https://www.oasis-open.org/committees/office/ipr.php);
-- the `.html` in its "Notices" section.
-
-Under those notices, verbatim copies may be copied and distributed provided
-the notices are retained and the files are not modified.
-
-## Derived files
-
-These files are produced from the verbatim files above by scripts in `tools/`.
-They are generated: regenerate them, never edit them by hand. They are
-derivative works that assist in implementing the specification, a category
-the OASIS notice permits, subject to the same notice.
-
-| File                            | Produced by                         | Derived from       |
-| ------------------------------- | ----------------------------------- | ------------------ |
-| `odf-1.3-length-datatypes.json` | `tools/extract-odf-datatypes.mjs`   | the `.rng`         |
-| `odf-1.3-length-datatypes.md`   | `tools/extract-odf-datatypes.mjs`   | the `.rng`         |
-| `citations/*.txt`               | `tools/extract-prose-citations.mjs` | the Part 3 `.html` |
-
-The citation files contain passages quoted from the Part 3 prose, used as
-section-cited evidence (T2 in the provenance charter).
+This directory holds artifacts derived from specifications (OASIS OpenDocument
+and the others listed below) and one verbatim excerpt file. This file is the
+single place for notices and annotations about everything here.
 
 ## ODF 1.4 derived files
 
@@ -60,7 +20,7 @@ Source: Open Document Format for Office Applications (OpenDocument) Version
 https://docs.oasis-open.org/office/OpenDocument/v1.4/os/schemas/. Each
 schema's header reads "Copyright (c) OASIS Open 2025. All Rights Reserved."
 
-## OASIS copyright notice and Notices (applies to all ODF-derived files in this directory, ODF 1.3 and 1.4)
+## OASIS copyright notice and Notices (applies to all ODF-derived files in this directory, ODF 1.4)
 
 Reproduced verbatim from the originals in the maintainer's internal source
 repository (HTML tags dropped, no other change):
@@ -139,9 +99,7 @@ l.123–135 and `gfm.txt` l.121–127), are:
 
 `spec/citations/markdown-cm-0.29-gfm-0.29.txt` is a verbatim, unmodified
 excerpt under CC BY-SA 4.0, not Apache-2.0. Each excerpt in it is headed by
-its section number and its line range in `cm.txt` or `gfm.txt`. It is not
-produced by `tools/extract-prose-citations.mjs`, and the `citations/*.txt`
-row under "Derived files" does not cover it.
+its section number and its line range in `cm.txt` or `gfm.txt`.
 
 ## Prose index (`prose-index/`)
 
@@ -220,9 +178,11 @@ tooling does. It does not denote an OASIS output.
 
 - These files stay in the repository and are not published in the npm
   package (provenance charter, DP4).
-- odf-kit's ODF target was ruled **ODF 1.4** on 2026-09-16. The verbatim
-  OASIS files in the first table are 1.3, together with the 1.3 derived
-  files; they stay here while code and tests still cite them.
+- odf-kit's ODF target was ruled **ODF 1.4** on 2026-09-16. The ODF 1.3
+  files once kept here (the 1.3 schema and Part 3 prose, the 1.3 length
+  tables, `citations/p1`–`p5`, and the two 1.3 extractor scripts that
+  produced them) were retired by odf-1.4 Unit C. They remain in git history,
+  added at `0059f7c`.
 - The ODF 1.4 schemas are **not copied into this directory**. The verbatim
   1.4 files live in the maintainer's internal source repository
   (`odf-kit-internal/spec/odf-1.4/`, with its own provenance record).

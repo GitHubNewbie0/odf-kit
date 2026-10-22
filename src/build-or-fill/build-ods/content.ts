@@ -658,7 +658,8 @@ function buildCellElement(
   const cellEl = el("table:table-cell");
 
   // Column and row span — on empty cells too: an empty cell may span
-  // (T1: rng table-table-cell-attlist-extra l.16102-16114; content optional l.16126-16138).
+  // (T1: OpenDocument-v1.4-schema.rng:16102-16114, define table-table-cell-attlist-extra,
+  // spec/odf-attributes.json table:number-columns-spanned; content optional :16126-16138).
   const colSpan = cell.colSpan ?? 1;
   const rowSpan = cell.rowSpan ?? 1;
   if (colSpan > 1) cellEl.attr("table:number-columns-spanned", String(colSpan));
@@ -695,12 +696,13 @@ function buildCellElement(
 
   // An empty spanning cell: style (above), formula and href, but no value. So there is no
   // office:value-type and no cached result (T4: Scott, LEAD 1 F1 ruling, decision 2). T1:
-  // table:formula is independent of the value-type group (rng l.16076-16083). §19.389
-  // (html l.13832) "The value type of each of these elements shall be specified" is an
-  // UNRESOLVED T2 tension for every empty cell odf-kit writes (LEAD); this follows the
-  // existing practice. The href is the text:p > text:a written for an empty string, with no
-  // anchor text (T1: text:a content zeroOrMore, rng l.16458-16460; T2 §6.1.8, html l.2162,
-  // is silent on an empty anchor; T4: decision 3).
+  // table:formula is independent of the value-type group (OpenDocument-v1.4-schema.rng:
+  // 16076-16083; spec/odf-attributes.json table:formula). ODF 1.4 Part 3 §19.389 "The value
+  // type of each of these elements shall be specified" is an UNRESOLVED T2 tension for every
+  // empty cell odf-kit writes (LEAD); this follows the existing practice. The href is the
+  // text:p > text:a written for an empty string, with no anchor text (T1: text:a content
+  // zeroOrMore, OpenDocument-v1.4-schema.rng:16458-16460, spec/odf-elements.json text:a;
+  // T2: ODF 1.4 Part 3 §6.1.8 is silent on an empty anchor; T4: decision 3).
   if (cell.type === "empty") {
     if (cell.formula) cellEl.attr("table:formula", `of:${cell.formula}`);
     if (cell.href) cellEl.appendChild(buildTextP(""));
@@ -887,8 +889,9 @@ function buildSheetElement(
     }
 
     // A row with nothing to emit gets one empty cell repeated across the
-    // declared columns (T1: table:table-row is oneOrMore cells, rng l.16223-16231;
-    // table:number-columns-repeated, rng l.16059-16064. T4: Scott, LEAD 1
+    // declared columns (T1: table:table-row is oneOrMore cells,
+    // OpenDocument-v1.4-schema.rng:16223-16231, spec/odf-elements.json table:table-row;
+    // table:number-columns-repeated, :16059-16064, spec/odf-attributes.json. T4: Scott, LEAD 1
     // decision 2; a bare cell when numCols ≤ 1, LEAD 1 N = 0 ruling).
     if (physicalCol === 0) {
       const emptyCell = el("table:table-cell");

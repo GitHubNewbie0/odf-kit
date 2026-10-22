@@ -120,7 +120,7 @@ function convertSheet(xlSheet: XlsxSheet, options: XlsxToOdsOptions, doc: OdsDoc
 
       // Covered cells take no entry: OdsDocument emits one table:covered-table-cell
       // per spanned position from the top-left cell's colSpan/rowSpan
-      // (T1: §9.1.5, Part 3 html l.3836; T4: Scott, LEAD 1 decision 4).
+      // (T2: ODF 1.4 Part 3 §9.1.5; T4: Scott, LEAD 1 decision 4).
       if (xlSheet.coveredCells.has(cellKey)) {
         hasCovered = true;
         continue;
