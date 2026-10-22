@@ -180,9 +180,13 @@ tooling does. It does not denote an OASIS output.
   package (provenance charter, DP4).
 - odf-kit's ODF target was ruled **ODF 1.4** on 2026-09-16. The ODF 1.3
   files once kept here (the 1.3 schema and Part 3 prose, the 1.3 length
-  tables, `citations/p1`–`p5`, and the two 1.3 extractor scripts that
-  produced them) were retired by odf-1.4 Unit C. They remain in git history,
-  added at `0059f7c`.
+  tables and `citations/p1`–`p5`) were retired by odf-1.4 Unit C, together
+  with the two 1.3 extractor scripts in `tools/`:
+  `tools/extract-odf-datatypes.mjs` wrote the length tables, and
+  `tools/extract-prose-citations.mjs` wrote `citations/p1`, `p2`, `p4` and
+  `p5`. Neither script wrote `citations/p3-space-before.txt`. All of them
+  remain in git history: the files here were added at `0059f7c`, the two
+  scripts at `c93c9cd`.
 - The ODF 1.4 schemas are **not copied into this directory**. The verbatim
   1.4 files live in the maintainer's internal source repository
   (`odf-kit-internal/spec/odf-1.4/`, with its own provenance record).
