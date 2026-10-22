@@ -45,7 +45,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // T4: bump on any change that alters the generated output.
-const GENERATOR_VERSION = "1.0.0";
+const GENERATOR_VERSION = "1.0.1";
 const GENERATOR_NAME = "tools/build-prose-index.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -540,7 +540,10 @@ function buildAuthority(a) {
   });
   crossChecks.sharedBoundaryLines = shared;
 
-  if (a.expect.notInToc.length) anomalies.push({ kind: "not-in-toc", sections: a.expect.notInToc });
+  // Only ODF's gaps are source anomalies: elsewhere the sections missing from
+  // the TOC are the title, the TOC headings and depth-limited entries, which
+  // crossChecks.tableOfContents.sectionsNotInToc already lists.
+  if (a.family === "odf" && a.expect.notInToc.length) anomalies.push({ kind: "not-in-toc", sections: a.expect.notInToc });
   if (a.expect.tocNotSection.length) anomalies.push({ kind: "toc-target-absent", entries: crossChecks.tableOfContents.tocTargetsNotASection });
   if (a.expect.tocNumberMismatch.length) anomalies.push({ kind: "toc-label-number-differs", entries: crossChecks.tableOfContents.tocLabelNumberMismatch });
   if (a.expect.paragraphSections.length) anomalies.push({ kind: "section-heading-is-a-paragraph", sections: a.expect.paragraphSections });

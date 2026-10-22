@@ -4,7 +4,7 @@
     "file": "spec/prose-index/whatwg-html.json",
     "generator": {
       "name": "tools/build-prose-index.mjs",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "generated": "2026-10-22",
     "authority": {
@@ -62,16 +62,7 @@
       },
       "sharedBoundaryLines": 0
     },
-    "anomalies": [
-      {
-        "kind": "not-in-toc",
-        "sections": [
-          "HTML",
-          "Table of contents",
-          "Full table of contents"
-        ]
-      }
-    ],
+    "anomalies": [],
     "counts": {
       "sections": 1239,
       "numbered": 1224,

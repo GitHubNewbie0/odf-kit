@@ -4,7 +4,7 @@
     "file": "spec/prose-index/commonmark.json",
     "generator": {
       "name": "tools/build-prose-index.mjs",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "generated": "2026-10-22",
     "authority": {
@@ -64,18 +64,7 @@
       },
       "sharedBoundaryLines": 0
     },
-    "anomalies": [
-      {
-        "kind": "not-in-toc",
-        "sections": [
-          "CommonMark Spec",
-          "5.2.1",
-          "An algorithm for parsing nested emphasis and links",
-          "look for link or image",
-          "process emphasis"
-        ]
-      }
-    ],
+    "anomalies": [],
     "counts": {
       "sections": 46,
       "numbered": 38,

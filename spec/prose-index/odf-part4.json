@@ -4,7 +4,7 @@
     "file": "spec/prose-index/odf-part4.json",
     "generator": {
       "name": "tools/build-prose-index.mjs",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "generated": "2026-10-22",
     "authority": {
