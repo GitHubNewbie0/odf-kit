@@ -139,8 +139,60 @@ function paragraphStyleToCss(style: ParagraphStyle): string {
   if (style.marginBottom !== undefined) parts.push(`margin-bottom:${style.marginBottom}`);
   if (style.paddingLeft !== undefined) parts.push(`padding-left:${style.paddingLeft}`);
   if (style.paddingRight !== undefined) parts.push(`padding-right:${style.paddingRight}`);
-  if (style.lineHeight !== undefined) parts.push(`line-height:${style.lineHeight}`);
+  const lineHeight = blockLineHeight(style);
+  if (lineHeight !== undefined) parts.push(`line-height:${lineHeight.value}`);
   return parts.join(";");
+}
+
+/**
+ * True when a verbatim value is below 0: a leading "-" and a number with a
+ * nonzero digit. A value of 0 is not negative, whatever its sign, so "-0%"
+ * and "-0.00%" are not. Lexical on purpose: no float parsing (T4: D8).
+ * T4: D106-3 first bullet, D106-4 third bullet.
+ */
+function isNegative(value: string): boolean {
+  const m = /^-([0-9]*\.?[0-9]*)/.exec(value);
+  return m !== null && /[1-9]/.test(m[1] ?? "");
+}
+
+/**
+ * The CSS line-height a block carries from the line-height setting, and
+ * whether its inline content needs the line-height:normal wrapper.
+ * T4: D106-3:
+ *  - lineHeight → written verbatim, unless negative (CSS 2.1 §10.8.1:
+ *    "Negative values are illegal"). It has precedence over the other two in
+ *    the same element (ODF 1.4 §20.204; T4: D106-2), so the reader never
+ *    reports them beside it.
+ *  - lineHeightAtLeast → written on the block, unless negative, and the
+ *    inline content is wrapped: on a block container line-height is the
+ *    minimal height of the line boxes, on an inline element the height used
+ *    (CSS 2.1 §10.8.1, visudet l.1502–1520).
+ *  - lineSpacing → not written: CSS has no form for it. A named exception to
+ *    C-2, pending a warnings channel on the HTML path.
+ */
+function blockLineHeight(style: ParagraphStyle): { value: string; wrap: boolean } | undefined {
+  if (style.lineHeight !== undefined) {
+    return isNegative(style.lineHeight) ? undefined : { value: style.lineHeight, wrap: false };
+  }
+  if (style.lineHeightAtLeast !== undefined && !isNegative(style.lineHeightAtLeast)) {
+    return { value: style.lineHeightAtLeast, wrap: true };
+  }
+  return undefined;
+}
+
+/**
+ * The inner HTML of a paragraph or heading. When the block carries an
+ * at-least line height, non-empty inline content is wrapped in one
+ * <span style="line-height:normal"> (T4: D106-3 third bullet).
+ */
+function renderBlockInner(
+  spans: InlineNode[],
+  style: ParagraphStyle | undefined,
+  options?: HtmlOptions,
+): string {
+  const inner = renderSpans(spans, options);
+  const wrap = style !== undefined && blockLineHeight(style)?.wrap === true;
+  return wrap && inner !== "" ? `<span style="line-height:normal">${inner}</span>` : inner;
 }
 
 /**
@@ -533,7 +585,7 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const css = [reset, sourceCss].filter((s) => s).join(";");
       const attrs =
         (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
-      return `<p${attrs}>${renderSpans(node.spans, options)}</p>`;
+      return `<p${attrs}>${renderBlockInner(node.spans, node.paragraphStyle, options)}</p>`;
     }
     case "heading": {
       const reset = inCell ? "margin-top:0;margin-bottom:0" : "";
@@ -542,7 +594,7 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
       const css = [reset, sourceCss].filter((s) => s).join(";");
       const attrs =
         (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
-      return `<h${node.level}${attrs}>${renderSpans(node.spans, options)}</h${node.level}>`;
+      return `<h${node.level}${attrs}>${renderBlockInner(node.spans, node.paragraphStyle, options)}</h${node.level}>`;
     }
     case "list":
       return renderList(node, options);
