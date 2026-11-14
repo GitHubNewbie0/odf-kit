@@ -233,10 +233,43 @@ export interface ParagraphOptions {
   spaceAfter?: string;
 
   /**
-   * Line height. A number ≥ 1 is treated as a multiplier (e.g. `1.5` → 150%).
-   * A string with units sets an absolute line height (e.g. `"18pt"`).
+   * Line height, written as `fo:line-height` (ODF 1.4 §20.204).
+   *
+   * A number is a multiplier, written as a percent exactly: `1.5` → `"150%"`,
+   * `1.555` → `"155.5%"`. Nothing is rounded.
+   *
+   * A string is `"normal"`, a non-negative length (`"18pt"`) or a percent
+   * (`"150%"`), written as given. A `px` length is written in `pt`, converted
+   * exactly (`"12px"` → `"9pt"`).
+   *
+   * @throws {TypeError} at `addParagraph` / `addHeading` for a value ODF 1.4
+   *   does not permit: a number that is not finite or is negative, a negative
+   *   percent such as `"-50%"` (`"-0%"` is accepted), or any other string,
+   *   such as `"1.5em"` or `"auto"`.
    */
   lineHeight?: number | string;
+
+  /**
+   * Minimum line height, written as `style:line-height-at-least`
+   * (ODF 1.4 §20.317). A non-negative length with its unit, such as
+   * `"0.5cm"`, written as given; a `px` length is written in `pt`, converted
+   * exactly.
+   *
+   * @throws {TypeError} at `addParagraph` / `addHeading` for a negative
+   *   length, a value with no unit or an unknown unit, or a non-string.
+   */
+  lineHeightAtLeast?: string;
+
+  /**
+   * Fixed distance between two lines, written as `style:line-spacing`
+   * (ODF 1.4 §20.318). A length with its unit, such as `"0.2cm"`; ODF 1.4
+   * permits a negative length. Written as given; a `px` length is written
+   * in `pt`, converted exactly.
+   *
+   * @throws {TypeError} at `addParagraph` / `addHeading` for a value with
+   *   no unit or an unknown unit, or a non-string.
+   */
+  lineSpacing?: string;
 
   /**
    * Left indent for the entire paragraph with units (e.g. `"1cm"`).

@@ -13,6 +13,7 @@ import type {
   ImageData,
 } from "./types.js";
 import { normalizeFormatting, formattingKey, resolveColor } from "./formatting.js";
+import { lineHeightAttributes } from "./line-height.js";
 import type { NormalizedFormatting } from "./formatting.js";
 
 // ─── Content Element ──────────────────────────────────────────────────
@@ -1053,18 +1054,6 @@ function buildTextStyle(styleName: string, fmt: NormalizedFormatting): XmlElemen
 // ─── Paragraph Styles ─────────────────────────────────────────────────
 
 /**
- * Normalize a lineHeight value to an ODF fo:line-height string.
- * Numbers ≥ 1 are treated as multipliers (1.5 → "150%").
- * Strings with units are passed through as-is ("18pt" → "18pt").
- */
-function normalizeLineHeight(lineHeight: number | string): string {
-  if (typeof lineHeight === "number") {
-    return `${Math.round(lineHeight * 100)}%`;
-  }
-  return lineHeight;
-}
-
-/**
  * Returns true when the ParagraphOptions object contains at least one
  * property that requires a custom automatic paragraph style.
  */
@@ -1075,6 +1064,8 @@ function hasParagraphOptions(opts: ParagraphOptions | undefined): boolean {
     opts.spaceBefore ||
     opts.spaceAfter ||
     opts.lineHeight !== undefined ||
+    opts.lineHeightAtLeast !== undefined ||
+    opts.lineSpacing !== undefined ||
     opts.writingMode ||
     opts.indentLeft ||
     opts.indentFirst ||
@@ -1094,6 +1085,8 @@ function paragraphOptionsKey(opts: ParagraphOptions): string {
   if (opts.spaceBefore) parts.push(`sb:${opts.spaceBefore}`);
   if (opts.spaceAfter) parts.push(`sa:${opts.spaceAfter}`);
   if (opts.lineHeight !== undefined) parts.push(`lh:${opts.lineHeight}`);
+  if (opts.lineHeightAtLeast !== undefined) parts.push(`lhal:${opts.lineHeightAtLeast}`);
+  if (opts.lineSpacing !== undefined) parts.push(`ls:${opts.lineSpacing}`);
   if (opts.writingMode) parts.push(`wm:${opts.writingMode}`);
   if (opts.indentLeft) parts.push(`il:${opts.indentLeft}`);
   if (opts.indentFirst) parts.push(`if:${opts.indentFirst}`);
@@ -1182,8 +1175,9 @@ function buildParagraphStyle(
     paraProps.attr("fo:margin-bottom", opts.spaceAfter);
     hasParaProps = true;
   }
-  if (opts.lineHeight !== undefined) {
-    paraProps.attr("fo:line-height", normalizeLineHeight(opts.lineHeight));
+  // T4: D106-4. The values were checked at addParagraph / addHeading.
+  for (const [name, value] of Object.entries(lineHeightAttributes(opts))) {
+    paraProps.attr(name, value);
     hasParaProps = true;
   }
   if (opts.writingMode) {

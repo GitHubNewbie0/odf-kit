@@ -9,6 +9,7 @@ import type { ContentElement } from "./content.js";
 import { ParagraphBuilder } from "./paragraph-builder.js";
 import { HeaderFooterBuilder } from "./header-footer-builder.js";
 import { compareLengths } from "../../core/length.js";
+import { lineHeightAttributes } from "./line-height.js";
 import { TableBuilder } from "./table-builder.js";
 import { ListBuilder } from "./list-builder.js";
 import { generateOdtSettings } from "./settings.js";
@@ -216,6 +217,7 @@ export class OdtDocument {
     content: string | ((builder: ParagraphBuilder) => void),
     options?: ParagraphOptions,
   ): this {
+    lineHeightAttributes(options); // T4: D106-4: refuse at the API boundary
     this.elements.push({
       type: "paragraph",
       runs: buildRuns(content),
@@ -254,6 +256,7 @@ export class OdtDocument {
     level: number = 1,
     options?: ParagraphOptions,
   ): this {
+    lineHeightAttributes(options); // T4: D106-4: refuse at the API boundary
     this.elements.push({
       type: "heading",
       level,
