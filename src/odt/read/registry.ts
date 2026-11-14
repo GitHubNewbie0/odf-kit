@@ -128,6 +128,17 @@ const PARA_PROPS_TAG = "style:paragraph-properties";
 const GRAPHIC_PROPS_TAG = "style:graphic-properties";
 
 /**
+ * The style:paragraph-properties attributes that inherit as one setting
+ * (T4: D106-1). T1: all three are optional members of one interleave on
+ * style:paragraph-properties (rng:12465, 12474, 12479).
+ */
+const LINE_HEIGHT_ATTRS = [
+  "fo:line-height",
+  "style:line-height-at-least",
+  "style:line-spacing",
+] as const;
+
+/**
  * Tags whose attributes all land in cellProps.
  * table-cell, table-row, and table-column properties are merged into
  * one bag because a cell resolver looks up a single style name that
@@ -320,6 +331,10 @@ export function buildRegistry(
  *  3. Walk the parentName chain (named styles only — spec requirement).
  *     Build the chain from outermost ancestor to the requested style.
  *  4. Apply the chain in order: outermost first so child props overwrite.
+ *     Exception: fo:line-height, style:line-height-at-least and
+ *     style:line-spacing are one setting. The nearest style that sets any
+ *     of them supplies all three, the default style being the chain's root
+ *     (T4: D106-1; T2: §16.2, §16.4, §19.510).
  *  5. Cache and return the result.
  *
  * Returns an empty ResolvedStyle (all empty Maps) if the style name is
@@ -366,8 +381,14 @@ export function resolve(registry: StyleRegistry, family: string, name: string): 
   }
 
   // 4. Apply chain: outermost first so child properties overwrite.
+  //    The line-height attributes are one setting: a style that sets any of
+  //    them first clears all three, so none is inherited past it.
+  //    T4: D106-1 (T3 basis: tests/reader/fixtures/line-height-*.odt).
   for (const raw of chain) {
     for (const [k, v] of raw.textProps) result.textProps.set(k, v);
+    if (LINE_HEIGHT_ATTRS.some((a) => raw.paragraphProps.has(a))) {
+      for (const a of LINE_HEIGHT_ATTRS) result.paragraphProps.delete(a);
+    }
     for (const [k, v] of raw.paragraphProps) result.paragraphProps.set(k, v);
     for (const [k, v] of raw.cellProps) result.cellProps.set(k, v);
     for (const [k, v] of raw.graphicProps) result.graphicProps.set(k, v);

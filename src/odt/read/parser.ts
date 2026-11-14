@@ -651,10 +651,29 @@ function extractParagraphStyle(paragraphProps: Map<string, string>): ParagraphSt
     hasAny = true;
   }
 
-  const lineHeight = paragraphProps.get("fo:line-height");
-  if (lineHeight) {
-    style.lineHeight = lineHeight;
-    hasAny = true;
+  // The line-height setting, verbatim (T4: D8). resolve() has already
+  // limited all three to the one style that supplies the setting (T4: D106-1).
+  // In that element fo:line-height has precedence, and "normal" disables the
+  // other two, so only lineHeight is reported (T4: D106-2; T2: §20.204,
+  // §20.317, §20.318). Otherwise at-least and line-spacing are both reported:
+  // the spec gives no precedence between them (T4: D106-2).
+  if (paragraphProps.has("fo:line-height")) {
+    const lineHeight = paragraphProps.get("fo:line-height");
+    if (lineHeight) {
+      style.lineHeight = lineHeight;
+      hasAny = true;
+    }
+  } else {
+    const lineHeightAtLeast = paragraphProps.get("style:line-height-at-least");
+    if (lineHeightAtLeast) {
+      style.lineHeightAtLeast = lineHeightAtLeast;
+      hasAny = true;
+    }
+    const lineSpacing = paragraphProps.get("style:line-spacing");
+    if (lineSpacing) {
+      style.lineSpacing = lineSpacing;
+      hasAny = true;
+    }
   }
 
   // Paragraph direction. Carried verbatim; the renderer maps rl-* modes to

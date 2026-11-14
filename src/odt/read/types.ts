@@ -104,10 +104,35 @@ export interface ParagraphStyle {
   /** fo:padding-right → "0.2cm". */
   paddingRight?: string;
   /**
-   * fo:line-height → "150%" or "0.6cm".
-   * ODF accepts both percentage and length values; stored as-is.
+   * fo:line-height → "normal", "150%" or "0.6cm". Stored verbatim.
+   *
+   * fo:line-height, lineHeightAtLeast and lineSpacing are one setting: the
+   * nearest style in the chain that sets any of them supplies it, and none
+   * is inherited past that style. When that style sets fo:line-height, only
+   * this field is reported: it has precedence in the same element, and
+   * "normal" disables the other two (ODF 1.4 §20.204, §20.317, §20.318).
+   *
+   * An ODF percent and a CSS percent both multiply the font size, but they
+   * differ. In ODF a percent gives a minimum line height and a length gives
+   * a fixed one (ODF 1.4 §20.204). In CSS a length on a block is the minimal
+   * height of its line boxes, and a percent is computed from the block's own
+   * font size, which the HTML renderer does not set (CSS 2.1 §10.8.1).
    */
   lineHeight?: string;
+  /**
+   * style:line-height-at-least → "0.5cm": a minimum line height
+   * (ODF 1.4 §20.317). Stored verbatim. Absent when the style that supplies
+   * the line-height setting also sets fo:line-height (see lineHeight).
+   */
+  lineHeightAtLeast?: string;
+  /**
+   * style:line-spacing → "0.2cm": a fixed distance between two lines
+   * (ODF 1.4 §20.318); the grammar permits a negative length. Stored
+   * verbatim. Absent when the style that supplies the line-height setting
+   * also sets fo:line-height (see lineHeight). When both this and
+   * lineHeightAtLeast are present the spec gives no precedence between them.
+   */
+  lineSpacing?: string;
   /**
    * style:writing-mode → "rl-tb", "lr-tb", "tb-rl", "tb-lr", "lr", "rl",
    * "tb", or "page". Stored verbatim.
