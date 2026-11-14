@@ -49,6 +49,7 @@
  */
 
 import { escapeAttr } from "../../core/index.js";
+import { isBelowZero } from "../../core/length.js";
 
 import type {
   BodyNode,
@@ -145,17 +146,6 @@ function paragraphStyleToCss(style: ParagraphStyle): string {
 }
 
 /**
- * True when a verbatim value is below 0: a leading "-" and a number with a
- * nonzero digit. A value of 0 is not negative, whatever its sign, so "-0%"
- * and "-0.00%" are not. Lexical on purpose: no float parsing (T4: D8).
- * T4: D106-3 first bullet, D106-4 third bullet.
- */
-function isNegative(value: string): boolean {
-  const m = /^-([0-9]*\.?[0-9]*)/.exec(value);
-  return m !== null && /[1-9]/.test(m[1] ?? "");
-}
-
-/**
  * The CSS line-height a block carries from the line-height setting, and
  * whether its inline content needs the line-height:normal wrapper.
  * T4: D106-3:
@@ -172,9 +162,9 @@ function isNegative(value: string): boolean {
  */
 function blockLineHeight(style: ParagraphStyle): { value: string; wrap: boolean } | undefined {
   if (style.lineHeight !== undefined) {
-    return isNegative(style.lineHeight) ? undefined : { value: style.lineHeight, wrap: false };
+    return isBelowZero(style.lineHeight) ? undefined : { value: style.lineHeight, wrap: false };
   }
-  if (style.lineHeightAtLeast !== undefined && !isNegative(style.lineHeightAtLeast)) {
+  if (style.lineHeightAtLeast !== undefined && !isBelowZero(style.lineHeightAtLeast)) {
     return { value: style.lineHeightAtLeast, wrap: true };
   }
   return undefined;

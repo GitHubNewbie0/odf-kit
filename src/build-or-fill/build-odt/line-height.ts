@@ -13,7 +13,7 @@
  * T1: rng:12465, 12474, 12479 (spec/odf-attributes.json).
  */
 
-import { convertDecimal } from "../../core/length.js";
+import { convertDecimal, decimalToPercent, isBelowZero } from "../../core/length.js";
 import type { ParagraphOptions } from "./types.js";
 
 // T1: the datatype patterns, spec/odf-datatypes.json. An XSD pattern
@@ -40,15 +40,6 @@ function refuse(option: string, value: unknown, why: string, cause?: unknown): n
 }
 
 /**
- * A verbatim value below 0: a leading "-" and a nonzero digit. A value of 0
- * is not negative, whatever its sign (T4: D106-4 third bullet).
- */
-function isBelowZero(value: string): boolean {
-  const m = /^-([0-9]*\.?[0-9]*)/.exec(value);
-  return m !== null && /[1-9]/.test(m[1] ?? "");
-}
-
-/**
  * A length the grammar permits, as written. A px length is a conversion
  * handed to us, never emitted: it is written in pt by the length core's
  * exact interval method, the same conversion htmlToOdt uses for CSS px
@@ -65,22 +56,13 @@ function lengthAsWritten(option: string, value: string): string {
 }
 
 /**
- * A non-negative finite number as a percent, exactly: the decimal point of
- * String(n) (the shortest decimal form, exponent form included) moves two
- * places right. Nothing is rounded and no float arithmetic is done
- * (T4: D106-4 fourth bullet, D8). -0 prints as "0", so it gives "0%".
+ * A non-negative finite number as a percent, exactly, by the length core's
+ * decimal shift of String(n), its shortest decimal form, exponent form
+ * included (T4: D106-4 fourth bullet, D8). -0 prints as "0", so it gives
+ * "0%".
  */
 function numberAsPercent(n: number): string {
-  const m = /^(\d+)(?:\.(\d+))?(?:e([+-]\d+))?$/.exec(String(n));
-  if (!m) return refuse("lineHeight", n, "not a finite non-negative number");
-  const frac = m[2] ?? "";
-  const digits = BigInt(`${m[1]}${frac}`);
-  // value = digits × 10^-scale; × 100 lowers the scale by 2.
-  const scale = frac.length - Number(m[3] ?? "0") - 2;
-  if (scale <= 0) return `${digits * 10n ** BigInt(-scale)}%`;
-  const s = digits.toString().padStart(scale + 1, "0");
-  const fraction = s.slice(-scale).replace(/0+$/, "");
-  return `${s.slice(0, -scale)}${fraction === "" ? "" : `.${fraction}`}%`;
+  return decimalToPercent(String(n)) ?? refuse("lineHeight", n, "not a finite non-negative number");
 }
 
 function lineHeightValue(value: unknown): string {

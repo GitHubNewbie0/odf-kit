@@ -463,6 +463,58 @@ export function convertDecimal(raw: string, source: SourceUnit, target: Unit): s
   return shortestInUnit(intervalFromDecimal(raw, source), target);
 }
 
+// ─── Sign and percent: lexical, exact ──────────────────────────────────
+
+/**
+ * True when a numeric lexical (a length or a percent, as written) is below
+ * 0: a leading "-" and a nonzero digit. A value of 0 is not negative,
+ * whatever its sign, so "-0%" and "-0.00cm" are not. Decided on the text;
+ * nothing is parsed as a float (D8). [T4: D106-3 first bullet, D106-4
+ * third bullet]
+ *
+ * Linear on any input: the pattern is anchored at the left only, and each
+ * digit run matches one way.
+ */
+export function isBelowZero(lexical: string): boolean {
+  const m = /^-(\d*(?:\.\d*)?)/.exec(lexical);
+  return m !== null && /[1-9]/.test(m[1] ?? "");
+}
+
+/**
+ * The exponents a finite JS number's String() can carry, read from the
+ * extreme values themselves rather than restated: String(Number.MIN_VALUE)
+ * is "5e-324", String(Number.MAX_VALUE) ends "e+308". An exponent outside
+ * them cannot come from String(n), and bounding it bounds the 10^k below.
+ */
+const NUMBER_EXPONENT_MIN = Number(/e([+-]\d+)$/.exec(String(Number.MIN_VALUE))?.[1]);
+const NUMBER_EXPONENT_MAX = Number(/e([+-]\d+)$/.exec(String(Number.MAX_VALUE))?.[1]);
+
+/**
+ * A non-negative decimal string as a percent, exactly: the decimal point
+ * moves two places right ("1.555" → "155.5%", "1e-7" → "0.00001%",
+ * "2" → "200%"). Nothing is rounded and no float arithmetic is done (D8).
+ * Accepts plain decimals ("12", "12.", ".5", "1.5") and the exponent form
+ * String(n) produces for a finite number ("1e-7", "1.5e+21"). Returns
+ * undefined for anything else: a sign, a unit, a lexical longer than
+ * MAX_NUMERIC_LEXICAL, or an exponent no finite number prints.
+ * [T4: D106-4 fourth bullet, D8]
+ */
+export function decimalToPercent(decimal: string): string | undefined {
+  if (decimal.length > MAX_NUMERIC_LEXICAL) return undefined;
+  const m = /^(\d*)(?:\.(\d*))?(?:e([+-]\d+))?$/.exec(decimal);
+  if (!m) return undefined;
+  const int = m[1] ?? "";
+  const frac = m[2] ?? "";
+  if (int === "" && frac === "") return undefined;
+  const exponent = m[3] === undefined ? 0 : Number(m[3]);
+  if (exponent < NUMBER_EXPONENT_MIN || exponent > NUMBER_EXPONENT_MAX) return undefined;
+  const digits = BigInt(`${int}${frac}` || "0");
+  // value = digits × 10^-scale; × 100 lowers the scale by 2.
+  const scale = frac.length - exponent - 2;
+  if (scale <= 0) return `${digits * 10n ** BigInt(-scale)}%`;
+  return `${placeDecimal(digits, BigInt(scale))}%`;
+}
+
 // ─── D8a: geometric-domain unit vote ───────────────────────────────────
 
 function digitCount(rendered: string): number {
