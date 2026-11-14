@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `lineHeightAtLeast` must be a non-negative length and `lineSpacing` a length. Each must be a string: a number, or a length with no unit, is refused. The throw is limited to these three options.
 
 - A `px` length given to any of the three line-height options is written in `pt`, converted exactly by the same length core `htmlToOdt` uses for CSS px: `"12px"` → `"9pt"`. Before, `lineHeight: "12px"` was written as `12px`. odf-kit never writes `px` into ODF. A px value too long for the length core to convert is refused with a `TypeError`.
+- `htmlToOdt` maps CSS `line-height` exactly (#106, reported by lroder). A unitless number becomes a percent by moving the decimal point, never through a JavaScript number: `1.555` → `155.5%`, and `1.00000000000000001` → `100.000000000000001%`, where the old path gave `100%`. An `em` value becomes a percent the same way, because an em is the element's font size (CSS 2.1 §10.8.1): `1.5em` → `150%`. Before, `em` values were dropped. A value of 0 is not negative, so `-0%` is now written as given instead of dropped. Negative values, values with a leading `+`, values too long to convert, and values with no ODF form (`rem`, `ex`, `calc()`, keywords other than `normal`) are dropped without notice. `normal` still writes nothing.
 
 ### Fixed
 
