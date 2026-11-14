@@ -60,12 +60,28 @@ describe("htmlToOdt — CSS line-height (T4: D106-5 fourth bullet)", () => {
     expect(lineHeightAttr(xml)).toBeUndefined();
   });
 
-  test.each(["+50%", "+12pt"])(
-    "%p → no attribute, no throw: T1 percent and nonNegativeLength have no '+' (T1: rng:9082, rng:7070; T4: D106-5 fourth bullet)",
-    async (v) => {
-      expect(lineHeightAttr(await withLineHeight(v))).toBeUndefined();
+  // A leading "+" is a CSS number's optional sign: CSS Syntax 3 §4.3.13
+  // "Consume a number", spec/w3c-css/CRD-css-syntax-3-20261001.txt
+  // l.3849–3851 ("an optional sign character which is either "+", "-", or
+  // missing") and l.3866–3868; §4.3.10, l.3753–3770 (a "+" starts a number
+  // when a digit, or "." and a digit, follow). Each value below has an exact
+  // ODF form, and D106-5 drops only values with none (Scott, 2026-11-13;
+  // first pass 10.3 #7).
+  test.each([
+    ["+50%", "50%"],
+    ["+12pt", "12pt"],
+    ["+1.5", "150%"],
+    ["+1.5em", "150%"],
+  ])(
+    '%p → fo:line-height=%p: the "+" is removed and the value converted (CSS Syntax 3 §4.3.13, CRD-css-syntax-3-20261001.txt l.3849–3851, l.3866–3868; T4: D106-5 fourth bullet)',
+    async (v, expected) => {
+      expect(lineHeightAttr(await withLineHeight(v))).toBe(expected);
     },
   );
+
+  test('"+-0%" → no attribute, no throw: that "+" starts no number (CSS Syntax 3 §4.3.10, CRD-css-syntax-3-20261001.txt l.3753–3770; T4: D106-5 fourth bullet)', async () => {
+    expect(lineHeightAttr(await withLineHeight("+-0%"))).toBeUndefined();
+  });
 
   test('-0% → fo:line-height="-0%": a value of 0 is not negative, whatever its sign (T4: D106-4 third bullet; core isBelowZero)', async () => {
     expect(lineHeightAttr(await withLineHeight("-0%"))).toBe("-0%");

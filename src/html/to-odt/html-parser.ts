@@ -922,15 +922,21 @@ function cssLengthToOdf(raw: string): string | undefined {
  * Negative values are dropped (fo:line-height is nonNegativeLength or a
  * percent, and a negative percent is refused: T4: D106-4 third bullet);
  * a value of 0 is not negative, whatever its sign (core isBelowZero). A
- * leading "+" is dropped too: T1's percent and nonNegativeLength have none
+ * leading "+" that is a CSS number's sign is removed and the value
+ * converted: "+50%" → "50%", "+1.5em" → "150%" (CSS Syntax 3 §4.3.13 and
+ * §4.3.10, spec/w3c-css/CRD-css-syntax-3-20261001.txt l.3849–3851,
+ * l.3866–3868, l.3753–3770; Scott, 2026-11-13). Any other "+" leaves a
+ * value with no ODF form: T1's percent and nonNegativeLength have no "+"
  * (rng:9082, rng:7070). Everything else with no ODF form is dropped
  * without notice, pending the Phase 1 warnings channel. So the builder is
  * never handed a value D106-4 refuses, and a conversion never throws here
  * (D-A2: document input degrades).
  */
 function parseCssLineHeight(raw: string): string | undefined {
-  const value = raw.trim().toLowerCase();
-  if (value === "normal") return undefined;
+  const trimmed = raw.trim().toLowerCase();
+  if (trimmed === "normal") return undefined;
+  // A "+" starts a number when a digit, or "." and a digit, follow (§4.3.10).
+  const value = /^\+(?:\d|\.\d)/.test(trimmed) ? trimmed.slice(1) : trimmed;
   // Same rewrite as cssLengthToOdf above, same reason (js/polynomial-redos).
   // decimalToPercent applies the core's numeric bound (MAX_NUMERIC_LEXICAL).
   if (/^\d+(?:\.\d*)?$|^\.\d+$/.test(value)) return decimalToPercent(value);
