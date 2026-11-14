@@ -1471,6 +1471,18 @@
               "jsdoc": true
             },
             {
+              "name": "lineHeightAtLeast",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineSpacing",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
               "name": "spaceAfter",
               "type": "string | undefined",
               "optional": true,
@@ -3126,6 +3138,18 @@
               "jsdoc": true
             },
             {
+              "name": "lineHeightAtLeast",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineSpacing",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
               "name": "spaceAfter",
               "type": "string | undefined",
               "optional": true,
@@ -4539,6 +4563,18 @@
             {
               "name": "lineHeight",
               "type": "string | number | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineHeightAtLeast",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineSpacing",
+              "type": "string | undefined",
               "optional": true,
               "jsdoc": true
             },
@@ -8322,6 +8358,18 @@
             {
               "name": "lineHeight",
               "type": "string | number | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineHeightAtLeast",
+              "type": "string | undefined",
+              "optional": true,
+              "jsdoc": true
+            },
+            {
+              "name": "lineSpacing",
+              "type": "string | undefined",
               "optional": true,
               "jsdoc": true
             },
