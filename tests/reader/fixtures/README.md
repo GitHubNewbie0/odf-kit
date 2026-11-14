@@ -318,9 +318,11 @@ Line gaps were measured on 2026-11-13 from each file's own `writer_pdf_Export`, 
 
 - **What it is evidence of:** each of at-least and line-spacing, set on a child, displaces the other inherited from a parent (`LeadingOverAtLeast`, `AtLeastOverLeading`).
 
-- **Recipe:** not recorded.
+- **Recipe** (as given by Scott): new Writer document. Paragraph style `AtLeastBase` (parent Default Paragraph Style), line spacing "At least" 1.5 cm. Style `LeadingOverAtLeast`, inheriting from `AtLeastBase`, line spacing "Leading" 0.5 cm. Style `LeadingBase` (parent Default Paragraph Style), "Leading" 1 cm. Style `AtLeastOverLeading`, inheriting from `LeadingBase`, "At least" 0.8 cm. Four paragraphs, one in each style, each wrapping to three lines or more. Save as ODF Text; close LibreOffice.
 
-- **Provenance:** author not recorded. Created 2026-11-13 per `meta:creation-date`. Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `4bffed6bad58d9e94e42b68185220df4b1c5d62598b606dc80ea911fdf8fc023`, 25,375 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
+- **The file differs from the recipe in one respect:** as saved, the at-least value sits on `Standard` (Default Paragraph Style) and `AtLeastBase` sets nothing, so `AtLeastBase` inherits it. The file is the evidence; the recipe is recorded as given.
+
+- **Provenance:** authored 2026-11-13 by Scott, in LibreOffice Writer 26.8.2.2 on Windows, for the line-height unit, to measure the inheritance pairings `line-height-test.odt` does not show (canon D106-1). Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `4bffed6bad58d9e94e42b68185220df4b1c5d62598b606dc80ea911fdf8fc023`, 25,375 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
 
 - **Type:** regression
 
@@ -341,9 +343,9 @@ Line gaps were measured on 2026-11-13 from each file's own `writer_pdf_Export`, 
 
 - **What it is evidence of:** a child `fo:line-height`, percent or length, displaces an inherited line-spacing.
 
-- **Recipe:** not recorded.
+- **Recipe** (as given by Scott): new Writer document. Paragraph style `LeadingParent` (parent Default Paragraph Style), line spacing "Leading" 1 cm. Style `PropOverLeading`, inheriting from `LeadingParent`, "Proportional" 200%. Style `FixedOverLeading`, inheriting from `LeadingParent`, "Fixed" 0.8 cm. Three paragraphs, one in each style, each wrapping to three lines or more. Save as ODF Text; close LibreOffice. The saved file matches the recipe.
 
-- **Provenance:** author not recorded. Created 2026-11-13 per `meta:creation-date`. Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `449b24fcc7b37da8404717d9036a5aab92e8ee87f78c83e592a3db5e6a166414`, 20,432 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
+- **Provenance:** authored 2026-11-13 by Scott, in LibreOffice Writer 26.8.2.2 on Windows, for the line-height unit, to measure the inheritance pairings `line-height-test.odt` does not show (canon D106-1). Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `449b24fcc7b37da8404717d9036a5aab92e8ee87f78c83e592a3db5e6a166414`, 20,432 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
 
 - **Type:** regression
 
