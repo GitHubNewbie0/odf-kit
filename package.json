@@ -333,6 +333,7 @@
     "@types/jest": "^30.0.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.3.0",
+    "fast-check": "^4.10.2",
     "jest": "^30.3.0",
     "markdown-it": "14.3.0",
     "parse5": "5.1.1",
