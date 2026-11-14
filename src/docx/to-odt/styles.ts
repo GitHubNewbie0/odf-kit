@@ -200,16 +200,11 @@ export function parsePPr(el: XmlElementNode): PPrResult {
         const lineRule = child.attrs["w:lineRule"];
         if (before !== undefined) props.spaceBefore = twipsToCm(Number(before));
         if (after !== undefined) props.spaceAfter = twipsToCm(Number(after));
-        if (line !== undefined) {
-          // lineRule "auto" = multiple of 240 twips (single=240, double=480)
-          // lineRule "exact" or "atLeast" = fixed pt value — treat as multiplier vs 12pt baseline
-          if (!lineRule || lineRule === "auto") {
-            props.lineHeight = Number(line) / 240;
-          } else {
-            // Fixed line height in twips — store as multiplier relative to 12pt (240 twips)
-            props.lineHeight = Number(line) / 240;
-          }
-        }
+        // The rule stays with its value, verbatim; the converter maps the pair
+        // (T4: D106-5). An omitted w:lineRule is auto when w:line is present
+        // (ECMA-376 Part 1 §17.3.1.33). A w:lineRule without w:line sets
+        // nothing, so the pair is inherited from the style hierarchy.
+        if (line !== undefined) props.lineSpacing = { line, rule: lineRule ?? "auto" };
         break;
       }
 

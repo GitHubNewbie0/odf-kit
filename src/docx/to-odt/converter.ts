@@ -21,6 +21,7 @@
 
 import { OdtDocument } from "../../build-or-fill/build-odt/document.js";
 import { ParagraphBuilder } from "../../build-or-fill/build-odt/paragraph-builder.js";
+import { lineSpacingToOptions } from "./line-spacing.js";
 import type {
   TextFormatting,
   ParagraphOptions,
@@ -381,10 +382,13 @@ function resolveParaOptions(
   // Direct paragraph props override inherited
   mergeParaProps(inherited, para.props);
 
-  return paraPropsToOptions(inherited);
+  return paraPropsToOptions(inherited, ctx.warnings);
 }
 
-function paraPropsToOptions(props: Partial<ParaProps>): ParagraphOptions | undefined {
+function paraPropsToOptions(
+  props: Partial<ParaProps>,
+  warnings: string[],
+): ParagraphOptions | undefined {
   const opts: ParagraphOptions = {};
   let hasAny = false;
 
@@ -400,9 +404,17 @@ function paraPropsToOptions(props: Partial<ParaProps>): ParagraphOptions | undef
     opts.spaceAfter = `${props.spaceAfter}cm`;
     hasAny = true;
   }
-  if (props.lineHeight != null) {
-    opts.lineHeight = props.lineHeight;
-    hasAny = true;
+  if (props.lineSpacing !== undefined) {
+    // T4: D106-5. No ODF form → nothing written and one warnings entry.
+    const lineOpts = lineSpacingToOptions(props.lineSpacing, warnings);
+    if (lineOpts.lineHeight !== undefined) {
+      opts.lineHeight = lineOpts.lineHeight;
+      hasAny = true;
+    }
+    if (lineOpts.lineHeightAtLeast !== undefined) {
+      opts.lineHeightAtLeast = lineOpts.lineHeightAtLeast;
+      hasAny = true;
+    }
   }
   if (props.indentLeft != null) {
     opts.indentLeft = `${props.indentLeft}cm`;
@@ -921,7 +933,7 @@ function mergeParaProps(base: Partial<ParaProps>, override: Partial<ParaProps>):
   if (override.pageBreakBefore !== undefined) base.pageBreakBefore = override.pageBreakBefore;
   if (override.spaceBefore !== undefined) base.spaceBefore = override.spaceBefore;
   if (override.spaceAfter !== undefined) base.spaceAfter = override.spaceAfter;
-  if (override.lineHeight !== undefined) base.lineHeight = override.lineHeight;
+  if (override.lineSpacing !== undefined) base.lineSpacing = override.lineSpacing;
   if (override.indentLeft !== undefined) base.indentLeft = override.indentLeft;
   if (override.indentRight !== undefined) base.indentRight = override.indentRight;
   if (override.indentFirstLine !== undefined) base.indentFirstLine = override.indentFirstLine;

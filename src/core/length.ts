@@ -71,8 +71,12 @@ const MAX_EMISSION_SEARCH_K_BIG = BigInt(MAX_EMISSION_SEARCH_K);
  * magnitude past any observed producer (T3 max ≈ 6 digits).
  * Deliberate T1 deviation: the RNG's [0-9]* is unbounded; we reject
  * grammar-legal-but-pathological input to bound parse cost. CHANGELOG'd.
+ *
+ * Exported, like MAX_EMISSION_SEARCH_K, so a caller converting document
+ * text (DOCX w:line) can bound it BEFORE building a BigInt. Internal to the
+ * repo — not re-exported from the public `./length` subpath.
  */
-const MAX_NUMERIC_LEXICAL = 64;
+export const MAX_NUMERIC_LEXICAL = 64;
 
 /**
  * Excerpt an offending lexical for an error message. Rejected input may be
@@ -426,9 +430,30 @@ function parseDecimalOrThrow(s: string): Rational {
  */
 export function shortestInUnit(interval: Interval, unit: Unit): string {
   const f = FACTOR_MM[unit];
-  const lo = div(interval.lo, f);
-  const hi = div(interval.hi, f);
-  const nom = div(interval.nominal, f);
+  return `${shortestDecimal(div(interval.lo, f), div(interval.hi, f), div(interval.nominal, f))}${unit}`;
+}
+
+/**
+ * Case-2 percent: a source integer `count` in units of 1/`perUnit` (DOCX
+ * w:line under w:lineRule="auto" counts 240ths of a line) implies the true
+ * value lies in [count−½, count+½)/perUnit; × 100 gives the percent
+ * interval, and the shortest decimal in it is emitted, D8b on ties.
+ * 259/240 → [107.708…, 108.125)% → "108%". [T4: D8 Case 2, D8b; D106-5]
+ */
+export function convertQuantizedToPercent(count: bigint, perUnit: bigint): string {
+  const scale = rat(100n, perUnit);
+  const t = rat(count, 1n);
+  const lo = mul(sub(t, rat(1n, 2n)), scale);
+  const hi = mul(rat(2n * count + 1n, 2n), scale); // (t + ½) · scale, exact
+  return `${shortestDecimal(lo, hi, mul(t, scale))}%`;
+}
+
+/**
+ * The shortest decimal in the half-open interval [lo, hi), nearest `nom` on
+ * ties (D8b), as bare digits. The search shortestInUnit and
+ * convertQuantizedToPercent share.
+ */
+function shortestDecimal(lo: Rational, hi: Rational, nom: Rational): string {
   for (let k = 0n; k <= MAX_EMISSION_SEARCH_K_BIG; k += 1n) {
     const s = 10n ** k;
     const mMin = ceilDiv(lo.n * s, lo.d);
@@ -448,7 +473,7 @@ export function shortestInUnit(interval: Interval, unit: Unit): string {
       return diff < 0n ? -diff : diff;
     };
     const m = dist(c1) <= dist(c2) ? c1 : c2;
-    return `${placeDecimal(m, k)}${unit}`;
+    return placeDecimal(m, k);
   }
   throw new Error("length core: no decimal found in interval (degenerate interval?)");
 }
