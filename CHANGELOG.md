@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ParagraphStyle` (from `odf-kit/odt/read`, `odf-kit/reader` and `odf-kit/odt-reader`) has two new optional fields, `lineHeightAtLeast` and `lineSpacing`. They hold the values of `style:line-height-at-least` (a minimum line height, ODF 1.4 Part 3 §20.317) and `style:line-spacing` (a fixed distance between lines, §20.318), verbatim. Before, the reader did not read either attribute. When the style that supplies the line-height setting also sets `fo:line-height`, only `lineHeight` is reported: `fo:line-height` has precedence in the same element, and `normal` disables the other two (§20.204). When that style sets both of the others without `fo:line-height`, both are reported, because the spec gives no precedence between them.
+
 ### Changed
 
 - Generated files now declare ODF 1.4 instead of 1.2 (office:version and manifest:version). Validators choose a schema from the declared version: OASIS odfvalidator 0.13.0 validates these files against ODF 1.4, while 0.12.0 and 1.0.0-BETA1 fall back to the ODF 1.1 schemas for a 1.4-declared file and report an error on manifest:version. fillTemplate keeps the template's own declared version.
@@ -14,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `readOdt` treats `fo:line-height`, `style:line-height-at-least` and `style:line-spacing` as one setting for inheritance (#106, reported by lroder). The nearest style in the chain that sets any of them supplies the setting, and none of them is inherited past that style. Before, each attribute was inherited on its own. A paragraph style that set only an at-least or a line-spacing value therefore reported any `fo:line-height` it inherited. For example, a child of a `300%` style with `style:line-height-at-least="0.101cm"` reported `lineHeight: "300%"`, where LibreOffice lays its lines out at the font's natural height. The spec is silent on this: ODF 1.4 Part 3 §20.204 gives `fo:line-height` precedence only within one element. The rule follows LibreOffice's own rendering of three committed fixtures. Other paragraph properties are still inherited one by one. This also changes `odf-kit/odt/to-html` output: such a paragraph no longer gets its parent's `line-height` in CSS. The HTML form of the two new fields comes in a later change.
 - `xlsxToOds` no longer writes an empty `table:table-row`, which is invalid ODF. A row with no cells, such as a gap between data rows, now holds one empty cell repeated across the sheet's columns. A row that holds only an empty merged range now holds an empty cell spanning the range, plus its covered cells.
 - `xlsxToOds` keeps a merged range whose top-left cell is empty. Before, the merge was dropped without notice.
 - `xlsxToOds` no longer moves cells next to or below a merged range. Covered positions were written twice, which pushed later values to the right and added extra columns to the sheet.
