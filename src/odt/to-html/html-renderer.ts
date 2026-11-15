@@ -49,6 +49,7 @@
  */
 
 import { escapeAttr } from "../../core/index.js";
+import { checkDeclarationValue } from "../../core/css/index.js";
 
 import type {
   BodyNode,
@@ -89,6 +90,32 @@ function escapeHtml(text: string): string {
 }
 
 // ============================================================
+// CSS values in style attributes
+// ============================================================
+
+/**
+ * Whether a value can be written as `name:value` in a style attribute: it
+ * stays exactly one declaration at normal priority and leaves the later
+ * declarations untouched (src/core/css; T4: DS1-1). The text checked is the
+ * exact text written between `name:` and the renderer's `;` or the end of
+ * the attribute (T4: DS1-2).
+ *
+ * A value that fails has its declaration left out; the rest of the attribute
+ * is written as before. This is the named exception to verbatim writing for
+ * the HTML renderers (T4: DS1-8). The caller is not told in this release; the
+ * exception to C-2 is discharged when the HTML path gets a warnings channel
+ * (T4: DS1-10).
+ */
+function isWritableCssValue(value: string): boolean {
+  return checkDeclarationValue(value).ok;
+}
+
+/** Push `name:value` onto `parts` when the value is present and writable. */
+function pushDeclaration(parts: string[], name: string, value: string | undefined): void {
+  if (value !== undefined && isWritableCssValue(value)) parts.push(`${name}:${value}`);
+}
+
+// ============================================================
 // Tier 2 — CSS helpers
 // ============================================================
 
@@ -97,21 +124,23 @@ function escapeHtml(text: string): string {
  *
  * All SpanStyle values are CSS-ready — no unit conversion is needed
  * except fontSize, which is stored as a plain number (points) and
- * gets "pt" appended here.
+ * gets "pt" appended here. Each value is checked before it is written
+ * (isWritableCssValue); fontSize is checked as the text `${fontSize}pt`
+ * (T4: DS1-2).
  *
  * Returns an empty string when the style has no properties set,
  * so callers can skip emitting the <span> wrapper entirely.
  */
 function spanStyleToCss(style: SpanStyle): string {
   const parts: string[] = [];
-  if (style.fontColor !== undefined) parts.push(`color:${style.fontColor}`);
-  if (style.fontSize !== undefined) parts.push(`font-size:${style.fontSize}pt`);
-  if (style.fontFamily !== undefined) parts.push(`font-family:${style.fontFamily}`);
-  if (style.highlightColor !== undefined) parts.push(`background-color:${style.highlightColor}`);
-  if (style.textTransform !== undefined) parts.push(`text-transform:${style.textTransform}`);
-  if (style.fontVariant !== undefined) parts.push(`font-variant:${style.fontVariant}`);
-  if (style.textShadow !== undefined) parts.push(`text-shadow:${style.textShadow}`);
-  if (style.letterSpacing !== undefined) parts.push(`letter-spacing:${style.letterSpacing}`);
+  pushDeclaration(parts, "color", style.fontColor);
+  if (style.fontSize !== undefined) pushDeclaration(parts, "font-size", `${style.fontSize}pt`);
+  pushDeclaration(parts, "font-family", style.fontFamily);
+  pushDeclaration(parts, "background-color", style.highlightColor);
+  pushDeclaration(parts, "text-transform", style.textTransform);
+  pushDeclaration(parts, "font-variant", style.fontVariant);
+  pushDeclaration(parts, "text-shadow", style.textShadow);
+  pushDeclaration(parts, "letter-spacing", style.letterSpacing);
   return parts.join(";");
 }
 
@@ -127,19 +156,23 @@ function spanStyleToCss(style: SpanStyle): string {
  * "justify") are passed through verbatim — all are valid CSS text-align
  * values in modern browsers.
  *
+ * Each value is checked before it is written (isWritableCssValue). That
+ * includes marginTop / marginBottom read from fo:space-before /
+ * fo:space-after, a placement T1 does not declare (T4: DS1-7).
+ *
  * Returns an empty string when the style has no properties set,
  * so callers can omit the style attribute entirely.
  */
 function paragraphStyleToCss(style: ParagraphStyle): string {
   const parts: string[] = [];
-  if (style.textAlign !== undefined) parts.push(`text-align:${style.textAlign}`);
-  if (style.marginLeft !== undefined) parts.push(`margin-left:${style.marginLeft}`);
-  if (style.marginRight !== undefined) parts.push(`margin-right:${style.marginRight}`);
-  if (style.marginTop !== undefined) parts.push(`margin-top:${style.marginTop}`);
-  if (style.marginBottom !== undefined) parts.push(`margin-bottom:${style.marginBottom}`);
-  if (style.paddingLeft !== undefined) parts.push(`padding-left:${style.paddingLeft}`);
-  if (style.paddingRight !== undefined) parts.push(`padding-right:${style.paddingRight}`);
-  if (style.lineHeight !== undefined) parts.push(`line-height:${style.lineHeight}`);
+  pushDeclaration(parts, "text-align", style.textAlign);
+  pushDeclaration(parts, "margin-left", style.marginLeft);
+  pushDeclaration(parts, "margin-right", style.marginRight);
+  pushDeclaration(parts, "margin-top", style.marginTop);
+  pushDeclaration(parts, "margin-bottom", style.marginBottom);
+  pushDeclaration(parts, "padding-left", style.paddingLeft);
+  pushDeclaration(parts, "padding-right", style.paddingRight);
+  pushDeclaration(parts, "line-height", style.lineHeight);
   return parts.join(";");
 }
 
@@ -150,27 +183,30 @@ function paragraphStyleToCss(style: ParagraphStyle): string {
  *
  * columnWidth is not applied here — it is emitted on <col> elements
  * via the colgroup builder in renderTable.
+ *
+ * Each value is checked before it is written (isWritableCssValue).
  */
 function cellStyleToCss(style: CellStyle): string {
   const parts: string[] = [];
-  if (style.backgroundColor !== undefined) parts.push(`background-color:${style.backgroundColor}`);
-  if (style.verticalAlign !== undefined) parts.push(`vertical-align:${style.verticalAlign}`);
+  pushDeclaration(parts, "background-color", style.backgroundColor);
+  pushDeclaration(parts, "vertical-align", style.verticalAlign);
   if (style.border !== undefined) {
-    if (style.border.top !== undefined) parts.push(`border-top:${style.border.top}`);
-    if (style.border.bottom !== undefined) parts.push(`border-bottom:${style.border.bottom}`);
-    if (style.border.left !== undefined) parts.push(`border-left:${style.border.left}`);
-    if (style.border.right !== undefined) parts.push(`border-right:${style.border.right}`);
+    pushDeclaration(parts, "border-top", style.border.top);
+    pushDeclaration(parts, "border-bottom", style.border.bottom);
+    pushDeclaration(parts, "border-left", style.border.left);
+    pushDeclaration(parts, "border-right", style.border.right);
   }
   return parts.join(";");
 }
 
 /**
  * Convert a RowStyle to a semicolon-separated inline CSS string for
- * use on <tr> elements.
+ * use on <tr> elements. The value is checked before it is written
+ * (isWritableCssValue).
  */
 function rowStyleToCss(style: RowStyle): string {
   const parts: string[] = [];
-  if (style.backgroundColor !== undefined) parts.push(`background-color:${style.backgroundColor}`);
+  pushDeclaration(parts, "background-color", style.backgroundColor);
   return parts.join(";");
 }
 
@@ -227,7 +263,9 @@ function renderTextSpan(span: TextSpan): string {
  * The describedby id uses the image draw:name when available.
  *
  * Width and height from the ODF frame are emitted as inline CSS (values
- * are already in CSS-compatible units such as "17cm").
+ * are already in CSS-compatible units such as "17cm"). Each is checked
+ * before it is written (isWritableCssValue), so it cannot take in the
+ * float or display declaration that follows.
  */
 function renderImage(node: ImageNode): string {
   const attrs: string[] = [];
@@ -239,8 +277,8 @@ function renderImage(node: ImageNode): string {
   attrs.push(`alt="${escapeHtml(node.title ?? "")}"`);
 
   const styleParts: string[] = [];
-  if (node.width !== undefined) styleParts.push(`width:${node.width}`);
-  if (node.height !== undefined) styleParts.push(`height:${node.height}`);
+  pushDeclaration(styleParts, "width", node.width);
+  pushDeclaration(styleParts, "height", node.height);
 
   // Tier 3: float positioning from wrapMode
   if (node.wrapMode === "left") {
@@ -417,7 +455,10 @@ function renderRow(
  * Column widths are collected from the first content row's cells
  * (where columnWidth values are stored after Tier 2 column style
  * resolution). A <colgroup> is emitted only when at least one cell
- * carries a columnWidth value.
+ * carries a columnWidth value that passes the CSS check: a width left
+ * out counts as absent (isWritableCssValue; T4: DS1-1). columnWidth may
+ * come from cell properties, where T1 does not declare style:column-width
+ * (T4: DS1-7).
  *
  * Rows from table:table-header-rows are rendered inside <thead> with <th>
  * cells; the remaining rows go in <tbody> with <td> cells. When a table has
@@ -428,12 +469,13 @@ function renderTable(table: TableNode, options?: HtmlOptions): string {
   // Build <colgroup> from the first row that has cells with columnWidth
   let colgroup = "";
   for (const row of table.rows) {
-    const cols = row.cells.map((cell) => {
+    const widths = row.cells.map((cell) => {
       const cw = cell.cellStyle?.columnWidth;
-      return cw ? `<col style="width:${escapeAttr(cw)}">` : "<col>";
+      return cw !== undefined && isWritableCssValue(cw) ? cw : undefined;
     });
+    const cols = widths.map((cw) => (cw ? `<col style="width:${escapeAttr(cw)}">` : "<col>"));
     // Only emit <colgroup> when at least one cell has an explicit width
-    if (row.cells.some((cell) => cell.cellStyle?.columnWidth !== undefined)) {
+    if (widths.some((cw) => cw !== undefined)) {
       colgroup = `<colgroup>${cols.join("")}</colgroup>`;
     }
     break; // Use only the first row for column width information
