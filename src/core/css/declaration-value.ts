@@ -50,12 +50,16 @@ const PASS: DeclarationValueCheck = { ok: true };
  * is the exact text written between the renderer's `name:` and its `;` or the
  * end of the attribute (T4: DS1-2).
  *
+ * The input is converted to a string first, by the conversion a template
+ * literal applies, so a value that is not a string at run time is checked as
+ * the text it is written as (T4: DS1-20).
+ *
  * When a value breaks more than one condition, the result names the first
  * one met reading left to right; conditions 4, 6 and 7 are known only at the
  * end and are tested there, in that order.
  */
 export function checkDeclarationValue(text: string): DeclarationValueCheck {
-  const t = new Tokenizer(preprocess(text));
+  const t = new Tokenizer(preprocess(`${text}`));
   // Ending tokens of the blocks and functions open at this point
   // (T1: §5.5.9 l.5979-5981, the mirror variant; §5.5.10 l.6009-6013, ")").
   const open: string[] = [];

@@ -489,3 +489,86 @@ describe("renderOdtHtml — values that stay one declaration are written verbati
     },
   );
 });
+
+// ─── Values that are not strings (DS1-20) ──────────────────────────────
+//
+// renderOdtHtml takes models built outside the reader, for example parsed
+// from JSON, so a field typed `string` can hold another value at run time.
+// T4: DS1-20 — the value is converted to a string once; that string is
+// checked and that string is written. The presence tests are unchanged:
+// `!== undefined` for a declaration, truthiness for a <col> width.
+
+/** Values whose string form fails the check: condition 1 (Syntax 3 §4.3.1 l.3276-3279). */
+const NON_STRING_FAILING: [label: string, value: unknown][] = [
+  ["an array", ["red;position:fixed"]],
+  ["an object with toString", { toString: () => "red;position:fixed" }],
+];
+/** Values whose string form passes, with that string form. */
+const NON_STRING_PASSING: [label: string, value: unknown, text: string][] = [
+  ["a number", 5, "5"],
+  ["an array of two", ["a", "b"], "a,b"],
+  ["a plain object", {}, "[object Object]"],
+  ["null", null, "null"],
+];
+
+describe("renderOdtHtml — a non-string value is checked and written as one string (T4: DS1-20)", () => {
+  // The shared helper (pushDeclaration), at a span and at a paragraph.
+  test.each(NON_STRING_FAILING)("span fontColor, %s: left out", (_l, v) => {
+    expect(renderOdtHtml(span({ fontColor: v, fontSize: 12 }), opts)).toContain(
+      '<span style="font-size:12pt">',
+    );
+  });
+  test.each(NON_STRING_PASSING)("span fontColor, %s: written as %j", (_l, v, text) => {
+    expect(renderOdtHtml(span({ fontColor: v, fontSize: 12 }), opts)).toContain(
+      `<span style="color:${text};font-size:12pt">`,
+    );
+  });
+  test.each(NON_STRING_FAILING)("p marginLeft, %s: left out", (_l, v) => {
+    expect(renderOdtHtml(para({ marginLeft: v, marginRight: "1cm" }), opts)).toContain(
+      '<p style="margin-right:1cm">',
+    );
+  });
+  test.each(NON_STRING_PASSING)("p marginLeft, %s: written as %j", (_l, v, text) => {
+    expect(renderOdtHtml(para({ marginLeft: v, marginRight: "1cm" }), opts)).toContain(
+      `<p style="margin-left:${text};margin-right:1cm">`,
+    );
+  });
+
+  // The <col> width (renderTable). null is falsy, so, as before, it gives a
+  // bare <col>.
+  const cols = (v: unknown) =>
+    table([{ cellStyle: { columnWidth: v } }, { cellStyle: { columnWidth: "2cm" } }]);
+  test.each(NON_STRING_FAILING)("col columnWidth, %s: left out", (_l, v) => {
+    expect(renderOdtHtml(cols(v), opts)).toContain(
+      '<colgroup><col><col style="width:2cm"></colgroup>',
+    );
+  });
+  test.each(NON_STRING_PASSING.filter(([, v]) => v !== null))(
+    "col columnWidth, %s: written as %j",
+    (_l, v, text) => {
+      expect(renderOdtHtml(cols(v), opts)).toContain(
+        `<colgroup><col style="width:${text}"><col style="width:2cm"></colgroup>`,
+      );
+    },
+  );
+  test("col columnWidth, null: a bare <col>", () => {
+    expect(renderOdtHtml(cols(null), opts)).toContain(
+      '<colgroup><col><col style="width:2cm"></colgroup>',
+    );
+  });
+
+  // Font size: the string is `${fontSize}pt` (T4: DS1-2).
+  test.each([
+    ["an array", ["12;position:fixed"]],
+    ["an object with toString", { toString: () => "12;position:fixed" }],
+  ])("span fontSize, %s: left out", (_l, v) => {
+    expect(renderOdtHtml(span({ fontColor: "#000000", fontSize: v }), opts)).toContain(
+      '<span style="color:#000000">',
+    );
+  });
+  test.each(NON_STRING_PASSING)("span fontSize, %s: written as %jpt", (_l, v, text) => {
+    expect(renderOdtHtml(span({ fontColor: "#000000", fontSize: v }), opts)).toContain(
+      `<span style="color:#000000;font-size:${text}pt">`,
+    );
+  });
+});

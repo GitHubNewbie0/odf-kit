@@ -105,14 +105,24 @@ function escapeHtml(text: string): string {
  * the HTML renderers (T4: DS1-8). The caller is not told in this release; the
  * exception to C-2 is discharged when the HTML path gets a warnings channel
  * (T4: DS1-10).
+ *
+ * Callers pass the string they will write: a value is converted to a string
+ * once, and that one string is checked and written (T4: DS1-20).
  */
-function isWritableCssValue(value: string): boolean {
-  return checkDeclarationValue(value).ok;
+function isWritableCssValue(text: string): boolean {
+  return checkDeclarationValue(text).ok;
 }
 
-/** Push `name:value` onto `parts` when the value is present and writable. */
+/**
+ * Push `name:value` onto `parts` when the value is present and writable.
+ * A model built outside the reader can hold a non-string here at run time,
+ * so the value is converted to a string once, and that string is both
+ * checked and written (T4: DS1-20).
+ */
 function pushDeclaration(parts: string[], name: string, value: string | undefined): void {
-  if (value !== undefined && isWritableCssValue(value)) parts.push(`${name}:${value}`);
+  if (value === undefined) return;
+  const text = `${value}`;
+  if (isWritableCssValue(text)) parts.push(`${name}:${text}`);
 }
 
 // ============================================================
@@ -469,13 +479,19 @@ function renderTable(table: TableNode, options?: HtmlOptions): string {
   // Build <colgroup> from the first row that has cells with columnWidth
   let colgroup = "";
   for (const row of table.rows) {
-    const widths = row.cells.map((cell) => {
+    // Per cell: undefined when no width is present or it is left out (it then
+    // counts as absent, T4: DS1-1); null for a falsy width, which gives a bare
+    // <col> as before; otherwise the one string checked and written (T4: DS1-20).
+    const widths = row.cells.map((cell): string | null | undefined => {
       const cw = cell.cellStyle?.columnWidth;
-      return cw !== undefined && isWritableCssValue(cw) ? cw : undefined;
+      if (cw === undefined) return undefined;
+      const text = `${cw}`;
+      if (!isWritableCssValue(text)) return undefined;
+      return cw ? text : null;
     });
-    const cols = widths.map((cw) => (cw ? `<col style="width:${escapeAttr(cw)}">` : "<col>"));
+    const cols = widths.map((w) => (w ? `<col style="width:${escapeAttr(w)}">` : "<col>"));
     // Only emit <colgroup> when at least one cell has an explicit width
-    if (widths.some((cw) => cw !== undefined)) {
+    if (widths.some((w) => w !== undefined)) {
       colgroup = `<colgroup>${cols.join("")}</colgroup>`;
     }
     break; // Use only the first row for column width information

@@ -270,3 +270,22 @@ describe("css check — tokenizer paths to a failing condition (T4: DS1-1)", () 
     expect(checkDeclarationValue("url(a(b\\)c)")).toEqual(fail("bad-token"));
   });
 });
+
+// ─── Input that is not a string ────────────────────────────────────────
+
+describe("css check — a non-string input is checked as its string form (T4: DS1-20)", () => {
+  // T4: DS1-20 — the engine converts its input to a string, the same
+  // conversion a template literal applies when the renderer writes it, and
+  // checks that string. So an array or object is checked as the text it would
+  // be written as, not element by element.
+  test.each([
+    ['an array, "red;position:fixed"', ["red;position:fixed"], fail("semicolon")],
+    ['an array of two, "a,b"', ["a", "b"], pass],
+    ['an object with toString, "red}"', { toString: () => "red}" }, fail("close-brace")],
+    ['a plain object, "[object Object]"', {}, pass],
+    ['a number, "5"', 5, pass],
+    ['null, "null"', null, pass],
+  ])("%s", (_label, v, expected) => {
+    expect(checkDeclarationValue(v as unknown as string)).toEqual(expected);
+  });
+});
