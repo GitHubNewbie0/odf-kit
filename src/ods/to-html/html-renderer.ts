@@ -28,7 +28,7 @@ import type {
  * The check (src/core/css) passes a value that stays exactly one declaration
  * at normal priority and leaves the later declarations untouched (T4: DS1-1).
  * A value that fails is left out and counts as absent wherever the renderer
- * tests whether a value is present (Scott, 2026-11-14). Leaving it out is the
+ * tests whether a value is present (T4: DS1-21). Leaving it out is the
  * named exception to verbatim writing for the HTML renderers (T4: DS1-8); the
  * caller is not told in this release (T4: DS1-10).
  */
@@ -48,8 +48,13 @@ function pushDeclaration(parts: string[], name: string, value: string | undefine
  * Build the cell's inline style. Every value is checked (writableCssText),
  * textAlign and verticalAlign included: renderOdsHtml takes models built by
  * the caller, so the reader's keyword limit does not reach them.
+ *
+ * `textAlign` is the text-align text renderCell has already read and
+ * converted once (or undefined when absent or left out), so that the
+ * text-align written and the default right-align test use the same result
+ * (T4: DS1-20, DS1-21).
  */
-function buildInlineStyle(fmt: OdsCellFormatting): string {
+function buildInlineStyle(fmt: OdsCellFormatting, textAlign: string | undefined): string {
   const parts: string[] = [];
   if (fmt.bold) parts.push("font-weight:bold");
   if (fmt.italic) parts.push("font-style:italic");
@@ -58,7 +63,7 @@ function buildInlineStyle(fmt: OdsCellFormatting): string {
   pushDeclaration(parts, "font-family", fmt.fontFamily);
   pushDeclaration(parts, "color", fmt.color);
   pushDeclaration(parts, "background-color", fmt.backgroundColor);
-  pushDeclaration(parts, "text-align", fmt.textAlign);
+  if (textAlign !== undefined) parts.push(`text-align:${textAlign}`);
   pushDeclaration(parts, "vertical-align", fmt.verticalAlign);
   return parts.join(";");
 }
@@ -93,16 +98,22 @@ function renderCell(cell: OdsCellModel, includeStyles: boolean, prefix: string):
   if (cell.colSpan && cell.colSpan > 1) attrs.push(`colspan="${cell.colSpan}"`);
   if (cell.rowSpan && cell.rowSpan > 1) attrs.push(`rowspan="${cell.rowSpan}"`);
 
-  if (includeStyles && cell.formatting) {
-    const style = buildInlineStyle(cell.formatting);
+  // textAlign is read once and converted once per cell. The same result is
+  // written by buildInlineStyle and decides the default right-align below
+  // (T4: DS1-20, DS1-21).
+  const formatting = includeStyles ? cell.formatting : undefined;
+  const textAlign = formatting ? writableCssText(formatting.textAlign) : undefined;
+
+  if (formatting) {
+    const style = buildInlineStyle(formatting, textAlign);
     if (style) attrs.push(`style="${escapeAttr(style)}"`);
   }
 
-  // Right-align numbers by default if no explicit alignment was written: a
-  // textAlign that is left out counts as absent (Scott, 2026-11-14).
+  // Right-align numbers by default if no text-align was written: a textAlign
+  // that is left out counts as absent (T4: DS1-21).
   if (
     includeStyles &&
-    writableCssText(cell.formatting?.textAlign) === undefined &&
+    textAlign === undefined &&
     (cell.type === "float" || cell.type === "formula")
   ) {
     const existingStyle = attrs.find((a) => a.startsWith("style="));

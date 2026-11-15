@@ -101,8 +101,8 @@ describe("renderOdsHtml — attribute escaping (GHSA-3cgg-c5pp-57h6)", () => {
 // untouched. A value that fails the check (src/core/css) has its declaration
 // left out; everything else in the attribute is written as before, and an
 // attribute left empty is omitted (T4: DS1-1). A value left out counts as
-// absent wherever the renderer tests whether a value is present (Scott,
-// 2026-11-14, at S3). Leaving it out is the named exception to verbatim
+// absent wherever the renderer tests whether a value is present (T4: DS1-21).
+// Leaving it out is the named exception to verbatim
 // writing for the HTML renderers (T4: DS1-8); the caller is not told in this
 // release (T4: DS1-10). A value is converted to a string once, and that string
 // is checked and written (T4: DS1-20).
@@ -159,8 +159,8 @@ describe("renderOdsHtml — a value that fails the CSS check is left out (T4: DS
     expect(renderOdsHtml(rowDoc(v))).toContain('<tr class="ods-row"><td class="ods-cell">');
   });
 
-  // Scott, 2026-11-14 (S3): a textAlign left out counts as absent, so a
-  // number cell gets the default right-align, as one with no textAlign does.
+  // T4: DS1-21 — a textAlign left out counts as absent, so a number cell
+  // gets the default right-align, as one with no textAlign does.
   test.each(HOSTILE)(
     "<td> number cell: a dropped textAlign gives the default right-align — condition %s, %j",
     (_c, v) => {
@@ -295,5 +295,63 @@ describe("renderOdsHtml — a non-string value is checked and written as one str
   });
   test("<tr> height, null: absent", () => {
     expect(renderOdsHtml(rowDoc(null))).toContain('<tr class="ods-row"><td class="ods-cell">');
+  });
+});
+
+// ─── textAlign is read and converted once per cell (DS1-20, DS1-21) ────
+//
+// The written text-align and the default right-align test must use the same
+// result: one read of `formatting.textAlign`, one conversion to a string
+// (T4: DS1-20), and the default applies exactly when no text-align was
+// written (T4: DS1-21). Values whose string form changes between conversions,
+// or a getter whose result changes between reads, would otherwise let the two
+// disagree.
+
+/** Condition 1 (Syntax 3 §4.3.1 l.3276-3279). */
+const FAILING_ALIGN = "x;color:red";
+
+/** An object whose string form is `first` on the first conversion and `then` afterwards. */
+function changingString(first: string, then: string) {
+  const counter = { conversions: 0 };
+  const value = {
+    toString: () => (counter.conversions++ === 0 ? first : then),
+  };
+  return { value, counter };
+}
+
+describe("renderOdsHtml — the default right-align uses the text-align written (T4: DS1-20, DS1-21)", () => {
+  // (a) Converted once: "center" is checked and written, so a text-align was
+  // written and the default does not apply.
+  test('(a) toString "center" first, then a failing value: exactly text-align:center, one conversion', () => {
+    const { value, counter } = changingString("center", FAILING_ALIGN);
+    expect(renderOdsHtml(cellDoc({ textAlign: value }, "float"))).toContain(
+      '<td class="ods-cell" style="text-align:center">42</td>',
+    );
+    expect(counter.conversions).toBe(1);
+  });
+
+  // (b) Converted once: the failing value is left out, which counts as absent
+  // (T4: DS1-21), so the default applies.
+  test('(b) a failing value first, then "center": exactly text-align:right, one conversion', () => {
+    const { value, counter } = changingString(FAILING_ALIGN, "center");
+    expect(renderOdsHtml(cellDoc({ textAlign: value }, "float"))).toContain(
+      '<td class="ods-cell" style="text-align:right">42</td>',
+    );
+    expect(counter.conversions).toBe(1);
+  });
+
+  // (c) Read once: the first read gives "center", which is written, so the
+  // default does not apply.
+  test('(c) a getter giving "center" on the first read, then a failing value: exactly text-align:center, one read', () => {
+    let reads = 0;
+    const formatting = {
+      get textAlign() {
+        return reads++ === 0 ? "center" : FAILING_ALIGN;
+      },
+    };
+    expect(renderOdsHtml(cellDoc(formatting, "float"))).toContain(
+      '<td class="ods-cell" style="text-align:center">42</td>',
+    );
+    expect(reads).toBe(1);
   });
 });
