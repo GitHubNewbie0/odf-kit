@@ -55,7 +55,7 @@ import type { OdsDocumentModel } from "../../src/ods/read/types.js";
 
 // ─── Seed ──────────────────────────────────────────────────────────────
 //
-// T4: Scott, 2026-11-14 (S4 review) — the gate runs a pinned seed, so a
+// T4: DS1-22 — the gate runs a pinned seed, so a
 // failure reproduces on every run; an environment variable overrides it for
 // soak runs. ODF_KIT_PROPERTY_SEED unset: the pinned seed below. Set to an
 // integer: that seed. Set to "random": a fresh seed each run, printed so a

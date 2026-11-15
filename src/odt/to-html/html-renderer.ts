@@ -37,11 +37,18 @@
  * value cannot terminate its attribute, introduce an element, or add an
  * event handler.
  *
+ * Each CSS value written into a style attribute is also checked
+ * (src/core/css) before it is written. A value that would not stay exactly
+ * one declaration at normal priority, so that it could add declarations,
+ * remove the renderer's own, or mark itself !important, is left out, and
+ * the rest of the attribute is written as before (T4: DS1-1). The caller is
+ * not told when a value is left out (T4: DS1-10).
+ *
  * That is not a guarantee about the result. This output is HTML derived
- * from an untrusted document, and escaping says nothing about where a URL
- * points, what a CSS value causes the browser to fetch, or what a consumer's
- * page permits. Consumers embedding this output should sanitize it or render
- * it in a sandboxed context.
+ * from an untrusted document, and neither escaping nor the CSS check says
+ * anything about where a URL points, what a CSS value causes the browser to
+ * fetch, or what a consumer's page permits. Consumers embedding this output
+ * should sanitize it or render it in a sandboxed context.
  *
  * By default renderOdtHtml() returns a complete HTML document with a
  * <!DOCTYPE html> declaration. Pass { fragment: true } to receive only
