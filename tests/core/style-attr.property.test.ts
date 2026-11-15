@@ -21,6 +21,13 @@
 //     important text, escapes decoded, equals "important" ignoring case
 //     (CSS Syntax 3 §5.5.6 l.5847-5851). css-tree also marks `!foo` as
 //     important "foo"; that is not important under Syntax 3.
+//     This rule sees only items css-tree parses as a `Declaration`. A `Raw`
+//     item carries no important field: for a value with two bangs ending in
+//     `!important`, such as `color:!a !important` or
+//     `color:red !x !important`, css-tree returns one `Raw` item with no
+//     important field (code-work raw-important-probe, S4b), though under
+//     Syntax 3 both are important. The check rejects them (condition 7);
+//     this rule does not see them.
 //  4. css-tree's tokenizer scans the text: at top level no <{-token> and no
 //     <}-token>, and anywhere no <bad-string-token> and no <bad-url-token>.
 //     Nesting is tracked here (Syntax 3 §5.5.8-5.5.10), so a brace inside a
@@ -45,6 +52,31 @@ import { renderOdtHtml } from "../../src/odt/to-html/index.js";
 import { renderOdsHtml } from "../../src/ods/to-html/index.js";
 import type { BodyNode } from "../../src/odt/read/types.js";
 import type { OdsDocumentModel } from "../../src/ods/read/types.js";
+
+// ─── Seed ──────────────────────────────────────────────────────────────
+//
+// T4: Scott, 2026-11-14 (S4 review) — the gate runs a pinned seed, so a
+// failure reproduces on every run; an environment variable overrides it for
+// soak runs. ODF_KIT_PROPERTY_SEED unset: the pinned seed below. Set to an
+// integer: that seed. Set to "random": a fresh seed each run, printed so a
+// failing soak run can be replayed. The pinned value is the date of the
+// ruling; any fixed integer serves.
+const PINNED_SEED = 20261114;
+const seedSetting = process.env.ODF_KIT_PROPERTY_SEED;
+const seed =
+  seedSetting === undefined || seedSetting === ""
+    ? PINNED_SEED
+    : seedSetting === "random"
+      ? Math.floor(Math.random() * 2 ** 31) // any non-negative 31-bit integer
+      : Number.parseInt(seedSetting, 10);
+if (!Number.isSafeInteger(seed)) {
+  throw new Error(
+    `ODF_KIT_PROPERTY_SEED must be an integer or "random", got ${JSON.stringify(seedSetting)}`,
+  );
+}
+if (seedSetting !== undefined && seedSetting !== "")
+  console.log(`style-attr property seed: ${seed}`);
+fc.configureGlobal({ seed });
 
 // ─── HTML: find the element and its decoded style attribute ───────────
 
