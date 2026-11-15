@@ -6,6 +6,7 @@
  */
 
 import { escapeAttr } from "../../core/index.js";
+import { checkDeclarationValue } from "../../core/css/index.js";
 
 import type {
   OdsDocumentModel,
@@ -18,17 +19,47 @@ import type {
 
 // â”€â”€â”€ Style Building â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+/**
+ * The text to write for a CSS value, or undefined when the value is absent
+ * or is left out.
+ *
+ * Presence is tested as before, by truthiness. A present value is converted
+ * to a string once, and that one string is checked and written (T4: DS1-20).
+ * The check (src/core/css) passes a value that stays exactly one declaration
+ * at normal priority and leaves the later declarations untouched (T4: DS1-1).
+ * A value that fails is left out and counts as absent wherever the renderer
+ * tests whether a value is present (Scott, 2026-11-14). Leaving it out is the
+ * named exception to verbatim writing for the HTML renderers (T4: DS1-8); the
+ * caller is not told in this release (T4: DS1-10).
+ */
+function writableCssText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const text = `${value}`;
+  return checkDeclarationValue(text).ok ? text : undefined;
+}
+
+/** Push `name:value` onto `parts` when the value is present and writable. */
+function pushDeclaration(parts: string[], name: string, value: string | undefined): void {
+  const text = writableCssText(value);
+  if (text !== undefined) parts.push(`${name}:${text}`);
+}
+
+/**
+ * Build the cell's inline style. Every value is checked (writableCssText),
+ * textAlign and verticalAlign included: renderOdsHtml takes models built by
+ * the caller, so the reader's keyword limit does not reach them.
+ */
 function buildInlineStyle(fmt: OdsCellFormatting): string {
   const parts: string[] = [];
   if (fmt.bold) parts.push("font-weight:bold");
   if (fmt.italic) parts.push("font-style:italic");
   if (fmt.underline) parts.push("text-decoration:underline");
-  if (fmt.fontSize) parts.push(`font-size:${fmt.fontSize}`);
-  if (fmt.fontFamily) parts.push(`font-family:${fmt.fontFamily}`);
-  if (fmt.color) parts.push(`color:${fmt.color}`);
-  if (fmt.backgroundColor) parts.push(`background-color:${fmt.backgroundColor}`);
-  if (fmt.textAlign) parts.push(`text-align:${fmt.textAlign}`);
-  if (fmt.verticalAlign) parts.push(`vertical-align:${fmt.verticalAlign}`);
+  pushDeclaration(parts, "font-size", fmt.fontSize);
+  pushDeclaration(parts, "font-family", fmt.fontFamily);
+  pushDeclaration(parts, "color", fmt.color);
+  pushDeclaration(parts, "background-color", fmt.backgroundColor);
+  pushDeclaration(parts, "text-align", fmt.textAlign);
+  pushDeclaration(parts, "vertical-align", fmt.verticalAlign);
   return parts.join(";");
 }
 
@@ -67,10 +98,11 @@ function renderCell(cell: OdsCellModel, includeStyles: boolean, prefix: string):
     if (style) attrs.push(`style="${escapeAttr(style)}"`);
   }
 
-  // Right-align numbers by default if no explicit alignment
+  // Right-align numbers by default if no explicit alignment was written: a
+  // textAlign that is left out counts as absent (Scott, 2026-11-14).
   if (
     includeStyles &&
-    !cell.formatting?.textAlign &&
+    writableCssText(cell.formatting?.textAlign) === undefined &&
     (cell.type === "float" || cell.type === "formula")
   ) {
     const existingStyle = attrs.find((a) => a.startsWith("style="));
@@ -94,7 +126,11 @@ function renderRow(row: OdsRowModel, includeStyles: boolean, prefix: string): st
     .map((c: OdsCellModel) => renderCell(c, includeStyles, prefix))
     .join("");
 
-  const style = includeStyles && row.height ? ` style="height:${escapeAttr(row.height)}"` : "";
+  // The height is read from table:table-row, where T1 does not declare
+  // style:row-height; it is checked like any value (T4: DS1-7). A height left
+  // out counts as absent, so the attribute is omitted (T4: DS1-1).
+  const height = includeStyles ? writableCssText(row.height) : undefined;
+  const style = height !== undefined ? ` style="height:${escapeAttr(height)}"` : "";
   return `<tr class="${prefix}-row"${style}>${cells}</tr>`;
 }
 
