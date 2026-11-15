@@ -50,8 +50,8 @@ import { parse as parseCss, tokenize, tokenTypes } from "css-tree";
 import { checkDeclarationValue } from "../../src/core/css/index.js";
 import { renderOdtHtml } from "../../src/odt/to-html/index.js";
 import { renderOdsHtml } from "../../src/ods/to-html/index.js";
-import type { BodyNode } from "../../src/odt/read/types.js";
-import type { OdsDocumentModel } from "../../src/ods/read/types.js";
+import type { BodyNode } from "../../src/odt/read/index.js";
+import type { OdsDocumentModel } from "../../src/ods/read/index.js";
 
 // ─── Seed ──────────────────────────────────────────────────────────────
 //
@@ -507,6 +507,7 @@ const FRAGMENTS = [
   "\\;",
   "\\\\",
 ];
+// T4: DS1-25 — up to 8 parts, each a fragment or a string of at most 2 characters.
 const anyValue = fc
   .array(fc.oneof(fc.constantFrom(...FRAGMENTS), fc.string({ maxLength: 2 })), { maxLength: 8 })
   .map((parts) => parts.join(""));
@@ -534,7 +535,7 @@ describe("style attributes read back as exactly the renderer's own declarations 
         const problems = check(site, values, extra);
         if (problems.length > 0) throw new Error(problems.join("\n"));
       }),
-      { numRuns: 500 },
+      { numRuns: 500 }, // T4: DS1-25
     );
   });
 });
@@ -547,6 +548,7 @@ describe("style attributes read back as exactly the renderer's own declarations 
 // seen. With the check on, each is left out and the property holds; with the
 // check off, the oracle must catch it.
 
+// T4: DS1-25 — words of length 0 to 4.
 const word = fc.stringMatching(/^[a-z0-9]{0,4}$/);
 const words = fc.stringMatching(/^[a-z0-9 ]{0,4}$/);
 
@@ -617,7 +619,7 @@ describe("each condition of the check is caught at every placement (T4: DS1-12, 
           if (problems.length > 0) throw new Error(problems.join("\n"));
         },
       ),
-      { numRuns: 300 },
+      { numRuns: 300 }, // T4: DS1-25
     );
   });
 });

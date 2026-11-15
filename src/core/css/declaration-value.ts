@@ -56,7 +56,8 @@ const PASS: DeclarationValueCheck = { ok: true };
  *
  * When a value breaks more than one condition, the result names the first
  * one met reading left to right; conditions 4, 6 and 7 are known only at the
- * end and are tested there, in that order.
+ * end and are tested there, in that order (T4: DS1-24). The order is not a
+ * contract: nothing may depend on which rule is named.
  */
 export function checkDeclarationValue(text: string): DeclarationValueCheck {
   const t = new Tokenizer(preprocess(`${text}`));
