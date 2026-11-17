@@ -36,7 +36,9 @@
 // The pieces expected are computed with the renderers' own rules and with
 // checkDeclarationValue itself: a value is left out when it fails the check
 // (T4: DS1-1), counts as absent then (T4: DS1-21), and is converted to a
-// string once (T4: DS1-20). So this test catches a check that lets a hostile
+// string once (T4: DS1-20). A paragraph's line-height piece also follows
+// D106-3: a value below 0 is not written, judged with core isBelowZero, and
+// lineHeightAtLeast applies when lineHeight is absent. So this test catches a check that lets a hostile
 // value through, not one that rejects too much; the harmless-form tests in
 // tests/core/css.test.ts and the to-html suites cover that direction.
 //
@@ -48,6 +50,7 @@ import fc from "fast-check";
 import parse5 from "parse5";
 import { parse as parseCss, tokenize, tokenTypes } from "css-tree";
 import { checkDeclarationValue } from "../../src/core/css/index.js";
+import { isBelowZero } from "../../src/core/length.js";
 import { renderOdtHtml } from "../../src/odt/to-html/index.js";
 import { renderOdsHtml } from "../../src/ods/to-html/index.js";
 import type { BodyNode } from "../../src/odt/read/index.js";
@@ -258,7 +261,33 @@ const PARAGRAPH_FIELDS = [
   f("paddingLeft", "padding-left"),
   f("paddingRight", "padding-right"),
   f("lineHeight", "line-height"),
+  // T4: DS1-7 second bullet — the line-height unit's field takes the check.
+  // It writes the same `line-height` declaration (T4: D106-3); see lineHeightPiece.
+  f("lineHeightAtLeast", "line-height"),
 ];
+
+/**
+ * The one `line-height` piece a paragraph writes from lineHeight and
+ * lineHeightAtLeast (T4: D106-3), or undefined. Each value is converted to a
+ * string once (T4: DS1-20). A value the check leaves out counts as absent
+ * (T4: DS1-1, DS1-21), so a lineHeight left out lets lineHeightAtLeast apply.
+ * A value that passes and is below 0 is not written (T4: D106-3 first
+ * bullet; CSS 2.1 visudet l.1534-1553), and a lineHeight below 0 is not
+ * replaced by lineHeightAtLeast.
+ */
+function lineHeightPiece(values: Map<string, unknown>): string | undefined {
+  const lineHeight = values.get("lineHeight");
+  if (lineHeight !== undefined) {
+    const text = `${lineHeight as string}`;
+    if (checkDeclarationValue(text).ok) return isBelowZero(text) ? undefined : text;
+  }
+  const atLeast = values.get("lineHeightAtLeast");
+  if (atLeast !== undefined) {
+    const text = `${atLeast as string}`;
+    if (checkDeclarationValue(text).ok && !isBelowZero(text)) return text;
+  }
+  return undefined;
+}
 
 /** The renderers' style sites (src/odt/to-html, src/ods/to-html). */
 const SITES: Site[] = [
@@ -431,6 +460,7 @@ function expectedPieces(site: Site, values: Map<string, unknown>, extra: Extra):
   const written: string[] = [];
   let textAlignWritten = false;
   for (const field of site.fields) {
+    if (field.css === "line-height") continue; // after the loop: lineHeightPiece
     const value = values.get(key(field));
     const present = site.presentWhenDefined ? value !== undefined : Boolean(value);
     if (!present) continue;
@@ -438,6 +468,10 @@ function expectedPieces(site: Site, values: Map<string, unknown>, extra: Extra):
     if (!checkDeclarationValue(text).ok) continue;
     written.push(`${field.css}:${text}`);
     if (field.css === "text-align") textAlignWritten = true;
+  }
+  if (site.fields === PARAGRAPH_FIELDS) {
+    const lineHeight = lineHeightPiece(values);
+    if (lineHeight !== undefined) written.push(`line-height:${lineHeight}`);
   }
   const { before, after } = site.constants?.(written, extra) ?? { before: [], after: [] };
   const pieces = [...before, ...written, ...after];

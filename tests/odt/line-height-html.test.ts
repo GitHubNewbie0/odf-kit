@@ -205,3 +205,87 @@ describe("line-height HTML — synthetic", () => {
     expect(isWrapped(b)).toBe(true);
   });
 });
+
+// ============================================================
+// The CSS value check (DS1)
+// ============================================================
+//
+// T4: DS1-7 second bullet — the line-height setting's fields take the check of
+// src/core/css when this unit takes that fix. A value that fails it is left
+// out (DS1-1, DS1-5, DS1-8); a value left out counts as absent wherever the
+// renderer tests whether a value is present (DS1-21); a value is converted to
+// a string once, and that string is checked and written (DS1-20).
+// "x;color:red" fails condition 1: a top-level <semicolon-token> ends the
+// declaration (CSS Syntax 3 §4.3.1 l.3276-3279; §5.5.6 l.5840-5843).
+
+/** A caller-built paragraph: renderOdtHtml takes models built outside the reader. */
+function para(paragraphStyle: Record<string, unknown>): ParagraphNode {
+  return { kind: "paragraph", paragraphStyle, spans: [{ text: "x" }] } as ParagraphNode;
+}
+
+describe("line-height HTML — the CSS value check (T4: DS1-1, DS1-7, DS1-20, DS1-21)", () => {
+  test('fo:line-height="x;color:red" from a file → no line-height, the rest written (T4: DS1-1, DS1-7; Syntax 3 §4.3.1 l.3276-3279)', () => {
+    const node = readSynthetic('fo:line-height="x;color:red" fo:text-align="center"');
+    expect(node.paragraphStyle?.lineHeight).toBe("x;color:red");
+    expect(renderBlock(node).css).toEqual(["text-align:center"]);
+  });
+
+  test('style:line-height-at-least="x;color:red" from a file → no line-height and no wrapper span (T4: DS1-1, DS1-7, DS1-21; Syntax 3 §4.3.1 l.3276-3279)', () => {
+    const node = readSynthetic('style:line-height-at-least="x;color:red" fo:text-align="center"');
+    expect(node.paragraphStyle?.lineHeightAtLeast).toBe("x;color:red");
+    const b = renderBlock(node);
+    expect(b.css).toEqual(["text-align:center"]);
+    expect(b.inner).toBe("x");
+  });
+
+  test.each([
+    // T1: Syntax 3 §5.5.5 l.5675-5678. T4: DS1-11.
+    ["a top-level }", "1cm}"],
+    // T1: Syntax 3 §5.5.8 l.5956-5961. T4: DS1-3.
+    ["a top-level {", "1cm{"],
+    // T1: Syntax 3 §5.5.10 l.6009-6013.
+    ["a function open at the end", "calc(1cm"],
+    // T1: Syntax 3 §5.5.6 l.5847-5851.
+    ["a trailing !important", "1cm !important"],
+  ])("lineHeightAtLeast with %s → no line-height and no wrapper (T4: DS1-1, DS1-21)", (_c, v) => {
+    const b = renderBlock(para({ lineHeightAtLeast: v, textAlign: "center" }));
+    expect(b.css).toEqual(["text-align:center"]);
+    expect(b.inner).toBe("x");
+  });
+
+  test("a lineHeight left out counts as absent: lineHeightAtLeast is written, with the wrapper (T4: DS1-21; D106-3 third bullet)", () => {
+    // Only a caller-built model holds both: the reader reports lineHeight
+    // alone when fo:line-height is set (T4: D106-2).
+    const b = renderBlock(para({ lineHeight: "x;color:red", lineHeightAtLeast: "0.5cm" }));
+    expect(lineHeights(b)).toEqual(["line-height:0.5cm"]);
+    expect(isWrapped(b)).toBe(true);
+  });
+
+  test.each([
+    ["lineHeight", "an array", ["x;color:red"]],
+    ["lineHeight", "an object with toString", { toString: () => "x;color:red" }],
+    ["lineHeightAtLeast", "an array", ["x;color:red"]],
+    ["lineHeightAtLeast", "an object with toString", { toString: () => "x;color:red" }],
+  ])(
+    "%s, %s whose string fails the check → left out, no wrapper (T4: DS1-20, DS1-21)",
+    (field, _l, v) => {
+      const b = renderBlock(para({ [field]: v, textAlign: "center" }));
+      expect(b.css).toEqual(["text-align:center"]);
+      expect(b.inner).toBe("x");
+    },
+  );
+
+  test.each(["lineHeight", "lineHeightAtLeast"])(
+    "%s is converted to a string once per block, and that string is checked and written (T4: DS1-20)",
+    (field) => {
+      // The first conversion gives a value that passes; any later one gives a
+      // value that fails. One conversion: the passing value is written.
+      let calls = 0;
+      const v = { toString: () => (++calls === 1 ? "0.5cm" : "x;color:red") };
+      const b = renderBlock(para({ [field]: v }));
+      expect(lineHeights(b)).toEqual(["line-height:0.5cm"]);
+      expect(isWrapped(b)).toBe(field === "lineHeightAtLeast");
+      expect(calls).toBe(1);
+    },
+  );
+});

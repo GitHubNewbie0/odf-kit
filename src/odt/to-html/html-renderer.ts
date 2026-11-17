@@ -178,10 +178,16 @@ function spanStyleToCss(style: SpanStyle): string {
  * includes marginTop / marginBottom read from fo:space-before /
  * fo:space-after, a placement T1 does not declare (T4: DS1-7).
  *
+ * The line-height declaration is the block's BlockLineHeight, worked out
+ * once per block by the caller (blockLineHeight; T4: DS1-20).
+ *
  * Returns an empty string when the style has no properties set,
  * so callers can omit the style attribute entirely.
  */
-function paragraphStyleToCss(style: ParagraphStyle): string {
+function paragraphStyleToCss(
+  style: ParagraphStyle,
+  lineHeight: BlockLineHeight | undefined,
+): string {
   const parts: string[] = [];
   pushDeclaration(parts, "text-align", style.textAlign);
   pushDeclaration(parts, "margin-left", style.marginLeft);
@@ -190,9 +196,15 @@ function paragraphStyleToCss(style: ParagraphStyle): string {
   pushDeclaration(parts, "margin-bottom", style.marginBottom);
   pushDeclaration(parts, "padding-left", style.paddingLeft);
   pushDeclaration(parts, "padding-right", style.paddingRight);
-  const lineHeight = blockLineHeight(style);
   if (lineHeight !== undefined) parts.push(`line-height:${lineHeight.value}`);
   return parts.join(";");
+}
+
+/** The line-height a block writes, and whether its inline content is wrapped. */
+interface BlockLineHeight {
+  /** The one string that was checked, and is written (T4: DS1-20). */
+  value: string;
+  wrap: boolean;
 }
 
 /**
@@ -209,13 +221,25 @@ function paragraphStyleToCss(style: ParagraphStyle): string {
  *    (CSS 2.1 §10.8.1, visudet l.1502–1520).
  *  - lineSpacing → not written: CSS has no form for it. A named exception to
  *    C-2, pending a warnings channel on the HTML path.
+ *
+ * Each field is read and converted to a string once, and that string is
+ * checked and written (T4: DS1-20). A value the check leaves out counts as
+ * absent (isWritableCssValue; T4: DS1-1, DS1-21): a lineHeight left out lets
+ * lineHeightAtLeast apply, and a lineHeightAtLeast left out gives no wrapper.
+ * Call it once per block and pass the result to both of its users.
  */
-function blockLineHeight(style: ParagraphStyle): { value: string; wrap: boolean } | undefined {
-  if (style.lineHeight !== undefined) {
-    return isBelowZero(style.lineHeight) ? undefined : { value: style.lineHeight, wrap: false };
+function blockLineHeight(style: ParagraphStyle): BlockLineHeight | undefined {
+  const lineHeight = style.lineHeight;
+  if (lineHeight !== undefined) {
+    const text = `${lineHeight}`;
+    if (isWritableCssValue(text)) {
+      return isBelowZero(text) ? undefined : { value: text, wrap: false };
+    }
   }
-  if (style.lineHeightAtLeast !== undefined && !isBelowZero(style.lineHeightAtLeast)) {
-    return { value: style.lineHeightAtLeast, wrap: true };
+  const atLeast = style.lineHeightAtLeast;
+  if (atLeast !== undefined) {
+    const text = `${atLeast}`;
+    if (isWritableCssValue(text) && !isBelowZero(text)) return { value: text, wrap: true };
   }
   return undefined;
 }
@@ -227,11 +251,11 @@ function blockLineHeight(style: ParagraphStyle): { value: string; wrap: boolean 
  */
 function renderBlockInner(
   spans: InlineNode[],
-  style: ParagraphStyle | undefined,
+  lineHeight: BlockLineHeight | undefined,
   options?: HtmlOptions,
 ): string {
   const inner = renderSpans(spans, options);
-  const wrap = style !== undefined && blockLineHeight(style)?.wrap === true;
+  const wrap = lineHeight?.wrap === true;
   return wrap && inner !== "" ? `<span style="line-height:normal">${inner}</span>` : inner;
 }
 
@@ -635,21 +659,29 @@ function renderBodyNode(node: BodyNode, options?: HtmlOptions, inCell = false): 
   switch (node.kind) {
     case "paragraph": {
       const reset = inCell ? "margin-top:0;margin-bottom:0" : "";
+      const lineHeight =
+        node.paragraphStyle !== undefined ? blockLineHeight(node.paragraphStyle) : undefined;
       const sourceCss =
-        node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
+        node.paragraphStyle !== undefined
+          ? paragraphStyleToCss(node.paragraphStyle, lineHeight)
+          : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
       const attrs =
         (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
-      return `<p${attrs}>${renderBlockInner(node.spans, node.paragraphStyle, options)}</p>`;
+      return `<p${attrs}>${renderBlockInner(node.spans, lineHeight, options)}</p>`;
     }
     case "heading": {
       const reset = inCell ? "margin-top:0;margin-bottom:0" : "";
+      const lineHeight =
+        node.paragraphStyle !== undefined ? blockLineHeight(node.paragraphStyle) : undefined;
       const sourceCss =
-        node.paragraphStyle !== undefined ? paragraphStyleToCss(node.paragraphStyle) : "";
+        node.paragraphStyle !== undefined
+          ? paragraphStyleToCss(node.paragraphStyle, lineHeight)
+          : "";
       const css = [reset, sourceCss].filter((s) => s).join(";");
       const attrs =
         (css ? ` style="${escapeAttr(css)}"` : "") + dirAttr(node.paragraphStyle?.writingMode);
-      return `<h${node.level}${attrs}>${renderBlockInner(node.spans, node.paragraphStyle, options)}</h${node.level}>`;
+      return `<h${node.level}${attrs}>${renderBlockInner(node.spans, lineHeight, options)}</h${node.level}>`;
     }
     case "list":
       return renderList(node, options);

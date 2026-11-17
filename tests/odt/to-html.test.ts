@@ -404,6 +404,12 @@ const FIELDS: [field: string, body: BodyNode[], expected: string][] = [
     '<p style="text-align:center">',
   ],
   ["p lineHeight", para({ lineHeight: H, textAlign: "center" }), '<p style="text-align:center">'],
+  // T4: DS1-7 second bullet — the line-height unit's field takes the check.
+  [
+    "p lineHeightAtLeast",
+    para({ lineHeightAtLeast: H, textAlign: "center" }),
+    '<p style="text-align:center">',
+  ],
   [
     "img width",
     image({ width: H, height: "2cm" }),
