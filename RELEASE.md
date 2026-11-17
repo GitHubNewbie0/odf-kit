@@ -19,6 +19,7 @@ PRE-FLIGHT
 [ ]  0c. Cross-tree document checks at or below baseline (maintainer only)
 [ ]  1. Pull latest main
 [ ]  2. No security PRs you meant to include are still open (glance)
+[ ]  2b. Security releases: a fix held on a local branch is fast-forwarded onto main
 
 PREPARE CONTENT (everything below the tag must be done BEFORE step 7)
 [ ]  3. CHANGELOG.md updated (entry + footer links)
@@ -41,7 +42,7 @@ PUBLISH METADATA
 [ ] 11c. Backup pushes current again (git push backup main --follow-tags, both repos)
 
 SECURITY RELEASE ONLY
-[ ] 12. Request the CVE — AFTER the fix is live on npm
+[ ] 12. Request the CVE — AFTER the fix is live on npm (for our own finding, create the draft first)
 [ ] 13. Publish the advisory once the CVE is assigned, or when step 12's 5-working-day deadline passes
 [ ] 13b. Add the published advisory ID to the GitHub release body
 ```
@@ -136,6 +137,7 @@ on it, but the maintainer's copy of it is.
 
 ```powershell
 cd C:\dev\odf-kit2
+git switch main
 git pull origin main
 ```
 
@@ -149,6 +151,26 @@ release still sitting open. If one should ship in this release, merge it now so
 the fix rides _in_ the release rather than trailing it afterward. Dependabot
 handles the routine updates; this is only to avoid shipping while a security fix
 you meant to include is unmerged.
+
+## 2b. Bring a held fix onto main _(security releases only)_
+
+Only applies when the fix was kept on a local branch until this run, so that
+nothing about it was public before the release.
+
+Fast-forward main to that branch, by hand:
+
+```powershell
+cd C:\dev\odf-kit2
+git merge --ff-only <branch>
+git status --short --branch     # expect: ahead of origin/main, no file lines
+```
+
+`--ff-only` refuses when main has moved, and never creates a merge commit, so
+the fix's commit hashes stay as the unit's record cites them. If it refuses
+because step 1's pull brought new commits, stop and decide before going on.
+
+Step 0b's backup push ran before this, so the fix reaches no backup until
+step 11c.
 
 ## 3. Update CHANGELOG.md _(before the tag — do not defer this)_
 
@@ -422,7 +444,8 @@ why it needs a line of its own rather than trusting memory.
 
 ## 12. Request the CVE _(security releases only — AFTER step 9)_
 
-Only applies when the release fixes a reported vulnerability.
+Only applies when the release fixes a vulnerability, whether it was reported or
+found by our own review.
 
 **Nothing about the advisory happens before the fix is live on npm.** Publishing
 — or doing anything that could lead to publishing — while the defect is
@@ -432,6 +455,9 @@ using.
 Once `npm view odf-kit version` shows the new version:
 
 1. Go to the draft advisory on the repository's Security → Advisories page.
+   For an issue found by our own review there is no draft yet: create it now,
+   with the title, description, affected range, severity and weakness the
+   release's own rulings set.
 2. Set **Patched versions** to the version just published.
 3. Apply any draft-advisory edits the release's own plan rules (e.g. severity,
    scope wording) before requesting the CVE.

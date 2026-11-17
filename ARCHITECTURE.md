@@ -38,7 +38,8 @@ src/
 ├── types/                  # adapter contract types (public shim + public.ts)
 │
 ├── core/                   # INTERNAL: packaging, styles, xml, metadata,
-│                           # and the exact-rational length engine
+│                           # the exact-rational length engine, and the
+│                           # CSS value check for style attributes
 └── adapters/parser/        # INTERNAL: skeletal home for future adapters
 ```
 
@@ -91,8 +92,10 @@ step (types). Aliases are not deprecated and carry no removal timeline.
 ## Internal modules
 
 `src/core/` is deliberately unpublished: packaging, style synthesis, XML
-helpers, metadata, and the exact-rational length engine (BigInt rationals
-and intervals — no floating point anywhere in length arithmetic). The
+helpers, metadata, the exact-rational length engine (BigInt rationals
+and intervals — no floating point anywhere in length arithmetic), and the
+CSS declaration-value check (`src/core/css/`) that both HTML renderers run
+on every value they write into a `style` attribute. The
 user-shaped layer of the length engine is published as `odf-kit/length`;
 the rational/interval machinery underneath is not, so it can evolve
 freely. `src/adapters/` holds the (currently skeletal) home for future

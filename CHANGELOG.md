@@ -43,6 +43,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `xlsxToOds` no longer moves cells next to or below a merged range. Covered positions were written twice, which pushed later values to the right and added extra columns to the sheet.
 - `OdsDocument`: `addRow([])` now writes a valid row (one empty cell, repeated across the sheet's columns) instead of an empty `table:table-row`. A cell object with `value: null` and a `colSpan` or `rowSpan` above 1 is now written as an empty spanning cell. Before, it kept its span but was given a value from its `type`: an empty string (`"string"`), `false` (`"boolean"`), `0` (`"percentage"`), the formula `of:null` (`"formula"`), or the invalid `office:value="null"` (`"float"`, `"currency"`); `"date"` threw a TypeError.
 
+## [0.14.6] - 2026-11-15
+
+### Security
+
+- **Document-controlled style values can no longer add CSS declarations in `odtToHtml` and `odsToHtml` output.** `odtToHtml`, `renderOdtHtml`, `toHtml()`, `odsToHtml` and `renderOdsHtml` wrote each style value read from a document into a `style` attribute with HTML escaping only, which does not cover the `;` that separates CSS declarations. A crafted `.odt` or `.ods` could therefore end a value such as a color, a font name or a width early and add declarations of its own to that element, such as `position: fixed`, or a `background` image loaded from another server. A value could also remove the renderer's own later declarations, or mark itself `!important`. Each value is now checked before it is written, and one that would not stay exactly one declaration at normal priority is left out: a value holding a top-level `;`, `{` or `}`, an unclosed string, function, bracket or comment, a malformed string or `url()`, a trailing backslash, or a trailing `!important`. The rest of the `style` attribute is written as before, and the caller is not told when a value is left out. A value that stays one declaration is written unchanged, so the check says nothing about what a value means or what it makes a browser fetch: HTML converted from an untrusted document should still be sanitized or shown in a sandboxed context. Affected from 0.6.0 (`odtToHtml`) and 0.9.8 (`odsToHtml`), when each first wrote `style` attributes.
+
+### Changed
+
+- Generated files now declare ODF 1.4 instead of 1.2 (office:version and manifest:version). Validators choose a schema from the declared version: OASIS odfvalidator 0.13.0 validates these files against ODF 1.4, while 0.12.0 and 1.0.0-BETA1 fall back to the ODF 1.1 schemas for a 1.4-declared file and report an error on manifest:version. fillTemplate keeps the template's own declared version.
+- The README, the documentation site and code comments now state OASIS OpenDocument (ODF) 1.4 instead of ODF 1.2 or ODF 1.2+.
+
+### Fixed
+
+- `xlsxToOds` no longer writes an empty `table:table-row`, which is invalid ODF. A row with no cells, such as a gap between data rows, now holds one empty cell repeated across the sheet's columns. A row that holds only an empty merged range now holds an empty cell spanning the range, plus its covered cells.
+- `xlsxToOds` keeps a merged range whose top-left cell is empty. Before, the merge was dropped without notice.
+- `xlsxToOds` no longer moves cells next to or below a merged range. Covered positions were written twice, which pushed later values to the right and added extra columns to the sheet.
+- `OdsDocument`: `addRow([])` now writes a valid row (one empty cell, repeated across the sheet's columns) instead of an empty `table:table-row`. A cell object with `value: null` and a `colSpan` or `rowSpan` above 1 is now written as an empty spanning cell. Before, it kept its span but was given a value from its `type`: an empty string (`"string"`), `false` (`"boolean"`), `0` (`"percentage"`), the formula `of:null` (`"formula"`), or the invalid `office:value="null"` (`"float"`, `"currency"`); `"date"` threw a TypeError.
+
 ## [0.14.5] - 2026-10-20
 
 ### Security
@@ -633,7 +651,8 @@ Initial release. Complete ODT generation support.
 - Tables, page layout, headers/footers, page breaks, lists, tab stops.
 - Method chaining. Full TypeScript types. ESM-only, Node.js 22+. 102 tests.
 
-[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.5...HEAD
+[Unreleased]: https://github.com/GitHubNewbie0/odf-kit/compare/v0.14.6...HEAD
+[0.14.6]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.6
 [0.14.5]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.5
 [0.14.4]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.4
 [0.14.3]: https://github.com/GitHubNewbie0/odf-kit/releases/tag/v0.14.3
