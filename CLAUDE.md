@@ -10,7 +10,7 @@ Build all work as proofs from axioms, in authority order:
 - **T1** grammar — ODF 1.4: `spec/odf-elements.json`, `spec/odf-attributes.json`, `spec/odf-datatypes.json` (generated from the 1.4 RNG). T2 pointers: `spec/prose-index/*.json`. Never state spec facts from memory.
 - **T2** prose — section-cited; see `../odf-kit-internal/docs/odf-prose-constraints.md`. No section number → not a citation.
 - **T3** producer behavior — a named fixture with `meta:generator` intact. No fixture → the claim is unverified and never load-bearing.
-- **T4** our decisions — cite the decision ID (D8, D4, G5 …). **Never postulate arbitrarily**: before any T4 choice of weight, survey comparable software, conventions, examples, and our adopters' preferences, and record what the survey found. If you find yourself picking an answer just to keep moving — stop, that is a decision for Scott.
+- **T4** our decisions — cite the decision ID (D8, D4, G5 …). **Never postulate arbitrarily**: before any T4 choice of weight, survey comparable software, conventions, examples, and our adopters' preferences, and record what the survey found (the exhaustion rule, canon FA-1). If you find yourself picking an answer just to keep moving — stop, that is a decision for Scott.
 
 Tag citations in comments: `// T1: …` `// T4: D8a, …`. No uncited magic numbers in touched code. Where the spec is silent, record the silence. When work goes wrong, descend to the axiom layer that determines the answer and rebuild there — a higher-layer fix is a patch, and a patch is a finding, not a solution.
 
