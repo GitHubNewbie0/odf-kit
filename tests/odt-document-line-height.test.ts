@@ -16,6 +16,32 @@ import fc from "fast-check";
 import { OdtDocument } from "../src/build-or-fill/build-odt/document.js";
 import type { ParagraphOptions } from "../src/build-or-fill/build-odt/types.js";
 
+// ─── Seed ──────────────────────────────────────────────────────────────
+//
+// T4: D106-6 — this unit's property tests take their seed the way DS1-22
+// pins the style-attribute property test (tests/core/style-attr.property.test.ts),
+// so a failure reproduces on every run; an environment variable overrides it
+// for soak runs. ODF_KIT_PROPERTY_SEED unset: the pinned seed below. Set to an
+// integer: that seed. Set to "random": a fresh seed each run, printed so a
+// failing soak run can be replayed. The pinned value is the date of the
+// ruling (D106-6), as DS1-22's is; any fixed integer serves.
+const PINNED_SEED = 20261117;
+const seedSetting = process.env.ODF_KIT_PROPERTY_SEED;
+const seed =
+  seedSetting === undefined || seedSetting === ""
+    ? PINNED_SEED
+    : seedSetting === "random"
+      ? Math.floor(Math.random() * 2 ** 31) // any non-negative 31-bit integer
+      : Number.parseInt(seedSetting, 10);
+if (!Number.isSafeInteger(seed)) {
+  throw new Error(
+    `ODF_KIT_PROPERTY_SEED must be an integer or "random", got ${JSON.stringify(seedSetting)}`,
+  );
+}
+if (seedSetting !== undefined && seedSetting !== "")
+  console.log(`OdtDocument line-height property seed: ${seed}`);
+fc.configureGlobal({ seed });
+
 // ============================================================
 // T1 patterns, read from the generated grammar (never restated)
 // ============================================================
