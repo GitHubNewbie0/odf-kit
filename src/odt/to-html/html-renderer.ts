@@ -55,8 +55,7 @@
  * the inner body content, suitable for embedding in an existing page.
  */
 
-import { escapeAttr } from "../../core/index.js";
-import { isBelowZero } from "../../core/length.js";
+import { escapeAttr, isBelowZero } from "../../core/index.js";
 import { checkDeclarationValue } from "../../core/css/index.js";
 
 import type {

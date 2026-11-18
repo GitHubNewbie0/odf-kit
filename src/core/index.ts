@@ -9,3 +9,15 @@ export { generateStyles } from "./styles.js";
 export type { StylesConfig } from "./styles.js";
 export { assemblePackage } from "./packaging.js";
 export type { PackageFile } from "./packaging.js";
+// Internal only: core/ is not a published path (T4: MR-1, the front door for the
+// line-height unit's imports; core/length having no barrel of its own is LEAD-035).
+export {
+  convertDecimal,
+  convertQuantized,
+  convertQuantizedToPercent,
+  decimalToPercent,
+  isBelowZero,
+  parseOdfValue,
+  MAX_EMISSION_SEARCH_K,
+  MAX_NUMERIC_LEXICAL,
+} from "./length.js";

@@ -13,7 +13,7 @@
  * T1: rng:12465, 12474, 12479 (spec/odf-attributes.json).
  */
 
-import { convertDecimal, decimalToPercent, isBelowZero } from "../../core/length.js";
+import { convertDecimal, decimalToPercent, isBelowZero } from "../../core/index.js";
 import type { ParagraphOptions } from "./types.js";
 
 // T1: the datatype patterns, spec/odf-datatypes.json. An XSD pattern

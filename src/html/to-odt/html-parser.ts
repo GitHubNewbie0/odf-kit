@@ -45,7 +45,7 @@ import {
   isBelowZero,
   parseOdfValue,
   MAX_EMISSION_SEARCH_K,
-} from "../../core/length.js";
+} from "../../core/index.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 

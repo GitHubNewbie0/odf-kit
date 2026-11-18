@@ -21,7 +21,7 @@ import {
   convertQuantizedToPercent,
   isBelowZero,
   MAX_NUMERIC_LEXICAL,
-} from "../../core/length.js";
+} from "../../core/index.js";
 import type { ParagraphOptions } from "../../build-or-fill/build-odt/types.js";
 import type { DocxLineSpacing } from "./types.js";
 
