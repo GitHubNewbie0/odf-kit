@@ -39,7 +39,13 @@ import {
   isBase64Image,
   base64ToUint8Array,
 } from "../../lexical/to-odt/util/detect-mime.js";
-import { convertDecimal, parseOdfValue, MAX_EMISSION_SEARCH_K } from "../../core/length.js";
+import {
+  convertDecimal,
+  decimalToPercent,
+  isBelowZero,
+  parseOdfValue,
+  MAX_EMISSION_SEARCH_K,
+} from "../../core/index.js";
 
 // ─── Constants ────────────────────────────────────────────────────────
 
@@ -903,25 +909,56 @@ function cssLengthToOdf(raw: string): string | undefined {
 /**
  * Parse a CSS line-height value into the ParagraphOptions form.
  *
- * CSS line-height has four forms, mapped as follows:
- *  - "normal"        → undefined (ODF's default; nothing emitted)
- *  - unitless number → the number itself; the writer's existing
- *                      multiplier path turns 1.5 into "150%"
+ * CSS line-height maps as follows (T4: D106-5 fourth bullet):
+ *  - "normal"        → undefined: nothing emitted
+ *  - unitless number → a percent by the length core's decimal shift,
+ *                      lexically, never through Number: "1.555" →
+ *                      "155.5%" (T4: D106-4, D8)
+ *  - em              → a percent by the same shift: an em is the current
+ *                      font size (CSS 2.1 §10.8.1), so "1.5em" → "150%"
  *  - percentage      → passed through ("150%" is legal fo:line-height)
  *  - length          → via cssLengthToOdf (px converted to pt, others
- *                      lexical). fo:line-height is nonNegativeLength;
- *                      negatives are dropped.
+ *                      lexical)
+ * Negative values are dropped (fo:line-height is nonNegativeLength or a
+ * percent, and a negative percent is refused: T4: D106-4 third bullet);
+ * a value of 0 is not negative, whatever its sign (core isBelowZero), and
+ * a length of value 0 is written without the sign (T4: D106-8), and a
+ * unitless -0 is written as 0% (T4: D106-12). A
+ * leading "+" that is a CSS number's sign is removed and the value
+ * converted: "+50%" → "50%", "+1.5em" → "150%" (CSS Syntax 3 §4.3.13 and
+ * §4.3.10, spec/w3c-css/CRD-css-syntax-3-20261001.txt l.3849–3851,
+ * l.3866–3868, l.3753–3770; Scott, 2026-11-13). Any other "+" leaves a
+ * value with no ODF form: T1's percent and nonNegativeLength have no "+"
+ * (rng:9082, rng:7070). Everything else with no ODF form is dropped
+ * without notice, pending the Phase 1 warnings channel. So the builder is
+ * never handed a value D106-4 refuses, and a conversion never throws here
+ * (D-A2: document input degrades).
  */
-function parseCssLineHeight(raw: string): number | string | undefined {
-  const value = raw.trim().toLowerCase();
-  if (value === "normal") return undefined;
+function parseCssLineHeight(raw: string): string | undefined {
+  const trimmed = raw.trim().toLowerCase();
+  if (trimmed === "normal") return undefined;
+  // A "+" starts a number when a digit, or "." and a digit, follow (§4.3.10).
+  const value = /^\+(?:\d|\.\d)/.test(trimmed) ? trimmed.slice(1) : trimmed;
   // Same rewrite as cssLengthToOdf above, same reason (js/polynomial-redos).
-  if (/^\d+(?:\.\d*)?$|^\.\d+$/.test(value)) return Number(value);
+  // decimalToPercent applies the core's numeric bound (MAX_NUMERIC_LEXICAL).
+  if (/^\d+(?:\.\d*)?$|^\.\d+$/.test(value)) return decimalToPercent(value);
+  // A unitless -0 is not negative and is written as 0%, as D106-4 rules for
+  // the number -0 (T4: D106-12).
+  if (/^-(?:\d+(?:\.\d*)?|\.\d+)$/.test(value) && !isBelowZero(value)) {
+    return decimalToPercent(value.slice(1));
+  }
+  const em = /^-?(\d+(?:\.\d*)?|\.\d+)em$/.exec(value);
+  if (em) return isBelowZero(value) ? undefined : decimalToPercent(em[1]);
   const parsed = parseOdfValue(value);
   if (parsed?.kind === "percent") {
-    return parsed.lexical!.startsWith("-") ? undefined : parsed.lexical;
+    const lexical = parsed.lexical!;
+    return lexical.startsWith("+") || isBelowZero(lexical) ? undefined : lexical;
   }
-  return cssLengthToOdf(value);
+  // A length of value 0 is not negative, whatever its sign, and is written
+  // without the sign: T1's nonNegativeLength has no "-" (T4: D106-8).
+  const unsigned = value.startsWith("-") && !isBelowZero(value) ? value.slice(1) : value;
+  const length = cssLengthToOdf(unsigned);
+  return length?.startsWith("+") ? undefined : length;
 }
 
 /**

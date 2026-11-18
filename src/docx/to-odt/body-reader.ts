@@ -394,7 +394,8 @@ function readPPr(el: XmlElementNode, ctx: BodyReaderContext): PPrReadResult {
     pageBreakBefore: pprResult.props.pageBreakBefore ?? false,
     spaceBefore: pprResult.props.spaceBefore ?? null,
     spaceAfter: pprResult.props.spaceAfter ?? null,
-    lineHeight: pprResult.props.lineHeight ?? null,
+    // Undefined when absent, so the style hierarchy supplies it (T4: D106-5).
+    lineSpacing: pprResult.props.lineSpacing,
     indentLeft: pprResult.props.indentLeft ?? null,
     indentRight: pprResult.props.indentRight ?? null,
     indentFirstLine: pprResult.props.indentFirstLine ?? null,

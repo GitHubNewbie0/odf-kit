@@ -227,10 +227,19 @@ describe("parsePPr — paragraph properties", () => {
     expect(result.props.spaceAfter).toBeCloseTo(0.635, 2);
   });
 
-  it("parses line height multiplier (auto rule)", () => {
-    // 360 twips / 240 = 1.5 (1.5× line height)
+  it("keeps w:line with its w:lineRule, verbatim (T4: D106-5; first pass 10.2 S5 'Keep the rule with the value')", () => {
     const result = parsePPr(pPrEl(`<w:spacing w:line="360" w:lineRule="auto"/>`));
-    expect(result.props.lineHeight).toBeCloseTo(1.5, 2);
+    expect(result.props).toMatchObject({ lineSpacing: { line: "360", rule: "auto" } });
+  });
+
+  it("w:line without w:lineRule → rule auto (ECMA-376 Part 1 §17.3.1.33 l.12429)", () => {
+    const result = parsePPr(pPrEl(`<w:spacing w:line="276"/>`));
+    expect(result.props).toMatchObject({ lineSpacing: { line: "276", rule: "auto" } });
+  });
+
+  it("w:lineRule without w:line records nothing: the setting is inherited (ECMA-376 Part 1 §17.3.1.33 'previously set in the style hierarchy')", () => {
+    const result = parsePPr(pPrEl(`<w:spacing w:lineRule="exact"/>`));
+    expect(result.props).not.toHaveProperty("lineSpacing");
   });
 
   it("parses left indentation in twips → cm", () => {

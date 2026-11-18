@@ -272,6 +272,17 @@ export const DEFAULT_RUN_PROPS: RunProps = {
 // Paragraph properties (block-level formatting)
 // ---------------------------------------------------------------------------
 
+/**
+ * One w:spacing line setting. `line` is the w:line attribute verbatim
+ * (ST_SignedTwipsMeasure: an integer or a universal measure, ECMA-376
+ * Part 1 §17.18.81); `rule` is w:lineRule verbatim, "auto" when omitted
+ * with w:line present (§17.3.1.33).
+ */
+export interface DocxLineSpacing {
+  line: string;
+  rule: string;
+}
+
 export interface ParaProps {
   /** "left" | "center" | "right" | "justify". Null = inherited. */
   alignment: "left" | "center" | "right" | "justify" | null;
@@ -285,10 +296,11 @@ export interface ParaProps {
   /** Space after paragraph in cm. Null = inherited. */
   spaceAfter: number | null;
   /**
-   * Line height. Null = auto (single).
-   * Expressed as a multiplier, e.g. 1.5 = 150%, 2.0 = double.
+   * w:spacing line spacing: w:line kept with its w:lineRule, both verbatim
+   * (T4: D106-5). Undefined = not set here, so the value comes from the
+   * style hierarchy (ECMA-376 Part 1 §17.3.1.33).
    */
-  lineHeight: number | null;
+  lineSpacing: DocxLineSpacing | undefined;
   /** Left indentation in cm. Null = none. */
   indentLeft: number | null;
   /** Right indentation in cm. Null = none. */
@@ -308,7 +320,7 @@ export const DEFAULT_PARA_PROPS: ParaProps = {
   pageBreakBefore: false,
   spaceBefore: null,
   spaceAfter: null,
-  lineHeight: null,
+  lineSpacing: undefined,
   indentLeft: null,
   indentRight: null,
   indentFirstLine: null,

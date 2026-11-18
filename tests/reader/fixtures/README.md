@@ -90,6 +90,9 @@ Each index entry records:
 | `text-box-custom-shape-docx-roundtrip-source.docx` | LibreOffice Writer 26.2.5.2 (x86_64), Save As → _Word 2010–365 (.docx)_ | The recorded input to the row above's recipe. **Backs no assertions; nothing reads it.** Committed because the recipe's output depends on the LibreOffice version that ran it.               | provenance |
 | `frame-embedded-object-then-image-libreoffice.odt` | LibreOffice Writer **26.8.0.3** (x86_64)                                | One `draw:frame` holding **two** content children in document order: `draw:object` (an embedded spreadsheet) then its replacement `draw:image`. The T3 evidence for §10.4.1's ordering rule. | regression |
 | `empty-cells-libreoffice.ods`                      | LibreOffice Calc **26.8.0.3** (x86_64)                                  | One sheet: an empty row, a data row, and a row ending in empty cells. T3 evidence that LibreOffice writes empty cells with no `office:value-type`. **No test reads it yet.**                 | regression |
+| `line-height-test.odt`                             | LibreOffice Writer **26.8.1.1** (x86_64)                                | Named styles pairing an inherited `fo:line-height` or `style:line-height-at-least` with a different line-height attribute on the child. T3 basis of D106-1 (#106).                           | regression |
+| `line-height-inherit-2.odt`                        | LibreOffice Writer **26.8.2.2** (x86_64)                                | At-least and line-spacing, each inherited under a child that sets the other. T3 basis of D106-1 (#106).                                                                                      | regression |
+| `line-height-inherit-3.odt`                        | LibreOffice Writer **26.8.2.2** (x86_64)                                | An inherited `style:line-spacing` under a child `fo:line-height` percent, and under a child `fo:line-height` length. T3 basis of D106-1 (#106).                                              | regression |
 
 **`alignment-ltr.odt`**
 
@@ -266,6 +269,85 @@ Each index entry records:
 - **Also recorded:** declares `office:version="1.4"`.
 
 - **Type:** regression. **No test reads it yet.** It is committed as evidence for the §19.389 LEAD, ahead of the tests that will use it.
+
+**The line-height fixtures** — `line-height-test.odt`, `line-height-inherit-2.odt`, `line-height-inherit-3.odt` (#106, reported by lroder)
+
+What the three are evidence of, together. ODF 1.4 Part 3 §20.204 gives `fo:line-height` precedence over `style:line-height-at-least` and `style:line-spacing` only "in the same element", and §20.317 and §20.318 say nothing about inheritance. The spec is therefore silent on what a child style that sets one of the three does to a different one it inherits. These files are LibreOffice's answer, measured: each pairs an inherited attribute with a different attribute set by the child, and in every pairing LibreOffice's own PDF export lays the child out by the child's attribute alone. That is the T3 basis of canon D106-1: the three attributes inherit as a single setting, and the nearest style that sets any of them supplies it. Font in all three: 12pt Liberation Serif, from the default paragraph style; no style in a measured chain sets `fo:font-size`.
+
+Line gaps were measured on 2026-11-13 from each file's own `writer_pdf_Export`, by the LibreOffice build that wrote it, reading baselines from the PDF content streams (the #106 line-height first pass, §T3, §T3-2, §T3-3 and §8.7).
+
+**`line-height-test.odt`**
+
+- **Producer:** LibreOffice Writer 26.8.1.1 (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.8.1.1$Windows_X86_64 LibreOffice_project/bf6ef2662401c7d6dce671ab4deb26ee0af3a7c1`.
+
+- **Contents:** named styles in `styles.xml`, and the paragraphs that use them (`content.xml` order: `Text_20_body`, `P1` (empty), `Child`, `Child` (empty), `PropChild`, `P2` (empty), `LeadingChild`):
+
+  | Style           | Parent          | Line-height attribute it sets          | Gap (pt) |
+  | --------------- | --------------- | -------------------------------------- | -------- |
+  | `Text_20_body`  | `Standard`      | `fo:line-height="300%"`                | 41.4     |
+  | `Child`         | `Text_20_body`  | `style:line-height-at-least="0.101cm"` | 13.8     |
+  | `AtLeastParent` | `Standard`      | `style:line-height-at-least="1.499cm"` | —        |
+  | `PropChild`     | `AtLeastParent` | `fo:line-height="100%"`                | 13.8     |
+  | `LeadingChild`  | `Text_20_body`  | `style:line-spacing="0cm"`             | 13.8     |
+
+  `P1` and `P2` are automatic styles in `content.xml` with parents `Standard` and `Child`; neither sets a line-height attribute. `Text_20_body` also sets `fo:margin-bottom="0.247cm"`, which `Child` inherits.
+
+- **What it is evidence of:** `Child` and `LeadingChild` do not take their parent's `300%`. `PropChild` does not separate the two readings, because §20.204's same-element precedence gives the same result.
+
+- **Recipe:** not recorded beyond the table above.
+
+- **Provenance:** Scott's own document, authored in LibreOffice Writer; the second version of `line-height-test.odt` (four paragraphs with text), the first being superseded (state179 ruling 16). Created 2026-11-01 per `meta:creation-date`. Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `782ce26c4e633e718899ed0d6a4ccba48f4231b6db7771986a305cf100227bf3`, 26,205 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
+
+- **Type:** regression
+
+**`line-height-inherit-2.odt`**
+
+- **Producer:** LibreOffice Writer 26.8.2.2 (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.8.2.2$Windows_X86_64 LibreOffice_project/9dea406ab7695df6325b11b0e19fdca8db4b7276`.
+
+- **Contents:** (`content.xml` order: `AtLeastBase`, `P1` (empty), `LeadingOverAtLeast`, `P2` (empty), `LeadingBase`, `P2` (empty), `AtLeastOverLeading`)
+
+  | Style                | Parent        | Line-height attribute it sets          | Gap (pt) |
+  | -------------------- | ------------- | -------------------------------------- | -------- |
+  | `Standard`           | none          | `style:line-height-at-least="1.499cm"` | —        |
+  | `AtLeastBase`        | `Standard`    | none                                   | 42.5     |
+  | `LeadingOverAtLeast` | `AtLeastBase` | `style:line-spacing="0.499cm"`         | 27.95    |
+  | `LeadingBase`        | `Standard`    | `style:line-spacing="1cm"`             | 42.15    |
+  | `AtLeastOverLeading` | `LeadingBase` | `style:line-height-at-least="0.801cm"` | 22.7     |
+
+  `P1` and `P2` are automatic styles with parent `Standard`; neither sets a line-height attribute. The file also holds LibreOffice's stock styles (`Heading`, `Text_20_body` with `fo:line-height="115%"`, `List`, `Caption`, `Index`), which no paragraph uses.
+
+- **What it is evidence of:** each of at-least and line-spacing, set on a child, displaces the other inherited from a parent (`LeadingOverAtLeast`, `AtLeastOverLeading`).
+
+- **Recipe** (as given by Scott): new Writer document. Paragraph style `AtLeastBase` (parent Default Paragraph Style), line spacing "At least" 1.5 cm. Style `LeadingOverAtLeast`, inheriting from `AtLeastBase`, line spacing "Leading" 0.5 cm. Style `LeadingBase` (parent Default Paragraph Style), "Leading" 1 cm. Style `AtLeastOverLeading`, inheriting from `LeadingBase`, "At least" 0.8 cm. Four paragraphs, one in each style, each wrapping to three lines or more. Save as ODF Text; close LibreOffice.
+
+- **The file differs from the recipe in one respect:** as saved, the at-least value sits on `Standard` (Default Paragraph Style) and `AtLeastBase` sets nothing, so `AtLeastBase` inherits it. The file is the evidence; the recipe is recorded as given.
+
+- **Provenance:** authored 2026-11-13 by Scott, in LibreOffice Writer 26.8.2.2 on Windows, for the line-height unit, to measure the inheritance pairings `line-height-test.odt` does not show (canon D106-1). Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `4bffed6bad58d9e94e42b68185220df4b1c5d62598b606dc80ea911fdf8fc023`, 25,375 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
+
+- **Type:** regression
+
+**`line-height-inherit-3.odt`**
+
+- **Producer:** LibreOffice Writer 26.8.2.2 (x86_64), Windows. `meta:generator` intact and read before the file was touched: `LibreOffice/26.8.2.2$Windows_X86_64 LibreOffice_project/9dea406ab7695df6325b11b0e19fdca8db4b7276`.
+
+- **Contents:** (`content.xml` order: `LeadingParent`, `Standard` (empty), `PropOverLeading`, `Standard` (empty), `FixedOverLeading`; no paragraph automatic styles)
+
+  | Style              | Parent          | Line-height attribute it sets | Gap (pt) |
+  | ------------------ | --------------- | ----------------------------- | -------- |
+  | `Standard`         | none            | none                          | —        |
+  | `LeadingParent`    | `Standard`      | `style:line-spacing="1cm"`    | 42.15    |
+  | `PropOverLeading`  | `LeadingParent` | `fo:line-height="200%"`       | 27.6     |
+  | `FixedOverLeading` | `LeadingParent` | `fo:line-height="0.801cm"`    | 22.7     |
+
+  The stock styles are as in `line-height-inherit-2.odt`, with an empty `Standard`.
+
+- **What it is evidence of:** a child `fo:line-height`, percent or length, displaces an inherited line-spacing.
+
+- **Recipe** (as given by Scott): new Writer document. Paragraph style `LeadingParent` (parent Default Paragraph Style), line spacing "Leading" 1 cm. Style `PropOverLeading`, inheriting from `LeadingParent`, "Proportional" 200%. Style `FixedOverLeading`, inheriting from `LeadingParent`, "Fixed" 0.8 cm. Three paragraphs, one in each style, each wrapping to three lines or more. Save as ODF Text; close LibreOffice. The saved file matches the recipe.
+
+- **Provenance:** authored 2026-11-13 by Scott, in LibreOffice Writer 26.8.2.2 on Windows, for the line-height unit, to measure the inheritance pairings `line-height-test.odt` does not show (canon D106-1). Copied byte-identical from `C:\dev\odf-kit-scratch\issue-106\input\`; SHA-256 `449b24fcc7b37da8404717d9036a5aab92e8ee87f78c83e592a3db5e6a166414`, 20,432 bytes, verified identical to the source after copying and equal to canon D106-1. Inspected by unzipping a copy: never opened in an editor.
+
+- **Type:** regression
 
 ## Adding a fixture — quick checklist
 

@@ -71,14 +71,19 @@ const MAX_EMISSION_SEARCH_K_BIG = BigInt(MAX_EMISSION_SEARCH_K);
  * magnitude past any observed producer (T3 max ≈ 6 digits).
  * Deliberate T1 deviation: the RNG's [0-9]* is unbounded; we reject
  * grammar-legal-but-pathological input to bound parse cost. CHANGELOG'd.
+ *
+ * Exported, like MAX_EMISSION_SEARCH_K, so a caller converting document
+ * text (DOCX w:line) can bound it BEFORE building a BigInt. Internal to the
+ * repo — not re-exported from the public `./length` subpath.
  */
-const MAX_NUMERIC_LEXICAL = 64;
+export const MAX_NUMERIC_LEXICAL = 64;
 
 /**
  * Excerpt an offending lexical for an error message. Rejected input may be
- * arbitrarily long; never echo it back whole.
+ * arbitrarily long; never echo it back whole. Exported for every message
+ * that echoes document text, so the repo has one limit (T4: MR-4).
  */
-function excerpt(s: string): string {
+export function excerpt(s: string): string {
   return s.length > MAX_NUMERIC_LEXICAL ? `${s.slice(0, MAX_NUMERIC_LEXICAL)}…` : s;
 }
 
@@ -426,9 +431,30 @@ function parseDecimalOrThrow(s: string): Rational {
  */
 export function shortestInUnit(interval: Interval, unit: Unit): string {
   const f = FACTOR_MM[unit];
-  const lo = div(interval.lo, f);
-  const hi = div(interval.hi, f);
-  const nom = div(interval.nominal, f);
+  return `${shortestDecimal(div(interval.lo, f), div(interval.hi, f), div(interval.nominal, f))}${unit}`;
+}
+
+/**
+ * Case-2 percent: a source integer `count` in units of 1/`perUnit` (DOCX
+ * w:line under w:lineRule="auto" counts 240ths of a line) implies the true
+ * value lies in [count−½, count+½)/perUnit; × 100 gives the percent
+ * interval, and the shortest decimal in it is emitted, D8b on ties.
+ * 259/240 → [107.708…, 108.125)% → "108%". [T4: D8 Case 2, D8b; D106-5]
+ */
+export function convertQuantizedToPercent(count: bigint, perUnit: bigint): string {
+  const scale = rat(100n, perUnit);
+  const t = rat(count, 1n);
+  const lo = mul(sub(t, rat(1n, 2n)), scale);
+  const hi = mul(rat(2n * count + 1n, 2n), scale); // (t + ½) · scale, exact
+  return `${shortestDecimal(lo, hi, mul(t, scale))}%`;
+}
+
+/**
+ * The shortest decimal in the half-open interval [lo, hi), nearest `nom` on
+ * ties (D8b), as bare digits. The search shortestInUnit and
+ * convertQuantizedToPercent share.
+ */
+function shortestDecimal(lo: Rational, hi: Rational, nom: Rational): string {
   for (let k = 0n; k <= MAX_EMISSION_SEARCH_K_BIG; k += 1n) {
     const s = 10n ** k;
     const mMin = ceilDiv(lo.n * s, lo.d);
@@ -448,7 +474,7 @@ export function shortestInUnit(interval: Interval, unit: Unit): string {
       return diff < 0n ? -diff : diff;
     };
     const m = dist(c1) <= dist(c2) ? c1 : c2;
-    return `${placeDecimal(m, k)}${unit}`;
+    return placeDecimal(m, k);
   }
   throw new Error("length core: no decimal found in interval (degenerate interval?)");
 }
@@ -461,6 +487,58 @@ export function convertQuantized(count: number | bigint, source: SourceUnit, tar
 /** D8c convenience: fractional source string → shortest decimal in `target`. */
 export function convertDecimal(raw: string, source: SourceUnit, target: Unit): string {
   return shortestInUnit(intervalFromDecimal(raw, source), target);
+}
+
+// ─── Sign and percent: lexical, exact ──────────────────────────────────
+
+/**
+ * True when a numeric lexical (a length or a percent, as written) is below
+ * 0: a leading "-" and a nonzero digit. A value of 0 is not negative,
+ * whatever its sign, so "-0%" and "-0.00cm" are not. Decided on the text;
+ * nothing is parsed as a float (D8). [T4: D106-3 first bullet, D106-4
+ * third bullet]
+ *
+ * Linear on any input: the pattern is anchored at the left only, and each
+ * digit run matches one way.
+ */
+export function isBelowZero(lexical: string): boolean {
+  const m = /^-(\d*(?:\.\d*)?)/.exec(lexical);
+  return m !== null && /[1-9]/.test(m[1] ?? "");
+}
+
+/**
+ * The exponents a finite JS number's String() can carry, read from the
+ * extreme values themselves rather than restated: String(Number.MIN_VALUE)
+ * is "5e-324", String(Number.MAX_VALUE) ends "e+308". An exponent outside
+ * them cannot come from String(n), and bounding it bounds the 10^k below.
+ */
+const NUMBER_EXPONENT_MIN = Number(/e([+-]\d+)$/.exec(String(Number.MIN_VALUE))?.[1]);
+const NUMBER_EXPONENT_MAX = Number(/e([+-]\d+)$/.exec(String(Number.MAX_VALUE))?.[1]);
+
+/**
+ * A non-negative decimal string as a percent, exactly: the decimal point
+ * moves two places right ("1.555" → "155.5%", "1e-7" → "0.00001%",
+ * "2" → "200%"). Nothing is rounded and no float arithmetic is done (D8).
+ * Accepts plain decimals ("12", "12.", ".5", "1.5") and the exponent form
+ * String(n) produces for a finite number ("1e-7", "1.5e+21"). Returns
+ * undefined for anything else: a sign, a unit, a lexical longer than
+ * MAX_NUMERIC_LEXICAL, or an exponent no finite number prints.
+ * [T4: D106-4 fourth bullet, D8]
+ */
+export function decimalToPercent(decimal: string): string | undefined {
+  if (decimal.length > MAX_NUMERIC_LEXICAL) return undefined;
+  const m = /^(\d*)(?:\.(\d*))?(?:e([+-]\d+))?$/.exec(decimal);
+  if (!m) return undefined;
+  const int = m[1] ?? "";
+  const frac = m[2] ?? "";
+  if (int === "" && frac === "") return undefined;
+  const exponent = m[3] === undefined ? 0 : Number(m[3]);
+  if (exponent < NUMBER_EXPONENT_MIN || exponent > NUMBER_EXPONENT_MAX) return undefined;
+  const digits = BigInt(`${int}${frac}` || "0");
+  // value = digits × 10^-scale; × 100 lowers the scale by 2.
+  const scale = frac.length - exponent - 2;
+  if (scale <= 0) return `${digits * 10n ** BigInt(-scale)}%`;
+  return `${placeDecimal(digits, BigInt(scale))}%`;
 }
 
 // ─── D8a: geometric-domain unit vote ───────────────────────────────────

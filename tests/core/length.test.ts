@@ -20,6 +20,9 @@ import {
   convertQuantized,
   convertDecimal,
   chooseGeometricUnit,
+  isBelowZero,
+  decimalToPercent,
+  convertQuantizedToPercent,
 } from "../../src/core/length.js";
 
 // ─── Case 1: handed truth — lexical preservation ───────────────────────
@@ -213,4 +216,83 @@ describe("length core — determinism", () => {
       expect(convertQuantized(1417, "twip", "cm")).toBe(a);
     }
   });
+});
+
+// ─── Sign and percent: lexical, exact (D106-3, D106-4, D8) ─────────────
+
+describe("length core — isBelowZero", () => {
+  test.each(["-50%", "-0.5cm", "-.1pt", "-0.001%"])(
+    "%p is below zero (T4: D106-3 first bullet, D106-4 third bullet)",
+    (v) => {
+      expect(isBelowZero(v)).toBe(true);
+    },
+  );
+
+  test.each(["-0%", "-0.00%", "-0cm", "-.0pt", "0%", "50%", "0.5cm", "normal", "+5%", ""])(
+    "%p is not below zero: a value of 0 is not negative, whatever its sign (T4: D106-4 third bullet)",
+    (v) => {
+      expect(isBelowZero(v)).toBe(false);
+    },
+  );
+});
+
+describe("length core — decimalToPercent", () => {
+  test.each([
+    ["1.555", "155.5%"],
+    ["1.005", "100.5%"],
+    ["1e-7", "0.00001%"],
+    ["1.5", "150%"],
+    ["2", "200%"],
+    ["1", "100%"],
+    ["0", "0%"],
+    ["12.", "1200%"],
+    [".5", "50%"],
+    ["1.5e+21", "150000000000000000000000%"],
+  ])(
+    "%p → %p: the decimal point moves two places, nothing rounded (T4: D106-4 fourth bullet, D8)",
+    (d, p) => {
+      expect(decimalToPercent(d)).toBe(p);
+    },
+  );
+
+  test.each([String(Number.MIN_VALUE), String(Number.MAX_VALUE)])(
+    "the extreme finite numbers' String() forms are accepted (%p) (T4: D106-4 fourth bullet: any finite number)",
+    (d) => {
+      expect(decimalToPercent(d)).toMatch(/^\d+(\.\d+)?%$/);
+    },
+  );
+
+  test.each([
+    "",
+    ".",
+    "-1",
+    "+1",
+    "1.5em",
+    "1e",
+    "1e999999999",
+    "1e-999999999",
+    "1".repeat(65),
+    "abc",
+  ])(
+    "%p → undefined: not a non-negative decimal within the core's bounds (T4: D8; MAX_NUMERIC_LEXICAL)",
+    (d) => {
+      expect(decimalToPercent(d)).toBeUndefined();
+    },
+  );
+});
+
+describe("length core — convertQuantizedToPercent (D8 Case 2)", () => {
+  test.each([
+    [360n, "150%"],
+    [276n, "115%"],
+    [259n, "108%"],
+    [240n, "100%"],
+    [0n, "0%"],
+    [1n, "0.4%"],
+  ])(
+    "%p 240ths → %p: the shortest decimal in [t−½, t+½)/240 × 100, nearest the nominal on ties (T4: D8 Case 2, D8b; D106-5; ECMA-376 Part 1 §17.3.1.33 '240ths of a line')",
+    (count, expected) => {
+      expect(convertQuantizedToPercent(count, 240n)).toBe(expected);
+    },
+  );
 });
