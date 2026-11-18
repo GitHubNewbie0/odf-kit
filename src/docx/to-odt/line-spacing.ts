@@ -26,6 +26,9 @@ import {
 import type { ParagraphOptions } from "../../build-or-fill/build-odt/index.js";
 import type { DocxLineSpacing } from "./types.js";
 
+// T4: D106-9 — these patterns are built straight from the ECMA-376 text on
+// disk, a named exception to FA-1's order (no committed extraction yet for
+// the DOCX row; DS1-9 is the precedent). Discharged by that extraction.
 // ECMA-376 Part 1 §17.18.81 ST_SignedTwipsMeasure: xsd:integer ...
 const TWIPS = /^[-+]?\d+$/;
 // ... or §22.9.2.15 ST_UniversalMeasure.
