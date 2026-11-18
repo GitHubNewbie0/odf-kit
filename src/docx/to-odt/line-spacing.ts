@@ -22,7 +22,7 @@ import {
   isBelowZero,
   MAX_NUMERIC_LEXICAL,
 } from "../../core/index.js";
-import type { ParagraphOptions } from "../../build-or-fill/build-odt/types.js";
+import type { ParagraphOptions } from "../../build-or-fill/build-odt/index.js";
 import type { DocxLineSpacing } from "./types.js";
 
 // ECMA-376 Part 1 §17.18.81 ST_SignedTwipsMeasure: xsd:integer ...

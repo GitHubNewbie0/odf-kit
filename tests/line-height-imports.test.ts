@@ -46,3 +46,13 @@ describe("the line-height unit's imports into core go through core's barrel (T4:
     expect(published).toBe((length as Record<string, unknown>)[name]);
   });
 });
+
+describe("docx/to-odt/line-spacing.ts takes ParagraphOptions from build-odt's barrel (T4: MR-5)", () => {
+  // MR-5: a pathway never reaches into another module's definers; build-odt's
+  // barrel publishes ParagraphOptions (src/build-or-fill/build-odt/index.ts).
+  test("it imports nothing from build-odt/types.js, a definer (T4: MR-5, MR-1)", () => {
+    const specifiers = importSpecifiers("src/docx/to-odt/line-spacing.ts");
+    expect(specifiers.filter((s) => s.endsWith("/build-odt/types.js"))).toEqual([]);
+    expect(specifiers).toContain("../../build-or-fill/build-odt/index.js");
+  });
+});
