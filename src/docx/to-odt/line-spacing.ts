@@ -19,6 +19,7 @@
 import {
   convertQuantized,
   convertQuantizedToPercent,
+  excerpt,
   isBelowZero,
   MAX_NUMERIC_LEXICAL,
 } from "../../core/index.js";
@@ -35,10 +36,9 @@ const AUTO_PER_LINE = 240n;
 type LineHeightOptions = Pick<ParagraphOptions, "lineHeight" | "lineHeightAtLeast">;
 
 function warn(warnings: string[], s: DocxLineSpacing, why: string): LineHeightOptions {
-  const line = s.line.length > 40 ? `${s.line.slice(0, 40)}…` : s.line;
-  const rule = s.rule.length > 40 ? `${s.rule.slice(0, 40)}…` : s.rule;
+  // Document text is echoed through core's excerpt, the repo's one limit (T4: MR-4).
   warnings.push(
-    `w:spacing w:line="${line}" w:lineRule="${rule}": ${why} — line spacing not converted`,
+    `w:spacing w:line="${excerpt(s.line)}" w:lineRule="${excerpt(s.rule)}": ${why} — line spacing not converted`,
   );
   return {};
 }

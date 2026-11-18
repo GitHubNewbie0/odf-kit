@@ -80,9 +80,10 @@ export const MAX_NUMERIC_LEXICAL = 64;
 
 /**
  * Excerpt an offending lexical for an error message. Rejected input may be
- * arbitrarily long; never echo it back whole.
+ * arbitrarily long; never echo it back whole. Exported for every message
+ * that echoes document text, so the repo has one limit (T4: MR-4).
  */
-function excerpt(s: string): string {
+export function excerpt(s: string): string {
   return s.length > MAX_NUMERIC_LEXICAL ? `${s.slice(0, MAX_NUMERIC_LEXICAL)}…` : s;
 }
 

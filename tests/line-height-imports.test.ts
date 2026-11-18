@@ -36,6 +36,7 @@ describe("the line-height unit's imports into core go through core's barrel (T4:
     "convertQuantized",
     "convertQuantizedToPercent",
     "decimalToPercent",
+    "excerpt",
     "isBelowZero",
     "parseOdfValue",
     "MAX_EMISSION_SEARCH_K",

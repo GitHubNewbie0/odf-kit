@@ -16,6 +16,7 @@ export {
   convertQuantized,
   convertQuantizedToPercent,
   decimalToPercent,
+  excerpt,
   isBelowZero,
   parseOdfValue,
   MAX_EMISSION_SEARCH_K,

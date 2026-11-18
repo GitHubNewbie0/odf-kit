@@ -162,6 +162,37 @@ describe("docxToOdt — values with no ODF form: no attribute, one warning, no t
     expect(r.lineWarnings).toHaveLength(1);
   });
 
+  // T4: MR-4 — one engine for one job: the warning echoes w:line and
+  // w:lineRule through core's excerpt(), which keeps MAX_NUMERIC_LEXICAL (64)
+  // characters and marks a cut with "…" (src/core/length.ts).
+  const d50 = "1".repeat(50);
+  const d100 = "1".repeat(100);
+  const r50 = "x".repeat(50);
+  const r100 = "x".repeat(100);
+  test.each([
+    ["a 50-character w:line, whole", d50, "bogus", `w:line="${d50}" w:lineRule="bogus"`],
+    ["a 50-character w:lineRule, whole", "240", r50, `w:line="240" w:lineRule="${r50}"`],
+    [
+      "a 100-character w:line, cut at 64",
+      d100,
+      "exact",
+      `w:line="${"1".repeat(64)}…" w:lineRule="exact"`,
+    ],
+    [
+      "a 100-character w:lineRule, cut at 64",
+      "240",
+      r100,
+      `w:line="240" w:lineRule="${"x".repeat(64)}…"`,
+    ],
+  ])(
+    "the warning echoes %s, through core's excerpt (T4: MR-4; core MAX_NUMERIC_LEXICAL = 64)",
+    async (_label, line, rule, echoed) => {
+      const r = await convert(spacing(line, rule));
+      expect(r.lineWarnings).toHaveLength(1);
+      expect(r.lineWarnings[0]).toContain(echoed);
+    },
+  );
+
   test("property: for any w:line and w:lineRule, docxToOdt resolves, and either writes a T1 value or warns (T4: D106-5; C-2 Part 3)", async () => {
     const line = fc.oneof(
       fc.string(),
