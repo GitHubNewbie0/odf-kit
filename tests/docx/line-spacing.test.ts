@@ -193,6 +193,16 @@ describe("docxToOdt — values with no ODF form: no attribute, one warning, no t
     },
   );
 
+  // Run count and generator sizes stand as committed (T4: D106-10). Each is for:
+  // - numRuns 200: the cases drawn per run, twice fast-check's default 100.
+  // - fc.string() at fast-check's default size: arbitrary short text, mostly
+  //   not a measure at all.
+  // - integer part \d{0,5}: zero to five digits, twips counts up to 99999
+  //   and an empty integer part.
+  // - fraction \.\d{0,3}: zero to three digits, so a bare trailing point is
+  //   drawn as well as decimals.
+  // - constant "9".repeat(400): longer than the core's MAX_NUMERIC_LEXICAL
+  //   (64), so the bound is reached.
   test("property: for any w:line and w:lineRule, docxToOdt resolves, and either writes a T1 value or warns (T4: D106-5; C-2 Part 3)", async () => {
     const line = fc.oneof(
       fc.string(),

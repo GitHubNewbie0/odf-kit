@@ -133,6 +133,21 @@ describe("htmlToOdt — CSS line-height (T4: D106-5 fourth bullet)", () => {
     expect(lineHeightAttr(await withLineHeight("-0.5pt"))).toBeUndefined();
   });
 
+  // Run count and generator sizes stand as committed (T4: D106-10). Each is for:
+  // - numRuns 200: the cases drawn per run, twice fast-check's default 100.
+  // - fc.string() at fast-check's default size: arbitrary short text, mostly
+  //   not a CSS value at all.
+  // - integer part \d{0,4}: zero to four digits, so an empty integer part
+  //   is drawn as well as whole numbers.
+  // - fraction \.\d{0,4}: zero to four digits, so a bare trailing point is
+  //   drawn as well as decimals.
+  // - leading-point form \.\d{1,3}: one to three digits after a point with
+  //   no integer part.
+  // - exponent e[-+]?\d{1,3}: one to three exponent digits, signed or not,
+  //   a form CSS numbers admit and ODF lexicals do not.
+  // - constant "9".repeat(400): longer than the core's MAX_NUMERIC_LEXICAL
+  //   (64), so the bound is reached.
+  // - constant "1e400": an exponent past any finite number's.
   test("property: for any CSS line-height string, htmlToOdt resolves (T4: D106-4 + C-2 Part 3)", async () => {
     const cssish = fc.stringMatching(
       /^[-+]?(\d{0,4}(\.\d{0,4})?|\.\d{1,3})(e[-+]?\d{1,3})?(px|pt|cm|mm|in|pc|em|rem|ex|%)?$/,

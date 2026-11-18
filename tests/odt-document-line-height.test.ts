@@ -258,6 +258,13 @@ describe("line-height options — px is written in pt (T4: D8 Case 2, D8a: never
 // ============================================================
 
 describe("line-height options — properties (T4: D106-4)", () => {
+  // Run count and generator sizes stand as committed (T4: D106-10). Each is for:
+  // - runs, fast-check's default 100 (no numRuns set): the cases drawn per run.
+  // - double min 0, max Number.MAX_VALUE: every finite non-negative double, so
+  //   String(n) gives both plain and exponent forms ("1e-7", "1.5e+21").
+  // - constant -0: the one signed value D106-4 admits ("-0 gives 0%").
+  // - integer 0 to 1000, divided by 1000: decimals from 0 to 1 with up to three
+  //   fraction digits, whose String(n) is a short plain decimal.
   test("any finite non-negative number, -0 included → a T1 percent exactly 100 × the number's decimal string", async () => {
     const nonNegative = fc.oneof(
       fc.double({ min: 0, max: Number.MAX_VALUE, noNaN: true }),
@@ -277,6 +284,17 @@ describe("line-height options — properties (T4: D106-4)", () => {
     );
   });
 
+  // Run count and generator sizes stand as committed (T4: D106-10). Each is for:
+  // - runs, fast-check's default 100 per option (no numRuns set): the cases
+  //   drawn per run.
+  // - fc.string() at fast-check's default size: arbitrary short text, mostly
+  //   not a lexical at all.
+  // - integer part \d{0,3}: zero to three digits, so an empty integer part
+  //   (".5") is drawn as well as whole numbers.
+  // - fraction \.\d{0,3}: zero to three digits, so a bare trailing point
+  //   ("12.") is drawn as well as decimals.
+  // - leading-point form \.\d{1,3}: one to three digits after a point with
+  //   no integer part.
   const nearLexical = fc.stringMatching(
     /^[-+]?(\d{0,3}(\.\d{0,3})?|\.\d{1,3})(cm|mm|in|pt|pc|px|%|em|rem)?$/,
   );
