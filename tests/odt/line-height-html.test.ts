@@ -289,3 +289,47 @@ describe("line-height HTML — the CSS value check (T4: DS1-1, DS1-7, DS1-20, DS
     },
   );
 });
+
+// ============================================================
+// A lineHeight below 0 counts as absent (D106-7)
+// ============================================================
+//
+// T4: D106-7. A lineHeight not written because it is negative (D106-3 first
+// bullet) counts as absent, as a value the check leaves out does (DS1-21), so
+// lineHeightAtLeast applies. CSS makes a negative line height illegal, and a
+// user agent ignores a declaration with an illegal value (CSS 2.1 §10.8.1,
+// visudet l.1538, l.1553; §4.2, syndata l.708). Only a caller-built model
+// holds both fields: the reader never reports them together (T4: D106-2).
+
+describe("line-height HTML — a lineHeight below 0 counts as absent (T4: D106-7)", () => {
+  test.each(["-50%", "-1cm"])(
+    "lineHeight %s beside lineHeightAtLeast 0.5cm → line-height:0.5cm with the wrapper (T4: D106-7; D106-3 third bullet)",
+    (v) => {
+      const b = renderBlock(para({ lineHeight: v, lineHeightAtLeast: "0.5cm" }));
+      expect(lineHeights(b)).toEqual(["line-height:0.5cm"]);
+      expect(isWrapped(b)).toBe(true);
+    },
+  );
+
+  test("lineHeight -50% beside lineHeightAtLeast -0.5cm → no line-height, no wrapper (T4: D106-7; D106-3 first bullet)", () => {
+    const b = renderBlock(
+      para({ lineHeight: "-50%", lineHeightAtLeast: "-0.5cm", textAlign: "center" }),
+    );
+    expect(b.css).toEqual(["text-align:center"]);
+    expect(b.inner).toBe("x");
+  });
+
+  test("lineHeight -50% beside a lineHeightAtLeast the check leaves out → no line-height, no wrapper (T4: D106-7; DS1-1, DS1-21; Syntax 3 §4.3.1 l.3276-3279)", () => {
+    const b = renderBlock(
+      para({ lineHeight: "-50%", lineHeightAtLeast: "x;color:red", textAlign: "center" }),
+    );
+    expect(b.css).toEqual(["text-align:center"]);
+    expect(b.inner).toBe("x");
+  });
+
+  test("lineHeight -0% is not below 0: it is written and lineHeightAtLeast is not (T4: D106-7 applies to a negative value only; D106-4 third bullet; D106-2 precedence)", () => {
+    const b = renderBlock(para({ lineHeight: "-0%", lineHeightAtLeast: "0.5cm" }));
+    expect(lineHeights(b)).toEqual(["line-height:-0%"]);
+    expect(isWrapped(b)).toBe(false);
+  });
+});

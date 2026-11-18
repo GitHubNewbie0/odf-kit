@@ -226,15 +226,16 @@ interface BlockLineHeight {
  * checked and written (T4: DS1-20). A value the check leaves out counts as
  * absent (isWritableCssValue; T4: DS1-1, DS1-21): a lineHeight left out lets
  * lineHeightAtLeast apply, and a lineHeightAtLeast left out gives no wrapper.
+ * A negative lineHeight, not written, counts as absent in the same way: a
+ * user agent ignores a declaration with an illegal value (T4: D106-7; CSS 2.1
+ * §4.2, syndata l.708). Only a caller-built model holds both (T4: D106-2).
  * Call it once per block and pass the result to both of its users.
  */
 function blockLineHeight(style: ParagraphStyle): BlockLineHeight | undefined {
   const lineHeight = style.lineHeight;
   if (lineHeight !== undefined) {
     const text = `${lineHeight}`;
-    if (isWritableCssValue(text)) {
-      return isBelowZero(text) ? undefined : { value: text, wrap: false };
-    }
+    if (isWritableCssValue(text) && !isBelowZero(text)) return { value: text, wrap: false };
   }
   const atLeast = style.lineHeightAtLeast;
   if (atLeast !== undefined) {
