@@ -107,6 +107,21 @@ describe("docxToOdt — w:spacing exact and atLeast (T4: D106-5)", () => {
   test('atLeast "12mm" → style:line-height-at-least="12mm" (T4: D106-5, D8: handed truth verbatim)', async () => {
     expect((await convert(spacing("12mm", "atLeast"))).atLeast).toBe("12mm");
   });
+
+  // T4: D106-8 — a line-height length whose value is 0 is not negative,
+  // whatever its sign, and is written without the sign: T1's
+  // nonNegativeLength has no "-" in its pattern (spec/odf-datatypes.json).
+  test.each([
+    ["-0pt", "exact", { lineHeight: "0pt", atLeast: undefined }],
+    ["-0.0mm", "atLeast", { lineHeight: undefined, atLeast: "0.0mm" }],
+    ["-0", "exact", { lineHeight: "0pt", atLeast: undefined }],
+    ["-0", "atLeast", { lineHeight: undefined, atLeast: "0pt" }],
+  ])(
+    "w:line=%p w:lineRule=%p → %p, no warning: a length of value 0 is not negative, and is written without the sign (T4: D106-8; T1: nonNegativeLength)",
+    async (line, rule, expected) => {
+      expect(await convert(spacing(line, rule))).toEqual({ ...expected, lineWarnings: [] });
+    },
+  );
 });
 
 describe("docxToOdt — w:spacing auto (T4: D106-5; ECMA §17.3.1.33 '240ths of a line')", () => {

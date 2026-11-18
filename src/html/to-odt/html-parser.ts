@@ -921,7 +921,8 @@ function cssLengthToOdf(raw: string): string | undefined {
  *                      lexical)
  * Negative values are dropped (fo:line-height is nonNegativeLength or a
  * percent, and a negative percent is refused: T4: D106-4 third bullet);
- * a value of 0 is not negative, whatever its sign (core isBelowZero). A
+ * a value of 0 is not negative, whatever its sign (core isBelowZero), and
+ * a length of value 0 is written without the sign (T4: D106-8). A
  * leading "+" that is a CSS number's sign is removed and the value
  * converted: "+50%" → "50%", "+1.5em" → "150%" (CSS Syntax 3 §4.3.13 and
  * §4.3.10, spec/w3c-css/CRD-css-syntax-3-20261001.txt l.3849–3851,
@@ -947,7 +948,10 @@ function parseCssLineHeight(raw: string): string | undefined {
     const lexical = parsed.lexical!;
     return lexical.startsWith("+") || isBelowZero(lexical) ? undefined : lexical;
   }
-  const length = cssLengthToOdf(value);
+  // A length of value 0 is not negative, whatever its sign, and is written
+  // without the sign: T1's nonNegativeLength has no "-" (T4: D106-8).
+  const unsigned = value.startsWith("-") && !isBelowZero(value) ? value.slice(1) : value;
+  const length = cssLengthToOdf(unsigned);
   return length?.startsWith("+") ? undefined : length;
 }
 

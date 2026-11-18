@@ -113,6 +113,26 @@ describe("htmlToOdt — CSS line-height (T4: D106-5 fourth bullet)", () => {
     expect(lineHeightAttr(await withLineHeight("-0%"))).toBe("-0%");
   });
 
+  // T4: D106-8 — a line-height length whose value is 0 is not negative,
+  // whatever its sign, and is written without the sign: T1's
+  // nonNegativeLength has no "-" in its pattern (spec/odf-datatypes.json).
+  // Digits and unit are otherwise kept (D8, handed truth); px is converted
+  // to pt as every px length is (D8a).
+  test.each([
+    ["-0pt", "0pt"],
+    ["-0.0cm", "0.0cm"],
+    ["-0px", "0pt"],
+  ])(
+    "%p → fo:line-height=%p: a length of value 0 is not negative, and is written without the sign (T4: D106-8; T1: nonNegativeLength)",
+    async (v, expected) => {
+      expect(lineHeightAttr(await withLineHeight(v))).toBe(expected);
+    },
+  );
+
+  test('"-0.5pt" → no attribute: D106-8 covers a value of 0 only, and a negative length has no ODF form (T4: D106-8, D106-5 fourth bullet; T1: nonNegativeLength)', async () => {
+    expect(lineHeightAttr(await withLineHeight("-0.5pt"))).toBeUndefined();
+  });
+
   test("property: for any CSS line-height string, htmlToOdt resolves (T4: D106-4 + C-2 Part 3)", async () => {
     const cssish = fc.stringMatching(
       /^[-+]?(\d{0,4}(\.\d{0,4})?|\.\d{1,3})(e[-+]?\d{1,3})?(px|pt|cm|mm|in|pc|em|rem|ex|%)?$/,
