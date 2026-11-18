@@ -129,6 +129,16 @@ describe("htmlToOdt — CSS line-height (T4: D106-5 fourth bullet)", () => {
     },
   );
 
+  // T4: D106-12 — a unitless -0 is not negative and is written as 0%, as
+  // D106-4 rules for the number -0 ("the number -0 gives 0%").
+  test('unitless "-0" → fo:line-height="0%": a value of 0 is not negative, whatever its sign (T4: D106-12, D106-4 third bullet)', async () => {
+    expect(lineHeightAttr(await withLineHeight("-0"))).toBe("0%");
+  });
+
+  test('unitless "-0.5" → no attribute: D106-12 covers a value of 0 only (T4: D106-12, D106-4 third bullet)', async () => {
+    expect(lineHeightAttr(await withLineHeight("-0.5"))).toBeUndefined();
+  });
+
   test('"-0.5pt" → no attribute: D106-8 covers a value of 0 only, and a negative length has no ODF form (T4: D106-8, D106-5 fourth bullet; T1: nonNegativeLength)', async () => {
     expect(lineHeightAttr(await withLineHeight("-0.5pt"))).toBeUndefined();
   });

@@ -922,7 +922,8 @@ function cssLengthToOdf(raw: string): string | undefined {
  * Negative values are dropped (fo:line-height is nonNegativeLength or a
  * percent, and a negative percent is refused: T4: D106-4 third bullet);
  * a value of 0 is not negative, whatever its sign (core isBelowZero), and
- * a length of value 0 is written without the sign (T4: D106-8). A
+ * a length of value 0 is written without the sign (T4: D106-8), and a
+ * unitless -0 is written as 0% (T4: D106-12). A
  * leading "+" that is a CSS number's sign is removed and the value
  * converted: "+50%" → "50%", "+1.5em" → "150%" (CSS Syntax 3 §4.3.13 and
  * §4.3.10, spec/w3c-css/CRD-css-syntax-3-20261001.txt l.3849–3851,
@@ -941,6 +942,11 @@ function parseCssLineHeight(raw: string): string | undefined {
   // Same rewrite as cssLengthToOdf above, same reason (js/polynomial-redos).
   // decimalToPercent applies the core's numeric bound (MAX_NUMERIC_LEXICAL).
   if (/^\d+(?:\.\d*)?$|^\.\d+$/.test(value)) return decimalToPercent(value);
+  // A unitless -0 is not negative and is written as 0%, as D106-4 rules for
+  // the number -0 (T4: D106-12).
+  if (/^-(?:\d+(?:\.\d*)?|\.\d+)$/.test(value) && !isBelowZero(value)) {
+    return decimalToPercent(value.slice(1));
+  }
   const em = /^-?(\d+(?:\.\d*)?|\.\d+)em$/.exec(value);
   if (em) return isBelowZero(value) ? undefined : decimalToPercent(em[1]);
   const parsed = parseOdfValue(value);
