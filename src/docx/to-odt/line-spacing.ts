@@ -49,7 +49,7 @@ function warn(warnings: string[], s: DocxLineSpacing, why: string): LineHeightOp
 /**
  * A universal measure as an ODF length: digits and unit kept (D8, handed
  * truth), "pi" written "pc" (ECMA-376 §22.9.2.15: each is 12pt). A value of
- * 0 is not negative, whatever its sign (D106-4 third bullet), and T1's
+ * 0 is not negative, whatever its sign (D106-8), and T1's
  * nonNegativeLength has no "-", so a zero's sign is dropped.
  */
 function measureAsLength(measure: string, unit: string): string {
