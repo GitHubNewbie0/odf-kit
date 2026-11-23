@@ -13,17 +13,36 @@ maintainer until coordinated disclosure.
 
 If you cannot use GitHub Security Advisories, you can also email
 **scott@wirthmgt.com** with the subject line `[odf-kit security]`. Please
-include a description of the issue, a reproduction case if possible, and any
-suggested mitigation.
+include what the next section asks for.
+
+## What a report needs
+
+- The odf-kit version and the function called.
+- A reproduction that runs against the latest release: the input file or
+  string, and the code that passes it to odf-kit.
+- What an attacker gains from it.
+
+A report without a working reproduction is closed without discussion.
 
 ## What to expect
 
-- **Acknowledgement** within 7 days of your report.
-- **Initial assessment** (confirmed / not reproducible / out of scope) within 14
-  days.
-- **Resolution timeline** depends on severity. Critical issues are prioritised
-  for the next release; less severe issues are scheduled into the normal release
-  flow.
+odf-kit has one maintainer and no bug bounty. What follows applies to every
+open report, including reports filed before this version of the policy.
+
+- **Order.** Reports are handled by severity and by how reachable the defect is
+  in real use, as the maintainer assesses them, not in the order they arrive.
+  No timeline is promised. Critical issues are prioritised for the next release.
+- **Replies.** GitHub's confirmation of your submission is the receipt; an
+  emailed report gets none. You will get one reply, when the report is fixed or
+  declined. Status questions in between are not answered. If you intend to
+  publish on a date of your own, say so in the report.
+- **One advisory per defect.** A report of a defect that is already fixed, or
+  already covered by an advisory, is folded into that one. The same defect at
+  another site in the code is the same defect and does not get a separate
+  advisory or CVE.
+- **CVEs.** The maintainer decides whether to request a CVE, and requests it
+  once, after the fix is published. Assignment is GitHub's decision on GitHub's
+  schedule. The maintainer does not track it or answer questions about it.
 - **Credit** for the reporter in the release notes and any published security
   advisory, unless you request otherwise.
 
@@ -73,6 +92,12 @@ issues, not vulnerabilities:
   cleanly).
 - Issues in dependent applications that consume odf-kit but originate in the
   consumer's code rather than in odf-kit itself.
+- Values that only the calling code can supply: an option passed to an odf-kit
+  function, or a document model the calling code built or changed itself
+  rather than taking it unchanged from one of odf-kit's readers. odf-kit treats
+  its caller's own code as trusted. A value is in scope when a crafted input
+  can put it there: a file, or the HTML, Markdown, Lexical JSON or TipTap JSON
+  handed to odf-kit to convert.
 
 **Note on the first and fourth items above.** Neither excludes output-escaping
 issues. If odf-kit emits a document-controlled value into its output without

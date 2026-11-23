@@ -42,8 +42,8 @@ PUBLISH METADATA
 [ ] 11c. Backup pushes current again (git push backup main --follow-tags, both repos)
 
 SECURITY RELEASE ONLY
-[ ] 12. Request the CVE — AFTER the fix is live on npm (for our own finding, create the draft first)
-[ ] 13. Publish the advisory once the CVE is assigned, or when step 12's 5-working-day deadline passes
+[ ] 12. Decide on a CVE and request it if wanted — AFTER the fix is live on npm (for our own finding, create the draft first)
+[ ] 13. Publish the advisory: at once if no CVE was requested; otherwise once the CVE is assigned, or when step 12's 5-working-day deadline passes
 [ ] 13b. Add the published advisory ID to the GitHub release body
 ```
 
@@ -442,7 +442,7 @@ Observed on v0.14.3: the backup sat at the pre-release commit until an unrelated
 push happened to carry it forward. Nothing errors when this is skipped, which is
 why it needs a line of its own rather than trusting memory.
 
-## 12. Request the CVE _(security releases only — AFTER step 9)_
+## 12. Decide on a CVE and request it if wanted _(security releases only — AFTER step 9)_
 
 Only applies when the release fixes a vulnerability, whether it was reported or
 found by our own review.
@@ -461,12 +461,14 @@ Once `npm view odf-kit version` shows the new version:
 2. Set **Patched versions** to the version just published.
 3. Apply any draft-advisory edits the release's own plan rules (e.g. severity,
    scope wording) before requesting the CVE.
-4. Request the CVE. GitHub acts as a CNA and reviews the request
+4. Decide whether to request a CVE. The request is the maintainer's choice
+   (SECURITY.md, "CVEs"), and GitHub Docs marks it optional. If none is wanted,
+   go to step 13 and publish now. If one is wanted, request it once.
+   GitHub acts as a CNA and reviews the request
    usually within 72 hours (GitHub Docs, "Repository security advisories"); the
    review **publishes nothing** — the ID stays reserved until you publish.
    If no CVE ID is reserved within 5 working days of the request, go to step 13
-   and publish anyway, then email security-advisories@github.com about the
-   pending request.
+   and publish anyway. The request is not followed up (SECURITY.md, "CVEs").
 
 Three separate actions, none of which discloses anything on its own: creating
 the draft, requesting the CVE, and publishing. A draft is visible only to the
@@ -477,10 +479,10 @@ Also offer the patch to the reporter for testing if they offered — their
 confirmation is worth more than your own, and it costs nothing now that the fix
 is public anyway.
 
-## 13. Publish the advisory _(security releases only — after the CVE lands, or when step 12's 5-working-day deadline passes)_
+## 13. Publish the advisory _(security releases only — at once if no CVE was requested; otherwise after the CVE lands, or when step 12's 5-working-day deadline passes)_
 
-Once the CVE is assigned, or when step 12's 5-working-day deadline passes,
-publish the advisory.
+If no CVE was requested, publish the advisory now. Otherwise publish it once
+the CVE is assigned, or when step 12's 5-working-day deadline passes.
 
 - Confirm **Patched versions** is set and correct.
 - Credit the reporter unless they asked otherwise — SECURITY.md promises this.
